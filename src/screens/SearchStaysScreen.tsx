@@ -43,6 +43,7 @@ import { travelRepository, HotelSearchResult, HotelSearchFilters } from "../repo
 import { getLocalizedTabLabel } from "./Navigation";
 import { savedItemsService } from "../services/savedItemsService";
 import { RTLIcon } from "../components/ui";
+import { useResponsive } from "../hooks/useResponsive";
 import {
   HotelMapView,
   HotelGalleryModal,
@@ -441,6 +442,8 @@ const BUDGET_MILESTONES = [75, 150, 300, 500, 1000, 1500] as const;
 // ============================================================================
 
 export function SearchStaysScreen() {
+  const { isDesktop, isTablet } = useResponsive();
+  const numCols = isDesktop ? 3 : isTablet ? 2 : 1;
   // Shared travel store integration
   const { hotelFilters, setHotelFilters, resetFilters } = useTravelStore();
 
@@ -936,10 +939,10 @@ export function SearchStaysScreen() {
   const getItemLayout = useCallback(
     (_data: any, index: number) => ({
       length: HOTEL_CARD_HEIGHT,
-      offset: HOTEL_CARD_HEIGHT * index,
+      offset: HOTEL_CARD_HEIGHT * Math.floor(index / numCols),
       index,
     }),
-    []
+    [numCols]
   );
 
   const keyExtractor = useCallback((item: HotelItem) => item.id, []);
@@ -966,7 +969,10 @@ export function SearchStaysScreen() {
 
       return (
         <Pressable
-          style={styles.hotelCard}
+          style={[
+            styles.hotelCard,
+            (isDesktop || isTablet) && { flex: 1, marginHorizontal: 8 },
+          ]}
           className="bg-white mx-4 mb-4 rounded-2xl overflow-hidden border border-slate-200 shadow-sm"
           onPress={() => handleOpenHotelRooms(hotel)}
         >
@@ -1728,9 +1734,11 @@ export function SearchStaysScreen() {
           currencySymbol={HOSPITALITY_CONFIG.DEFAULT_CURRENCY_SYMBOL}
         />
       ) : (
-        /* Optimized Virtualized FlatList */
+        /* Optimized Virtualized FlatList with Desktop Multi-Column Grid */
         <FlatList
+          key={isDesktop ? "grid-desktop-3" : isTablet ? "grid-tablet-2" : "list-mobile-1"}
           data={pagedHotels}
+          numColumns={numCols}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -1757,7 +1765,10 @@ export function SearchStaysScreen() {
           }
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.4}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            isDesktop && { maxWidth: 1360, width: "100%", alignSelf: "center", paddingHorizontal: 16 },
+          ]}
           showsVerticalScrollIndicator={false}
         />
       )}

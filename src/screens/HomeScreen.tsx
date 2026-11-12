@@ -29,7 +29,7 @@ import { DestinationVitalsRow } from "../components/common/DestinationVitalsRow"
 import { useTheme } from "../theme";
 import { useAppConfig } from "../hooks/useAppConfig";
 import { useResponsive } from "../hooks/useResponsive";
-import { ResponsiveContainer } from "../components/layout";
+import { ResponsiveContainer, WebFooter } from "../components/layout";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -1022,8 +1022,11 @@ export function HomeScreen() {
         )}
         </View>
 
+        {/* Professional Desktop Web Footer (Rendered on Desktop/Laptop) */}
+        <WebFooter />
+
         {/* Space at bottom for floating navigation bar (only needed on mobile) */}
-        <View style={{ height: isDesktop ? 40 : 130 }} />
+        <View style={{ height: isDesktop ? 20 : 130 }} />
       </Animated.ScrollView>
 
       {/* Promo Exclusive Voucher Modal */}

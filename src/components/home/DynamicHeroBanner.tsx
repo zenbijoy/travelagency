@@ -30,6 +30,7 @@ import { unifiedSearchEngine } from "../../services/unifiedSearchEngine";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../theme";
 import { useResponsive } from "../../hooks/useResponsive";
+import { DesktopBookingWidget } from "./DesktopBookingWidget";
 
 const { width: WINDOW_WIDTH } = Dimensions.get("window");
 const RECENT_SEARCHES_KEY = "@antigravity:recent_home_searches_v2";
@@ -593,9 +594,15 @@ export const DynamicHeroBanner: React.FC<DynamicHeroBannerProps> = ({
           </Animated.View>
 
           {/* ========================================================================= */}
-          {/* 4. SEARCH BAR: Integrated Omnibar with Auto-Suggest & Trending            */}
+          {/* 4. SEARCH BAR: Desktop Booking Engine on Desktop / Omnibar on Mobile     */}
           {/* ========================================================================= */}
-          <View style={styles.searchBarWrapper}>
+          {isDesktop ? (
+            <DesktopBookingWidget
+              initialDestination={searchQuery}
+              onSearch={(dest) => handleExecuteSearch(dest)}
+            />
+          ) : (
+            <View style={styles.searchBarWrapper}>
             <View
               style={[
                 styles.searchBarContainer,
@@ -891,6 +898,7 @@ export const DynamicHeroBanner: React.FC<DynamicHeroBannerProps> = ({
               </Animated.View>
             )}
           </View>
+          )}
 
           {/* Slide Pagination Dots (When multiple banners are active in slideshow) */}
           {banners.length > 1 && (
