@@ -28,6 +28,8 @@ import { DynamicHeroBanner } from "../components/home/DynamicHeroBanner";
 import { DestinationVitalsRow } from "../components/common/DestinationVitalsRow";
 import { useTheme } from "../theme";
 import { useAppConfig } from "../hooks/useAppConfig";
+import { useResponsive } from "../hooks/useResponsive";
+import { ResponsiveContainer } from "../components/layout";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -105,6 +107,7 @@ const LOCATION_TAGS = [
 ];
 
 export function HomeScreen() {
+  const { isDesktop, isTablet, isPhone, width } = useResponsive();
   const { user } = useAuth();
   const { theme, isDark, toggleTheme } = useTheme();
   const { heroTitle, heroSubtitle, announcementTicker, announcementEnabled } = useAppConfig();
@@ -288,14 +291,14 @@ export function HomeScreen() {
     );
   };
 
-  const leftPosts = useMemo(
-    () => communityPosts.filter((_, i) => i % 2 === 0),
-    [communityPosts]
-  );
-  const rightPosts = useMemo(
-    () => communityPosts.filter((_, i) => i % 2 !== 0),
-    [communityPosts]
-  );
+  const numFeedCols = isDesktop ? 4 : isTablet ? 3 : 2;
+  const feedColumns = useMemo(() => {
+    const cols: DynamicPost[][] = Array.from({ length: numFeedCols }, () => []);
+    communityPosts.forEach((post, i) => {
+      cols[i % numFeedCols].push(post);
+    });
+    return cols;
+  }, [communityPosts, numFeedCols]);
 
   return (
     <SafeAreaView style={[styles.shell, { backgroundColor: theme.background }]} edges={["top"]}>
@@ -337,42 +340,75 @@ export function HomeScreen() {
           }}
         />
 
-        <View style={styles.searchSectionWrap}>
-          {/* ========================================================================= */}
-          {/* 2. LOCATION TAGS ROW: Clean Pill Buttons (with City Photos in Light Mode) */}
-          {/* ========================================================================= */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.locationTagsScroll}
-          >
-            {LOCATION_TAGS.map((loc) => (
-              <Pressable
-                key={loc.name}
-                style={[
-                  styles.locationPillBtn,
-                  {
-                    backgroundColor: isDark ? "#FFF8EE" : "#FFFFFF",
-                    borderColor: isDark ? "rgba(229, 169, 60, 0.25)" : "#E2E8F0",
-                  },
-                ]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setSearchQuery(loc.name);
-                  router.push({
-                    pathname: "/screens/search" as any,
-                    params: { q: loc.name },
-                  });
-                }}
+        {/* Responsive Content Container for Desktop & Mobile */}
+        <View style={isDesktop ? { maxWidth: 1320, width: "100%", alignSelf: "center" } : { width: "100%" }}>
+          <View style={styles.searchSectionWrap}>
+            {/* ========================================================================= */}
+            {/* 2. LOCATION TAGS ROW: Clean Pill Buttons (with City Photos in Light Mode) */}
+            {/* ========================================================================= */}
+            {isDesktop ? (
+              <View style={[styles.locationTagsScroll, { flexWrap: "wrap", gap: 10, paddingHorizontal: 0 }]}>
+                {LOCATION_TAGS.map((loc) => (
+                  <Pressable
+                    key={loc.name}
+                    style={[
+                      styles.locationPillBtn,
+                      {
+                        backgroundColor: isDark ? "#FFF8EE" : "#FFFFFF",
+                        borderColor: isDark ? "rgba(229, 169, 60, 0.25)" : "#E2E8F0",
+                        paddingHorizontal: 16,
+                        paddingVertical: 10,
+                      },
+                    ]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setSearchQuery(loc.name);
+                      router.push({
+                        pathname: "/screens/search" as any,
+                        params: { q: loc.name },
+                      });
+                    }}
+                  >
+                    {!isDark && (
+                      <Image source={{ uri: loc.image }} style={styles.locationThumbPhoto} />
+                    )}
+                    <Text style={[styles.locationPillText, { fontSize: 13, fontWeight: "600" }]}>{loc.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.locationTagsScroll}
               >
-                {/* City thumbnail photo in light mode matching Screenshot 3 */}
-                {!isDark && (
-                  <Image source={{ uri: loc.image }} style={styles.locationThumbPhoto} />
-                )}
-                <Text style={styles.locationPillText}>{loc.name}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
+                {LOCATION_TAGS.map((loc) => (
+                  <Pressable
+                    key={loc.name}
+                    style={[
+                      styles.locationPillBtn,
+                      {
+                        backgroundColor: isDark ? "#FFF8EE" : "#FFFFFF",
+                        borderColor: isDark ? "rgba(229, 169, 60, 0.25)" : "#E2E8F0",
+                      },
+                    ]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setSearchQuery(loc.name);
+                      router.push({
+                        pathname: "/screens/search" as any,
+                        params: { q: loc.name },
+                      });
+                    }}
+                  >
+                    {!isDark && (
+                      <Image source={{ uri: loc.image }} style={styles.locationThumbPhoto} />
+                    )}
+                    <Text style={styles.locationPillText}>{loc.name}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            )}
 
           {/* ========================================================================= */}
           {/* 5. SUB-CATEGORY QUICK ACTIONS (Deals, Events, Trip.Planner, Trending)     */}
@@ -495,84 +531,166 @@ export function HomeScreen() {
               </Text>
             </View>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-              <Pressable
-                style={{
-                  width: 140,
-                  padding: 12,
-                  borderRadius: 14,
-                  backgroundColor: isDark ? "#1E293B" : "#FEF3C7",
-                  borderWidth: 1,
-                  borderColor: isDark ? "rgba(245, 158, 11, 0.3)" : "#FDE68A",
-                }}
-                onPress={() => router.push("/screens/explore-trips" as any)}
-              >
-                <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#F59E0B20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
-                  <Ionicons name="flame" size={18} color="#D97706" />
-                </View>
-                <Text style={{ fontSize: 12, fontWeight: "700", color: isDark ? "#FFFFFF" : "#92400E" }}>
-                  Trending Spot
-                </Text>
-                <Text style={{ fontSize: 10, color: isDark ? "#94A3B8" : "#B45309", marginTop: 2 }}>
-                  Sajek Valley (+48% visits)
-                </Text>
-              </Pressable>
+            {isDesktop ? (
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <Pressable
+                  style={{
+                    flex: 1,
+                    padding: 14,
+                    borderRadius: 14,
+                    backgroundColor: isDark ? "#1E293B" : "#FEF3C7",
+                    borderWidth: 1,
+                    borderColor: isDark ? "rgba(245, 158, 11, 0.3)" : "#FDE68A",
+                  }}
+                  onPress={() => router.push("/screens/explore-trips" as any)}
+                >
+                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#F59E0B20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
+                    <Ionicons name="flame" size={18} color="#D97706" />
+                  </View>
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: isDark ? "#FFFFFF" : "#92400E" }}>
+                    Trending Spot
+                  </Text>
+                  <Text style={{ fontSize: 11, color: isDark ? "#94A3B8" : "#B45309", marginTop: 2 }}>
+                    Sajek Valley (+48% visits)
+                  </Text>
+                </Pressable>
 
-              <Pressable
-                style={{
-                  width: 140,
-                  padding: 12,
-                  borderRadius: 14,
-                  backgroundColor: isDark ? "#1E293B" : "#ECFDF5",
-                  borderWidth: 1,
-                  borderColor: isDark ? "rgba(16, 185, 129, 0.3)" : "#A7F3D0",
-                }}
-                onPress={() => router.push("/screens/explore" as any)}
-              >
-                <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#10B98120", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
-                  <Ionicons name="sunny" size={18} color="#059669" />
-                </View>
-                <Text style={{ fontSize: 12, fontWeight: "700", color: isDark ? "#FFFFFF" : "#065F46" }}>
-                  Weather Friendly
-                </Text>
-                <Text style={{ fontSize: 10, color: isDark ? "#94A3B8" : "#047857", marginTop: 2 }}>
-                  Cox's Bazar (Mild 24°C)
-                </Text>
-              </Pressable>
+                <Pressable
+                  style={{
+                    flex: 1,
+                    padding: 14,
+                    borderRadius: 14,
+                    backgroundColor: isDark ? "#1E293B" : "#ECFDF5",
+                    borderWidth: 1,
+                    borderColor: isDark ? "rgba(16, 185, 129, 0.3)" : "#A7F3D0",
+                  }}
+                  onPress={() => router.push("/screens/explore" as any)}
+                >
+                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#10B98120", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
+                    <Ionicons name="sunny" size={18} color="#059669" />
+                  </View>
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: isDark ? "#FFFFFF" : "#065F46" }}>
+                    Weather Friendly
+                  </Text>
+                  <Text style={{ fontSize: 11, color: isDark ? "#94A3B8" : "#047857", marginTop: 2 }}>
+                    Cox's Bazar (Mild 24°C)
+                  </Text>
+                </Pressable>
 
-              <Pressable
-                style={{
-                  width: 140,
-                  padding: 12,
-                  borderRadius: 14,
-                  backgroundColor: isDark ? "#1E293B" : "#EFF6FF",
-                  borderWidth: 1,
-                  borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "#BFDBFE",
-                }}
-                onPress={() => router.push("/screens/explore-trips" as any)}
-              >
-                <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#287DFA20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
-                  <Ionicons name="diamond" size={18} color="#1D4ED8" />
-                </View>
-                <Text style={{ fontSize: 12, fontWeight: "700", color: isDark ? "#FFFFFF" : "#1E40AF" }}>
-                  Hidden Gem
-                </Text>
-                <Text style={{ fontSize: 10, color: isDark ? "#94A3B8" : "#2563EB", marginTop: 2 }}>
-                  Tanguar Haor Silence
-                </Text>
-              </Pressable>
-            </ScrollView>
+                <Pressable
+                  style={{
+                    flex: 1,
+                    padding: 14,
+                    borderRadius: 14,
+                    backgroundColor: isDark ? "#1E293B" : "#EFF6FF",
+                    borderWidth: 1,
+                    borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "#BFDBFE",
+                  }}
+                  onPress={() => router.push("/screens/explore-trips" as any)}
+                >
+                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#287DFA20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
+                    <Ionicons name="diamond" size={18} color="#1D4ED8" />
+                  </View>
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: isDark ? "#FFFFFF" : "#1E40AF" }}>
+                    Hidden Gem
+                  </Text>
+                  <Text style={{ fontSize: 11, color: isDark ? "#94A3B8" : "#2563EB", marginTop: 2 }}>
+                    Tanguar Haor Silence
+                  </Text>
+                </Pressable>
 
-            {/* Live Destination Vitals for Selected Region (Image 1 UX Pattern) */}
-            <View style={{ marginTop: 12 }}>
-              <DestinationVitalsRow
-                compact
-                temperature={{ value: "Cold 16°C", condition: "Chilly morning mist" }}
-                airQuality={{ aqi: 30, statusText: "Great" }}
-                safety={{ statusText: "100% Safe" }}
-                connectivity={{ statusText: "4G Active" }}
-              />
-            </View>
+                <View style={{ flex: 1.2 }}>
+                  <DestinationVitalsRow
+                    compact
+                    temperature={{ value: "Cold 16°C", condition: "Chilly morning mist" }}
+                    airQuality={{ aqi: 30, statusText: "Great" }}
+                    safety={{ statusText: "100% Safe" }}
+                    connectivity={{ statusText: "4G Active" }}
+                  />
+                </View>
+              </View>
+            ) : (
+              <>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+                  <Pressable
+                    style={{
+                      width: 140,
+                      padding: 12,
+                      borderRadius: 14,
+                      backgroundColor: isDark ? "#1E293B" : "#FEF3C7",
+                      borderWidth: 1,
+                      borderColor: isDark ? "rgba(245, 158, 11, 0.3)" : "#FDE68A",
+                    }}
+                    onPress={() => router.push("/screens/explore-trips" as any)}
+                  >
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#F59E0B20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
+                      <Ionicons name="flame" size={18} color="#D97706" />
+                    </View>
+                    <Text style={{ fontSize: 12, fontWeight: "700", color: isDark ? "#FFFFFF" : "#92400E" }}>
+                      Trending Spot
+                    </Text>
+                    <Text style={{ fontSize: 10, color: isDark ? "#94A3B8" : "#B45309", marginTop: 2 }}>
+                      Sajek Valley (+48% visits)
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={{
+                      width: 140,
+                      padding: 12,
+                      borderRadius: 14,
+                      backgroundColor: isDark ? "#1E293B" : "#ECFDF5",
+                      borderWidth: 1,
+                      borderColor: isDark ? "rgba(16, 185, 129, 0.3)" : "#A7F3D0",
+                    }}
+                    onPress={() => router.push("/screens/explore" as any)}
+                  >
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#10B98120", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
+                      <Ionicons name="sunny" size={18} color="#059669" />
+                    </View>
+                    <Text style={{ fontSize: 12, fontWeight: "700", color: isDark ? "#FFFFFF" : "#065F46" }}>
+                      Weather Friendly
+                    </Text>
+                    <Text style={{ fontSize: 10, color: isDark ? "#94A3B8" : "#047857", marginTop: 2 }}>
+                      Cox's Bazar (Mild 24°C)
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={{
+                      width: 140,
+                      padding: 12,
+                      borderRadius: 14,
+                      backgroundColor: isDark ? "#1E293B" : "#EFF6FF",
+                      borderWidth: 1,
+                      borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "#BFDBFE",
+                    }}
+                    onPress={() => router.push("/screens/explore-trips" as any)}
+                  >
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#287DFA20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
+                      <Ionicons name="diamond" size={18} color="#1D4ED8" />
+                    </View>
+                    <Text style={{ fontSize: 12, fontWeight: "700", color: isDark ? "#FFFFFF" : "#1E40AF" }}>
+                      Hidden Gem
+                    </Text>
+                    <Text style={{ fontSize: 10, color: isDark ? "#94A3B8" : "#2563EB", marginTop: 2 }}>
+                      Tanguar Haor Silence
+                    </Text>
+                  </Pressable>
+                </ScrollView>
+
+                {/* Live Destination Vitals for Selected Region (Image 1 UX Pattern) */}
+                <View style={{ marginTop: 12 }}>
+                  <DestinationVitalsRow
+                    compact
+                    temperature={{ value: "Cold 16°C", condition: "Chilly morning mist" }}
+                    airQuality={{ aqi: 30, statusText: "Great" }}
+                    safety={{ statusText: "100% Safe" }}
+                    connectivity={{ statusText: "4G Active" }}
+                  />
+                </View>
+              </>
+            )}
           </View>
 
           {/* ========================================================================= */}
@@ -614,13 +732,14 @@ export function HomeScreen() {
         {/* ========================================================================= */}
         {/* 7. FEATURED CARDS CAROUSEL: "Explore Asia" & "Trip.Tuesday" Verified Cards */}
         {/* ========================================================================= */}
-        <View style={styles.cardsCarouselWrap}>
+        <View style={[styles.cardsCarouselWrap, isDesktop && { flexDirection: "row", gap: 16, marginHorizontal: 16 }]}>
           {ads.length > 0 ? (
             ads.map((ad, index) => (
               <Pressable
                 key={ad.id || `ad-${index}`}
                 style={[
                   styles.featuredCard,
+                  isDesktop && { flex: 1, marginHorizontal: 0, height: 230 },
                   {
                     borderColor: theme.cardBorder,
                     shadowColor: isDark ? "#000" : "#94A3B8",
@@ -687,6 +806,7 @@ export function HomeScreen() {
           <Pressable
             style={[
               styles.featuredCard,
+              isDesktop && { flex: 1, marginHorizontal: 0, height: 230 },
               {
                 borderColor: theme.cardBorder,
                 shadowColor: isDark ? "#000" : "#94A3B8",
@@ -758,6 +878,7 @@ export function HomeScreen() {
           <Pressable
             style={[
               styles.featuredCard,
+              isDesktop && { flex: 1, marginHorizontal: 0, height: 230 },
               {
                 borderColor: theme.cardBorder,
                 shadowColor: isDark ? "#000" : "#94A3B8",
@@ -817,166 +938,92 @@ export function HomeScreen() {
         </View>
 
         {/* ========================================================================= */}
-        {/* 8. LIVE COMMUNITY & HOTEL FEED (Dynamic from Supabase)                    */}
+        {/* 8. LIVE COMMUNITY & HOTEL FEED (Responsive 2 to 4 Columns)               */}
         {/* ========================================================================= */}
         {communityPosts.length > 0 && (
-          <View style={styles.masonryFeedGrid}>
-            {/* Left Column */}
-            <View style={styles.masonryColumn}>
-              {leftPosts.map((post) => {
-                const isLiked = likedPostIds.has(post.id);
-                const postImage =
-                  post.media?.[0]?.media_url ||
-                  "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=500";
-                const authorName =
-                  post.author?.username || post.author?.display_name || "Traveler";
+          <View style={[styles.masonryFeedGrid, isDesktop && { gap: 16 }]}>
+            {feedColumns.map((colPosts, colIdx) => (
+              <View key={`col-${colIdx}`} style={[styles.masonryColumn, isDesktop && { gap: 16 }]}>
+                {colPosts.map((post) => {
+                  const isLiked = likedPostIds.has(post.id);
+                  const postImage =
+                    post.media?.[0]?.media_url ||
+                    "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=500";
+                  const authorName =
+                    post.author?.username || post.author?.display_name || "Traveler";
 
-                return (
-                  <Pressable
-                    key={post.id}
-                    style={[
-                      styles.feedCard,
-                      {
-                        backgroundColor: isDark ? "#121622" : "#FFFFFF",
-                        borderColor: theme.cardBorder,
-                      },
-                    ]}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/(tabs)/community" as any,
-                        params: { postId: post.id },
-                      })
-                    }
-                  >
-                    <Image source={{ uri: postImage }} style={styles.feedCardImage} />
-                    <View style={styles.feedCardContent}>
-                      <Text
-                        style={[
-                          styles.feedCardTitle,
-                          { color: isDark ? "#F8FAFC" : "#0F172A" },
-                        ]}
-                        numberOfLines={2}
-                      >
-                        {post.title}
-                      </Text>
-                      <View style={styles.feedCardAuthorRow}>
+                  return (
+                    <Pressable
+                      key={post.id}
+                      style={[
+                        styles.feedCard,
+                        {
+                          backgroundColor: isDark ? "#121622" : "#FFFFFF",
+                          borderColor: theme.cardBorder,
+                        },
+                      ]}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(tabs)/community" as any,
+                          params: { postId: post.id },
+                        })
+                      }
+                    >
+                      <Image source={{ uri: postImage }} style={[styles.feedCardImage, isDesktop && { height: 160 }]} />
+                      <View style={styles.feedCardContent}>
                         <Text
                           style={[
-                            styles.feedAuthorName,
-                            { color: isDark ? "#94A3B8" : "#64748B" },
+                            styles.feedCardTitle,
+                            { color: isDark ? "#F8FAFC" : "#0F172A" },
                           ]}
-                          numberOfLines={1}
+                          numberOfLines={2}
                         >
-                          {authorName}
+                          {post.title}
                         </Text>
-                        <Pressable
-                          style={styles.feedLikeBtn}
-                          onPress={(e) => {
-                            e.stopPropagation();
-                            handleToggleLike(post);
-                          }}
-                        >
-                          <Ionicons
-                            name={isLiked ? "heart" : "heart-outline"}
-                            size={14}
-                            color={isLiked ? "#EF4444" : "#94A3B8"}
-                          />
+                        <View style={styles.feedCardAuthorRow}>
                           <Text
                             style={[
-                              styles.feedLikeCount,
-                              { color: isLiked ? "#EF4444" : "#94A3B8" },
+                              styles.feedAuthorName,
+                              { color: isDark ? "#94A3B8" : "#64748B" },
                             ]}
+                            numberOfLines={1}
                           >
-                            {post.likes_count}
+                            {authorName}
                           </Text>
-                        </Pressable>
-                      </View>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {/* Right Column */}
-            <View style={styles.masonryColumn}>
-              {rightPosts.map((post) => {
-                const isLiked = likedPostIds.has(post.id);
-                const postImage =
-                  post.media?.[0]?.media_url ||
-                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=500";
-                const authorName =
-                  post.author?.username || post.author?.display_name || "Traveler";
-
-                return (
-                  <Pressable
-                    key={post.id}
-                    style={[
-                      styles.feedCard,
-                      {
-                        backgroundColor: isDark ? "#121622" : "#FFFFFF",
-                        borderColor: theme.cardBorder,
-                      },
-                    ]}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/(tabs)/community" as any,
-                        params: { postId: post.id },
-                      })
-                    }
-                  >
-                    <Image source={{ uri: postImage }} style={styles.feedCardImage} />
-                    <View style={styles.feedCardContent}>
-                      <Text
-                        style={[
-                          styles.feedCardTitle,
-                          { color: isDark ? "#F8FAFC" : "#0F172A" },
-                        ]}
-                        numberOfLines={2}
-                      >
-                        {post.title}
-                      </Text>
-                      <View style={styles.feedCardAuthorRow}>
-                        <Text
-                          style={[
-                            styles.feedAuthorName,
-                            { color: isDark ? "#94A3B8" : "#64748B" },
-                          ]}
-                          numberOfLines={1}
-                        >
-                          {authorName}
-                        </Text>
-                        <Pressable
-                          style={styles.feedLikeBtn}
-                          onPress={(e) => {
-                            e.stopPropagation();
-                            handleToggleLike(post);
-                          }}
-                        >
-                          <Ionicons
-                            name={isLiked ? "heart" : "heart-outline"}
-                            size={14}
-                            color={isLiked ? "#EF4444" : "#94A3B8"}
-                          />
-                          <Text
-                            style={[
-                              styles.feedLikeCount,
-                              { color: isLiked ? "#EF4444" : "#94A3B8" },
-                            ]}
+                          <Pressable
+                            style={styles.feedLikeBtn}
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              handleToggleLike(post);
+                            }}
                           >
-                            {post.likes_count}
-                          </Text>
-                        </Pressable>
+                            <Ionicons
+                              name={isLiked ? "heart" : "heart-outline"}
+                              size={14}
+                              color={isLiked ? "#EF4444" : "#94A3B8"}
+                            />
+                            <Text
+                              style={[
+                                styles.feedLikeCount,
+                                { color: isLiked ? "#EF4444" : "#94A3B8" },
+                              ]}
+                            >
+                              {post.likes_count}
+                            </Text>
+                          </Pressable>
+                        </View>
                       </View>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ))}
           </View>
         )}
+        </View>
 
-        {/* Space at bottom for floating navigation bar */}
-        <View style={{ height: 130 }} />
+        {/* Space at bottom for floating navigation bar (only needed on mobile) */}
+        <View style={{ height: isDesktop ? 40 : 130 }} />
       </Animated.ScrollView>
 
       {/* Promo Exclusive Voucher Modal */}

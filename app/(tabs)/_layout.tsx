@@ -1,17 +1,21 @@
 import { Tabs } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { CustomBottomTabBar } from "../../src/screens/Navigation";
+import { DesktopNavBar } from "../../src/components/layout";
+import { useResponsive } from "../../src/hooks/useResponsive";
 import { useAuthStore } from "../../src/store/authStore";
 import { useNotificationStore } from "../../src/store/notificationStore";
 
 export default function TabLayout() {
+  const { isDesktop } = useResponsive();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
     <View style={styles.container}>
+      {isDesktop && <DesktopNavBar />}
       <Tabs
-        tabBar={(props) => <CustomBottomTabBar {...props} />}
+        tabBar={(props) => (isDesktop ? null : <CustomBottomTabBar {...props} />)}
         screenOptions={{
           headerShown: false,
           tabBarHideOnKeyboard: true,

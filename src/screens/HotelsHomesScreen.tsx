@@ -43,6 +43,7 @@ import { formatLocalizedCurrency, formatLocalizedDate } from "../utils/formatter
 import { useTheme } from "../context/ThemeContext";
 import { RTLIcon } from "../components/ui";
 import { FONTS } from "../theme/typography";
+import { useResponsive } from "../hooks/useResponsive";
 import {
   sentimentService,
   getVibeMeterColors,
@@ -323,6 +324,8 @@ const BUDGET_MILESTONES = [75, 150, 300, 500, 1000, 1500] as const;
 // ============================================================================
 
 export function HotelsHomesScreen() {
+  const { isDesktop, isTablet } = useResponsive();
+  const numCols = isDesktop ? 3 : isTablet ? 2 : 1;
   const { colors, isDark } = useTheme();
   // Shared travel store integration
   const { hotelFilters, setHotelFilters, resetFilters } = useTravelStore();
@@ -852,10 +855,10 @@ export function HotelsHomesScreen() {
   const getItemLayout = useCallback(
     (_data: any, index: number) => ({
       length: VILLA_ITEM_HEIGHT,
-      offset: VILLA_ITEM_HEIGHT * index,
+      offset: VILLA_ITEM_HEIGHT * Math.floor(index / numCols),
       index,
     }),
-    []
+    [numCols]
   );
 
   const keyExtractor = useCallback((item: VacationRental) => item.id, []);
@@ -870,7 +873,11 @@ export function HotelsHomesScreen() {
 
       return (
         <View
-          style={[styles.villaCard, { backgroundColor: colors.card, borderColor: colors.borderSubtle }]}
+          style={[
+            styles.villaCard,
+            (isDesktop || isTablet) && { flex: 1, marginHorizontal: 8 },
+            { backgroundColor: colors.card, borderColor: colors.borderSubtle },
+          ]}
         >
           {/* Progressive Image & Badges */}
           <Pressable
@@ -1641,9 +1648,11 @@ export function HotelsHomesScreen() {
 
   return (
     <SafeAreaView style={[styles.shell, { backgroundColor: colors.background }]} edges={["top"]}>
-      {/* Optimized Virtualized FlatList with Progressive Pagination */}
+      {/* Optimized Virtualized FlatList with Progressive Pagination & Desktop Multi-Column Grid */}
       <FlatList
+        key={isDesktop ? "grid-desktop-3" : isTablet ? "grid-tablet-2" : "list-mobile-1"}
         data={pagedRentals}
+        numColumns={numCols}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -1670,7 +1679,10 @@ export function HotelsHomesScreen() {
         }
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.4}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isDesktop && { maxWidth: 1360, width: "100%", alignSelf: "center", paddingHorizontal: 16 },
+        ]}
         showsVerticalScrollIndicator={false}
       />
 

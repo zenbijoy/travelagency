@@ -29,6 +29,7 @@ import { trendingSearchService, DEFAULT_FALLBACK_TRENDING } from "../../services
 import { unifiedSearchEngine } from "../../services/unifiedSearchEngine";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../theme";
+import { useResponsive } from "../../hooks/useResponsive";
 
 const { width: WINDOW_WIDTH } = Dimensions.get("window");
 const RECENT_SEARCHES_KEY = "@antigravity:recent_home_searches_v2";
@@ -46,6 +47,7 @@ export const DynamicHeroBanner: React.FC<DynamicHeroBannerProps> = ({
 }) => {
   const { user } = useAuth();
   const { theme, isDark, toggleTheme } = useTheme();
+  const { isDesktop, isTablet } = useResponsive();
 
   // Dynamic Data States
   const [banners, setBanners] = useState<HeroBanner[]>([DEFAULT_FALLBACK_BANNER]);
@@ -429,7 +431,8 @@ export const DynamicHeroBanner: React.FC<DynamicHeroBannerProps> = ({
         {/* ========================================================================= */}
         {/* 2. TOP HEADER BAR: Brand + Nav Links (Web) + Profile, Notification, Theme */}
         {/* ========================================================================= */}
-        <View style={styles.topHeaderBar}>
+        {!isDesktop && (
+          <View style={styles.topHeaderBar}>
           {/* Brand Logo & Name */}
           <TouchableOpacity
             activeOpacity={0.8}
@@ -548,6 +551,7 @@ export const DynamicHeroBanner: React.FC<DynamicHeroBannerProps> = ({
             </TouchableOpacity>
           </View>
         </View>
+        )}
 
         {/* ========================================================================= */}
         {/* 3. HERO CONTENT: Headline + Subtitle + Dynamic Badge                      */}
@@ -964,9 +968,19 @@ export const DynamicHeroBanner: React.FC<DynamicHeroBannerProps> = ({
         ]}
       >
         <ScrollView
-          horizontal
+          horizontal={!isDesktop}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.serviceRowContent}
+          contentContainerStyle={[
+            styles.serviceRowContent,
+            isDesktop && {
+              maxWidth: 1240,
+              alignSelf: "center",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              gap: 20,
+              paddingVertical: 10,
+            },
+          ]}
         >
           {SERVICE_CATEGORIES.map((cat) => (
             <TouchableOpacity
@@ -1200,7 +1214,7 @@ const styles = StyleSheet.create({
   searchBarWrapper: {
     position: "relative",
     width: "100%",
-    maxWidth: 680,
+    maxWidth: Platform.OS === "web" ? 780 : 680,
     zIndex: 50,
   },
   searchBarContainer: {

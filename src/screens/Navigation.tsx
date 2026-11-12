@@ -20,6 +20,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { AudioMiniBar } from "../components/audio/AudioMiniBar";
 import { useAuthStore } from "../store/authStore";
 import { useNotificationStore } from "../store/notificationStore";
+import { useResponsive } from "../hooks/useResponsive";
 
 // ─── Tab Config Matching Reference Screenshots & Clean Expo Router Paths ─────
 export const TABS = [
@@ -194,11 +195,17 @@ export function AiPill({ color, extraBottomOffset = 0 }: { color?: string; extra
 
 // ─── Official Custom Bottom Tab Bar for React Navigation / Expo Router ────────
 export function CustomBottomTabBar(props: BottomTabBarProps) {
+  const { isDesktop } = useResponsive();
   const [isAudioMiniBarVisible, setIsAudioMiniBarVisible] = useState(false);
   const { theme, isDark } = useTheme();
   const { t } = useLanguage();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const unreadCount = useNotificationStore((s) => s.unreadCount);
+
+  // When on laptop/desktop web, hide the mobile bottom tab bar entirely
+  if (isDesktop) {
+    return null;
+  }
 
   const { state, descriptors, navigation, insets } = props;
   const currentRoute = state.routes[state.index];
