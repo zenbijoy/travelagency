@@ -33,12 +33,14 @@ import { APP_EVENTS } from "../../src/services/events/appEventBus";
 import { useTranslation } from "react-i18next";
 import { toast } from "../../src/components/ui/Toast";
 import { useBookingRealtimeSync } from "../../src/services/bookingRealtimeService";
+import { useResponsive } from "../../src/hooks/useResponsive";
 
 const TRIP_BLUE = "#E5A93C";
 const TRIP_PINK = "#FFF0F3";
 const ACCENT_YELLOW = "#FACC15";
 
 export default function TripsTab() {
+  const { isDesktop } = useResponsive();
   const { user } = useAuth();
   const { t } = useTranslation();
   const [showWidgetModal, setShowWidgetModal] = useState(false);
@@ -297,7 +299,8 @@ export default function TripsTab() {
 
   return (
     <SafeAreaView style={styles.shell} edges={["top"]}>
-      {/* Header Bar */}
+      <View style={isDesktop ? { maxWidth: 1200, width: "100%", alignSelf: "center", flex: 1 } : { flex: 1 }}>
+        {/* Header Bar */}
       <View style={styles.headerBar}>
         <Text style={styles.headerTitle}>My Trips</Text>
 
@@ -867,6 +870,7 @@ export default function TripsTab() {
           <Ionicons name="arrow-up" size={20} color="#FFFFFF" />
         </Pressable>
       )}
+      </View>
     </SafeAreaView>
   );
 }

@@ -32,6 +32,7 @@ import { ActiveDevicesModal } from "../../src/components/settings/ActiveDevicesM
 import { AccountDeletionModal } from "../../src/components/settings/AccountDeletionModal";
 import { userDataExportService } from "../../src/services/userDataExportService";
 import { RTLIcon } from "../../src/components/ui";
+import { useResponsive } from "../../src/hooks/useResponsive";
 
 const PRIMARY = "#E5A93C";
 const BG_COLOR = "#F8FAFC";
@@ -48,6 +49,7 @@ interface SettingsState {
 }
 
 export default function ProfileScreen() {
+  const { isDesktop } = useResponsive();
   const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -233,7 +235,8 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.shell}>
-      {/* BEGIN: TopHeader */}
+      <View style={isDesktop ? { maxWidth: 960, width: "100%", alignSelf: "center", flex: 1 } : { flex: 1 }}>
+        {/* BEGIN: TopHeader */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerAvatarWrap}>
@@ -545,8 +548,9 @@ export default function ProfileScreen() {
         onClose={() => setShowDeleteAccountModal(false)}
       />
 
-      <AiPill color={PRIMARY} />
-      <BottomNav active="Account" color={PRIMARY} />
+      {!isDesktop && <AiPill color={PRIMARY} />}
+      {!isDesktop && <BottomNav active="Account" color={PRIMARY} />}
+      </View>
     </SafeAreaView>
   );
 }

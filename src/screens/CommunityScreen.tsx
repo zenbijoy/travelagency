@@ -40,6 +40,8 @@ import { sanitizeUserText, sanitizeMediaUrl } from "../utils/sanitizer";
 import { colors } from "../theme/colors";
 import { useTheme } from "../context/ThemeContext";
 import { FONTS } from "../theme/typography";
+import { useResponsive } from "../hooks/useResponsive";
+import { WebFooter } from "../components/layout";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const TRIP_BLUE = "#E5A93C";
@@ -208,6 +210,7 @@ const PostFeedItem = memo(function PostFeedItem({
 
 export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
   const { colors: themeColors, isDark } = useTheme();
+  const { isDesktop } = useResponsive();
   const themeColor = screen.theme === "luxe" ? LUXE_NAVY : PRIMARY;
 
   // Authenticated User Context
@@ -1220,6 +1223,7 @@ export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={["top", "bottom"]}>
+      <View style={isDesktop ? { maxWidth: 1240, width: "100%", alignSelf: "center", flex: 1 } : { flex: 1 }}>
       {/* Top Header Bar */}
       <View style={[styles.communityHeader, { backgroundColor: themeColors.headerBg, borderBottomColor: themeColors.borderSubtle }]}>
         <View style={styles.headerLeft}>
@@ -1337,9 +1341,12 @@ export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
         <FlatList
           data={filteredPosts}
           keyExtractor={(item) => item.id}
-          getItemLayout={getItemLayout}
+          key={isDesktop ? "feed-2col" : "feed-1col"}
+          numColumns={isDesktop ? 2 : 1}
+          getItemLayout={isDesktop ? undefined : getItemLayout}
           ListHeaderComponent={renderFeedHeader}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 100, ...(isDesktop ? { padding: 16, gap: 12 } : {}) }}
+          columnWrapperStyle={isDesktop ? { gap: 12 } : undefined}
           initialNumToRender={4}
           maxToRenderPerBatch={4}
           windowSize={7}
@@ -1400,7 +1407,10 @@ export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
         <FlatList
           data={influencers}
           keyExtractor={(item) => item.id}
+          key={isDesktop ? "inf-3col" : "inf-1col"}
+          numColumns={isDesktop ? 3 : 1}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          columnWrapperStyle={isDesktop ? { gap: 12 } : undefined}
           ListHeaderComponent={
             <View>
               <Text style={styles.sectionHeading}>Top Verified Creators</Text>
@@ -2306,6 +2316,8 @@ export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
         }}
       />
 
+      {isDesktop && <WebFooter />}
+      </View>
     </SafeAreaView>
   );
 }
