@@ -5,6 +5,7 @@
  */
 
 import { supabase } from "@/utils/supabase";
+import { logger } from "@/utils/logger";
 import {
   AdminUser,
   AdminActivityLog,
@@ -164,7 +165,7 @@ export const adminService = {
       if (error || !data) return null;
       return data as AdminUser;
     } catch (error) {
-      console.warn("Failed to retrieve admin user profile:", error);
+      logger.warn("Failed to retrieve admin user profile:", error);
       return null;
     }
   },
@@ -229,7 +230,7 @@ export const userManagementService = {
       }
       return [];
     } catch (error) {
-      console.warn("Error fetching users in userManagementService:", error);
+      logger.warn("Error fetching users in userManagementService:", error);
       return [];
     }
   },
@@ -415,7 +416,7 @@ export const destinationService = {
       }
       return [];
     } catch (error) {
-      console.warn("Error fetching destinations in destinationService:", error);
+      logger.warn("Error fetching destinations in destinationService:", error);
       return [];
     }
   },
@@ -601,7 +602,7 @@ export const marketingService = {
       }
       return [];
     } catch (error) {
-      console.warn("Failed to load promo codes:", error);
+      logger.warn("Failed to load promo codes:", error);
       return [];
     }
   },
@@ -928,7 +929,7 @@ export const notificationAdminService = {
 
       return true;
     } catch (err) {
-      console.error("Error dispatching broadcast:", err);
+      logger.error("Error dispatching broadcast:", err);
       return false;
     }
   },
@@ -978,7 +979,7 @@ export const notificationAdminService = {
       if (error) throw error;
       return data || [];
     } catch (err) {
-      console.warn("Failed to fetch scheduled notifications:", err);
+      logger.warn("Failed to fetch scheduled notifications:", err);
       return [];
     }
   },
@@ -993,7 +994,7 @@ export const notificationAdminService = {
       if (error) throw error;
       return data || [];
     } catch (err) {
-      console.warn("Failed to fetch broadcast history:", err);
+      logger.warn("Failed to fetch broadcast history:", err);
       return [];
     }
   },
@@ -1023,7 +1024,7 @@ export const notificationAdminService = {
       }
       return true;
     } catch (err) {
-      console.error("Error triggering scheduled notification now:", err);
+      logger.error("Error triggering scheduled notification now:", err);
       return false;
     }
   },
@@ -1063,7 +1064,7 @@ export const appConfigService = {
       }
       return map;
     } catch (err) {
-      console.warn("Failed to load app configs from database:", err);
+      logger.warn("Failed to load app configs from database:", err);
       return {};
     }
   },
@@ -1089,7 +1090,7 @@ export const appConfigService = {
       });
       return true;
     } catch (err) {
-      console.error(`Failed to update setting ${key}:`, err);
+      logger.error(`Failed to update setting ${key}:`, err);
       return false;
     }
   },
@@ -1112,7 +1113,7 @@ export const appConfigService = {
       });
       return true;
     } catch (err) {
-      console.error("Failed to bulk update settings:", err);
+      logger.error("Failed to bulk update settings:", err);
       return false;
     }
   },

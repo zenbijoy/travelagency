@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 .expo/
+**/.expo/
+**/.expo/**
 
 # Environment variables
 .env.local
@@ -40,6 +42,8 @@ Icon?
 .hgcheckout
 .idea/
 .vscode/
+**/.vscode/
+**/.vscode/**
 *.swp
 *.swo
 *~
@@ -144,6 +148,12 @@ supabase/.branches/
 !user/**
 !utils/
 !utils/**
+
+# Explicit ignores overriding whitelists
+app/.expo/
+app/.vscode/
+**/.expo/
+**/.vscode/
 
 # Python artifacts
 __pycache__/

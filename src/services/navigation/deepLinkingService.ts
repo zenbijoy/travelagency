@@ -25,6 +25,7 @@ import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../../utils/supabase";
+import { logger } from "../../utils/logger";
 
 // ============================================================================
 // CONSTANTS & SCHEMES CONFIGURATION
@@ -542,7 +543,7 @@ export class DeepLinkingService {
         searchParams,
       };
     } catch (err) {
-      console.warn("[DeepLinkingService] Error parsing URL:", url, err);
+      logger.warn("[DeepLinkingService] Error parsing URL:", url, err);
       return null;
     }
   }
@@ -578,20 +579,20 @@ export class DeepLinkingService {
         STORAGE_KEYS.DEFERRED_DEEP_LINK,
         JSON.stringify(payload)
       );
-      console.log("[DeepLinkingService] Deferred link preserved:", payload.id, parsed.targetRoute);
+      logger.info("[DeepLinkingService] Deferred link preserved:", payload.id, parsed.targetRoute);
 
       // Notify registered listeners
       this.deferredLinkListeners.forEach((listener) => {
         try {
           listener(payload);
         } catch (e) {
-          console.warn("[DeepLinkingService] Error in deferred listener:", e);
+          logger.warn("[DeepLinkingService] Error in deferred listener:", e);
         }
       });
 
       return true;
     } catch (e) {
-      console.warn("[DeepLinkingService] Failed saving deferred deep link:", e);
+      logger.warn("[DeepLinkingService] Failed saving deferred deep link:", e);
       return false;
     }
   }
@@ -615,7 +616,7 @@ export class DeepLinkingService {
 
       return payload;
     } catch (e) {
-      console.warn("[DeepLinkingService] Failed reading deferred link:", e);
+      logger.warn("[DeepLinkingService] Failed reading deferred link:", e);
       return null;
     }
   }
@@ -668,7 +669,7 @@ export class DeepLinkingService {
     const { parsedLink } = payload;
     await this.markDeferredLinkConsumed();
 
-    console.log(
+    logger.info(
       "[DeepLinkingService] Executing deferred link post-install:",
       parsedLink.targetRoute,
       parsedLink.params
@@ -1061,13 +1062,13 @@ ${JSON.stringify(jsonLd, null, 2)}
         STORAGE_KEYS.PENDING_AUTH_DESTINATION,
         JSON.stringify(destination)
       );
-      console.log(
+      logger.info(
         "[DeepLinkingService] Auth destination locked in memory & storage:",
         destination.targetRoute,
         destination.params
       );
     } catch (e) {
-      console.warn("[DeepLinkingService] Failed saving pending auth destination:", e);
+      logger.warn("[DeepLinkingService] Failed saving pending auth destination:", e);
     }
   }
 
@@ -1124,7 +1125,7 @@ ${JSON.stringify(jsonLd, null, 2)}
       return false;
     }
 
-    console.log(
+    logger.info(
       "[DeepLinkingService] Resuming protected destination post-auth:",
       destination.targetRoute,
       destination.params
@@ -1164,7 +1165,7 @@ ${JSON.stringify(jsonLd, null, 2)}
       return { handled: false, action: "UNSUPPORTED" };
     }
 
-    console.log(
+    logger.info(
       `[DeepLinkingService] Incoming ${parsed.type.toUpperCase()} link:`,
       parsed.targetRoute,
       parsed.params
@@ -1175,7 +1176,7 @@ ${JSON.stringify(jsonLd, null, 2)}
       const isAuthed = await this.checkUserAuthenticated();
 
       if (!isAuthed) {
-        console.log(
+        logger.info(
           `[DeepLinkingService] Route '${parsed.targetRoute}' requires authentication. Retaining destination & redirecting to login.`
         );
 
@@ -1244,14 +1245,14 @@ ${JSON.stringify(jsonLd, null, 2)}
         if (event === "SIGNED_IN" && session?.user) {
           const destination = await this.getPendingAuthDestination();
           if (destination && this.routerRef) {
-            console.log("[DeepLinkingService] Auth state changed to SIGNED_IN. Resuming destination...");
+            logger.info("[DeepLinkingService] Auth state changed to SIGNED_IN. Resuming destination...");
             await this.resumePendingPostAuthNavigation(this.routerRef);
           }
         }
       });
       this.authStateSubscription = data?.subscription ?? null;
     } catch (e) {
-      console.warn("[DeepLinkingService] Auth observer registration failed:", e);
+      logger.warn("[DeepLinkingService] Auth observer registration failed:", e);
     }
   }
 
@@ -1281,7 +1282,7 @@ ${JSON.stringify(jsonLd, null, 2)}
         }
       })
       .catch((err) => {
-        console.warn("[DeepLinkingService] Error reading initial URL:", err);
+        logger.warn("[DeepLinkingService] Error reading initial URL:", err);
       });
 
     // 2. Register runtime URL listener

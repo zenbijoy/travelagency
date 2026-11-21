@@ -19,7 +19,7 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-ico
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { router, Href } from "expo-router";
 
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../utils/supabase";
@@ -334,9 +334,9 @@ export function HomeScreen() {
           onSearchSubmit={(q) => {
             setSearchQuery(q);
             router.push({
-              pathname: "/screens/search" as any,
+              pathname: "/screens/search",
               params: { q },
-            });
+            } as Href);
           }}
         />
 
@@ -364,9 +364,9 @@ export function HomeScreen() {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setSearchQuery(loc.name);
                       router.push({
-                        pathname: "/screens/search" as any,
+                        pathname: "/screens/search",
                         params: { q: loc.name },
-                      });
+                      } as Href);
                     }}
                   >
                     {!isDark && (
@@ -396,9 +396,9 @@ export function HomeScreen() {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setSearchQuery(loc.name);
                       router.push({
-                        pathname: "/screens/search" as any,
+                        pathname: "/screens/search",
                         params: { q: loc.name },
-                      });
+                      } as Href);
                     }}
                   >
                     {!isDark && (
@@ -414,12 +414,12 @@ export function HomeScreen() {
           {/* 5. SUB-CATEGORY QUICK ACTIONS (Deals, Events, Trip.Planner, Trending)     */}
           {/* ========================================================================= */}
           <View style={styles.quickActionsGrid}>
-            {[
+            {([
               { label: "Deals", icon: "pricetag-outline", route: "deals" },
               { label: "Travel Buddy", icon: "people-outline", route: "/screens/travel-match" },
               { label: "Trip.Planner", icon: "flash-outline", route: "/screens/trip-planner" },
               { label: "Launch & Bus", icon: "boat-outline", route: "/screens/bus-launch" },
-            ].map((action) => (
+            ] as Array<{ label: string; icon: keyof typeof Ionicons.glyphMap; route: string }>).map((action) => (
               <Pressable
                 key={action.label}
                 style={styles.quickActionCol}
@@ -428,7 +428,7 @@ export function HomeScreen() {
                   if (action.route === "deals") {
                     setShowPromoModal(true);
                   } else {
-                    router.push(action.route as any);
+                    router.push(action.route as Href);
                   }
                 }}
               >
@@ -443,7 +443,7 @@ export function HomeScreen() {
                   ]}
                 >
                   <Ionicons
-                    name={action.icon as any}
+                    name={action.icon}
                     size={22}
                     color={theme.quickActionIcon}
                   />
@@ -473,7 +473,7 @@ export function HomeScreen() {
               }}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/screens/travel-intelligence" as any);
+                router.push("/screens/travel-intelligence" as Href);
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -499,7 +499,7 @@ export function HomeScreen() {
               }}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/screens/explore-trips" as any);
+                router.push("/screens/explore-trips" as Href);
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -542,7 +542,7 @@ export function HomeScreen() {
                     borderWidth: 1,
                     borderColor: isDark ? "rgba(245, 158, 11, 0.3)" : "#FDE68A",
                   }}
-                  onPress={() => router.push("/screens/explore-trips" as any)}
+                  onPress={() => router.push("/screens/explore-trips" as Href)}
                 >
                   <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#F59E0B20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
                     <Ionicons name="flame" size={18} color="#D97706" />
@@ -564,7 +564,7 @@ export function HomeScreen() {
                     borderWidth: 1,
                     borderColor: isDark ? "rgba(16, 185, 129, 0.3)" : "#A7F3D0",
                   }}
-                  onPress={() => router.push("/screens/explore" as any)}
+                  onPress={() => router.push("/screens/explore" as Href)}
                 >
                   <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#10B98120", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
                     <Ionicons name="sunny" size={18} color="#059669" />
@@ -586,7 +586,7 @@ export function HomeScreen() {
                     borderWidth: 1,
                     borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "#BFDBFE",
                   }}
-                  onPress={() => router.push("/screens/explore-trips" as any)}
+                  onPress={() => router.push("/screens/explore-trips" as Href)}
                 >
                   <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#287DFA20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
                     <Ionicons name="diamond" size={18} color="#1D4ED8" />
@@ -621,7 +621,7 @@ export function HomeScreen() {
                       borderWidth: 1,
                       borderColor: isDark ? "rgba(245, 158, 11, 0.3)" : "#FDE68A",
                     }}
-                    onPress={() => router.push("/screens/explore-trips" as any)}
+                    onPress={() => router.push("/screens/explore-trips" as Href)}
                   >
                     <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#F59E0B20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
                       <Ionicons name="flame" size={18} color="#D97706" />
@@ -643,7 +643,7 @@ export function HomeScreen() {
                       borderWidth: 1,
                       borderColor: isDark ? "rgba(16, 185, 129, 0.3)" : "#A7F3D0",
                     }}
-                    onPress={() => router.push("/screens/explore" as any)}
+                    onPress={() => router.push("/screens/explore" as Href)}
                   >
                     <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#10B98120", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
                       <Ionicons name="sunny" size={18} color="#059669" />
@@ -665,7 +665,7 @@ export function HomeScreen() {
                       borderWidth: 1,
                       borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "#BFDBFE",
                     }}
-                    onPress={() => router.push("/screens/explore-trips" as any)}
+                    onPress={() => router.push("/screens/explore-trips" as Href)}
                   >
                     <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#287DFA20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
                       <Ionicons name="diamond" size={18} color="#1D4ED8" />
@@ -722,7 +722,7 @@ export function HomeScreen() {
 
             <Pressable
               style={styles.seeAllBtn}
-              onPress={() => router.push("/screens/explore" as any)}
+              onPress={() => router.push("/screens/explore" as Href)}
             >
               <Text style={[styles.seeAllText, { color: theme.gold }]}>See All →</Text>
             </Pressable>
@@ -745,7 +745,7 @@ export function HomeScreen() {
                     shadowColor: isDark ? "#000" : "#94A3B8",
                   },
                 ]}
-                onPress={() => router.push((ad.target_url || "/screens/explore") as any)}
+                onPress={() => router.push((ad.target_url || "/screens/explore") as Href)}
               >
                 <ImageBackground
                   source={{
@@ -784,7 +784,7 @@ export function HomeScreen() {
                           styles.viewDealsBtn,
                           { backgroundColor: theme.ctaButtonBg },
                         ]}
-                        onPress={() => router.push((ad.target_url || "/screens/explore") as any)}
+                        onPress={() => router.push((ad.target_url || "/screens/explore") as Href)}
                       >
                         <Text
                           style={[
@@ -812,7 +812,7 @@ export function HomeScreen() {
                 shadowColor: isDark ? "#000" : "#94A3B8",
               },
             ]}
-            onPress={() => router.push("/screens/explore" as any)}
+            onPress={() => router.push("/screens/explore" as Href)}
           >
             <ImageBackground
               source={{
@@ -858,7 +858,7 @@ export function HomeScreen() {
                       styles.viewDealsBtn,
                       { backgroundColor: theme.ctaButtonBg },
                     ]}
-                    onPress={() => router.push("/screens/explore" as any)}
+                    onPress={() => router.push("/screens/explore" as Href)}
                   >
                     <Text
                       style={[
@@ -884,7 +884,7 @@ export function HomeScreen() {
                 shadowColor: isDark ? "#000" : "#94A3B8",
               },
             ]}
-            onPress={() => router.push("/screens/flights" as any)}
+            onPress={() => router.push("/screens/flights" as Href)}
           >
             <ImageBackground
               source={{
@@ -918,7 +918,7 @@ export function HomeScreen() {
                       styles.specialPromoBtn,
                       { backgroundColor: theme.ctaButtonBg },
                     ]}
-                    onPress={() => router.push("/screens/flights" as any)}
+                    onPress={() => router.push("/screens/flights" as Href)}
                   >
                     <Text
                       style={[
@@ -964,9 +964,9 @@ export function HomeScreen() {
                       ]}
                       onPress={() =>
                         router.push({
-                          pathname: "/(tabs)/community" as any,
+                          pathname: "/(tabs)/community",
                           params: { postId: post.id },
-                        })
+                        } as Href)
                       }
                     >
                       <Image source={{ uri: postImage }} style={[styles.feedCardImage, isDesktop && { height: 160 }]} />

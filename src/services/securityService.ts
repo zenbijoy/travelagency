@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Advanced Security Features Service
 import { supabase } from "@/utils/supabase";
 
@@ -306,7 +305,7 @@ export const ipWhitelistService = {
 export const securityMonitoringService = {
   async logSecurityEvent(
     adminId: string,
-    event: Omit<SecurityEvent, "id" | "created_at">,
+    event: Omit<SecurityEvent, "id" | "created_at" | "admin_id">,
   ) {
     try {
       const { data, error } = await supabase

@@ -15,7 +15,7 @@ import { Platform,
 import { formatPrice } from "../../src/utils/currency";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { router, Href } from "expo-router";
 
 import { useAuth } from "../../src/hooks/useAuth";
 import { AddWidgetModal } from "../../src/components/AddWidgetModal";
@@ -61,7 +61,7 @@ export default function TripsTab() {
       id: ticket.id,
       bookingReference: ticket.bookingReference,
       passengerName: ticket.passengerName || user?.email?.split("@")[0] || "Valued Traveler",
-      transportType: ticket.type as any,
+      transportType: ticket.type === "tour" ? "package" : ticket.type,
       operatorOrAirline: ticket.title || (isFlight ? "বিমান বাংলাদেশ এয়ারলাইন্স" : isTrain ? "বাংলাদেশ রেলওয়ে" : "গ্রীন লাইন পরিবহন"),
       serviceNumber: ticket.title.match(/[A-Z0-9]+-\d+/)?.[0] || (isFlight ? "BG-433" : isTrain ? "701" : "GL-102"),
       origin: ticket.origin || "ঢাকা (DAC)",
@@ -198,7 +198,7 @@ export default function TripsTab() {
       setBookings((prev) =>
         prev.map((b) => {
           if (b.id !== payload.bookingId) return b;
-          const { status: _ignored, ...restBooking } = (payload.booking || {}) as any;
+          const { status: _ignored, ...restBooking } = (payload.booking || {}) as Partial<BookingManageData>;
           return { ...b, ...restBooking, status: payload.newStatus };
         })
       );
@@ -383,7 +383,7 @@ export default function TripsTab() {
 
         <Pressable
           style={styles.segmentButton}
-          onPress={() => router.push("/screens/group-trip" as any)}
+          onPress={() => router.push("/screens/group-trip" as Href)}
         >
           <Ionicons
             name="people"
@@ -429,7 +429,7 @@ export default function TripsTab() {
                       id: offlineTickets[0].id,
                       bookingReference: offlineTickets[0].bookingReference,
                       passengerName: offlineTickets[0].passengerName,
-                      transportType: offlineTickets[0].type as any,
+                      transportType: offlineTickets[0].type === "tour" ? "package" : offlineTickets[0].type,
                       operatorOrAirline: offlineTickets[0].title,
                       serviceNumber: offlineTickets[0].title.match(/[A-Z0-9]+-\d+/)?.[0] || "BG-433",
                       origin: offlineTickets[0].origin || "ঢাকা (DAC)",
@@ -445,7 +445,7 @@ export default function TripsTab() {
                     }
                   : null
               }
-              onOpenSupport={() => router.push("/screens/customer-support" as any)}
+              onOpenSupport={() => router.push("/screens/customer-support" as Href)}
             />
 
             {/* Offline Saved Tickets List */}
@@ -469,7 +469,7 @@ export default function TripsTab() {
                   const isBus = tkt.type === "bus";
                   const isLaunch = tkt.type === "launch";
 
-                  const tIcon = isFlight
+                  const tIcon: keyof typeof Ionicons.glyphMap = isFlight
                     ? "airplane"
                     : isTrain
                     ? "train"
@@ -484,7 +484,7 @@ export default function TripsTab() {
                       <View style={styles.ticketCardHeader}>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                           <View style={styles.ticketTypeCircle}>
-                            <Ionicons name={tIcon as any} size={16} color="#FFFFFF" />
+                            <Ionicons name={tIcon} size={16} color="#FFFFFF" />
                           </View>
                           <View>
                             <Text style={styles.ticketCardTitle} numberOfLines={1}>
@@ -562,13 +562,13 @@ export default function TripsTab() {
                 <View style={styles.emptyButtonsRow}>
                   <Pressable
                     style={styles.emptyStaysBtn}
-                    onPress={() => router.push("/screens/flights" as any)}
+                    onPress={() => router.push("/screens/flights" as Href)}
                   >
                     <Text style={styles.emptyStaysBtnText}>ফ্লাইট খুঁজুন</Text>
                   </Pressable>
                   <Pressable
                     style={styles.emptyFlightsBtn}
-                    onPress={() => router.push("/screens/trains" as any)}
+                    onPress={() => router.push("/screens/trains" as Href)}
                   >
                     <Text style={styles.emptyFlightsBtnText}>ট্রেন বুকিং</Text>
                   </Pressable>
@@ -651,7 +651,7 @@ export default function TripsTab() {
 
           <Pressable
             style={styles.filterPill}
-            onPress={() => router.push("/screens/search" as any)}
+            onPress={() => router.push("/screens/search" as Href)}
           >
             <Ionicons name="options-outline" size={14} color="#111827" />
             <Ionicons name="chevron-down" size={14} color="#111827" />
@@ -743,13 +743,13 @@ export default function TripsTab() {
             <View style={styles.emptyButtonsRow}>
               <Pressable
                 style={styles.emptyStaysBtn}
-                onPress={() => router.push("/screens/search-stays" as any)}
+                onPress={() => router.push("/screens/search-stays" as Href)}
               >
                 <Text style={styles.emptyStaysBtnText}>Browse Hotels</Text>
               </Pressable>
               <Pressable
                 style={styles.emptyFlightsBtn}
-                onPress={() => router.push("/screens/flights" as any)}
+                onPress={() => router.push("/screens/flights" as Href)}
               >
                 <Text style={styles.emptyFlightsBtnText}>Find Flights</Text>
               </Pressable>
@@ -769,7 +769,7 @@ export default function TripsTab() {
 
           <Pressable
             style={styles.aiActionPill}
-            onPress={() => router.push("/screens/explore" as any)}
+            onPress={() => router.push("/screens/explore" as Href)}
           >
             <Ionicons name="map-outline" size={15} color="#111827" />
             <Text style={styles.aiActionLabel}>Explore on map</Text>
@@ -781,7 +781,7 @@ export default function TripsTab() {
           <Text style={styles.favoritesTitle}>Travelers' favorites</Text>
           <Pressable
             style={styles.momentsLinkRow}
-            onPress={() => router.push("/screens/community" as any)}
+            onPress={() => router.push("/screens/community" as Href)}
           >
             <Text style={styles.momentsLinkText}>Moments</Text>
             <Ionicons name="chevron-forward" size={14} color={TRIP_BLUE} />
@@ -801,7 +801,7 @@ export default function TripsTab() {
               <Pressable
                 key={post.id}
                 style={styles.favoriteCard}
-                onPress={() => router.push("/screens/community" as any)}
+                onPress={() => router.push("/screens/community" as Href)}
               >
                 <Image source={{ uri: image }} style={styles.favoriteCardImage} />
 

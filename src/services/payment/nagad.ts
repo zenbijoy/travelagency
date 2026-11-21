@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Nagad Payment Provider - Hardened & Tamper-Proofed
  *

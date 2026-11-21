@@ -16,6 +16,7 @@ import * as Location from "expo-location";
 import * as SMS from "expo-sms";
 import * as Contacts from "expo-contacts";
 import * as Localization from "expo-localization";
+import { logger } from "../../utils/logger";
 
 // ============================================================================
 // Types & Contracts
@@ -1632,7 +1633,7 @@ class SOSService {
         }
       }
     } catch (err) {
-      console.warn("[SOSService] Failed to load contacts from storage:", err);
+      logger.warn("[SOSService] Failed to load contacts from storage:", err);
     }
 
     // Default primary contacts
@@ -1735,7 +1736,7 @@ class SOSService {
       const { status, canAskAgain } = await Location.requestForegroundPermissionsAsync();
       return { granted: status === Location.PermissionStatus.GRANTED, canAskAgain };
     } catch (err) {
-      console.warn("[SOSService] requestLocationPermission error:", err);
+      logger.warn("[SOSService] requestLocationPermission error:", err);
       return { granted: false, canAskAgain: false };
     }
   }
@@ -1848,7 +1849,7 @@ class SOSService {
         }
       }
     } catch (locErr) {
-      console.warn("[SOSService] expo-location failed:", locErr);
+      logger.warn("[SOSService] expo-location failed:", locErr);
     }
 
     // 2. Fallback to Web Geolocation API if on web
@@ -1875,7 +1876,7 @@ class SOSService {
         await AsyncStorage.setItem(STORAGE_LAST_KNOWN_LOCATION, JSON.stringify(coords)).catch(() => {});
         return coords;
       } catch (webGeoErr) {
-        console.warn("[SOSService] Web Geolocation failed:", webGeoErr);
+        logger.warn("[SOSService] Web Geolocation failed:", webGeoErr);
       }
     }
 
@@ -1893,7 +1894,7 @@ class SOSService {
         }
       }
     } catch (cacheErr) {
-      console.warn("[SOSService] Failed to read cached location:", cacheErr);
+      logger.warn("[SOSService] Failed to read cached location:", cacheErr);
     }
 
     // 4. Default Fallback (Dhaka Diplomatic Tourist Hub)
@@ -1953,7 +1954,7 @@ class SOSService {
 
       return null;
     } catch (err) {
-      console.warn("[SOSService] pickContactFromPhonebook error:", err);
+      logger.warn("[SOSService] pickContactFromPhonebook error:", err);
       return null;
     }
   }
@@ -2020,7 +2021,7 @@ class SOSService {
     try {
       await AsyncStorage.setItem(STORAGE_SELECTED_COUNTRY, countryCode.toUpperCase());
     } catch (err) {
-      console.warn("[SOSService] Failed to set selected country:", err);
+      logger.warn("[SOSService] Failed to set selected country:", err);
     }
   }
 
@@ -2162,7 +2163,7 @@ class SOSService {
             });
             contactsNotifiedCount = targetContacts.length;
           } catch (smsErr) {
-            console.warn("[SOSService] SMS.sendSMSAsync fallback to URI:", smsErr);
+            logger.warn("[SOSService] SMS.sendSMSAsync fallback to URI:", smsErr);
             const phoneListStr = recipientPhones.join(Platform.OS === "ios" ? "," : ";");
             const encodedMsg = encodeURIComponent(sosMessage);
             const fallbackUrl = `sms:${phoneListStr}?body=${encodedMsg}`;
@@ -2235,7 +2236,7 @@ class SOSService {
           backendLogged = true;
         }
       } catch (logErr) {
-        console.warn("[SOSService] Backend logging non-critical error:", logErr);
+        logger.warn("[SOSService] Backend logging non-critical error:", logErr);
       }
 
       // 4. Save local dispatch log
@@ -2300,7 +2301,7 @@ class SOSService {
       // Keep last 20 logs
       await AsyncStorage.setItem(STORAGE_SOS_LOGS_KEY, JSON.stringify(existing.slice(0, 20)));
     } catch (err) {
-      console.warn("[SOSService] Failed to save SOS log:", err);
+      logger.warn("[SOSService] Failed to save SOS log:", err);
     }
   }
 

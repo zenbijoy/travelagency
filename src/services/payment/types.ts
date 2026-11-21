@@ -65,9 +65,9 @@ export interface GooglePayConfig {
 
 export interface BkashConfig {
   appKey: string;
-  appSecret: string;
-  username: string;
-  password: string;
+  appSecret?: string;
+  username?: string;
+  password?: string;
   baseUrl: string;
   sandboxMode: boolean;
 }
@@ -75,8 +75,8 @@ export interface BkashConfig {
 export interface NagadConfig {
   merchantId: string;
   merchantNumber: string;
-  publicKey: string;
-  privateKey: string;
+  publicKey?: string;
+  privateKey?: string;
   baseUrl: string;
   sandboxMode: boolean;
 }

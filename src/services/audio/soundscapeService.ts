@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { logger } from '../../utils/logger';
 
 // Types for Soundscapes & Geofencing
 export interface GeoCoordinate {
@@ -378,7 +379,7 @@ class SoundscapeService {
 
       this.notifyListeners();
     } catch (err) {
-      console.warn('[SoundscapeService] Bootstrap warning:', err);
+      logger.warn('[SoundscapeService] Bootstrap warning:', err);
     }
   }
 
@@ -404,7 +405,7 @@ class SoundscapeService {
         return true;
       }
     } catch (err) {
-      console.warn('[SoundscapeService] Audio.setAudioModeAsync fallback:', err);
+      logger.warn('[SoundscapeService] Audio.setAudioModeAsync fallback:', err);
     }
     return false;
   }
@@ -469,7 +470,7 @@ class SoundscapeService {
 
       // Auto-trigger soundscape if enabled and newly entered
       if (this.state.autoGeoTriggerEnabled && justEntered) {
-        console.log(
+        logger.info(
           `[SoundscapeService] 📍 Geo-Fenced Arrived at: ${nearestTrack.title} (${distanceMeters}m away)`
         );
         // Stage track ready for user to play, without sudden unprompted playback
@@ -540,7 +541,7 @@ class SoundscapeService {
         : trackOrId;
 
     if (!track) {
-      console.warn('[SoundscapeService] Invalid track provided:', trackOrId);
+      logger.warn('[SoundscapeService] Invalid track provided:', trackOrId);
       return false;
     }
 
@@ -569,7 +570,7 @@ class SoundscapeService {
         try {
           Audio = require('expo-av').Audio;
         } catch (audioReqErr) {
-          console.warn("[SoundscapeService] audio engine fallback:", audioReqErr);
+          logger.warn("[SoundscapeService] audio engine fallback:", audioReqErr);
         }
       }
 
@@ -591,7 +592,7 @@ class SoundscapeService {
             this.state.isLooping = !!status.isLooping;
             this.notifyListeners();
           } else if (status.error) {
-            console.warn('[SoundscapeService] Playback status error:', status.error);
+            logger.warn('[SoundscapeService] Playback status error:', status.error);
             this.state.errorMessage = status.error;
             this.state.isBuffering = false;
             this.notifyListeners();
@@ -627,7 +628,7 @@ class SoundscapeService {
 
       return true;
     } catch (err: any) {
-      console.error('[SoundscapeService] Error playing soundscape:', err);
+      logger.error('[SoundscapeService] Error playing soundscape:', err);
       this.state.isPlaying = false;
       this.state.isBuffering = false;
       this.state.errorMessage = err?.message || 'Failed to play soundscape';
@@ -660,7 +661,7 @@ class SoundscapeService {
       this.notifyListeners();
       return true;
     } catch (err) {
-      console.warn('[SoundscapeService] Play error:', err);
+      logger.warn('[SoundscapeService] Play error:', err);
       return false;
     }
   }
@@ -681,7 +682,7 @@ class SoundscapeService {
       this.notifyListeners();
       return true;
     } catch (err) {
-      console.warn('[SoundscapeService] Pause error:', err);
+      logger.warn('[SoundscapeService] Pause error:', err);
       return false;
     }
   }
@@ -715,12 +716,12 @@ class SoundscapeService {
       try {
         await this.currentSound.stopAsync();
       } catch (err) {
-        console.warn("[SoundscapeService] stopAsync warning:", err);
+        logger.warn("[SoundscapeService] stopAsync warning:", err);
       }
       try {
         await this.currentSound.unloadAsync();
       } catch (err) {
-        console.warn("[SoundscapeService] unloadAsync warning:", err);
+        logger.warn("[SoundscapeService] unloadAsync warning:", err);
       }
       this.currentSound = null;
     }
@@ -739,7 +740,7 @@ class SoundscapeService {
         const effectiveVol = this.state.isDucked ? clamped * 0.25 : clamped;
         await this.currentSound.setVolumeAsync(effectiveVol);
       } catch (err) {
-        console.warn('[SoundscapeService] Volume set warning:', err);
+        logger.warn('[SoundscapeService] Volume set warning:', err);
       }
     }
 
@@ -778,7 +779,7 @@ class SoundscapeService {
         try {
           await this.currentSound.setVolumeAsync(Math.max(0, currentStepVol));
         } catch (duckErr) {
-          console.warn("[SoundscapeService] duckVolume warning:", duckErr);
+          logger.warn("[SoundscapeService] duckVolume warning:", duckErr);
         }
       }
 
@@ -820,7 +821,7 @@ class SoundscapeService {
         try {
           await this.currentSound.setVolumeAsync(Math.min(1, currentStepVol));
         } catch (unduckErr) {
-          console.warn("[SoundscapeService] unduckVolume warning:", unduckErr);
+          logger.warn("[SoundscapeService] unduckVolume warning:", unduckErr);
         }
       }
 
@@ -899,7 +900,7 @@ class SoundscapeService {
       this.cacheDirectory = soundscapeDir;
       return soundscapeDir;
     } catch (err) {
-      console.warn('[SoundscapeService] Cache dir setup notice:', err);
+      logger.warn('[SoundscapeService] Cache dir setup notice:', err);
       return null;
     }
   }
@@ -929,7 +930,7 @@ class SoundscapeService {
                   delete this.cacheManifest[key];
                 }
               } catch (infoErr) {
-                console.warn("[SoundscapeService] Local file check error:", infoErr);
+                logger.warn("[SoundscapeService] Local file check error:", infoErr);
                 verifiedTrackIds.add(item.trackId);
               }
             }
@@ -944,7 +945,7 @@ class SoundscapeService {
         this.state.cachedTrackIds = Array.from(verifiedTrackIds);
       }
     } catch (err) {
-      console.warn('[SoundscapeService] Cache manifest load warning:', err);
+      logger.warn('[SoundscapeService] Cache manifest load warning:', err);
     }
   }
 
@@ -963,7 +964,7 @@ class SoundscapeService {
       this.state.cachedTrackIds = uniqueTrackIds;
       this.notifyListeners();
     } catch (err) {
-      console.warn('[SoundscapeService] Cache manifest save error:', err);
+      logger.warn('[SoundscapeService] Cache manifest save error:', err);
     }
   }
 
@@ -1013,7 +1014,7 @@ class SoundscapeService {
         return entry.localUri;
       }
     } catch (uriErr) {
-      console.warn("[SoundscapeService] Local URI resolve warning:", uriErr);
+      logger.warn("[SoundscapeService] Local URI resolve warning:", uriErr);
       return entry.localUri;
     }
     return null;
@@ -1098,7 +1099,7 @@ class SoundscapeService {
             sizeBytes = fileInfo.size;
           }
         } catch (infoErr) {
-          console.warn("[SoundscapeService] Size query warning:", infoErr);
+          logger.warn("[SoundscapeService] Size query warning:", infoErr);
         }
       }
 
@@ -1119,7 +1120,7 @@ class SoundscapeService {
 
       return { success: true, bytes: sizeBytes };
     } catch (err: any) {
-      console.warn(`[SoundscapeService] Pre-cache fallback for ${trackId}:`, err);
+      logger.warn(`[SoundscapeService] Pre-cache fallback for ${trackId}:`, err);
       // Even if native download fails, retain fallback entry in manifest so zero-network mode works
       this.cacheManifest[`${trackId}_${mode}`] = {
         trackId,
@@ -1175,7 +1176,7 @@ class SoundscapeService {
         try {
           await FileSystem.deleteAsync(item.localUri, { idempotent: true });
         } catch (delErr) {
-          console.warn("[SoundscapeService] Cached file delete warning:", delErr);
+          logger.warn("[SoundscapeService] Cached file delete warning:", delErr);
         }
       }
       delete this.cacheManifest[key];
@@ -1193,7 +1194,7 @@ class SoundscapeService {
         await FileSystem.deleteAsync(this.cacheDirectory, { idempotent: true });
         await this.initCacheDirectory();
       } catch (err) {
-        console.warn('[SoundscapeService] Clear cache directory notice:', err);
+        logger.warn('[SoundscapeService] Clear cache directory notice:', err);
       }
     }
     this.cacheManifest = {};
@@ -1254,7 +1255,7 @@ class SoundscapeService {
         }).catch(() => {});
       }
     } catch (notifErr) {
-      console.warn("[SoundscapeService] Notification schedule fallback:", notifErr);
+      logger.warn("[SoundscapeService] Notification schedule fallback:", notifErr);
     }
   }
 
@@ -1280,7 +1281,7 @@ class SoundscapeService {
       try {
         listener(currentState);
       } catch (err) {
-        console.error('[SoundscapeService] Listener error:', err);
+        logger.error('[SoundscapeService] Listener error:', err);
       }
     });
   }

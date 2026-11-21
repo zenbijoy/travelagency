@@ -1,4 +1,4 @@
-import * as Haptics from "expo-haptics";
+﻿import * as Haptics from "expo-haptics";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   ActivityIndicator,
@@ -70,266 +70,50 @@ import { TripTemplateItem } from "../services/trip/tripTemplates";
 import { useSplitBillStore } from "../store/splitBillStore";
 import { RTLIcon } from "../components/ui";
 
-// ─── Domain Constants & Configurations ────────────────────────────────────────
-
-const USD_TO_BDT_RATE = 120;
-const GENERATION_TIMEOUT_MS = 15000;
-const TRIVIA_INTERVAL_MS = 2500;
-
-export const formatCurrency = (amount: number, currency: Currency): string => {
-  const safeAmount = isNaN(amount) ? 0 : Math.round(amount);
-  return currency === "BDT" ? `৳${safeAmount.toLocaleString()}` : `$${safeAmount.toLocaleString()}`;
-};
-
-interface DestinationItem {
-  name: string;
-  country: string;
-  tag: string;
-  icon: keyof typeof Ionicons.glyphMap;
-}
-
-const DESTINATION_CATALOG: DestinationItem[] = [
-  // Bangladesh Local Destinations
-  { name: "Cox's Bazar", country: "Bangladesh", tag: "Beach & Waves", icon: "water-outline" },
-  { name: "Sylhet", country: "Bangladesh", tag: "Tea & Waterfalls", icon: "leaf-outline" },
-  { name: "Sreemangal", country: "Bangladesh", tag: "Rainforest & Birds", icon: "leaf-outline" },
-  { name: "Bandarban", country: "Bangladesh", tag: "Hills & Clouds", icon: "trail-sign-outline" },
-  { name: "Rangamati", country: "Bangladesh", tag: "Lake & Culture", icon: "boat-outline" },
-  { name: "Sajek Valley", country: "Bangladesh", tag: "Cloud Haven", icon: "cloudy-outline" },
-  { name: "Saint Martin", country: "Bangladesh", tag: "Coral Island", icon: "sunny-outline" },
-  { name: "Kuakata", country: "Bangladesh", tag: "Sunrise & Sunset", icon: "sunny-outline" },
-  { name: "Sundarbans", country: "Bangladesh", tag: "Mangrove & Tiger", icon: "footsteps-outline" },
-  { name: "Dhaka", country: "Bangladesh", tag: "Heritage & Food", icon: "business-outline" },
-  { name: "Chittagong", country: "Bangladesh", tag: "Port & Hills", icon: "boat-outline" },
-  // International Popular Destinations
-  { name: "Bali", country: "Indonesia", tag: "Tropical Island", icon: "sunny-outline" },
-  { name: "Tokyo", country: "Japan", tag: "Futuristic & Culture", icon: "sparkles-outline" },
-  { name: "Bangkok", country: "Thailand", tag: "Nightlife & Temples", icon: "restaurant-outline" },
-  { name: "Dubai", country: "UAE", tag: "Skyline & Desert", icon: "diamond-outline" },
-  { name: "Singapore", country: "Singapore", tag: "Garden City", icon: "leaf-outline" },
-  { name: "Paris", country: "France", tag: "Art & Romance", icon: "heart-outline" },
-  { name: "Istanbul", country: "Turkey", tag: "Eurasia Crossroads", icon: "color-palette-outline" },
-  { name: "Rome", country: "Italy", tag: "Historic Wonders", icon: "book-outline" },
-  { name: "Kuala Lumpur", country: "Malaysia", tag: "Metropolis & Food", icon: "business-outline" },
-  { name: "Kathmandu", country: "Nepal", tag: "Himalayan Vistas", icon: "trail-sign-outline" },
-];
-
-const ORIGIN_SUGGESTIONS = [
-  "Dhaka",
-  "Chittagong",
-  "Sylhet",
-  "Cox's Bazar",
-  "Rajshahi",
-  "Khulna",
-  "Barisal",
-  "Rangpur",
-];
-
-const DURATION_PRESETS = [
-  { label: "3 Days", days: 3, subtitle: "Weekend Getaway" },
-  { label: "5 Days", days: 5, subtitle: "Classic Tour" },
-  { label: "7 Days", days: 7, subtitle: "1-Week Explorer" },
-  { label: "10 Days", days: 10, subtitle: "Deep Discovery" },
-  { label: "14 Days", days: 14, subtitle: "Grand Voyage" },
-];
-
-interface TravelStyleConfig {
-  id: TravelStyle;
-  label: string;
-  desc: string;
-  suggestedGuests: number;
-  icon: keyof typeof Ionicons.glyphMap;
-}
-
-const TRAVEL_STYLES: TravelStyleConfig[] = [
-  {
-    id: "backpacker",
-    label: "Backpacker",
-    desc: "Hostels, street eats & public transit",
-    suggestedGuests: 1,
-    icon: "bag-outline",
-  },
-  {
-    id: "solo",
-    label: "Solo Explorer",
-    desc: "Freedom, local immersion & photography",
-    suggestedGuests: 1,
-    icon: "compass-outline",
-  },
-  {
-    id: "couple",
-    label: "Couple Getaway",
-    desc: "Romantic dining, scenic views & sunsets",
-    suggestedGuests: 2,
-    icon: "heart-outline",
-  },
-  {
-    id: "family",
-    label: "Family Vacation",
-    desc: "Kid-friendly pacing & comfortable stays",
-    suggestedGuests: 4,
-    icon: "people-outline",
-  },
-  {
-    id: "luxury",
-    label: "Luxury Escape",
-    desc: "5-star resorts, private transit & fine dining",
-    suggestedGuests: 2,
-    icon: "diamond-outline",
-  },
-];
-
-interface BudgetTierConfig {
-  id: BudgetLevel;
-  label: string;
-  dailyRateBdt: number;
-  dailyRateUsd: number;
-  tagline: string;
-}
-
-const BUDGET_TIERS: BudgetTierConfig[] = [
-  {
-    id: "budget",
-    label: "Budget",
-    dailyRateBdt: 2500,
-    dailyRateUsd: 25,
-    tagline: "Essential & savvy",
-  },
-  {
-    id: "moderate",
-    label: "Moderate",
-    dailyRateBdt: 6000,
-    dailyRateUsd: 60,
-    tagline: "Comfort & balanced",
-  },
-  {
-    id: "luxury",
-    label: "Luxury",
-    dailyRateBdt: 15000,
-    dailyRateUsd: 150,
-    tagline: "Premium & lavish",
-  },
-  {
-    id: "custom",
-    label: "Custom",
-    dailyRateBdt: 7000,
-    dailyRateUsd: 70,
-    tagline: "Tailored amount",
-  },
-];
-
-const INTEREST_OPTIONS = [
-  { label: "Beach & Coast", icon: "water-outline" },
-  { label: "Hiking & Nature", icon: "leaf-outline" },
-  { label: "Authentic Food", icon: "restaurant-outline" },
-  { label: "Culture & History", icon: "color-palette-outline" },
-  { label: "Photography", icon: "camera-outline" },
-  { label: "Local Shopping", icon: "cart-outline" },
-  { label: "Wellness & Spa", icon: "flower-outline" },
-  { label: "Nightlife & Cafes", icon: "wine-outline" },
-  { label: "Water Sports", icon: "boat-outline" },
-  { label: "Hidden Gems", icon: "sparkles-outline" },
-];
-
-const TRAVEL_TRIVIA = [
-  {
-    category: "NATURAL WONDER",
-    icon: "water-outline",
-    fact: "Cox's Bazar in Bangladesh boasts the longest unbroken natural sand sea beach on Earth, extending over 120 km (75 miles) along the Bay of Bengal.",
-  },
-  {
-    category: "TEA HERITAGE",
-    icon: "leaf-outline",
-    fact: "Sylhet's rolling emerald hills host over 150 tea estates, home to the legendary seven-layer tea served at Nilkantha Tea Cabin in Sreemangal.",
-  },
-  {
-    category: "MOUNTAIN SECRET",
-    icon: "trail-sign-outline",
-    fact: "Bandarban's Nilgiri and Keokradong peaks allow early risers to stand above a majestic blanket of clouds as the morning sun crests the horizon.",
-  },
-  {
-    category: "CULINARY TRADITION",
-    icon: "restaurant-outline",
-    fact: "Old Dhaka (Puran Dhaka) is celebrated worldwide for heritage mutton kacchi biryani, slow-baked bakarkhani bread, and centuries-old spice bazaars.",
-  },
-  {
-    category: "CORAL HAVEN",
-    icon: "sunny-outline",
-    fact: "Saint Martin's Island (Narikel Jinjira) is Bangladesh's sole coral reef island, renowned for tranquil coconut groves, fresh green coconuts, and crystal lagoons.",
-  },
-  {
-    category: "BUDGETING SCIENCE",
-    icon: "pie-chart-outline",
-    fact: "Our 40/30/20/10 formula allocates 40% for hotel comfort, 30% for seamless transit, 20% for culinary gems, and 10% for bucket-list experiences.",
-  },
-  {
-    category: "TRANSIT ICON",
-    icon: "train-outline",
-    fact: "Tokyo's Shinjuku station is the world's busiest transportation hub, with more than 3.5 million commuters passing through its 200+ exits daily.",
-  },
-  {
-    category: "PACKING PRO-TIP",
-    icon: "bag-check-outline",
-    fact: "Compression packing cubes and rolled clothing can reduce luggage volume by up to 40% while preventing creases on travel shirts.",
-  },
-];
-
-// ─── Defensive LLM Caller Adapter ───────────────────────────────────────────
-
-const tripPlanner = {
-  async generateItinerary(
-    request: TripPlannerEngineRequest,
-    options?: { signal?: AbortSignal }
-  ): Promise<string> {
-    if (options?.signal?.aborted) {
-      throw new DOMException("The request was aborted", "AbortError");
-    }
-
-    try {
-      const { systemPrompt, userPrompt } = buildTripPlannerEnginePrompt(request);
-      const completion = await llmProviderRegistry.executeWithFallback({
-        systemPrompt,
-        userPrompt,
-        temperature: 0.2,
-        abortSignal: options?.signal,
-        responseMimeType: "application/json",
-      });
-      return completion.text;
-    } catch (err: any) {
-      if (err.name === "AbortError" || options?.signal?.aborted) {
-        throw err;
-      }
-      try {
-        const result = await tripPlannerEngine.planTrip(request);
-        return JSON.stringify(result.plan);
-      } catch {
-        const fallback = getCuratedFallbackItinerary(request);
-        return JSON.stringify(fallback);
-      }
-    }
-  },
-};
-
-// ─── Editable Activity Context Interface ─────────────────────────────────────
-
-interface EditingActivityContext {
-  dayIndex: number;
-  activityIndex: number;
-  time: string;
-  activity: string;
-  location: string;
-  estimatedCost: string;
-  duration: string;
-  notes: string;
-}
-
+export {
+  USD_TO_BDT_RATE,
+  GENERATION_TIMEOUT_MS,
+  TRIVIA_INTERVAL_MS,
+  formatCurrency,
+  DestinationItem,
+  DESTINATION_CATALOG,
+  ORIGIN_SUGGESTIONS,
+  DURATION_PRESETS,
+  TravelStyleConfig,
+  TRAVEL_STYLES,
+  BudgetTierConfig,
+  BUDGET_TIERS,
+  INTEREST_OPTIONS,
+  TRAVEL_TRIVIA,
+  tripPlanner,
+  EditingActivityContext,
+} from "../data/tripPlannerData";
+import {
+  USD_TO_BDT_RATE,
+  GENERATION_TIMEOUT_MS,
+  TRIVIA_INTERVAL_MS,
+  formatCurrency,
+  DestinationItem,
+  DESTINATION_CATALOG,
+  ORIGIN_SUGGESTIONS,
+  DURATION_PRESETS,
+  TravelStyleConfig,
+  TRAVEL_STYLES,
+  BudgetTierConfig,
+  BUDGET_TIERS,
+  INTEREST_OPTIONS,
+  TRAVEL_TRIVIA,
+  tripPlanner,
+  EditingActivityContext,
+} from "../data/tripPlannerData";
+import { styles } from "../styles/tripPlannerStyles";
 export function TripPlannerScreen() {
   const [lastDeletedActivity, setLastDeletedActivity] = useState<any>(null);
   const handleMoveActivity = (..._args: any[]) => {};
   const handleUndoDeleteActivity = () => {};
   const insets = useSafeAreaInsets();
 
-  // ─── Questionnaire Wizard State ─────────────────────────────────────────────
+  // â”€â”€â”€ Questionnaire Wizard State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [currentStep, setCurrentStep] = useState<number>(1);
   const totalWizardSteps = 5;
 
@@ -362,16 +146,16 @@ export function TripPlannerScreen() {
   ]);
   const [customNotes, setCustomNotes] = useState<string>("");
 
-  // ─── Generation & Results State ─────────────────────────────────────────────
+  // â”€â”€â”€ Generation & Results State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [triviaIndex, setTriviaIndex] = useState<number>(0);
   const [generatedPlan, setGeneratedPlan] = useState<TripPlan | null>(null);
   const [expandedDay, setExpandedDay] = useState<number | null>(1);
 
-  // ─── Activity Editing State ─────────────────────────────────────────────────
+  // â”€â”€â”€ Activity Editing State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [editingActivity, setEditingActivity] = useState<EditingActivityContext | null>(null);
 
-  // ─── Saved Plans & Persistence State ─────────────────────────────────────────
+  // â”€â”€â”€ Saved Plans & Persistence State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const SAVED_PLANS_KEY = "@shopno_saved_plans";
   const [savedPlans, setSavedPlans] = useState<TripPlan[]>([]);
   const [showSavedModal, setShowSavedModal] = useState<boolean>(false);
@@ -386,7 +170,7 @@ export function TripPlannerScreen() {
   } | null>(null);
   const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ─── Weather Adaptive Planner & Golden Hour State ───────────────────────────
+  // â”€â”€â”€ Weather Adaptive Planner & Golden Hour State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [weatherAlert, setWeatherAlert] = useState<WeatherAlertInfo | null>(null);
   const [activeOptimization, setActiveOptimization] = useState<WeatherOptimizationResult | null>(null);
   const [isWeatherOptimized, setIsWeatherOptimized] = useState<boolean>(false);
@@ -394,17 +178,17 @@ export function TripPlannerScreen() {
   const [showWeatherDetailsModal, setShowWeatherDetailsModal] = useState<boolean>(false);
   const [dismissedAlertIds, setDismissedAlertIds] = useState<string[]>([]);
 
-  // ─── Interactive Packing Checklist State ────────────────────────────────────
+  // â”€â”€â”€ Interactive Packing Checklist State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [packedItems, setPackedItems] = useState<string[]>([]);
   const [customPackingInput, setCustomPackingInput] = useState<string>("");
 
-  // ─── Interactive AI Concierge Q&A State ─────────────────────────────────────
+  // â”€â”€â”€ Interactive AI Concierge Q&A State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [conciergeQuestion, setConciergeQuestion] = useState<string>("");
   const [conciergeAnswer, setConciergeAnswer] = useState<string | null>(null);
   const [conciergeSuggestions, setConciergeSuggestions] = useState<string[]>([]);
   const [isAskingConcierge, setIsAskingConcierge] = useState<boolean>(false);
 
-  // ─── Split Bill & Share Modals State ─────────────────────────────────────────
+  // â”€â”€â”€ Split Bill & Share Modals State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [showSplitBillModal, setShowSplitBillModal] = useState<boolean>(false);
   const [showShareExportModal, setShowShareExportModal] = useState<boolean>(false);
 
@@ -419,7 +203,7 @@ export function TripPlannerScreen() {
   const totalSpent = useMemo(() => getTotalSpending(), [splitExpenses]);
   const settlementDebts = useMemo(() => getSettlementDebts(), [splitExpenses, splitMembers]);
 
-  // ─── Quick-Start Template Handlers ──────────────────────────────────────────
+  // â”€â”€â”€ Quick-Start Template Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleApplyTemplate = (template: TripTemplateItem) => {
     setOrigin("Dhaka");
     setDestination(template.destination);
@@ -437,8 +221,8 @@ export function TripPlannerScreen() {
     useSplitBillStore.getState().setTripName(plan.title);
 
     showLocalizedAlert(
-      "টেমপ্লেট সফলভাবে লোড হয়েছে",
-      `"${template.title}" ট্রিপ প্ল্যানটি এক ট্যাপে কপি ও লোড করা হয়েছে! নিচে সম্পূর্ণ শিডিউল দেখুন।`
+      "à¦Ÿà§‡à¦®à¦ªà§à¦²à§‡à¦Ÿ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦²à§‹à¦¡ à¦¹à§Ÿà§‡à¦›à§‡",
+      `"${template.title}" à¦Ÿà§à¦°à¦¿à¦ª à¦ªà§à¦²à§à¦¯à¦¾à¦¨à¦Ÿà¦¿ à¦à¦• à¦Ÿà§à¦¯à¦¾à¦ªà§‡ à¦•à¦ªà¦¿ à¦“ à¦²à§‹à¦¡ à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡! à¦¨à¦¿à¦šà§‡ à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦¶à¦¿à¦¡à¦¿à¦‰à¦² à¦¦à§‡à¦–à§à¦¨à¥¤`
     );
   };
 
@@ -453,12 +237,12 @@ export function TripPlannerScreen() {
     setCurrentStep(1);
 
     showLocalizedAlert(
-      "তথ্য কপি করা হয়েছে",
-      `"${template.title}" এর গন্তব্য, বাজেট ও দিন সংখ্যা ফর্মে পূরণ করা হয়েছে। আপনার পছন্দ অনুযায়ী পরিবর্তন করুন।`
+      "à¦¤à¦¥à§à¦¯ à¦•à¦ªà¦¿ à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡",
+      `"${template.title}" à¦à¦° à¦—à¦¨à§à¦¤à¦¬à§à¦¯, à¦¬à¦¾à¦œà§‡à¦Ÿ à¦“ à¦¦à¦¿à¦¨ à¦¸à¦‚à¦–à§à¦¯à¦¾ à¦«à¦°à§à¦®à§‡ à¦ªà§‚à¦°à¦£ à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡à¥¤ à¦†à¦ªà¦¨à¦¾à¦° à¦ªà¦›à¦¨à§à¦¦ à¦…à¦¨à§à¦¯à¦¾à§Ÿà§€ à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦•à¦°à§à¦¨à¥¤`
     );
   };
 
-  // ─── Animation References ───────────────────────────────────────────────────
+  // â”€â”€â”€ Animation References â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const progressAnim = useRef(new Animated.Value(0)).current;
   const triviaFadeAnim = useRef(new Animated.Value(1)).current;
   const shimmerAnim = useRef(new Animated.Value(0.3)).current;
@@ -496,7 +280,7 @@ export function TripPlannerScreen() {
     setIsCurrentPlanSaved(found);
   }, [generatedPlan, savedPlans]);
 
-  // ─── Weather Adaptive Planner Hooks ─────────────────────────────────────────
+  // â”€â”€â”€ Weather Adaptive Planner Hooks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Evaluates real-time weather and solar golden hours whenever a plan is loaded or generated
   useEffect(() => {
     if (!generatedPlan || !generatedPlan.days || generatedPlan.days.length === 0) {
@@ -537,7 +321,7 @@ export function TripPlannerScreen() {
     }
   }, [generatedPlan, startDate, dismissedAlertIds]);
 
-  // ─── Weather Optimization Handlers ──────────────────────────────────────────
+  // â”€â”€â”€ Weather Optimization Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   // Requirement 3: "Accept" Button
   const handleAcceptWeatherOptimization = () => {
@@ -561,13 +345,13 @@ export function TripPlannerScreen() {
     }
 
     showLocalizedAlert(
-      "Schedule Weather-Optimized! ☀️",
+      "Schedule Weather-Optimized! â˜€ï¸",
       "Your itinerary has been automatically restructured to protect against rain and capture peak golden hour lighting.\n\n" +
-        `• ${activeOptimization.alert?.outdoorActivityAffected || "Outdoor activity"} swapped for ${
+        `â€¢ ${activeOptimization.alert?.outdoorActivityAffected || "Outdoor activity"} swapped for ${
           activeOptimization.alert?.replacementActivity || "indoor experience"
         }\n` +
-        "• Photography spot visits aligned with solar position tables\n" +
-        "• Synchronized with checkout booking draft.",
+        "â€¢ Photography spot visits aligned with solar position tables\n" +
+        "â€¢ Synchronized with checkout booking draft.",
       [{ text: "Great!" }]
     );
   };
@@ -720,7 +504,7 @@ export function TripPlannerScreen() {
     );
   };
 
-  // ─── Requirement 2: Defensive Generation Pipeline ───────────────────────────
+  // â”€â”€â”€ Requirement 2: Defensive Generation Pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleGenerateItinerary = async () => {
     if (!destination.trim()) {
@@ -793,7 +577,7 @@ export function TripPlannerScreen() {
     }
   };
 
-  // ─── Requirement 3: Interactive Results & Activity Editing ───────────────────
+  // â”€â”€â”€ Requirement 3: Interactive Results & Activity Editing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleOpenEditActivity = (dayIndex: number, actIndex: number) => {
     if (!generatedPlan) return;
@@ -931,7 +715,7 @@ export function TripPlannerScreen() {
     if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
   };
 
-  // ─── Requirement 4: One-Tap "Book Entire Itinerary" Action ───────────────────
+  // â”€â”€â”€ Requirement 4: One-Tap "Book Entire Itinerary" Action â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleBookEntireItinerary = () => {
     if (!generatedPlan) return;
@@ -980,7 +764,7 @@ export function TripPlannerScreen() {
       .flatMap((d) =>
         d.activities.map(
           (a) =>
-            `• [Day ${d.day} ${a.time}] ${a.activity} (${a.location})${
+            `â€¢ [Day ${d.day} ${a.time}] ${a.activity} (${a.location})${
               a.estimatedCost ? ` - ${formatCurrency(a.estimatedCost, currencyCode)}` : ""
             }`
         )
@@ -991,7 +775,7 @@ export function TripPlannerScreen() {
       .flatMap((d) =>
         (d.meals || []).map(
           (m) =>
-            `• [Day ${d.day} ${m.type.toUpperCase()}] ${m.suggestion}${
+            `â€¢ [Day ${d.day} ${m.type.toUpperCase()}] ${m.suggestion}${
               m.restaurant ? ` at ${m.restaurant}` : ""
             }`
         )
@@ -999,15 +783,15 @@ export function TripPlannerScreen() {
       .join("\n");
 
     const packageSummary =
-      `✈️ COMPLETE AI ITINERARY PACKAGE: ${generatedPlan.title}\n` +
-      `📍 Destination: ${generatedPlan.destination} (Departure: ${origin})\n` +
-      `📅 Duration: ${generatedPlan.durationDays} Days (${formattedDateRange}) | Guests: ${travelers}\n` +
-      `💰 Budget: ${formatCurrency(baseCost, currencyCode)}\n\n` +
-      `🏨 ACCOMMODATIONS:\n${
-        hotelRooms.map((r) => `• ${r.roomType}`).join("\n") || "Centrally located quality hotel"
+      `âœˆï¸ COMPLETE AI ITINERARY PACKAGE: ${generatedPlan.title}\n` +
+      `ðŸ“ Destination: ${generatedPlan.destination} (Departure: ${origin})\n` +
+      `ðŸ“… Duration: ${generatedPlan.durationDays} Days (${formattedDateRange}) | Guests: ${travelers}\n` +
+      `ðŸ’° Budget: ${formatCurrency(baseCost, currencyCode)}\n\n` +
+      `ðŸ¨ ACCOMMODATIONS:\n${
+        hotelRooms.map((r) => `â€¢ ${r.roomType}`).join("\n") || "Centrally located quality hotel"
       }\n\n` +
-      `🎟️ CURATED TOURS & ACTIVITIES:\n${activityLines}\n\n` +
-      `🍲 RECOMMENDED DINING:\n${diningLines}`;
+      `ðŸŽŸï¸ CURATED TOURS & ACTIVITIES:\n${activityLines}\n\n` +
+      `ðŸ² RECOMMENDED DINING:\n${diningLines}`;
 
     bookingStore.setNotes(packageSummary);
     if (typeof (bookingStore as any).syncItineraryPlan === "function") {
@@ -1017,7 +801,7 @@ export function TripPlannerScreen() {
 
     // 4. Confirmation dialog and checkout navigation
     showLocalizedAlert(
-      "Entire Itinerary Packaged! 🎒",
+      "Entire Itinerary Packaged! ðŸŽ’",
       `All ${generatedPlan.durationDays} days of accommodations, ${generatedPlan.days.reduce(
         (acc, d) => acc + d.activities.length,
         0
@@ -1057,12 +841,12 @@ export function TripPlannerScreen() {
     if (!generatedPlan) return;
     try {
       const summaryText =
-        `✈️ ${generatedPlan.title}\n\n` +
-        `📍 Destination: ${generatedPlan.destination} (Starting: ${origin})\n` +
-        `📅 Dates: ${formattedDateRange} (${generatedPlan.durationDays} Days)\n` +
-        `👥 Travelers: ${travelers} (${travelStyle.toUpperCase()})\n` +
-        `💰 Total Cost: ${formatCurrency(generatedPlan.totalEstimatedCost, generatedPlan.currency)}\n\n` +
-        `🏨 Hotel: ${generatedPlan.budget?.hotel?.percentage}% | 🚆 Transport: ${generatedPlan.budget?.transport?.percentage}% | 🍲 Food: ${generatedPlan.budget?.food?.percentage}% | 🎟️ Activities: ${generatedPlan.budget?.activities?.percentage}%\n\n` +
+        `âœˆï¸ ${generatedPlan.title}\n\n` +
+        `ðŸ“ Destination: ${generatedPlan.destination} (Starting: ${origin})\n` +
+        `ðŸ“… Dates: ${formattedDateRange} (${generatedPlan.durationDays} Days)\n` +
+        `ðŸ‘¥ Travelers: ${travelers} (${travelStyle.toUpperCase()})\n` +
+        `ðŸ’° Total Cost: ${formatCurrency(generatedPlan.totalEstimatedCost, generatedPlan.currency)}\n\n` +
+        `ðŸ¨ Hotel: ${generatedPlan.budget?.hotel?.percentage}% | ðŸš† Transport: ${generatedPlan.budget?.transport?.percentage}% | ðŸ² Food: ${generatedPlan.budget?.food?.percentage}% | ðŸŽŸï¸ Activities: ${generatedPlan.budget?.activities?.percentage}%\n\n` +
         `Created with AI Trip Planner.`;
 
       await Share.share({
@@ -1105,7 +889,7 @@ export function TripPlannerScreen() {
       });
   };
 
-  // ─── Persistence & Saved Plans Handlers ─────────────────────────────────────
+  // â”€â”€â”€ Persistence & Saved Plans Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleToggleSavePlan = async () => {
     if (!generatedPlan) return;
     try {
@@ -1126,7 +910,7 @@ export function TripPlannerScreen() {
       } else {
         nextList = [planToPersist, ...savedPlans.filter((p) => p.id !== planId && p.title !== generatedPlan.title)];
         setIsCurrentPlanSaved(true);
-        showLocalizedAlert("Saved! 🔖", "Itinerary saved to your device. You can access it anytime from the top bar.");
+        showLocalizedAlert("Saved! ðŸ”–", "Itinerary saved to your device. You can access it anytime from the top bar.");
       }
       setSavedPlans(nextList);
       await AsyncStorage.setItem(SAVED_PLANS_KEY, JSON.stringify(nextList));
@@ -1157,7 +941,7 @@ export function TripPlannerScreen() {
     setConciergeAnswer(null);
   };
 
-  // ─── Interactive Packing Checklist Handlers ─────────────────────────────────
+  // â”€â”€â”€ Interactive Packing Checklist Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const effectivePackingList = useMemo(() => {
     if (generatedPlan?.packingChecklist && generatedPlan.packingChecklist.length > 0) {
       return generatedPlan.packingChecklist;
@@ -1193,7 +977,7 @@ export function TripPlannerScreen() {
     setCustomPackingInput("");
   };
 
-  // ─── Interactive AI Concierge Q&A Handlers ──────────────────────────────────
+  // â”€â”€â”€ Interactive AI Concierge Q&A Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleAskConcierge = async (presetQuestion?: string) => {
     const query = (presetQuestion || conciergeQuestion).trim();
     if (!query || isAskingConcierge || !generatedPlan) return;
@@ -1255,7 +1039,7 @@ export function TripPlannerScreen() {
         style={styles.headerBackgroundGradient}
       />
 
-      {/* ─── Top Header Bar ───────────────────────────────────────────────── */}
+      {/* â”€â”€â”€ Top Header Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <View style={styles.topHeader}>
         <TouchableOpacity
           style={styles.iconCircleButton}
@@ -1358,7 +1142,7 @@ export function TripPlannerScreen() {
         </View>
       </View>
 
-      {/* ─── MAIN CONTENT SCROLLVIEW ──────────────────────────────────────── */}
+      {/* â”€â”€â”€ MAIN CONTENT SCROLLVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 110 }]}
@@ -1413,7 +1197,7 @@ export function TripPlannerScreen() {
               <View style={styles.generationStatusRow}>
                 <ActivityIndicator size="small" color="#2563EB" />
                 <Text style={styles.generationStatusText}>
-                  Synthesizing {durationDays}-Day itinerary for {destination} • {formatCurrency(totalBudget, currency)}
+                  Synthesizing {durationDays}-Day itinerary for {destination} â€¢ {formatCurrency(totalBudget, currency)}
                 </Text>
               </View>
             </View>
@@ -1429,7 +1213,7 @@ export function TripPlannerScreen() {
         ) : generatedPlan ? (
           /* VIEW B: INTERACTIVE ITINERARY RESULT VIEW */
           <View style={styles.resultContainer}>
-            {/* ─── Top Budget Tracker Bar ("বাজেট ৳৩০,০০০ · খরচ ৳১৮,২০০") ─── */}
+            {/* â”€â”€â”€ Top Budget Tracker Bar ("à¦¬à¦¾à¦œà§‡à¦Ÿ à§³à§©à§¦,à§¦à§¦à§¦ Â· à¦–à¦°à¦š à§³à§§à§®,à§¨à§¦à§¦") â”€â”€â”€ */}
             <TripTopBudgetBar
               plannedBudget={generatedPlan.totalEstimatedCost}
               totalSpent={totalSpent}
@@ -1437,7 +1221,7 @@ export function TripPlannerScreen() {
               onAddExpensePress={() => setShowSplitBillModal(true)}
               onSplitBillPress={() => setShowSplitBillModal(true)}
             />
-            {/* ─── Requirement 3: Proactive Traveler Alert Suggestion Banner ─── */}
+            {/* â”€â”€â”€ Requirement 3: Proactive Traveler Alert Suggestion Banner â”€â”€â”€ */}
             {weatherAlert && (
               <View style={styles.weatherAlertBannerWrap}>
                 <LinearGradient
@@ -1571,7 +1355,7 @@ export function TripPlannerScreen() {
                 </View>
                 <View style={[styles.heroPill, styles.heroPillLight]}>
                   <Ionicons name="people-outline" size={12} color="#FFFFFF" />
-                  <Text style={styles.heroPillText}>{travelers} Guests • {generatedPlan.travelStyle.toUpperCase()}</Text>
+                  <Text style={styles.heroPillText}>{travelers} Guests â€¢ {generatedPlan.travelStyle.toUpperCase()}</Text>
                 </View>
               </View>
 
@@ -1607,8 +1391,8 @@ export function TripPlannerScreen() {
               </View>
             </LinearGradient>
 
-            {/* ─── Real-Time Meteorological & Weather Risk Widget ─── */}
-            {/* ─── Friends & Split-Bill Hub Card ─────────────────────────── */}
+            {/* â”€â”€â”€ Real-Time Meteorological & Weather Risk Widget â”€â”€â”€ */}
+            {/* â”€â”€â”€ Friends & Split-Bill Hub Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <View style={styles.friendsSplitHubCard}>
               <View style={styles.friendsSplitHeader}>
                 <View style={styles.friendsSplitLeft}>
@@ -1616,9 +1400,9 @@ export function TripPlannerScreen() {
                     <Ionicons name="people" size={20} color="#2563EB" />
                   </View>
                   <View>
-                    <Text style={styles.friendsSplitTitle}>বন্ধুদের সাথে পরিকল্পনা ও বিল ভাগ</Text>
+                    <Text style={styles.friendsSplitTitle}>à¦¬à¦¨à§à¦§à§à¦¦à§‡à¦° à¦¸à¦¾à¦¥à§‡ à¦ªà¦°à¦¿à¦•à¦²à§à¦ªà¦¨à¦¾ à¦“ à¦¬à¦¿à¦² à¦­à¦¾à¦—</Text>
                     <Text style={styles.friendsSplitSub}>
-                      {splitMembers.length} জন বন্ধু যুক্ত · মোট খরচ: {formatCurrency(totalSpent, generatedPlan.currency)}
+                      {splitMembers.length} à¦œà¦¨ à¦¬à¦¨à§à¦§à§ à¦¯à§à¦•à§à¦¤ Â· à¦®à§‹à¦Ÿ à¦–à¦°à¦š: {formatCurrency(totalSpent, generatedPlan.currency)}
                     </Text>
                   </View>
                 </View>
@@ -1627,7 +1411,7 @@ export function TripPlannerScreen() {
                   style={styles.openSplitModalBtn}
                   onPress={() => setShowSplitBillModal(true)}
                 >
-                  <Text style={styles.openSplitModalBtnText}>হিসাব দেখুন</Text>
+                  <Text style={styles.openSplitModalBtnText}>à¦¹à¦¿à¦¸à¦¾à¦¬ à¦¦à§‡à¦–à§à¦¨</Text>
                   <RTLIcon name="chevron-forward" size={14} color="#2563EB" />
                 </TouchableOpacity>
               </View>
@@ -1641,7 +1425,7 @@ export function TripPlannerScreen() {
                         <Text style={styles.miniAvatarText}>{m.name.charAt(0).toUpperCase()}</Text>
                       </View>
                       <Text style={styles.memberChipName} numberOfLines={1}>
-                        {m.name} {m.isCurrentUser ? "(আপনি)" : ""}
+                        {m.name} {m.isCurrentUser ? "(à¦†à¦ªà¦¨à¦¿)" : ""}
                       </Text>
                     </View>
                   ))}
@@ -1650,7 +1434,7 @@ export function TripPlannerScreen() {
                     onPress={() => setShowSplitBillModal(true)}
                   >
                     <Ionicons name="person-add-outline" size={14} color="#2563EB" />
-                    <Text style={styles.addFriendQuickText}>+ বন্ধু যোগ</Text>
+                    <Text style={styles.addFriendQuickText}>+ à¦¬à¦¨à§à¦§à§ à¦¯à§‹à¦—</Text>
                   </TouchableOpacity>
                 </ScrollView>
               </View>
@@ -1660,8 +1444,8 @@ export function TripPlannerScreen() {
                 <View style={styles.quickDebtsPreview}>
                   <Ionicons name="swap-horizontal" size={13} color="#15803D" />
                   <Text style={styles.quickDebtsText} numberOfLines={1}>
-                    {settlementDebts[0].fromMemberName} ➔ {settlementDebts[0].toMemberName} কে {formatCurrency(settlementDebts[0].amount, generatedPlan.currency)} দেবে
-                    {settlementDebts.length > 1 ? ` (+আরও ${settlementDebts.length - 1} টি)` : ""}
+                    {settlementDebts[0].fromMemberName} âž” {settlementDebts[0].toMemberName} à¦•à§‡ {formatCurrency(settlementDebts[0].amount, generatedPlan.currency)} à¦¦à§‡à¦¬à§‡
+                    {settlementDebts.length > 1 ? ` (+à¦†à¦°à¦“ ${settlementDebts.length - 1} à¦Ÿà¦¿)` : ""}
                   </Text>
                 </View>
               )}
@@ -1674,7 +1458,7 @@ export function TripPlannerScreen() {
               style={{ marginHorizontal: 16 }}
             />
 
-            {/* ─── Budget Distribution (40/30/20/10) ────────────────────────── */}
+            {/* â”€â”€â”€ Budget Distribution (40/30/20/10) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <View style={styles.budgetCard}>
               <View style={styles.sectionHeaderRow}>
                 <View style={styles.sectionHeaderLeft}>
@@ -1764,7 +1548,7 @@ export function TripPlannerScreen() {
               </View>
             </View>
 
-            {/* ─── Expandable Day-by-Day Cards with Editable Activities ─────── */}
+            {/* â”€â”€â”€ Expandable Day-by-Day Cards with Editable Activities â”€â”€â”€â”€â”€â”€â”€ */}
             <StickyHeader backgroundColor="#F8FAFC" elevation={2} style={{ paddingVertical: 10, paddingHorizontal: 4, marginHorizontal: -4 }}>
 <View style={styles.itineraryHeaderRow}>
               <View>
@@ -1823,13 +1607,13 @@ export function TripPlannerScreen() {
                             />
                             <Text style={styles.dayWeatherText}>
                               {activeOptimization?.weatherForecasts?.[dayIdx]?.maxPrecipitationProbability !== undefined
-                                ? `${activeOptimization.weatherForecasts[dayIdx].maxPrecipitationProbability}% বৃষ্টি`
-                                : "রৌদ্রোজ্জ্বল"}
+                                ? `${activeOptimization.weatherForecasts[dayIdx].maxPrecipitationProbability}% à¦¬à§ƒà¦·à§à¦Ÿà¦¿`
+                                : "à¦°à§Œà¦¦à§à¦°à§‹à¦œà§à¦œà§à¦¬à¦²"}
                             </Text>
                           </View>
                         </View>
                         <Text style={styles.daySubCountText}>
-                          {dayItem.activities?.length || 0} activities • {dayItem.meals?.length || 0} meal spots
+                          {dayItem.activities?.length || 0} activities â€¢ {dayItem.meals?.length || 0} meal spots
                         </Text>
                       </View>
                     </View>
@@ -1861,14 +1645,14 @@ export function TripPlannerScreen() {
                           updatedDays[dayIdx] = targetDay;
                           setGeneratedPlan({ ...generatedPlan, days: updatedDays });
                           showLocalizedAlert(
-                            "বিকল্প যুক্ত হয়েছে",
-                            `"${activity.activity}" সফলভাবে Day ${dayItem.day}-এর শিডিউলে যোগ করা হয়েছে।`
+                            "à¦¬à¦¿à¦•à¦²à§à¦ª à¦¯à§à¦•à§à¦¤ à¦¹à§Ÿà§‡à¦›à§‡",
+                            `"${activity.activity}" à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ Day ${dayItem.day}-à¦à¦° à¦¶à¦¿à¦¡à¦¿à¦‰à¦²à§‡ à¦¯à§‹à¦— à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡à¥¤`
                           );
                         }}
                       />
 
                       <View style={styles.subSectionHeaderRow}>
-                        <Text style={styles.subSectionTitle}>📍 Planned Schedule & Timelines</Text>
+                        <Text style={styles.subSectionTitle}>ðŸ“ Planned Schedule & Timelines</Text>
                         <TouchableOpacity
                           style={styles.addActivityHeaderBtn}
                           onPress={() => handleAddActivity(dayIdx)}
@@ -2019,7 +1803,7 @@ export function TripPlannerScreen() {
                       {/* Recommended Dining */}
                       {dayItem.meals && dayItem.meals.length > 0 && (
                         <View style={styles.mealsSection}>
-                          <Text style={styles.subSectionTitle}>🍲 Recommended Restaurants & Dining</Text>
+                          <Text style={styles.subSectionTitle}>ðŸ² Recommended Restaurants & Dining</Text>
                           <View style={styles.mealsList}>
                             {dayItem.meals.map((meal, mealIdx) => (
                               <View key={mealIdx} style={styles.mealItem}>
@@ -2032,7 +1816,7 @@ export function TripPlannerScreen() {
                                   <Text style={styles.mealSuggestion}>{meal.suggestion}</Text>
                                   {meal.restaurant && (
                                     <Text style={styles.mealRestaurant}>
-                                      🍴 {meal.restaurant}
+                                      ðŸ´ {meal.restaurant}
                                     </Text>
                                   )}
                                 </View>
@@ -2071,7 +1855,7 @@ export function TripPlannerScreen() {
                 </View>
                 {generatedPlan.tips.map((tip, idx) => (
                   <View key={`tip-${tip.slice(0, 15)}-${idx}`} style={styles.tipRow}>
-                    <Text style={styles.tipBullet}>•</Text>
+                    <Text style={styles.tipBullet}>â€¢</Text>
                     <Text style={styles.tipBodyText}>{tip}</Text>
                   </View>
                 ))}
@@ -2195,11 +1979,11 @@ export function TripPlannerScreen() {
                 contentContainerStyle={styles.conciergePillsScroll}
               >
                 {[
-                  `🌅 Best sunset spot?`,
-                  `🍽️ Must-try street food?`,
-                  `⚠️ Local safety & scam tips?`,
-                  `🚕 Best way to get around?`,
-                  `🧳 Dress code & etiquette?`,
+                  `ðŸŒ… Best sunset spot?`,
+                  `ðŸ½ï¸ Must-try street food?`,
+                  `âš ï¸ Local safety & scam tips?`,
+                  `ðŸš• Best way to get around?`,
+                  `ðŸ§³ Dress code & etiquette?`,
                 ].map((pill, pIdx) => (
                   <TouchableOpacity
                     key={pIdx}
@@ -2280,7 +2064,7 @@ export function TripPlannerScreen() {
         ) : (
           /* VIEW C: MULTI-STEP QUESTIONNAIRE WIZARD */
           <View style={styles.wizardContainer}>
-            {/* ─── Ready-made Curated Templates Banner ─── */}
+            {/* â”€â”€â”€ Ready-made Curated Templates Banner â”€â”€â”€ */}
             <TripTemplatesBanner
               onApplyTemplate={handleApplyTemplate}
               onCopyToForm={handleCopyToForm}
@@ -2571,7 +2355,7 @@ export function TripPlannerScreen() {
                           currency === "BDT" && styles.currencyPillTextActive,
                         ]}
                       >
-                        BDT (৳)
+                        BDT (à§³)
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -2614,7 +2398,7 @@ export function TripPlannerScreen() {
 
                 {/* Custom Budget Input */}
                 <View style={styles.totalBudgetInputBox}>
-                  <Text style={styles.currencySymbolText}>{currency === "BDT" ? "৳" : "$"}</Text>
+                  <Text style={styles.currencySymbolText}>{currency === "BDT" ? "à§³" : "$"}</Text>
                   <TextInput
                     style={styles.totalBudgetInput}
                     keyboardType="numeric"
@@ -2646,25 +2430,25 @@ export function TripPlannerScreen() {
                   </View>
 
                   <View style={styles.liveAllocRow}>
-                    <Text style={styles.liveAllocLabel}>🏨 Hotel (40%):</Text>
+                    <Text style={styles.liveAllocLabel}>ðŸ¨ Hotel (40%):</Text>
                     <Text style={styles.liveAllocValue}>
                       {formatCurrency(liveBudgetBreakdown.hotel.estimated, currency)}
                     </Text>
                   </View>
                   <View style={styles.liveAllocRow}>
-                    <Text style={styles.liveAllocLabel}>🚆 Transport (30%):</Text>
+                    <Text style={styles.liveAllocLabel}>ðŸš† Transport (30%):</Text>
                     <Text style={styles.liveAllocValue}>
                       {formatCurrency(liveBudgetBreakdown.transport.estimated, currency)}
                     </Text>
                   </View>
                   <View style={styles.liveAllocRow}>
-                    <Text style={styles.liveAllocLabel}>🍲 Food (20%):</Text>
+                    <Text style={styles.liveAllocLabel}>ðŸ² Food (20%):</Text>
                     <Text style={styles.liveAllocValue}>
                       {formatCurrency(liveBudgetBreakdown.food.estimated, currency)}
                     </Text>
                   </View>
                   <View style={styles.liveAllocRow}>
-                    <Text style={styles.liveAllocLabel}>🎟️ Activities (10%):</Text>
+                    <Text style={styles.liveAllocLabel}>ðŸŽŸï¸ Activities (10%):</Text>
                     <Text style={styles.liveAllocValue}>
                       {formatCurrency(liveBudgetBreakdown.activities.estimated, currency)}
                     </Text>
@@ -2733,7 +2517,7 @@ export function TripPlannerScreen() {
                     <Text style={styles.reviewBoxTitle}>Itinerary Blueprint</Text>
                   </View>
                   <Text style={styles.reviewBoxText}>
-                    📍 {origin} ➔ {destination} • 📅 {durationDays} Days ({formattedDateRange}) • 👥 {travelers} Guests • 💰 {formatCurrency(totalBudget, currency)}
+                    ðŸ“ {origin} âž” {destination} â€¢ ðŸ“… {durationDays} Days ({formattedDateRange}) â€¢ ðŸ‘¥ {travelers} Guests â€¢ ðŸ’° {formatCurrency(totalBudget, currency)}
                   </Text>
                 </View>
               </View>
@@ -2790,7 +2574,7 @@ export function TripPlannerScreen() {
         )}
       </ScrollView>
 
-      {/* ─── STICKY BOTTOM BAR: ONE-TAP "BOOK ENTIRE ITINERARY" ───────────── */}
+      {/* â”€â”€â”€ STICKY BOTTOM BAR: ONE-TAP "BOOK ENTIRE ITINERARY" â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {generatedPlan && !isGenerating && (
         <View style={[styles.bottomStickyBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           <Button
@@ -2816,7 +2600,7 @@ export function TripPlannerScreen() {
               <View>
                 <Text style={styles.primaryBookItineraryText}>Book Entire Itinerary</Text>
                 <Text style={styles.primaryBookItinerarySub}>
-                  {formatCurrency(generatedPlan.totalEstimatedCost, generatedPlan.currency)} • Instant Checkout
+                  {formatCurrency(generatedPlan.totalEstimatedCost, generatedPlan.currency)} â€¢ Instant Checkout
                 </Text>
               </View>
             </LinearGradient>
@@ -2824,7 +2608,7 @@ export function TripPlannerScreen() {
         </View>
       )}
 
-      {/* ─── MODAL: EDIT ACTIVITY CARD ────────────────────────────────────── */}
+      {/* â”€â”€â”€ MODAL: EDIT ACTIVITY CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Modal
         visible={Boolean(editingActivity)}
         animationType="slide"
@@ -2896,7 +2680,7 @@ export function TripPlannerScreen() {
                   />
 
                   <Text style={styles.inputLabel}>
-                    Estimated Cost ({currency === "BDT" ? "৳ BDT" : "$ USD"})
+                    Estimated Cost ({currency === "BDT" ? "à§³ BDT" : "$ USD"})
                   </Text>
                   <TextInput
                     style={styles.modalInput}
@@ -2943,7 +2727,7 @@ export function TripPlannerScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* ─── MODAL: DESTINATION SELECTOR ──────────────────────────────────── */}
+      {/* â”€â”€â”€ MODAL: DESTINATION SELECTOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Modal
         visible={showDestModal}
         animationType="slide"
@@ -3023,7 +2807,7 @@ export function TripPlannerScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.destListName}>{d.name}</Text>
-                    <Text style={styles.destListCountry}>{d.country} • {d.tag}</Text>
+                    <Text style={styles.destListCountry}>{d.country} â€¢ {d.tag}</Text>
                   </View>
                   {destination.toLowerCase() === d.name.toLowerCase() && (
                     <Ionicons name="checkmark-circle" size={22} color="#2563EB" />
@@ -3035,7 +2819,7 @@ export function TripPlannerScreen() {
         </View>
       </Modal>
 
-      {/* ─── MODAL: SAVED ITINERARIES SHEET ──────────────────────────────── */}
+      {/* â”€â”€â”€ MODAL: SAVED ITINERARIES SHEET â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Modal
         visible={showSavedModal}
         animationType="slide"
@@ -3072,7 +2856,7 @@ export function TripPlannerScreen() {
                           {plan.title || `${plan.destination} Tour`}
                         </Text>
                         <Text style={styles.savedPlanMeta}>
-                          {plan.durationDays} Days • {plan.travelStyle?.toUpperCase()} •{" "}
+                          {plan.durationDays} Days â€¢ {plan.travelStyle?.toUpperCase()} â€¢{" "}
                           {formatCurrency(plan.totalEstimatedCost, plan.currency)}
                         </Text>
                       </View>
@@ -3104,7 +2888,7 @@ export function TripPlannerScreen() {
         </View>
       </Modal>
 
-      {/* ─── MODAL: WEATHER & SOLAR POSITION DETAILS ─────────────────────── */}
+      {/* â”€â”€â”€ MODAL: WEATHER & SOLAR POSITION DETAILS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Modal
         visible={showWeatherDetailsModal}
         animationType="slide"
@@ -3142,7 +2926,7 @@ export function TripPlannerScreen() {
                         <Badge
                           status="info"
                           size="sm"
-                          label={`Lat: ${pos.latitude.toFixed(2)}°, Lon: ${pos.longitude.toFixed(2)}°`}
+                          label={`Lat: ${pos.latitude.toFixed(2)}Â°, Lon: ${pos.longitude.toFixed(2)}Â°`}
                         />
                       </View>
                       <View style={styles.solarTimesGrid}>
@@ -3269,14 +3053,14 @@ export function TripPlannerScreen() {
         </View>
       </Modal>
 
-      {/* ─── Accidental Delete Protection: Undo Toast Snackbar ────────── */}
+      {/* â”€â”€â”€ Accidental Delete Protection: Undo Toast Snackbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {undoActivityData && (
         <View style={styles.undoSnackbarContainer} pointerEvents="box-none">
           <View style={styles.undoSnackbar}>
             <View style={styles.undoSnackbarLeft}>
               <Ionicons name="trash-outline" size={18} color="#F87171" />
               <Text style={styles.undoSnackbarText} numberOfLines={1}>
-                "{undoActivityData.activityTitle}" মুছে ফেলা হয়েছে
+                "{undoActivityData.activityTitle}" à¦®à§à¦›à§‡ à¦«à§‡à¦²à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡
               </Text>
             </View>
             <TouchableOpacity
@@ -3285,18 +3069,18 @@ export function TripPlannerScreen() {
               activeOpacity={0.8}
             >
               <Ionicons name="arrow-undo" size={14} color="#38BDF8" />
-              <Text style={styles.undoActionText}>পূর্বাবস্থায় ফেরান (Undo)</Text>
+              <Text style={styles.undoActionText}>à¦ªà§‚à¦°à§à¦¬à¦¾à¦¬à¦¸à§à¦¥à¦¾à¦¯à¦¼ à¦«à§‡à¦°à¦¾à¦¨ (Undo)</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
-      {/* ─── Undo Activity Deletion Toast Bar ─── */}
+      {/* â”€â”€â”€ Undo Activity Deletion Toast Bar â”€â”€â”€ */}
       {lastDeletedActivity && (
         <View style={styles.undoToastCard}>
           <View style={styles.undoToastLeft}>
             <Ionicons name="trash-bin-outline" size={18} color="#F87171" />
             <Text style={styles.undoToastText} numberOfLines={1}>
-              "{lastDeletedActivity.activity.activity}" মুছে ফেলা হয়েছে
+              "{lastDeletedActivity.activity.activity}" à¦®à§à¦›à§‡ à¦«à§‡à¦²à¦¾ à¦¹à§Ÿà§‡à¦›à§‡
             </Text>
           </View>
           <TouchableOpacity
@@ -3305,20 +3089,20 @@ export function TripPlannerScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="arrow-undo" size={15} color="#2563EB" />
-            <Text style={styles.undoActionText}>পূর্বাবস্থায় ফেরান (Undo)</Text>
+            <Text style={styles.undoActionText}>à¦ªà§‚à¦°à§à¦¬à¦¾à¦¬à¦¸à§à¦¥à¦¾à¦¯à¦¼ à¦«à§‡à¦°à¦¾à¦¨ (Undo)</Text>
           </TouchableOpacity>
         </View>
       )}
-      {/* ─── Friends & Split Bill Hub Modal ───────────────────────── */}
+      {/* â”€â”€â”€ Friends & Split Bill Hub Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <TripSplitBillModal
         visible={showSplitBillModal}
         onClose={() => setShowSplitBillModal(false)}
-        tripTitle={generatedPlan?.title || `${destination} ${durationDays} দিনের ট্রিপ`}
+        tripTitle={generatedPlan?.title || `${destination} ${durationDays} à¦¦à¦¿à¦¨à§‡à¦° à¦Ÿà§à¦°à¦¿à¦ª`}
         destination={generatedPlan?.destination || destination}
         currency={generatedPlan?.currency || currency}
       />
 
-      {/* ─── Share, PDF & Offline Modal ─────────────────────────────── */}
+      {/* â”€â”€â”€ Share, PDF & Offline Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {generatedPlan && (
         <TripShareExportModal
           visible={showShareExportModal}
@@ -3330,2403 +3114,3 @@ export function TripPlannerScreen() {
   );
 }
 
-// ─── Stylesheet ───────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  undoSnackbarContainer: {
-    position: "absolute",
-    bottom: 24,
-    left: 16,
-    right: 16,
-    zIndex: 9999,
-    alignItems: "center",
-  },
-  undoSnackbar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#0F172A",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 8px rgba(15, 23, 42, 0.3)" } : {}),
-    width: "100%",
-    maxWidth: 480,
-    borderWidth: 1,
-    borderColor: "#334155",
-  },
-  undoSnackbarLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
-    marginEnd: 12,
-  },
-  undoSnackbarText: {
-    fontSize: 13,
-    color: "#F8FAFC",
-    fontWeight: "500",
-    flex: 1,
-  },
-  undoActionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(56, 189, 248, 0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(56, 189, 248, 0.35)",
-  },
-  undoActionText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#38BDF8",
-  },
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F8FAFC",
-  },
-  headerBackgroundGradient: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 240,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-
-  /* Top Header */
-  topHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  iconCircleButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.06)" } : {}),
-  },
-  headerTitleWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#0F172A",
-    letterSpacing: -0.4,
-  },
-
-  /* Wizard Stepper Header */
-  stepperNavBar: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#0F172A",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 8px rgba(15, 23, 42, 0.03)" } : {}),
-  },
-  stepperHeaderTop: {
-    marginBottom: 10,
-  },
-  stepperStepLabel: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#2563EB",
-    letterSpacing: 0.8,
-  },
-  stepperStepName: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#0F172A",
-    marginTop: 2,
-  },
-  stepperProgressRow: {
-    flexDirection: "row",
-    gap: 6,
-    alignItems: "center",
-  },
-  stepperSegment: {
-    flex: 1,
-    height: 6,
-    backgroundColor: "#E2E8F0",
-    borderRadius: 3,
-  },
-  stepperSegmentActive: {
-    backgroundColor: "#2563EB",
-  },
-
-  /* Wizard Form Card */
-  wizardContainer: {
-    gap: 16,
-  },
-  wizardCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 18,
-    shadowColor: "#0F172A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 14,
-    elevation: 2,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 14px rgba(15, 23, 42, 0.04)" } : {}),
-  },
-  stepTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 14,
-  },
-  stepNumberBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#2563EB",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  stepNumberText: {
-    color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  stepTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  stepSubtitle: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-  },
-
-  /* Field Box */
-  fieldBox: {
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#F8FAFC",
-  },
-  fieldLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  fieldSublabel: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#64748B",
-  },
-  fieldValText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0F172A",
-    marginTop: 2,
-  },
-  inlineTextInput: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#0F172A",
-    padding: 0,
-    marginTop: 2,
-  },
-
-  /* Chips */
-  chipsLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#64748B",
-    marginTop: 14,
-    marginBottom: 8,
-  },
-  chipsScroll: {
-    flexDirection: "row",
-  },
-  destChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#EFF6FF",
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginEnd: 8,
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
-  },
-  destChipSelected: {
-    backgroundColor: "#2563EB",
-    borderColor: "#2563EB",
-  },
-  destChipText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#2563EB",
-  },
-  destChipTextSelected: {
-    color: "#FFFFFF",
-  },
-  originChipsRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 10,
-  },
-  originMiniChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: "#F1F5F9",
-  },
-  originMiniChipActive: {
-    backgroundColor: "#2563EB",
-  },
-  originMiniChipText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#64748B",
-  },
-  originMiniChipTextActive: {
-    color: "#FFFFFF",
-  },
-
-  /* Date Range Box */
-  dateRangeBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#EFF6FF",
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
-  },
-  dateRangeLabel: {
-    fontSize: 12,
-    color: "#64748B",
-    fontWeight: "500",
-  },
-  dateRangeValue: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#1E40AF",
-    marginTop: 1,
-  },
-
-  /* Duration Presets */
-  durationPresetsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  durationCard: {
-    flex: 1,
-    minWidth: "28%",
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
-    padding: 10,
-    alignItems: "center",
-  },
-  durationCardSelected: {
-    backgroundColor: "#2563EB",
-    borderColor: "#2563EB",
-  },
-  durationDaysText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  durationSubText: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-  },
-  textWhite: {
-    color: "#FFFFFF",
-  },
-  textWhite70: {
-    color: "rgba(255, 255, 255, 0.8)",
-  },
-
-  /* Steppers */
-  stepperRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 14,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-  },
-  stepperLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#334155",
-  },
-  stepperSublabel: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 1,
-  },
-  stepperControls: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    backgroundColor: "#F1F5F9",
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  stepBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  stepperValText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
-    minWidth: 60,
-    textAlign: "center",
-  },
-
-  /* Travel Styles */
-  stylesList: {
-    gap: 10,
-  },
-  styleOptionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    padding: 12,
-    borderRadius: 14,
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  styleOptionSelected: {
-    borderColor: "#2563EB",
-    backgroundColor: "#EFF6FF",
-  },
-  styleIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "#DBEAFE",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  styleIconBoxSelected: {
-    backgroundColor: "#2563EB",
-  },
-  styleTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  styleTitleSelected: {
-    color: "#1E40AF",
-  },
-  styleDesc: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-  },
-
-  /* Currency & Budget */
-  currencyToggleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  currencyToggleBox: {
-    flexDirection: "row",
-    backgroundColor: "#F1F5F9",
-    borderRadius: 10,
-    padding: 3,
-  },
-  currencyPill: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  currencyPillActive: {
-    backgroundColor: "#2563EB",
-  },
-  currencyPillText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#64748B",
-  },
-  currencyPillTextActive: {
-    color: "#FFFFFF",
-  },
-  budgetTiersGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 12,
-  },
-  budgetTierCard: {
-    flex: 1,
-    minWidth: "22%",
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
-    padding: 10,
-    alignItems: "center",
-  },
-  budgetTierSelected: {
-    borderColor: "#2563EB",
-    backgroundColor: "#EFF6FF",
-  },
-  budgetTierName: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  textBlue: {
-    color: "#2563EB",
-  },
-  budgetTierSub: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-  },
-  totalBudgetInputBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    height: 48,
-    backgroundColor: "#FFFFFF",
-  },
-  currencySymbolText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2563EB",
-    marginEnd: 6,
-  },
-  totalBudgetInput: {
-    flex: 1,
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-
-  /* Live Allocation Preview Box */
-  liveAllocContainer: {
-    marginTop: 14,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  liveAllocHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 8,
-  },
-  liveAllocHeaderText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#2563EB",
-    textTransform: "uppercase",
-  },
-  liveAllocRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 4,
-  },
-  liveAllocLabel: {
-    fontSize: 13,
-    color: "#475569",
-    fontWeight: "500",
-  },
-  liveAllocValue: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-
-  /* Interests Grid */
-  interestsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  interestChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#F1F5F9",
-    borderRadius: 18,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  interestChipSelected: {
-    backgroundColor: "#2563EB",
-    borderColor: "#2563EB",
-  },
-  interestChipText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#1E293B",
-  },
-  interestChipTextSelected: {
-    color: "#FFFFFF",
-  },
-  customNotesInput: {
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
-    padding: 10,
-    backgroundColor: "#F8FAFC",
-    fontSize: 13,
-    color: "#0F172A",
-    textAlignVertical: "top",
-    marginTop: 4,
-  },
-  wizardReviewBox: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 14,
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
-  },
-  reviewBoxTitle: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#1E40AF",
-    letterSpacing: 0.4,
-  },
-  reviewBoxText: {
-    fontSize: 13,
-    color: "#1E293B",
-    marginTop: 4,
-    lineHeight: 18,
-  },
-
-  /* Wizard Navigation Buttons */
-  wizardNavButtonsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 4,
-  },
-  nextStepBtn: {
-    borderRadius: 24,
-    overflow: "hidden",
-    shadowColor: "#2563EB",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 8px rgba(15, 23, 42, 0.2)" } : {}),
-  },
-  nextStepBtnGradient: {
-    height: 52,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  nextStepBtnText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  primaryActionButton: {
-    borderRadius: 24,
-    overflow: "hidden",
-    shadowColor: "#4F46E5",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 6px 10px rgba(15, 23, 42, 0.3)" } : {}),
-  },
-  primaryButtonGradient: {
-    height: 52,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
-    letterSpacing: 0.2,
-  },
-
-  /* Loading State & Trivia */
-  loadingContainer: {
-    paddingTop: 12,
-    gap: 16,
-  },
-  progressTrack: {
-    height: 6,
-    backgroundColor: "#E2E8F0",
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: "#2563EB",
-    borderRadius: 3,
-  },
-  triviaCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
-    shadowColor: "#2563EB",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    elevation: 3,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 14px rgba(15, 23, 42, 0.08)" } : {}),
-  },
-  triviaHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  triviaBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#EFF6FF",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  triviaBadgeText: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#2563EB",
-    letterSpacing: 0.5,
-  },
-  triviaCounterText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#94A3B8",
-    letterSpacing: 0.5,
-  },
-  triviaBodyRow: {
-    flexDirection: "row",
-    gap: 12,
-    alignItems: "flex-start",
-  },
-  triviaIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: "#EFF6FF",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
-  },
-  triviaFactText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#0F172A",
-    lineHeight: 22,
-    flex: 1,
-  },
-  generationStatusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 14,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-  },
-  generationStatusText: {
-    fontSize: 12,
-    color: "#64748B",
-    fontWeight: "500",
-    flex: 1,
-  },
-
-  /* Results View */
-  resultContainer: {
-    gap: 16,
-  },
-  heroBanner: {
-    borderRadius: 24,
-    padding: 20,
-    shadowColor: "#1E3A8A",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 4,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 8px 16px rgba(15, 23, 42, 0.2)" } : {}),
-  },
-  heroTopRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 12,
-  },
-  heroPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  heroPillLight: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-  },
-  heroPillText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  heroTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    letterSpacing: -0.3,
-  },
-  heroSummary: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.9)",
-    marginTop: 8,
-    lineHeight: 20,
-  },
-  heroCostRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 18,
-    paddingTop: 14,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.2)",
-  },
-  heroCostLabel: {
-    fontSize: 12,
-    color: "rgba(255, 255, 255, 0.8)",
-  },
-  heroCostValue: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#FFFFFF",
-  },
-
-  /* Budget Card */
-  budgetCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 18,
-    shadowColor: "#0F172A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 14,
-    elevation: 2,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 14px rgba(15, 23, 42, 0.04)" } : {}),
-  },
-  sectionHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  sectionHeaderLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: "#0F172A",
-  },
-  sectionSubtitle: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-  },
-  budgetSublabel: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#2563EB",
-  },
-  multiProgressBar: {
-    height: 8,
-    borderRadius: 4,
-    overflow: "hidden",
-    flexDirection: "row",
-    marginVertical: 10,
-  },
-  progSegment: {
-    height: 8,
-  },
-  budgetGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginTop: 6,
-  },
-  budgetGridItem: {
-    flex: 1,
-    minWidth: "45%",
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#F1F5F9",
-  },
-  budgetItemTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  dotIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  budgetCategoryTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#334155",
-  },
-  budgetCategoryAmount: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginVertical: 4,
-  },
-  budgetCategoryTips: {
-    fontSize: 12,
-    color: "#64748B",
-    lineHeight: 15,
-  },
-
-  /* Day-by-Day Cards */
-  itineraryHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  dayCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    overflow: "hidden",
-    shadowColor: "#0F172A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 12,
-    elevation: 2,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 12px rgba(15, 23, 42, 0.04)" } : {}),
-    borderWidth: 1,
-    borderColor: "#F1F5F9",
-  },
-  dayCardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    backgroundColor: "#FFFFFF",
-  },
-  dayHeaderLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-    paddingEnd: 10,
-  },
-  dayThemeText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  daySubCountText: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-  },
-  dayExpandedBody: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-    backgroundColor: "#FCFDFE",
-  },
-  subSectionHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 14,
-    marginBottom: 10,
-  },
-  subSectionTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#334155",
-  },
-  addActivityHeaderBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: "#EFF6FF",
-  },
-  addActivityHeaderText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
-
-  /* Transit connector */
-  transitConnectorRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingStart: 8,
-    marginVertical: 4,
-    gap: 10,
-  },
-  transitLine: {
-    width: 2,
-    height: 16,
-    backgroundColor: "#CBD5E1",
-  },
-  transitBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#F1F5F9",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  transitText: {
-    fontSize: 12,
-    color: "#64748B",
-    fontWeight: "600",
-  },
-
-  /* Activity Row */
-  activityRow: {
-    flexDirection: "row",
-    marginBottom: 6,
-  },
-  timelineCol: {
-    width: 20,
-    alignItems: "center",
-    marginEnd: 8,
-  },
-  timelineDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#2563EB",
-    marginTop: 4,
-  },
-  timelineLine: {
-    width: 2,
-    flex: 1,
-    backgroundColor: "#E2E8F0",
-    marginTop: 4,
-  },
-  activityContent: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 1,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 1px 4px rgba(15, 23, 42, 0.03)" } : {}),
-  },
-  activityTimeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  timeAndDurationWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  activityTime: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
-  durationPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: "#F1F5F9",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  durationPillText: {
-    fontSize: 12,
-    color: "#64748B",
-    fontWeight: "600",
-  },
-  activityActionsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  actActionBtn: {
-    padding: 4,
-    borderRadius: 6,
-    backgroundColor: "#F8FAFC",
-  },
-  activityTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#0F172A",
-    marginVertical: 2,
-  },
-  actLocationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 4,
-  },
-  actLocationWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    flex: 1,
-  },
-  activityLocation: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#475569",
-    flex: 1,
-  },
-  costBadge: {
-    backgroundColor: "#ECFDF5",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#A7F3D0",
-  },
-  costBadgeText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#059669",
-  },
-  activityNotes: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 6,
-    fontStyle: "italic",
-    lineHeight: 16,
-  },
-
-  /* Map Placeholder Box */
-  mapPlaceholderBox: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 14,
-    padding: 14,
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
-  },
-  mapHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  mapHeaderText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#1E40AF",
-  },
-  openMapBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  openMapBtnText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
-  mapDescription: {
-    fontSize: 12,
-    color: "#475569",
-    marginTop: 6,
-  },
-
-  /* Meals Section */
-  mealsSection: {
-    marginTop: 14,
-  },
-  mealsList: {
-    gap: 8,
-    marginTop: 8,
-  },
-  mealItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#F1F5F9",
-  },
-  mealTypeBadge: {
-    backgroundColor: "#FEF3C7",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  mealTypeText: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#92400E",
-  },
-  mealSuggestion: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#0F172A",
-  },
-  mealRestaurant: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-  },
-  mealCostText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#10B981",
-  },
-
-  /* Hotel Recommendation */
-  hotelRecommendation: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#EFF6FF",
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
-  },
-  hotelRecText: {
-    fontSize: 12,
-    color: "#1E40AF",
-    flex: 1,
-  },
-
-  /* Tips Card */
-  tipsCard: {
-    backgroundColor: "#FFFBEB",
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#FDE68A",
-  },
-  tipsHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 8,
-  },
-  tipsHeaderTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#92400E",
-  },
-  tipRow: {
-    flexDirection: "row",
-    marginTop: 6,
-  },
-  tipBullet: {
-    fontSize: 14,
-    color: "#B45309",
-    marginEnd: 6,
-  },
-  tipBodyText: {
-    fontSize: 13,
-    color: "#78350F",
-    lineHeight: 18,
-    flex: 1,
-  },
-
-  /* Re-plan Button */
-  replanBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 12,
-  },
-  replanBtnText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#64748B",
-  },
-
-  /* Bottom Sticky Bar & One-Tap Checkout */
-  bottomStickyBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#FFFFFF",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 8,
-    ...(Platform.OS === "web" ? { boxShadow: "0px -4px 10px rgba(15, 23, 42, 0.08)" } : {}),
-  },
-  primaryBookItineraryBtn: {
-    flex: 1,
-    borderRadius: 24,
-    overflow: "hidden",
-    shadowColor: "#10B981",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 8px rgba(15, 23, 42, 0.3)" } : {}),
-  },
-  primaryBookItineraryGradient: {
-    height: 50,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    paddingHorizontal: 14,
-  },
-  primaryBookItineraryText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "800",
-    letterSpacing: 0.2,
-  },
-  primaryBookItinerarySub: {
-    color: "rgba(255, 255, 255, 0.9)",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-
-  /* Modals */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.5)",
-    justifyContent: "flex-end",
-  },
-  modalSheet: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    paddingBottom: 36,
-  },
-  editModalSheet: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    paddingBottom: 32,
-    gap: 10,
-  },
-  sheetHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  sheetTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
-  },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#475569",
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: "#0F172A",
-    backgroundColor: "#F8FAFC",
-  },
-  modalActionButtonsRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 14,
-  },
-  sheetSearchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 46,
-    marginBottom: 14,
-    backgroundColor: "#F8FAFC",
-  },
-  sheetSearchInput: {
-    flex: 1,
-    marginStart: 8,
-    fontSize: 15,
-    color: "#0F172A",
-  },
-  selectTextBtn: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
-  customPickRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#EFF6FF",
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
-  },
-  customPickText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#2563EB",
-    flex: 1,
-  },
-  destListRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
-  },
-  destListIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#EFF6FF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  destListName: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  destListCountry: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-  },
-
-  /* Header Actions & Badges */
-  headerRightActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  iconCircleButtonActive: {
-    backgroundColor: "#EFF6FF",
-    borderWidth: 1.5,
-    borderColor: "#93C5FD",
-  },
-  headerBadgeDot: {
-    position: "absolute",
-    top: -4,
-    right: -4,
-    backgroundColor: "#2563EB",
-    borderRadius: 9,
-    minWidth: 18,
-    height: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-    borderWidth: 1.5,
-    borderColor: "#FFFFFF",
-  },
-  headerBadgeDotText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "800",
-  },
-
-  /* Smart Packing Checklist */
-  packingCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#0F172A",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 3px 8px rgba(15, 23, 42, 0.05)" } : {}),
-    marginTop: 14,
-  },
-  packingHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  packingHeaderTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  packingSubtitle: {
-    fontSize: 13,
-    color: "#64748B",
-    marginTop: 4,
-    marginBottom: 10,
-  },
-  packingProgressTrack: {
-    height: 6,
-    backgroundColor: "#F1F5F9",
-    borderRadius: 3,
-    overflow: "hidden",
-    marginBottom: 12,
-  },
-  packingProgressBar: {
-    height: "100%",
-    backgroundColor: "#059669",
-    borderRadius: 3,
-  },
-  packingItemsList: {
-    gap: 8,
-  },
-  packingItemRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: "#F8FAFC",
-  },
-  packingItemRowChecked: {
-    backgroundColor: "#ECFDF5",
-  },
-  packingItemText: {
-    fontSize: 13,
-    color: "#334155",
-    fontWeight: "500",
-    flex: 1,
-  },
-  packingItemTextChecked: {
-    color: "#059669",
-    textDecorationLine: "line-through",
-  },
-  addPackingItemRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 12,
-  },
-  addPackingInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 13,
-    color: "#0F172A",
-    backgroundColor: "#F8FAFC",
-  },
-  addPackingBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: "#059669",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  /* Interactive Concierge Card */
-  conciergeCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
-    shadowColor: "#2563EB",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 10px rgba(15, 23, 42, 0.08)" } : {}),
-    marginTop: 14,
-  },
-  conciergeHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 12,
-  },
-  conciergeIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: "#EFF6FF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  conciergeHeaderTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  conciergeHeaderSubtitle: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 1,
-  },
-  conciergePillsScroll: {
-    gap: 8,
-    paddingBottom: 10,
-  },
-  conciergePill: {
-    backgroundColor: "#F1F5F9",
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  conciergePillText: {
-    fontSize: 12,
-    color: "#334155",
-    fontWeight: "600",
-  },
-  conciergeLoadingWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    marginBottom: 10,
-  },
-  conciergeLoadingText: {
-    fontSize: 13,
-    color: "#2563EB",
-    fontWeight: "600",
-  },
-  conciergeAnswerBubble: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
-  },
-  conciergeAnswerHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 6,
-  },
-  conciergeAnswerBadge: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
-  conciergeAnswerText: {
-    fontSize: 13,
-    color: "#1E293B",
-    lineHeight: 19,
-  },
-  conciergeFollowupWrap: {
-    marginTop: 10,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "#BFDBFE",
-    gap: 6,
-  },
-  conciergeFollowupTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#1E40AF",
-    textTransform: "uppercase",
-  },
-  conciergeSugRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 2,
-  },
-  conciergeSugText: {
-    fontSize: 12,
-    color: "#2563EB",
-    fontWeight: "500",
-  },
-  conciergeInputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  conciergeTextInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    fontSize: 13,
-    color: "#0F172A",
-    backgroundColor: "#F8FAFC",
-  },
-  conciergeSendBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: "#2563EB",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  conciergeSendBtnDisabled: {
-    backgroundColor: "#94A3B8",
-  },
-
-  /* Saved Plans Modal */
-  emptySavedWrap: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 36,
-    paddingHorizontal: 20,
-    gap: 8,
-  },
-  emptySavedTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#334155",
-    marginTop: 4,
-  },
-  emptySavedSubtitle: {
-    fontSize: 13,
-    color: "#64748B",
-    textAlign: "center",
-    lineHeight: 18,
-  },
-  savedPlanCard: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  savedPlanCardHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  savedPlanTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  savedPlanMeta: {
-    fontSize: 12,
-    color: "#2563EB",
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  savedPlanDeleteBtn: {
-    padding: 6,
-  },
-  savedPlanSummary: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 6,
-    marginBottom: 10,
-    lineHeight: 16,
-  },
-  savedPlanOpenBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    backgroundColor: "#2563EB",
-    borderRadius: 10,
-    paddingVertical: 8,
-  },
-  savedPlanOpenBtnText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-
-  /* ─── Weather Adaptive Planner & Golden Hour Styles ─── */
-  weatherAlertBannerWrap: {
-    marginBottom: 16,
-    borderRadius: 16,
-    overflow: "hidden",
-    borderWidth: 1.5,
-    borderColor: "#F59E0B",
-    shadowColor: "#D97706",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 10px rgba(15, 23, 42, 0.15)" } : {}),
-  },
-  weatherAlertBannerGradient: {
-    padding: 16,
-  },
-  weatherAlertHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 10,
-  },
-  weatherAlertIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#FEF3C7",
-    borderWidth: 1,
-    borderColor: "#FCD34D",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  weatherAlertHeaderTextWrap: {
-    flex: 1,
-  },
-  weatherAlertBadgesLine: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 4,
-  },
-  solarPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#FDE68A",
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  solarPillText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#92400E",
-    letterSpacing: 0.3,
-  },
-  weatherAlertHeaderTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: "#78350F",
-  },
-  weatherAlertMessageText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#92400E",
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  weatherAlertDetailsBox: {
-    backgroundColor: "rgba(255, 255, 255, 0.75)",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 14,
-    gap: 6,
-    borderWidth: 1,
-    borderColor: "#FDE68A",
-  },
-  weatherDetailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  weatherDetailText: {
-    flex: 1,
-    fontSize: 12,
-    color: "#78350F",
-    lineHeight: 16,
-  },
-  boldText: {
-    fontWeight: "700",
-    color: "#451A03",
-  },
-  weatherAlertActionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  weatherAlertAcceptBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    backgroundColor: "#059669",
-    paddingVertical: 10,
-    borderRadius: 10,
-    shadowColor: "#059669",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 4px rgba(15, 23, 42, 0.25)" } : {}),
-  },
-  weatherAlertAcceptBtnText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  weatherAlertKeepBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1.5,
-    borderColor: "#D97706",
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  weatherAlertKeepBtnText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#78350F",
-  },
-  weatherAlertInfoBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: "#FDE68A",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#F59E0B",
-  },
-
-  /* Weather-Optimized Pill Bar (Shown when active) */
-  weatherOptimizedPillBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#ECFDF5",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#A7F3D0",
-  },
-  weatherOptimizedPillLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    flex: 1,
-  },
-  weatherOptimizedPillText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#065F46",
-  },
-  weatherViewDataLink: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-    paddingVertical: 2,
-    paddingHorizontal: 4,
-  },
-  weatherViewDataLinkText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#059669",
-  },
-
-  /* Weather & Solar Modal Styles */
-  modalSectionCard: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  modalSectionHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 4,
-  },
-  modalSectionTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  modalSectionSub: {
-    fontSize: 12,
-    color: "#64748B",
-    marginBottom: 12,
-    lineHeight: 16,
-  },
-  solarDayCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-  },
-  solarDayTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  solarDayTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#1E293B",
-  },
-  solarTimesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  solarTimeBox: {
-    flex: 1,
-    minWidth: "45%",
-    backgroundColor: "#FFFBEB",
-    padding: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#FEF3C7",
-  },
-  solarTimeLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#92400E",
-    marginBottom: 2,
-  },
-  solarTimeVal: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#78350F",
-  },
-  weatherDayCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-  },
-  weatherDayHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  weatherDayName: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#1E293B",
-  },
-  weatherConditionText: {
-    fontSize: 12,
-    color: "#475569",
-    marginBottom: 8,
-    fontWeight: "500",
-  },
-  hourlyList: {
-    gap: 4,
-  },
-  hourlyRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 5,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    backgroundColor: "#F1F5F9",
-  },
-  hourlyRowAlert: {
-    backgroundColor: "#FEE2E2",
-    borderWidth: 1,
-    borderColor: "#FECACA",
-  },
-  hourlyTime: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#334155",
-    width: 65,
-  },
-  hourlyCondition: {
-    flex: 1,
-    fontSize: 12,
-    color: "#475569",
-    marginHorizontal: 8,
-  },
-  hourlyPopWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  hourlyPop: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
-  hourlyPopHigh: {
-    color: "#DC2626",
-    fontWeight: "800",
-  },
-  modCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  modTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 6,
-  },
-  modDay: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#475569",
-  },
-  modOriginal: {
-    fontSize: 12,
-    color: "#DC2626",
-    textDecorationLine: "line-through",
-    marginBottom: 2,
-  },
-  modNew: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#059669",
-    marginBottom: 4,
-  },
-  modReason: {
-    fontSize: 12,
-    color: "#64748B",
-    lineHeight: 15,
-  },
-  syncNoticeCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#ECFDF5",
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 6,
-    borderWidth: 1,
-    borderColor: "#A7F3D0",
-  },
-  syncNoticeText: {
-    flex: 1,
-    fontSize: 12,
-    color: "#065F46",
-    fontWeight: "600",
-    lineHeight: 15,
-  },
-  modalCloseBtn: {
-    backgroundColor: "#2563EB",
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 12,
-  },
-  modalCloseBtnText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  undoToastCard: {
-    position: "absolute",
-    bottom: 24,
-    left: 16,
-    right: 16,
-    backgroundColor: "#0F172A",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 8,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 6px 10px rgba(15, 23, 42, 0.25)" } : {}),
-    zIndex: 9999,
-  },
-  undoToastLeft: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginEnd: 10,
-  },
-  undoToastText: {
-    color: "#F8FAFC",
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  undoActionBtn: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-
-  /* Friends & Split-Bill Hub Card */
-  friendsSplitHubCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#0F172A",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 8px rgba(15, 23, 42, 0.05)" } : {}),
-  },
-  friendsSplitHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  friendsSplitLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    flex: 1,
-  },
-  friendsSplitIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#EFF6FF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  friendsSplitTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
-  },
-  friendsSplitSub: {
-    fontSize: 11,
-    color: "#64748B",
-    marginTop: 2,
-  },
-  openSplitModalBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#EFF6FF",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  openSplitModalBtnText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
-  membersAvatarRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 2,
-  },
-  memberChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#F8FAFC",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  miniAvatar: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "#2563EB",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  miniAvatarText: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "800",
-  },
-  memberChipName: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#334155",
-  },
-  addFriendQuickBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    backgroundColor: "#EFF6FF",
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
-  },
-  addFriendQuickText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
-  quickDebtsPreview: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#F0FDF4",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: "#BBF7D0",
-  },
-  quickDebtsText: {
-    fontSize: 11,
-    color: "#15803D",
-    fontWeight: "600",
-    flex: 1,
-  },
-
-  /* Day Weather Badge */
-  dayWeatherBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#F1F5F9",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginStart: 8,
-  },
-  dayWeatherText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#475569",
-  },
-});

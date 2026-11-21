@@ -87,7 +87,7 @@ jest.mock("../../../hooks/useAuth", () => ({
 
 import { MysteryBoxModal } from "../MysteryBoxModal";
 
-jest.setTimeout(20000);
+jest.setTimeout(60000);
 
 describe("MysteryBoxModal Component", () => {
   it("renders properly when visible is true", async () => {

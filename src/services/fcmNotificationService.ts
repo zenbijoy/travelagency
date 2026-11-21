@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 import { supabase } from "../utils/supabase";
+import { logger } from "../utils/logger";
 import { DEMO_USER_ID } from "./repositories/friends";
 import { useSettingsStore, isQuietHourActive } from "../store/settingsStore";
 
@@ -87,7 +88,7 @@ export const fcmNotificationService = {
         importance: Notifications.AndroidImportance.LOW,
       });
     } catch (e) {
-      console.warn("[FCM] Failed to set up notification channels:", e);
+      logger.warn("[FCM] Failed to set up notification channels:", e);
     }
   },
 
@@ -142,7 +143,7 @@ export const fcmNotificationService = {
 
       return token;
     } catch (err) {
-      console.warn("[FCM] Push registration error:", err);
+      logger.warn("[FCM] Push registration error:", err);
       return null;
     }
   },
@@ -162,7 +163,7 @@ export const fcmNotificationService = {
         { onConflict: "user_id,fcm_token" }
       );
     } catch (e) {
-      console.warn("[FCM] Save token to database error:", e);
+      logger.warn("[FCM] Save token to database error:", e);
     }
   },
 
@@ -228,7 +229,7 @@ export const fcmNotificationService = {
 
       return subscription;
     } catch (err) {
-      console.warn("[FCM] Notification listener setup error:", err);
+      logger.warn("[FCM] Notification listener setup error:", err);
       return { remove: () => {} };
     }
   },
@@ -252,7 +253,7 @@ export const fcmNotificationService = {
 
       // Check quiet hours
       if (isQuietHourActive(settings.quietHoursStart, settings.quietHoursEnd) && type !== "booking" && type !== "flight_alert") {
-        console.log(`[Notification Muted during Quiet Hours] ${title} - ${body}`);
+        logger.debug(`[Notification Muted during Quiet Hours] ${title} - ${body}`);
         return;
       }
 
@@ -271,7 +272,7 @@ export const fcmNotificationService = {
         trigger: null, // Instant
       });
     } catch (err) {
-      console.log(`[Local Notification] ${title} - ${body}`, data);
+      logger.info(`[Local Notification] ${title} - ${body}`, data);
     }
   },
 
@@ -282,7 +283,7 @@ export const fcmNotificationService = {
     try {
       await supabase.from("user_device_tokens").delete().eq("user_id", userId);
     } catch (e) {
-      console.warn("[FCM] Clear tokens error:", e);
+      logger.warn("[FCM] Clear tokens error:", e);
     }
   },
 };

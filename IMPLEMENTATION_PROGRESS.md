@@ -1,88 +1,58 @@
-# Implementation Progress Tracker: Travel Intelligence & Itinerary Marketplace
+# Implementation Progress & Platform Health Tracker
 
 **Project**: Shopno Jatra (স্বপ্ন যাত্রা)  
-**Execution Date**: November 2026  
-**Status**: COMPLETE (All 8 Phases Implemented & Verified)
+**Last Updated**: November 2026  
+**Status**: ACTIVE REFACTORING & PLATFORM HARDENING
 
 ---
 
-## Progress Overview
+## 1. High-Level Platform Progress
 
-| Phase | Description | Status | Completion % |
+| Track / Component | Scope | Real Status | Test Coverage |
 |---|---|---|---|
-| **Phase 1** | Repository & Architecture Audit | COMPLETED | 100% |
-| **Phase 2** | Database Foundation & Supabase Migrations | COMPLETED | 100% |
-| **Phase 3** | Itinerary Marketplace & Creator Studio | COMPLETED | 100% |
-| **Phase 4** | Itinerary Personalization & AI Budget Optimization | COMPLETED | 100% |
-| **Phase 5** | Booking Orchestration & Booking Saga | COMPLETED | 100% |
-| **Phase 6** | Travel Intelligence & Disruption Engine | COMPLETED | 100% |
-| **Phase 7** | Agency & Admin Portal Integration | COMPLETED | 100% |
-| **Phase 8** | Testing, Hardening & Final Documentation | COMPLETED | 100% |
+| **Python FastAPI Backend** | Auth, RBAC, Ledger, Saga, ML Pricing, NLP, KYC, Travel Intelligence | Operational & Fully Verified | **124/124 Pytest tests PASS** |
+| **Travel Intelligence & Marketplace** | Explore Trips, Itinerary Builder, 1-Click Clone, Budget Optimizer | Implemented & Seeded | 6/6 Pytest + 8/8 Jest PASS |
+| **Monorepo Architecture** | Workspaces for Consumer App, AGEN, Hotel, and Shared Library | Configured (`pnpm-workspace.yaml` + npm workspaces) | All 4 packages compile (`tsc --noEmit`) |
+| **Mobile Consumer Client** | React Native 0.83 / Expo 55 UI, Booking, Search, Social Flex | Functional; Modularization Ongoing | TypeScript compilation clean (0 errors) |
+| **Agency Portal (`AGEN`)** | B2B Operations, Fleet, Bookings, Ledger, Messaging | Functional | TypeScript compilation clean (0 errors) |
+| **Hotel Portal (`hotel`)** | PMS, Room Allocations, Guest Check-In, Contract Hub | Functional | TypeScript compilation clean (0 errors) |
+| **Repo Hygiene & Tooling** | Scripts archiving, IDE cache untracking, documentation consolidation | Addressed (70 patch scripts archived, `.expo`/`.vscode` untracked) | CI workflow expanded with multi-job pipeline |
 
 ---
 
-## Detailed Task Checklist
+## 2. Test Verification Matrix (Current Reality)
 
-### Phase 1: Architecture Audit (COMPLETED)
-- [x] Full codebase inspection (Expo 55, React Native 0.83, FastAPI, Supabase).
-- [x] Create `EXISTING_ARCHITECTURE_AUDIT.md`.
-- [x] Create `FEATURE_IMPLEMENTATION_PLAN.md`.
-- [x] Create `DATABASE_CHANGELOG.md`.
-- [x] Create `EXTERNAL_INTEGRATION_REQUIREMENTS.md`.
-- [x] Create `IMPLEMENTATION_PROGRESS.md`.
+### Backend Pytest Suite: 124 Tests (100% Passing)
+- `tests/test_auth_rbac.py` (4 tests) - JWT validation, RBAC admin resolution, claims inspection
+- `tests/test_booking_concurrency.py` (3 tests) - Atomic booking creation, seat locking & race condition prevention
+- `tests/test_booking_events_rls.py` (2 tests) - Tenant isolation & RLS enforcement
+- `tests/test_database_routing.py` (5 tests) - Primary/replica read-your-own-writes routing
+- `tests/test_forecast_api.py` (3 tests) - Price drop forecast heuristics
+- `tests/test_group_trip_balances.py` (5 tests) - Largest remainder rule & debt minimization
+- `tests/test_itinerary_marketplace_and_saga.py` (2 tests) - Multi-service booking saga & compensating rollback
+- `tests/test_kyc_verification.py` (7 tests) - Trade license verification, state machine, RLS isolation
+- `tests/test_ledger_service.py` (6 tests) - Immutable ledger triggers, double-entry integrity, payout batching
+- `tests/test_marketplace.py` (8 tests) - Provider onboarding, GPS check-in, tidal intelligence
+- `tests/test_ml_recommendations.py` (11 tests) - Thompson sampling, MMR reranking, hybrid scoring
+- `tests/test_nlp_service.py` (8 tests) - Banglish entity extraction, bilingual query parsing
+- `tests/test_payment_webhooks.py` (5 tests) - bKash/Nagad/Rocket HMAC signature verification
+- `tests/test_price_alerts.py` (8 tests) - Quiet hours in Dhaka timezone, deduplication windows
+- `tests/test_price_forecast.py` (9 tests) - Holt linear smoother, occupancy velocity surge
+- `tests/test_search_cache.py` (2 tests) - Hotel & flight multi-tenant search
+- `tests/test_storage_presigned.py` (3 tests) - R2 presigned URLs, MIME validation, 5MB limit
+- `tests/test_surge_pricing.py` (6 tests) - Weather freeze, disaster cap (1.25x), HMAC price guarantee
+- `tests/test_tickets.py` (6 tests) - Ed25519 cryptographic signatures, anti-double-scan
+- `tests/test_travel_intelligence.py` (4 tests) - Delay telemetry, SHA256 deduplication, impact analysis
+- `tests/test_vibe_analyzer.py` (13 tests) - Aspect sentiment extraction, anti-spam perplexity detector
 
-### Phase 2: Database Foundation (COMPLETED)
-- [x] Created `supabase/migrations/20260616_travel_intelligence_and_itinerary_marketplace.sql`.
-- [x] Created `supabase/migrations/20260616b_seed_itineraries_and_monitors.sql`.
-- [x] Verified and applied all migrations into live Supabase PostgreSQL (154 tables verified with RLS enabled).
-- [x] Implemented Row Level Security (RLS) on all new tables:
-  - `journey_monitors`, `disruption_events`, `disruption_impacts`, `alternative_recommendations`
-  - `itineraries`, `itinerary_days`, `itinerary_items`, `itinerary_clones`, `creator_profiles`
-  - `trip_bookings`, `service_bookings`, `booking_compensations`.
+---
 
-### Phase 3: Itinerary Marketplace & Creator Studio (COMPLETED)
-- [x] Created backend models in `backend/app/models/itinerary.py`.
-- [x] Created schemas in `backend/app/schemas/itinerary.py`.
-- [x] Built REST endpoints in `backend/app/api/v1/endpoints/itineraries.py`.
-- [x] Built frontend types in `src/types/itinerary.ts`.
-- [x] Built client service in `src/services/itineraryService.ts`.
-- [x] Implemented "Explore Trips" marketplace screen (`app/screens/explore-trips.tsx`).
-- [x] Implemented "Itinerary Details" screen with Day Overview & Timeline views (`app/screens/itinerary-details.tsx`).
-- [x] Implemented "Creator Studio & Itinerary Builder" (`app/screens/itinerary-builder.tsx`).
+## 3. Technical Debt & Codebase Modernization Tracker
 
-### Phase 4: Itinerary Personalization & AI Budget Optimization (COMPLETED)
-- [x] Built 1-Click Clone workflow (`app/screens/itinerary-clone.tsx`).
-- [x] Integrated AI Budget Optimizer (`/api/v1/itineraries/optimize-budget` & `itineraryService.optimizeBudget`).
-- [x] Implemented date shifting, passenger counts, budget sliders, and hotel category adaptations.
-
-### Phase 5: Booking Orchestration & Booking Saga (COMPLETED)
-- [x] Built Provider Adapters:
-  - `MockFlightProvider` & `AmadeusFlightProvider` (`flight_provider.py`).
-  - `BangladeshRailwayProvider` (`rail_provider.py`).
-  - `BangladeshBusProvider` (`bus_provider.py`).
-  - `HotelInventoryProvider` & `WeatherDisruptionProvider` (`hotel_and_weather_provider.py`).
-- [x] Built `BookingSagaOrchestrator` (`backend/app/services/booking_saga.py`).
-- [x] Handled atomic reservation, idempotency, and compensating rollback on failure.
-- [x] Built Unified Trip Checkout screen (`app/screens/trip-checkout.tsx`).
-
-### Phase 6: Travel Intelligence Engine (COMPLETED)
-- [x] Built `JourneyMonitor` & `DisruptionEngineService` (`backend/app/services/travel_intelligence/disruption_engine.py`).
-- [x] Built `DisruptionImpactAnalyzer` (`impact_analyzer.py`).
-- [x] Added deduplication with SHA256 hashes.
-- [x] Built Travel Intelligence Dashboard (`app/screens/travel-intelligence.tsx`).
-- [x] Integrated Surveillance Banner and quick actions into `app/(tabs)/trips.tsx` and `app/(tabs)/index.tsx`.
-
-### Phase 7: Agency & Admin Integration (COMPLETED)
-- [x] Integrated Travel Disruption Telemetry & Provider Stream into `src/screens/admin/AgenPlatformMonitoringScreen.tsx`.
-- [x] Registered routes in `src/constants/routes.ts`.
-
-### Phase 8: Testing & Verification (COMPLETED)
-- [x] Frontend Jest test suites:
-  - `src/services/__tests__/travelDisruptionIntelligence.test.ts` (PASS - 4/4)
-  - `src/services/__tests__/itineraryCloningAndSaga.test.ts` (PASS - 4/4)
-  - Total: 2 suites passed, 8/8 tests passed.
-- [x] Backend Pytest test suites:
-  - `backend/tests/test_travel_intelligence.py` (PASS - 4/4)
-  - `backend/tests/test_itinerary_marketplace_and_saga.py` (PASS - 2/2)
-  - Total: 6/6 tests passed.
-- [x] Verified Supabase database migrations applied and queryable.
+- [x] **Repo Hygiene**: Untracked `app/.expo/devices.json` and `app/.vscode/mcp.json`. Archived 70 legacy one-off patch scripts into `scripts/archive/legacy_patches/`.
+- [x] **Monorepo Setup**: Configured `pnpm-workspace.yaml` and npm workspaces (`AGEN`, `hotel`, `packages/*`). Created shared `@shopnojatra/shared` package.
+- [x] **CI Pipeline**: Added backend Pytest execution, multi-workspace TypeScript verification, secret scanning, and critical dependency audits to `.github/workflows/ci.yml`.
+- [x] **Dependency Cleanup**: Segregated `pg` and `dotenv` into `devDependencies`. Eliminated duplicate `react-native-linear-gradient` and `react-native-vector-icons`.
+- [ ] **Giant Screens Modularization**: Decomposing monolithic screens (`TripPlannerScreen`, `BookingSystemScreen`, `AgencyManagementScreen`, `FlightsScreen`).
+- [ ] **Routing Pattern Alignment**: Relocating UI implementations out of `app/screens/abroad-agency.tsx` and `app/screens/tour-guides.tsx` into thin route wrappers.
+- [ ] **Type Safety & Logging**: Replacing `@ts-ignore` / `as any` with strict types, and replacing unstructured `console.log` with a central logger.

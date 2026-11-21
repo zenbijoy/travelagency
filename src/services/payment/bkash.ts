@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * bKash Payment Provider - Hardened & Tamper-Proofed
  *

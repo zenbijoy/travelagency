@@ -17,11 +17,30 @@ import { toBengaliNumber } from "./HotelGalleryModal";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+export type MapHotel = CatalogHotel | {
+  id: string;
+  name: string;
+  city: string;
+  country?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  star_rating?: number | string;
+  average_rating?: number | string;
+  total_reviews?: number;
+  base_price: number | string;
+  image_url?: string;
+  images?: string[];
+  landmarks_summary_bn?: string;
+  landmarks_summary_en?: string;
+  [key: string]: any;
+};
+
 interface HotelMapViewProps {
-  hotels: CatalogHotel[];
+  hotels: MapHotel[];
   selectedHotelId?: string | null;
-  onSelectHotel: (hotel: CatalogHotel) => void;
-  onOpenHotelRooms: (hotel: CatalogHotel) => void;
+  onSelectHotel: (hotel: MapHotel) => void;
+  onOpenHotelRooms: (hotel: MapHotel) => void;
   currencySymbol?: string;
 }
 

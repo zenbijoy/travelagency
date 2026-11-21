@@ -9,7 +9,12 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shopnojatra/shared": ["../packages/shared/src/index.ts"],
+      "@shopnojatra/shared/*": ["../packages/shared/src/*"]
+    }
   },
   "include": [
     "src",

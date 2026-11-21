@@ -23,7 +23,9 @@
       "@hooks/*": ["src/hooks/*"],
       "@config/*": ["src/config/*"],
       "@navigation/*": ["src/navigation/*"],
-      "@constants/*": ["src/constants/*"]
+      "@constants/*": ["src/constants/*"],
+      "@shopnojatra/shared": ["../packages/shared/src/index.ts"],
+      "@shopnojatra/shared/*": ["../packages/shared/src/*"]
     }
   },
   "include": ["src", "app", "../nativewind-env.d.ts"],

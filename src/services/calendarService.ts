@@ -2,6 +2,7 @@ import { Linking, Platform } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { openLink } from "../utils/openLink";
+import { TripPlan } from "./ai/types";
 
 export interface CalendarEventPayload {
   title: string;
@@ -126,6 +127,96 @@ export const calendarService = {
         console.error("Failed to open calendar URL fallback:", e2);
         return false;
       }
+    }
+  },
+
+  /**
+   * Generates a multi-event iCalendar (.ics) string for a complete Trip Plan
+   */
+  generateTripPlanIcs(plan: TripPlan): string {
+    const nowIcs = formatDateToIcsString(new Date());
+    const baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() + 1);
+    baseDate.setHours(9, 0, 0, 0);
+
+    const events: string[] = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      `PRODID:-//Shopno Travel Agency//Trip Plan: ${plan.title || "Travel Plan"}//BN`,
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+    ];
+
+    (plan.days || []).forEach((day, index) => {
+      const dayStart = new Date(baseDate.getTime() + index * 24 * 60 * 60 * 1000);
+      dayStart.setHours(9, 0, 0, 0);
+      const dayEnd = new Date(dayStart.getTime() + 10 * 60 * 60 * 1000);
+
+      const startIcs = formatDateToIcsString(dayStart);
+      const endIcs = formatDateToIcsString(dayEnd);
+      const uid = `shopno-trip-${plan.id || "trip"}-day${day.day || index + 1}-${Date.now()}@shopno.travel`;
+
+      const activityList = (day.activities || [])
+        .map((a, i) => `${i + 1}. [${a.time || "Activity"}] ${a.activity} (${a.location || plan.destination})`)
+        .join("\\n");
+
+      events.push(
+        "BEGIN:VEVENT",
+        `UID:${uid}`,
+        `DTSTAMP:${nowIcs}`,
+        `DTSTART:${startIcs}`,
+        `DTEND:${endIcs}`,
+        `SUMMARY:Day ${day.day || index + 1}: ${day.theme || day.title || plan.title}`,
+        `DESCRIPTION:${day.description || ""}\\n\\nActivities:\\n${activityList}`,
+        `LOCATION:${plan.destination}`,
+        "STATUS:CONFIRMED",
+        "BEGIN:VALARM",
+        "TRIGGER:-PT2H",
+        "ACTION:DISPLAY",
+        `DESCRIPTION:Reminder for Day ${day.day || index + 1} of ${plan.title}`,
+        "END:VALARM",
+        "END:VEVENT"
+      );
+    });
+
+    events.push("END:VCALENDAR");
+    return events.join("\r\n");
+  },
+
+  /**
+   * Exports full multi-day Trip Plan to device calendar (.ics file / Google Calendar)
+   */
+  async addTripPlanToCalendar(plan: TripPlan): Promise<boolean> {
+    try {
+      const icsString = this.generateTripPlanIcs(plan);
+      const safeTitle = (plan.title || "trip_plan").replace(/[^a-zA-Z0-9]/g, "_");
+      const filename = `${safeTitle}-${Date.now()}.ics`;
+      const filePath = `${(FileSystem as any).cacheDirectory || (FileSystem as any).documentDirectory}${filename}`;
+
+      await FileSystem.writeAsStringAsync(filePath, icsString, {
+        encoding: "utf8" as any,
+      });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(filePath, {
+          mimeType: "text/calendar",
+          dialogTitle: `${plan.title} ক্যালেন্ডারে যোগ করুন`,
+          UTI: "com.apple.ical.ics",
+        });
+        return true;
+      } else {
+        const googleUrl = this.getGoogleCalendarUrl({
+          title: `Trip: ${plan.title} (${plan.destination})`,
+          description: `${plan.summary || ""}\nDuration: ${plan.durationDays} Days`,
+          location: plan.destination,
+          startDate: new Date(),
+        });
+        await openLink(googleUrl, { label: "Google Calendar", copyValue: googleUrl });
+        return true;
+      }
+    } catch (err) {
+      console.warn("Failed to add trip plan to calendar:", err);
+      return false;
     }
   },
 };

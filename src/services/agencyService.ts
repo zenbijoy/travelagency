@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * agencyService.ts
  * Full agency service layer — public-facing + admin operations.

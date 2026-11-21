@@ -31,6 +31,7 @@ import * as Brightness from "expo-brightness";
 
 import { ticketLocalCache, CachedTicket } from "../../src/services/ticketLocalCache";
 import { supabase } from "../../src/utils/supabase";
+import { calendarService } from "../../src/services/calendarService";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -44,6 +45,7 @@ export default function ETicketScreen() {
   const [loading, setLoading] = useState(true);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isAddingToCalendar, setIsAddingToCalendar] = useState(false);
   const originalBrightness = useRef<number | null>(null);
 
   // Brightness Boost Lifecycle
@@ -280,6 +282,35 @@ export default function ETicketScreen() {
     }
   };
 
+  const handleAddToCalendar = async () => {
+    if (!ticket) return;
+    try {
+      setIsAddingToCalendar(true);
+      const startDate = new Date(ticket.valid_from);
+      const parsedEnd = ticket.valid_to ? new Date(ticket.valid_to) : null;
+      const endDate =
+        parsedEnd && !isNaN(parsedEnd.getTime())
+          ? parsedEnd
+          : new Date(startDate.getTime() + 3 * 60 * 60 * 1000);
+
+      const success = await calendarService.addToCalendar({
+        title: `✈️ ${ticket.service_type.toUpperCase()} Booking: ${ticket.passenger_name} (${ticket.seat || "Confirmed"})`,
+        description: `ShopnoJatra Verified Travel Ticket\nBooking Ref: ${ticket.booking_id}\nSeat: ${ticket.seat || "Unassigned"}\nStatus: ${ticket.status.toUpperCase()}\nEd25519 Signature: ${ticket.signature.slice(0, 24)}...`,
+        location: "Bangladesh / International Terminal",
+        startDate,
+        endDate,
+      });
+
+      if (success && Platform.OS !== "web") {
+        Alert.alert("ক্যালেন্ডার সিঙ্ক", "ভ্রমণের শিডিউল ক্যালেন্ডারে যুক্ত করার জন্য প্রস্তুত।");
+      }
+    } catch (err: any) {
+      Alert.alert("ত্রুটি", err?.message || "ক্যালেন্ডারে ইভেন্ট যোগ করা সম্ভব হয়নি।");
+    } finally {
+      setIsAddingToCalendar(false);
+    }
+  };
+
   const getStatusBadgeStyle = (status: string) => {
     switch (status) {
       case "active":
@@ -447,17 +478,31 @@ export default function ETicketScreen() {
         </View>
 
         {/* Action Buttons */}
-        <TouchableOpacity
-          style={styles.sharePdfButton}
-          onPress={handleSharePdf}
-          disabled={isExportingPdf}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="document-text-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.sharePdfButtonText}>
-            {isExportingPdf ? "Generating PDF..." : "Share as PDF / পিডিএফ সংরক্ষণ করুন"}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.actionButtonsRow}>
+          <TouchableOpacity
+            style={styles.sharePdfButton}
+            onPress={handleSharePdf}
+            disabled={isExportingPdf}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="document-text-outline" size={18} color="#FFFFFF" />
+            <Text style={styles.sharePdfButtonText}>
+              {isExportingPdf ? "Generating..." : "PDF সংরক্ষণ"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.calendarButton}
+            onPress={handleAddToCalendar}
+            disabled={isAddingToCalendar}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="calendar-outline" size={18} color="#0055F2" />
+            <Text style={styles.calendarButtonText}>
+              {isAddingToCalendar ? "সিঙ্ক হচ্ছে..." : "ক্যালেন্ডার সিঙ্ক (.ics)"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Offline Disclaimer & Help */}
         <View style={styles.infoBanner}>
@@ -685,15 +730,20 @@ const styles = StyleSheet.create({
     color: "#64748B",
     maxWidth: 200,
   },
+  actionButtonsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 18,
+  },
   sharePdfButton: {
+    flex: 1,
     backgroundColor: "#4F46E5",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 14,
     borderRadius: 12,
-    marginTop: 18,
-    gap: 8,
+    gap: 6,
     shadowColor: "#4F46E5",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -702,7 +752,24 @@ const styles = StyleSheet.create({
   },
   sharePdfButtonText: {
     color: "#FFFFFF",
-    fontSize: 15,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  calendarButton: {
+    flex: 1,
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1.5,
+    borderColor: "#BFDBFE",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 6,
+  },
+  calendarButtonText: {
+    color: "#0055F2",
+    fontSize: 13,
     fontWeight: "600",
   },
   infoBanner: {

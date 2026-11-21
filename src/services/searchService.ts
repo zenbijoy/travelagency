@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Advanced Search & Filtering Service
 import { supabase } from "@/utils/supabase";
 
@@ -57,7 +56,7 @@ export const searchService = {
           .from(table)
           .select("*")
           .ilike("name,email,title", `%${query}%`)
-          .limit(limit / tablesToSearch);
+          .limit(Math.ceil(limit / tablesToSearch.length));
 
         if (!error && data) {
           data.forEach((item) => {
@@ -361,8 +360,8 @@ export const searchService = {
 
       // Count occurrences
       const facets: Record<string, number> = {};
-      data?.forEach((item) => {
-        const value = item[field];
+      data?.forEach((item: Record<string, any>) => {
+        const value = String(item[field] ?? "");
         facets[value] = (facets[value] || 0) + 1;
       });
 
@@ -393,7 +392,7 @@ export const searchService = {
 
       // Extract unique values
       const suggestions = Array.from(
-        new Set(data?.map((item) => item[field]) || []),
+        new Set(data?.map((item: Record<string, any>) => String(item[field] ?? "")) || []),
       );
       return suggestions as string[];
     } catch (err) {

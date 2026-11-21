@@ -23,7 +23,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { GlassView } from '../components/ui/GlassView';
-import { router } from "expo-router";
+import { router, Href } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -435,7 +435,7 @@ const PRICE_PRESETS = [
   { label: "$500+", value: "above500", min: 500, max: HOSPITALITY_CONFIG.MAX_BUDGET },
 ] as const;
 
-const BUDGET_MILESTONES = [75, 150, 300, 500, 1000, 1500] as const;
+const BUDGET_MILESTONES: number[] = [75, 150, 300, 500, 1000, 1500];
 
 // ============================================================================
 // MAIN COMPONENT
@@ -447,7 +447,7 @@ export function SearchStaysScreen() {
   // Shared travel store integration
   const { hotelFilters, setHotelFilters, resetFilters } = useTravelStore();
 
-  const [hotels, setHotels] = useState<HotelItem[]>(FALLBACK_HOTELS as any);
+  const [hotels, setHotels] = useState<HotelItem[]>(FALLBACK_HOTELS as unknown as HotelItem[]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(hotelFilters.city || "");
   const [selectedVibe, setSelectedVibe] = useState<string>("All Stays");
@@ -674,14 +674,14 @@ export function SearchStaysScreen() {
             if (!error && data && data.length > 0) {
               setHotels(data);
             } else {
-              setHotels(FALLBACK_HOTELS as any);
+              setHotels(FALLBACK_HOTELS as unknown as HotelItem[]);
             }
           }
         }
       } catch (err) {
         console.warn("Hotel inventory fetch warning:", err);
         if (isMounted) {
-          setHotels(FALLBACK_HOTELS as any);
+          setHotels(FALLBACK_HOTELS as unknown as HotelItem[]);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -907,7 +907,7 @@ export function SearchStaysScreen() {
     setSelectedHotel(null);
 
     router.push({
-      pathname: "/screens/payments" as any,
+      pathname: "/screens/payments",
       params: {
         hotelId: hotel.id,
         hotelName: hotel.name,
@@ -921,7 +921,7 @@ export function SearchStaysScreen() {
         amount: String(finalTotal),
         reference: `Booking: ${hotel.name} (${room ? room.room_type : "Standard"})`,
       },
-    });
+    } as Href);
   }, [
     selectedHotel,
     activeSelectedRoom,
@@ -1222,7 +1222,7 @@ export function SearchStaysScreen() {
               key={item.label}
               style={styles.quickLinkItem}
               className="items-center"
-              onPress={() => router.push(item.route as any)}
+              onPress={() => router.push(item.route as Href)}
             >
               <View style={styles.quickLinkCircle} className="w-11 h-11 rounded-full bg-blue-50 items-center justify-center mb-1">
                 <Ionicons name={item.icon} size={20} color={TRIP_BLUE} />
@@ -1534,7 +1534,7 @@ export function SearchStaysScreen() {
               max={HOSPITALITY_CONFIG.MAX_BUDGET}
               step={HOSPITALITY_CONFIG.BUDGET_STEP}
               unit="/রাত"
-              presets={BUDGET_MILESTONES as any}
+              presets={BUDGET_MILESTONES}
               onChange={(val) => {
                 setMaxPriceSlider(val);
                 setPricePreset("custom");
@@ -1718,7 +1718,7 @@ export function SearchStaysScreen() {
           <Pressable
             style={styles.moreBtn}
             className="w-9 h-9 rounded-full bg-slate-100 items-center justify-center active:bg-slate-200"
-            onPress={() => router.push("/screens/settings" as any)}
+            onPress={() => router.push("/screens/settings" as Href)}
           >
             <Ionicons name="ellipsis-horizontal" size={22} color="#0F172A" />
           </Pressable>
@@ -1728,9 +1728,9 @@ export function SearchStaysScreen() {
       {/* View Mode conditional */}
       {viewMode === "map" ? (
         <HotelMapView
-          hotels={filteredHotels as any}
-          onSelectHotel={(h) => handleOpenHotelRooms(h as any)}
-          onOpenHotelRooms={(h) => handleOpenHotelRooms(h as any)}
+          hotels={filteredHotels}
+          onSelectHotel={(h) => handleOpenHotelRooms(h as unknown as HotelItem)}
+          onOpenHotelRooms={(h) => handleOpenHotelRooms(h as unknown as HotelItem)}
           currencySymbol={HOSPITALITY_CONFIG.DEFAULT_CURRENCY_SYMBOL}
         />
       ) : (
@@ -1937,8 +1937,8 @@ export function SearchStaysScreen() {
                     const stock =
                       typeof room.available_count === "number"
                         ? room.available_count
-                        : typeof (room as any).stock === "number"
-                        ? (room as any).stock
+                        : typeof room.stock === "number"
+                        ? room.stock
                         : undefined;
                     const isRoomSoldOut = room.is_available === false || (stock !== undefined && stock <= 0);
                     const hasRealUrgency = typeof stock === "number" && stock > 0 && stock <= 2;
@@ -2036,7 +2036,7 @@ export function SearchStaysScreen() {
                                   is_free: !String(a).toLowerCase().includes("charge") && !String(a).toLowerCase().includes("paid"),
                                 }))
                             ).map((am, amIdx) => (
-                              <AmenityBadgeItem key={`${am.name}-${amIdx}`} amenity={am as any} isRoomDetail={true} />
+                              <AmenityBadgeItem key={`${am.name}-${amIdx}`} amenity={am} isRoomDetail={true} />
                             ))}
                           </View>
 

@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Alert,
   Modal,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -22,6 +23,7 @@ import * as Haptics from "expo-haptics";
 import { TripPlan } from "../../services/ai/types";
 import { tripExportService } from "../../services/trip/tripExportService";
 import { useSplitBillStore } from "../../store/splitBillStore";
+import { calendarService } from "../../services/calendarService";
 
 interface TripShareExportModalProps {
   visible: boolean;
@@ -37,6 +39,7 @@ export const TripShareExportModal: React.FC<TripShareExportModalProps> = ({
   const [isExportingPdf, setIsExportingPdf] = useState<boolean>(false);
   const [isSavingOffline, setIsSavingOffline] = useState<boolean>(false);
   const [isOfflineSaved, setIsOfflineSaved] = useState<boolean>(false);
+  const [isSyncingCalendar, setIsSyncingCalendar] = useState<boolean>(false);
 
   const { expenses, getSettlementDebts } = useSplitBillStore();
 
@@ -96,6 +99,22 @@ export const TripShareExportModal: React.FC<TripShareExportModalProps> = ({
       Alert.alert("সংরক্ষণ ব্যর্থ", err?.message || "অফলাইন কপি সেভ করা সম্ভব হয়নি।");
     } finally {
       setIsSavingOffline(false);
+    }
+  };
+
+  // Handle iCalendar (.ICS) / Google Calendar Sync
+  const handleSyncToCalendar = async () => {
+    try {
+      setIsSyncingCalendar(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const success = await calendarService.addTripPlanToCalendar(plan);
+      if (success && Platform.OS !== "web") {
+        Alert.alert("ক্যালেন্ডার সিঙ্ক", "সম্পূর্ণ ট্রিপ শিডিউল ক্যালেন্ডারে যুক্ত করার জন্য প্রস্তুত।");
+      }
+    } catch (err: any) {
+      Alert.alert("ক্যালেন্ডার সিঙ্ক ত্রুটি", err?.message || "ক্যালেন্ডারে ট্রিপ যোগ করা সম্ভব হয়নি।");
+    } finally {
+      setIsSyncingCalendar(false);
     }
   };
 
@@ -213,6 +232,31 @@ export const TripShareExportModal: React.FC<TripShareExportModalProps> = ({
               size={18}
               color={isOfflineSaved ? "#16A34A" : "#94A3B8"}
             />
+          </TouchableOpacity>
+
+          {/* Option 4: Calendar Sync (.ICS / Google Calendar) */}
+          <TouchableOpacity
+            style={styles.exportCard}
+            activeOpacity={0.85}
+            onPress={handleSyncToCalendar}
+            disabled={isSyncingCalendar}
+          >
+            <View style={[styles.iconCircle, { backgroundColor: "#F5F3FF" }]}>
+              {isSyncingCalendar ? (
+                <ActivityIndicator size="small" color="#7C3AED" />
+              ) : (
+                <Ionicons name="calendar-outline" size={24} color="#7C3AED" />
+              )}
+            </View>
+
+            <View style={styles.exportCardContent}>
+              <Text style={styles.cardTitle}>ক্যালেন্ডারে সিঙ্ক করুন (.ICS)</Text>
+              <Text style={styles.cardSub}>
+                Google, Apple বা Outlook ক্যালেন্ডারে স্বয়ংক্রিয় অ্যালার্ম ও প্রতিটি দিনের সময়সূচি যুক্ত করুন
+              </Text>
+            </View>
+
+            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
           </TouchableOpacity>
         </View>
       </View>

@@ -21,7 +21,9 @@ A next-generation enterprise-grade travel ecosystem built with Expo (React Nativ
 │   ├── benchmarks/       # Scale partitioning & throughput benchmarks
 │   ├── pgbouncer/        # Connection pooling configurations
 │   ├── redis/            # Redis Sentinel configurations
-│   └── tests/            # Pytest test suite (73 passing tests: Auth, Payments, Concurrency, ML)
+│   └── tests/            # Pytest test suite (124 passing tests: Auth, Payments, Saga, Ledger, Concurrency, ML)
+├── packages/             # Monorepo shared packages
+│   └── shared/           # @shopnojatra/shared (design tokens, formatters, unified Supabase client)
 ├── AGEN/                 # Standalone B2B Agency Management Portal (Expo app)
 ├── hotel/                # Hotelier and Property Management System
 ├── supabase/             # Database migrations, policies & schema definitions
