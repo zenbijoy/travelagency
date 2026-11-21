@@ -127,6 +127,9 @@ Thumbs.db
 !AGEN/**
 !supabase/
 !supabase/**
+# Exclude Supabase CLI temp state (contains credentials/project-ref)
+supabase/.temp/
+supabase/.branches/
 !hotel/
 !hotel/**
 !app/

@@ -1,3 +1,8 @@
-"postgres" "postgres"
-"shopno_search_readonly" "shopno_search_password"
-"shopno_booking_tx" "shopno_booking_password"
+# userlist.txt is generated at container startup by entrypoint.sh from env vars.
+# DO NOT commit real passwords here. This file is a template placeholder only.
+# See backend/pgbouncer/entrypoint.sh and docker-compose for env var injection.
+#
+# Format (generated at runtime):
+# "postgres" "${PGBOUNCER_POSTGRES_PASSWORD}"
+# "shopno_search_readonly" "${PGBOUNCER_SEARCH_PASSWORD}"
+# "shopno_booking_tx" "${PGBOUNCER_BOOKING_PASSWORD}"
