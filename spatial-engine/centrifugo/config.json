@@ -1,0 +1,43 @@
+{
+  "client": {
+    "token": {
+      "hmac_secret_key": "prod_super_secret_key_change_me_to_at_least_32_characters_in_env"
+    },
+    "allowed_origins": [
+      "*"
+    ],
+    "ping_interval": "25s",
+    "pong_timeout": "10s"
+  },
+  "http_api": {
+    "key": "dev_centrifugo_api_key_2026"
+  },
+  "admin": {
+    "enabled": false
+  },
+  "engine": {
+    "type": "redis",
+    "redis": {
+      "address": "redis:6379",
+      "presence_hash_field_ttl": true
+    }
+  },
+  "channel": {
+    "namespaces": [
+      {
+        "name": "order",
+        "allow_subscribe_for_client": true,
+        "allow_publish_for_client": false,
+        "history_size": 10,
+        "history_ttl": "300s",
+        "force_recovery": true
+      },
+      {
+        "name": "rider",
+        "allow_user_limited_channels": true,
+        "allow_subscribe_for_client": true,
+        "allow_publish_for_client": false
+      }
+    ]
+  }
+}

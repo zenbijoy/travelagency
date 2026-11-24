@@ -1,0 +1,33 @@
+# ==============================================================================
+# VROOM 1.15.0 Configuration for Valhalla Bridge in Bangladesh Fleet Routing
+# ==============================================================================
+cliArgs:
+  geometry: false
+  planmode: false
+  threads: 2
+  explore: 5
+  limit: '2mb'
+  logdir: '/conf'
+  logsize: '50M'
+  maxlocations: 1000
+  maxvehicles: 200
+  override: ['c', 'g', 'l', 't', 'x']
+  path: ''
+  port: 3000
+  router: 'valhalla'
+  timeout: 60000
+  baseurl: '/'
+routingServers:
+  valhalla:
+    auto:
+      host: 'valhalla'
+      port: '8002'
+    motorcycle:
+      host: 'valhalla'
+      port: '8002'
+    motor_scooter:
+      host: 'valhalla'
+      port: '8002'
+    bicycle:
+      host: 'valhalla'
+      port: '8002'

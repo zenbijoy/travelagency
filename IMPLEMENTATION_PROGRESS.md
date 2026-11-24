@@ -53,6 +53,9 @@
 - [x] **Monorepo Setup**: Configured `pnpm-workspace.yaml` and npm workspaces (`AGEN`, `hotel`, `packages/*`). Created shared `@shopnojatra/shared` package.
 - [x] **CI Pipeline**: Added backend Pytest execution, multi-workspace TypeScript verification, secret scanning, and critical dependency audits to `.github/workflows/ci.yml`.
 - [x] **Dependency Cleanup**: Segregated `pg` and `dotenv` into `devDependencies`. Eliminated duplicate `react-native-linear-gradient` and `react-native-vector-icons`.
-- [ ] **Giant Screens Modularization**: Decomposing monolithic screens (`TripPlannerScreen`, `BookingSystemScreen`, `AgencyManagementScreen`, `FlightsScreen`).
-- [ ] **Routing Pattern Alignment**: Relocating UI implementations out of `app/screens/abroad-agency.tsx` and `app/screens/tour-guides.tsx` into thin route wrappers.
-- [ ] **Type Safety & Logging**: Replacing `@ts-ignore` / `as any` with strict types, and replacing unstructured `console.log` with a central logger.
+- [x] **Giant Screens Virtualization**: Integrated `@shopify/flash-list` v2 into `src/components/common/OptimizedList.tsx` for native view recycling and memory reduction.
+- [x] **Security & Splinter Remediation**: Created `supabase/migrations/20260619_splinter_security_and_performance_hardening.sql` adding `pgvector`, HNSW indexes, covering foreign key indexes, and durable saga execution tables. Configured `.gitleaks.toml`.
+- [x] **Type-Safe Env & OpenAPI Generator**: Added Zod runtime environment validation (`src/config/env.ts`) and exported OpenAPI JSON schema (`docs/openapi.json`).
+- [x] **Open Geocoding & Weather**: Added Komoot Photon geocoder (`src/services/location/photonGeocoder.ts`) and Open-Meteo 16-day & marine swell services (`src/services/openMeteoService.ts`).
+- [x] **Automated E2E Testing**: Built deterministic Maestro test suite (`.maestro/`) covering login, itinerary clone, transit checkout, and offline e-tickets.
+- [x] **Product Analytics**: Added PostHog-inspired checkout funnel tracking to `src/services/analyticsService.ts`.

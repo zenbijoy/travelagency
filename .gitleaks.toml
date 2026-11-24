@@ -1,0 +1,23 @@
+# Gitleaks Configuration for Shopno Jatra
+title = "Shopno Jatra Secret Scan"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for dummy/test configurations"
+paths = [
+  '''^\.env\.example$''',
+  '''^tests/.*''',
+  '''^backend/tests/.*''',
+  '''^src/utils/supabase-test\.ts$''',
+  '''^package-lock\.json$''',
+  '''^packages/shared/.*test.*'''
+]
+regexes = [
+  '''placeholder''',
+  '''mock-anon-key''',
+  '''mock-service-role-key''',
+  '''sb_publishable_test''',
+  '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.test'''
+]

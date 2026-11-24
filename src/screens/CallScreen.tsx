@@ -19,6 +19,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Video, ResizeMode, Audio } from "../utils/safeExpoAv";
 import { CallPermissionModal } from "../components/call/CallPermissionModal";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import { useCallStore, InCallItinerarySheet } from "../features/calls";
 
 import {
   callService,
@@ -238,6 +239,7 @@ export function CallScreen() {
 
   // In-Call Chat Drawer State
   const [showInCallChat, setShowInCallChat] = useState(false);
+  const [showItinerarySheet, setShowItinerarySheet] = useState(false);
   const [inCallMessages, setInCallMessages] = useState<InCallMessage[]>([
     {
       id: "1",
@@ -247,6 +249,18 @@ export function CallScreen() {
     },
   ]);
   const [chatInputText, setChatInputText] = useState("");
+
+  // Minimize call to floating banner
+  const handleMinimize = () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch {}
+    if (callStatus === "connected") {
+      useCallStore.getState().setMinimized(true);
+      showToast("কল মিনিমাইজ করা হয়েছে");
+    }
+    router.back();
+  };
 
   // Animated Concentric Pulse Rings
   const pulseAnim1 = useRef(new Animated.Value(1)).current;
@@ -819,6 +833,13 @@ export function CallScreen() {
               style={styles.videoHeader}
             >
               <View style={styles.videoHeaderLeft}>
+                <Pressable
+                  style={{ marginRight: 6 }}
+                  onPress={handleMinimize}
+                  hitSlop={8}
+                >
+                  <Ionicons name="chevron-down" size={26} color="#FFFFFF" />
+                </Pressable>
                 {targetAvatar ? (
                   <Image source={{ uri: targetAvatar }} style={styles.videoMiniAvatar} />
                 ) : (
@@ -839,6 +860,13 @@ export function CallScreen() {
                   <Ionicons name="shield-checkmark" size={12} color="#10B981" />
                   <Text style={styles.encryptedText}>E2EE</Text>
                 </View>
+
+                <Pressable
+                  style={styles.headerChatBtn}
+                  onPress={() => setShowItinerarySheet(!showItinerarySheet)}
+                >
+                  <Ionicons name="map-outline" size={18} color="#FFFFFF" />
+                </Pressable>
 
                 <Pressable
                   style={styles.headerChatBtn}
@@ -1030,18 +1058,26 @@ export function CallScreen() {
         >
           {/* Top Bar with Status Badge */}
           <SafeAreaView edges={["top"]} style={styles.audioTopBar}>
-            <Pressable style={styles.audioBackBtn} onPress={() => router.back()}>
+            <Pressable style={styles.audioBackBtn} onPress={handleMinimize}>
               <Ionicons name="chevron-down" size={26} color="#94A3B8" />
             </Pressable>
 
             {renderConnectionBadge()}
 
-            <Pressable
-              style={styles.audioChatToggle}
-              onPress={() => setShowInCallChat(!showInCallChat)}
-            >
-              <Ionicons name="chatbubble-ellipses-outline" size={22} color="#94A3B8" />
-            </Pressable>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <Pressable
+                style={styles.audioChatToggle}
+                onPress={() => setShowItinerarySheet(!showItinerarySheet)}
+              >
+                <Ionicons name="map-outline" size={20} color="#94A3B8" />
+              </Pressable>
+              <Pressable
+                style={styles.audioChatToggle}
+                onPress={() => setShowInCallChat(!showInCallChat)}
+              >
+                <Ionicons name="chatbubble-ellipses-outline" size={22} color="#94A3B8" />
+              </Pressable>
+            </View>
           </SafeAreaView>
 
           {/* Center Caller Profile & Animated Concentric Pulse Rings */}
@@ -1288,6 +1324,12 @@ export function CallScreen() {
           setShowPermissionModal(false);
           handleEndCall();
         }}
+      />
+
+      {/* In-Call Shared Travel Itinerary Sheet */}
+      <InCallItinerarySheet
+        visible={showItinerarySheet}
+        onClose={() => setShowItinerarySheet(false)}
       />
     </View>
   );

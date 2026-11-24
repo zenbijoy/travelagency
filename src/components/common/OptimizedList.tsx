@@ -10,6 +10,7 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
+import { FlashList } from "@shopify/flash-list";
 import { useResponsive } from "../../hooks/useResponsive";
 import { EmptyStateView } from "./EmptyStateView";
 import { ErrorStateCard } from "./ErrorStateCard";
@@ -35,6 +36,7 @@ export interface OptimizedListProps<T> extends Omit<FlatListProps<T>, "data"> {
   loadingMore?: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
+  estimatedItemSize?: number;
 }
 
 /**
@@ -77,6 +79,7 @@ export function OptimizedList<T extends Record<string, any>>({
   onLoadMore,
   onEndReached,
   onEndReachedThreshold = 0.4,
+  estimatedItemSize,
   ...restProps
 }: OptimizedListProps<T>) {
   const { width, isTablet, isDesktop } = useResponsive();
@@ -207,6 +210,27 @@ export function OptimizedList<T extends Record<string, any>>({
       <Text style={styles.footerLoaderText}>আরো লোড হচ্ছে...</Text>
     </View>
   ) : null;
+
+  // Use Shopify FlashList when estimatedItemSize is provided
+  if (estimatedItemSize && estimatedItemSize > 0) {
+    return (
+      <FlashList<T>
+        data={pagedItems}
+        renderItem={renderItem as any}
+        keyExtractor={safeKeyExtractor}
+        estimatedItemSize={estimatedItemSize}
+        numColumns={computedColumns}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={onEndReachedThreshold}
+        contentContainerStyle={contentContainerStyle as any}
+        ListEmptyComponent={ListEmptyComponent ?? defaultEmptyComponent}
+        ListFooterComponent={ListFooterComponent ?? defaultFooterComponent}
+        {...(restProps as any)}
+      />
+    );
+  }
 
   return (
     <FlatList<T>

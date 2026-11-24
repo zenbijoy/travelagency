@@ -417,4 +417,39 @@ export const reportService = {
       return false;
     }
   },
+
+  /**
+   * PostHog-inspired Conversion Funnel Event Tracker
+   * Diagnoses checkout abandonment and booking drop-offs across user journeys
+   */
+  async trackConversionFunnel(
+    step:
+      | "itinerary_viewed"
+      | "itinerary_cloned"
+      | "checkout_started"
+      | "payment_method_selected"
+      | "booking_saga_completed"
+      | "booking_saga_failed",
+    properties: Record<string, any> = {}
+  ): Promise<void> {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id || "anonymous";
+
+      if (__DEV__) {
+        console.log(`[Funnel] ${step}:`, { userId, ...properties, timestamp: new Date().toISOString() });
+      }
+
+      await supabase.from("search_logs").insert({
+        user_id: userId !== "anonymous" ? userId : null,
+        search_query: `funnel:${step}`,
+        filters: properties,
+        result_count: properties.total_amount ? Math.round(Number(properties.total_amount)) : 1,
+        created_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      // Non-blocking telemetry
+      console.debug("Funnel event tracking non-blocking warning:", err);
+    }
+  },
 };

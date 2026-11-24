@@ -1,0 +1,28 @@
+# Maestro E2E Flow: 01_login_flow.yaml
+# Tests Phone Authentication & Profile Screen Verification
+appId: com.shopnojatra.app
+---
+- launchApp:
+    clearState: true
+
+# Verify Welcome Screen / Splash Screen loads
+- assertVisible: "স্বপ্ন যাত্রা"
+
+# Tap Get Started or Login
+- tapOn:
+    text: "Get Started|Login|লগইন"
+    optional: true
+
+# Enter Phone Number
+- tapOn: "Phone Number|01XXXXXXXXX"
+- inputText: "01700000000"
+
+# Request OTP
+- tapOn: "Continue|Send OTP|পরবর্তী"
+
+# Enter Mock OTP (123456)
+- assertVisible: "Enter OTP|যাচাইকরণ কোড"
+- inputText: "123456"
+
+# Verify Dashboard / Home Screen
+- assertVisible: "Explore|আবিষ্কার করুন|Home"

@@ -1,0 +1,31 @@
+# Maestro E2E Flow: 03_flight_train_booking.yaml
+# Tests Transit Search (DAC -> CGP), Flight/Train Seat Selection, and Booking Saga Checkout
+appId: com.shopnojatra.app
+---
+- launchApp
+
+# Tap on Flights or Trains vertical icon on Home
+- tapOn:
+    text: "Flights|Trains|ফ্লাইট|ট্রেন"
+    index: 0
+
+# Verify Search Screen displays
+- assertVisible: "From|Origin|DAC|Dhaka"
+
+# Tap Search
+- tapOn: "Search Flights|Search Trains|সার্চ করুন"
+
+# Verify FlashList Results Loaded
+- assertVisible: "Available|ফলাফল|Fare"
+
+# Select the First Result Card
+- tapOn:
+    text: "Select|Book Now|বুক করুন"
+    index: 0
+
+# Verify Booking / Seat Picker
+- assertVisible: "Passenger Details|Seat Matrix|Cabin"
+
+# Confirm & Proceed to Payment
+- tapOn: "Continue to Payment|Pay with bKash|পরবর্তী"
+- assertVisible: "Payment Method|bKash|Nagad"

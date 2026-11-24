@@ -1,0 +1,29 @@
+{
+  "name": "@shopnojatra/map-sdk",
+  "version": "1.0.0",
+  "description": "Universal Bangladesh Hyperlocal Map & Mobility SDK (Drop-in Google Maps and Uber replacement)",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "bangladesh",
+    "maps",
+    "maplibre",
+    "google-maps-alternative",
+    "uber-clone",
+    "foodpanda-clone",
+    "routing",
+    "geocoding",
+    "valhalla",
+    "pmtiles"
+  ],
+  "author": "ShopnoJatra Engineering Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "@maplibre/maplibre-react-native": ">=11.0.0",
+    "react": ">=18.0.0",
+    "react-native": ">=0.74.0"
+  }
+}

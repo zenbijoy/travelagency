@@ -1,0 +1,25 @@
+# Maestro E2E Flow: 04_offline_eticket.yaml
+# Tests Accessing Confirmed E-Tickets and Offline Survival Vault
+appId: com.shopnojatra.app
+---
+- launchApp
+
+# Navigate to Bookings / Trips
+- tapOn: "My Trips|Trips|আমার বুকিং"
+
+# Tap Confirmed Booking Card
+- tapOn:
+    text: "Confirmed|E-Ticket|View Pass"
+    index: 0
+
+# Verify E-Ticket Screen with QR Code
+- assertVisible: "E-Ticket|Boarding Pass|SJ-TRIP"
+- assertVisible: "QR Code|Scan at Gate"
+
+# Verify Offline Survival Mode / Guide
+- tapOn:
+    text: "Offline Vault|Survival Mode|অফলাইন গাইড"
+    optional: true
+
+# Check Offline Map & Emergency Contacts
+- assertVisible: "Emergency Contacts|SOS|Offline Map"

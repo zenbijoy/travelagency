@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopnoJatra Autonomous Map Platform - Bangladesh Live Showcase</title>
+  
+  <!-- MapLibre GL JS -->
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", sans-serif; }
+    body { background-color: #0b131e; color: #f8fafc; overflow: hidden; }
+    
+    #map { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+
+    /* Control Overlay Panel */
+    .control-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+      width: 380px;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #006a4e;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    h1 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    p.subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
+
+    .search-box { position: relative; margin-bottom: 12px; }
+    .search-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .search-input:focus { border-color: #006a4e; box-shadow: 0 0 0 2px rgba(0, 106, 78, 0.3); }
+
+    .predictions-list {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 20;
+      display: none;
+    }
+    .prediction-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid #334155;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .prediction-item:hover { background: #334155; }
+    .prediction-item .name { font-weight: 600; color: #38bdf8; }
+    .prediction-item .sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+    .vehicle-selector {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .btn-vehicle {
+      flex: 1;
+      padding: 8px 4px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: 0.2s;
+    }
+    .btn-vehicle.active {
+      background: #006a4e;
+      color: #fff;
+      border-color: #006a4e;
+      font-weight: 600;
+    }
+
+    .eta-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .eta-val { font-size: 18px; font-weight: 800; color: #10b981; }
+    .eta-dist { font-size: 12px; color: #94a3b8; }
+
+    .btn-action {
+      width: 100%;
+      padding: 12px;
+      background: #006a4e;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+    .btn-action:hover { background: #00523c; }
+
+    .attribution-tag {
+      margin-top: 12px;
+      font-size: 10px;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen Interactive Map -->
+  <div id="map"></div>
+
+  <!-- Interactive Control Panel -->
+  <div class="control-panel">
+    <span class="badge">🇧🇩 BANGLADESH AUTONOMOUS MAP API</span>
+    <h1>ShopnoJatra Mobility Core</h1>
+    <p class="subtitle">গুগল ম্যাপ ও উবারের ১০০% ওপেন-সোর্স বিকল্প</p>
+
+    <!-- Search Input -->
+    <div class="search-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="স্থান বা অলিগলি খুঁজুন (যেমন: ধানমন্ডি, গুলশান)" autocomplete="off" />
+      <div id="predictionsList" class="predictions-list"></div>
+    </div>
+
+    <!-- Mode Selector -->
+    <div class="vehicle-selector">
+      <button class="btn-vehicle active" data-mode="motorbike">🏍️ বাইক</button>
+      <button class="btn-vehicle" data-mode="cng">🛺 সিএনজি</button>
+      <button class="btn-vehicle" data-mode="rickshaw">🚲 রিকশা</button>
+      <button class="btn-vehicle" data-mode="car">🚗 কার</button>
+    </div>
+
+    <!-- ETA & Distance Display -->
+    <div class="eta-card">
+      <div>
+        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">আনুমানিক সময় (ETA)</div>
+        <div id="etaTime" class="eta-val">১৪ মিনিট</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">দূরত্ব</div>
+        <div id="etaDist" class="eta-dist">৪.২ কিমি</div>
+      </div>
+    </div>
+
+    <!-- Live Simulation Button -->
+    <button id="btnSimulate" class="btn-action">
+      <span>▶️ লাইভ রাইডার মুভমেন্ট সিমুলেট করুন</span>
+    </button>
+
+    <div class="attribution-tag">
+      © OpenStreetMap contributors, Overture Maps Foundation
+    </div>
+  </div>
+
+  <script>
+    // Demo Sample Coordinates (Dhaka Center: Banani to Dhanmondi)
+    const DEMO_ORIGIN = [90.4078, 23.7925]; // Banani
+    const DEMO_DEST = [90.3776, 23.7516];   // Dhanmondi 32
+
+    // Initialize MapLibre GL
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: {
+        version: 8,
+        sources: {
+          'osm-tiles': {
+            type: 'raster',
+            tiles: [
+              'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+            ],
+            tileSize: 256,
+            attribution: '© OpenStreetMap contributors'
+          }
+        },
+        layers: [
+          {
+            id: 'osm-layer',
+            type: 'raster',
+            source: 'osm-tiles',
+            minzoom: 0,
+            maxzoom: 19
+          }
+        ]
+      },
+      center: [90.395, 23.77],
+      zoom: 13,
+      pitch: 45
+    });
+
+    map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+
+    // Add Markers
+    new maplibregl.Marker({ color: '#EF4444' })
+      .setLngLat(DEMO_DEST)
+      .setPopup(new maplibregl.Popup().setText('কাস্টমার ড্রপ-অফ (ধানমন্ডি ৩২)'))
+      .addTo(map);
+
+    const riderMarker = new maplibregl.Marker({ color: '#10B981' })
+      .setLngLat(DEMO_ORIGIN)
+      .setPopup(new maplibregl.Popup().setText('রাইডার (বনানী)'))
+      .addTo(map);
+
+    // Sample Search Places Autocomplete Demo
+    const samplePlaces = [
+      { name: "ধানমন্ডি ৩২ (বঙ্গবন্ধু স্মৃতি জাদুঘর)", sub: "Road 32, Dhanmondi, Dhaka", coords: [90.3776, 23.7516] },
+      { name: "স্টার কাবাব ও রেস্টুরেন্ট", sub: "House 15, Road 2, Dhanmondi", coords: [90.3853, 23.7408] },
+      { name: "গুলশান ১ গোলচত্বর", sub: "Gulshan Avenue, Dhaka", coords: [90.4172, 23.7781] },
+      { name: "বনানী রোড ১১ ফুড হাব", sub: "Road 11, Block D, Banani", coords: [90.4048, 23.7937] },
+      { name: "উত্তরা সেক্টর ৩ রাজলক্ষ্মী কমপ্লেক্স", sub: "Sector 3, Uttara, Dhaka", coords: [90.3986, 23.8683] }
+    ];
+
+    const searchInput = document.getElementById('searchInput');
+    const predictionsList = document.getElementById('predictionsList');
+
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        predictionsList.style.display = 'none';
+        return;
+      }
+      const matches = samplePlaces.filter(p => p.name.toLowerCase().includes(q) || p.sub.toLowerCase().includes(q));
+      if (matches.length > 0) {
+        predictionsList.innerHTML = matches.map(p => `
+          <div class="prediction-item" onclick="selectPlace(${p.coords[0]}, ${p.coords[1]}, '${p.name}')">
+            <div class="name">${p.name}</div>
+            <div class="sub">${p.sub}</div>
+          </div>
+        `).join('');
+        predictionsList.style.display = 'block';
+      } else {
+        predictionsList.style.display = 'none';
+      }
+    });
+
+    window.selectPlace = (lng, lat, name) => {
+      searchInput.value = name;
+      predictionsList.style.display = 'none';
+      map.flyTo({ center: [lng, lat], zoom: 16 });
+    };
+
+    // Live Rider Movement Simulation
+    let isSimulating = false;
+    document.getElementById('btnSimulate').addEventListener('click', () => {
+      if (isSimulating) return;
+      isSimulating = true;
+      let step = 0;
+      const totalSteps = 100;
+      
+      const interval = setInterval(() => {
+        step++;
+        const currentLng = DEMO_ORIGIN[0] + (DEMO_DEST[0] - DEMO_ORIGIN[0]) * (step / totalSteps);
+        const currentLat = DEMO_ORIGIN[1] + (DEMO_DEST[1] - DEMO_ORIGIN[1]) * (step / totalSteps);
+        
+        riderMarker.setLngLat([currentLng, currentLat]);
+
+        // Dynamic ETA Countdown
+        const remainingKm = (4.2 * (1 - step / totalSteps)).toFixed(1);
+        const remainingMin = Math.ceil(14 * (1 - step / totalSteps));
+        document.getElementById('etaTime').innerText = `${remainingMin} মিনিট`;
+        document.getElementById('etaDist').innerText = `${remainingKm} কিমি`;
+
+        if (step >= totalSteps) {
+          clearInterval(interval);
+          isSimulating = false;
+          alert('✅ রাইডার সফলভাবে কাস্টমারের ঠিকানায় পৌঁছেছে!');
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>

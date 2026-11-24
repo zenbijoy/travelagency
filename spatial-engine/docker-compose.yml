@@ -1,0 +1,190 @@
+# ==============================================================================
+# Autonomous Production Map Engine & Mobility Platform: Bangladesh (Late-2026)
+# Target Architecture: Oracle Cloud Always Free (2 OCPUs, 12 GB RAM, ARM64)
+# Host Limits: 8,350 MB container hard caps | 3,650 MB reserved for Linux OS cache
+# ==============================================================================
+
+services:
+  # 1. Edge Reverse Proxy & TLS Gateway
+  gateway:
+    image: nginx:alpine
+    container_name: bd_gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/letsencrypt:ro
+    ulimits:
+      nofile:
+        soft: 131072
+        hard: 131072
+    mem_limit: 150m
+    networks:
+      - spatial_net
+    depends_on:
+      - spatial-bff
+      - centrifugo
+      - martin
+
+  # 2. Go Spatial BFF & API Gateway (Google Maps drop-in facade + Uber H3)
+  spatial-bff:
+    build:
+      context: ./spatial-bff
+      dockerfile: Dockerfile
+    image: shopnojatra/bd-spatial-bff:v1.0.0
+    container_name: bd_spatial_bff
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+      - VALHALLA_URL=http://valhalla:8002
+      - VROOM_URL=http://vroom:3000
+      - PHOTON_URL=http://photon:2322
+      - TYPESENSE_URL=http://typesense:8108
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY:-dev_typesense_secret_key_2026}
+      - TILE38_ADDR=tile38:9851
+      - REDIS_ADDR=redis:6379
+      - CENTRIFUGO_API_URL=http://centrifugo:8000/api
+      - CENTRIFUGO_API_KEY=${CENTRIFUGO_API_KEY:-dev_centrifugo_api_key_2026}
+      - CENTRIFUGO_SECRET=${CENTRIFUGO_SECRET:-dev_hmac_secret_key_at_least_32_chars_2026}
+      - API_SECRET_KEYS=${API_SECRET_KEYS:-key_live_bd_user_001,key_live_bd_agency_002}
+    mem_limit: 100m
+    networks:
+      - spatial_net
+    depends_on:
+      - valhalla
+      - vroom
+      - photon
+      - typesense
+      - tile38
+      - redis
+      - centrifugo
+
+  # 3. Rust-Powered Vector Tile Server (Standby & Local Fallback for PMTiles)
+  martin:
+    image: ghcr.io/maplibre/martin:main
+    container_name: bd_martin
+    restart: unless-stopped
+    volumes:
+      - ./tiles:/tiles:ro
+    command: /tiles/bangladesh.pmtiles --workers 2
+    mem_limit: 100m
+    networks:
+      - spatial_net
+
+  # 4. Dynamic Multimodal Routing Engine & Meili Map Matcher (Valhalla 3.9.1)
+  valhalla:
+    image: ghcr.io/valhalla/valhalla-scripted:3.9.1
+    container_name: bd_valhalla
+    restart: unless-stopped
+    volumes:
+      - ./valhalla_data:/custom_files
+    environment:
+      - server_threads=2
+      - build_elevation=False
+      - build_admins=True
+      - build_time_zones=True
+      - serve_tiles=True
+      - use_tiles_ignore_pbf=False
+    mem_limit: 2200m
+    networks:
+      - spatial_net
+
+  # 5. Multi-Order Batching & Dispatch Optimization Engine (VROOM 1.15.0)
+  vroom:
+    image: ghcr.io/vroom-project/vroom-docker:v1.15.0
+    container_name: bd_vroom
+    restart: unless-stopped
+    volumes:
+      - ./vroom:/conf:ro
+    environment:
+      - VROOM_ROUTER=valhalla
+    mem_limit: 300m
+    networks:
+      - spatial_net
+    depends_on:
+      - valhalla
+
+  # 6. High-Performance Multilingual Geocoder & Autocomplete (Photon 1.0.0 on OpenSearch)
+  photon:
+    image: eclipse-temurin:21-jre-alpine
+    container_name: bd_photon
+    restart: unless-stopped
+    working_dir: /photon
+    volumes:
+      - ./photon_data:/photon
+    command: >
+      java -Xms1024m -Xmx1800m -XX:+UseG1GC
+      -jar /photon/photon.jar serve
+      -data-dir /photon
+      -listen-ip 0.0.0.0
+      -listen-port 2322
+    mem_limit: 2800m
+    networks:
+      - spatial_net
+
+  # 7. ODbL-Isolated Search Engine for Overture Places & Private Merchants (Typesense 30.2)
+  typesense:
+    image: typesense/typesense:30.2
+    container_name: bd_typesense
+    restart: unless-stopped
+    volumes:
+      - ./typesense_data:/data
+    command: >
+      --data-dir /data
+      --api-key=${TYPESENSE_API_KEY:-dev_typesense_secret_key_2026}
+      --enable-cors
+      --thread-pool-size=2
+    mem_limit: 1200m
+    networks:
+      - spatial_net
+
+  # 8. Real-time In-Memory Spatial Index, Driver KNN & Geofencing (Tile38 1.38.0)
+  tile38:
+    image: tile38/tile38:1.38.0
+    container_name: bd_tile38
+    restart: unless-stopped
+    volumes:
+      - ./tile38_data:/data
+    command: tile38-server -d /data
+    mem_limit: 500m
+    networks:
+      - spatial_net
+
+  # 9. Real-Time High-Concurrency WebSocket Location Broker (Centrifugo v6.9.6)
+  centrifugo:
+    image: centrifugo/centrifugo:v6.9.6
+    container_name: bd_centrifugo
+    restart: unless-stopped
+    volumes:
+      - ./centrifugo/config.json:/centrifugo/config.json:ro
+    command: centrifugo -c /centrifugo/config.json
+    ulimits:
+      nofile:
+        soft: 131072
+        hard: 131072
+    mem_limit: 600m
+    networks:
+      - spatial_net
+    depends_on:
+      - redis
+
+  # 10. L1 In-Memory Cache, Rate Limiting & Centrifugo Pub/Sub Broker (Redis 7)
+  redis:
+    image: redis:7-alpine
+    container_name: bd_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --maxmemory 320mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+    mem_limit: 400m
+    networks:
+      - spatial_net
+
+networks:
+  spatial_net:
+    driver: bridge

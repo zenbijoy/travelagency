@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: ShopnoJatra Autonomous Map & Mobility API (Bangladesh)
+  version: 1.0.0
+  description: >
+    Production-grade, zero-cost Google Maps and Uber Movement replacement API.
+    Designed for 15-20 Lakh MAU, real-time rider tracking, bilingual address autocomplete,
+    turn-by-turn routing, distance matrices, and offline map delivery for Bangladesh.
+servers:
+  - url: https://api.yourdomain.com
+    description: Production OCI Singapore Gateway
+  - url: http://localhost:8080
+    description: Local Development / Go Spatial BFF
+
+paths:
+  /v1/places/autocomplete:
+    get:
+      summary: Google Places Autocomplete Replacement
+      description: Searches streets, alleys, markets, restaurants, and holding landmarks in Bengali and English.
+      parameters:
+        - name: input
+          in: query
+          required: true
+          schema:
+            type: string
+          example: ধানমন্ডি
+        - name: lat
+          in: query
+          schema:
+            type: number
+          example: 23.7516
+        - name: lng
+          in: query
+          schema:
+            type: number
+          example: 90.3776
+      responses:
+        '200':
+          description: List of predictions with coordinates and confidence scores
+        '401':
+          description: Unauthorized - Valid X-API-Key required
+
+  /v1/geocode/reverse:
+    get:
+      summary: Reverse Geocoding
+      description: Converts GPS coordinates into complete Bengali structured street address.
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+          example: 23.7925
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+          example: 90.4078
+        - name: lang
+          in: query
+          schema:
+            type: string
+            default: bn
+      responses:
+        '200':
+          description: Structured address with holding, road, sector, thana, district
+
+  /v1/directions:
+    get:
+      summary: Turn-by-Turn Navigation & ETA
+      description: Computes multimodal routes for motorbike, cng, car, and rickshaw with traffic awareness.
+      parameters:
+        - name: origin
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "23.7925,90.4078"
+        - name: destination
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "23.7516,90.3776"
+        - name: mode
+          in: query
+          schema:
+            type: string
+            enum: [motorbike, cng, car, bicycle]
+            default: motorbike
+      responses:
+        '200':
+          description: Complete route with polyline, duration in seconds, and distance in km
+
+  /v1/distancematrix:
+    post:
+      summary: Driver Dispatch Distance Matrix
+      description: Finds the nearest available riders within a radius and calculates ETAs in < 2ms.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pickup_lat:
+                  type: number
+                  example: 23.7465
+                pickup_lng:
+                  type: number
+                  example: 90.3725
+                radius_meters:
+                  type: integer
+                  default: 3000
+                limit:
+                  type: integer
+                  default: 15
+      responses:
+        '200':
+          description: Sorted array of nearest riders with ETA and distance
+
+  /v1/roads/snap:
+    post:
+      summary: Roads API Snap-to-Roads (Map Matching)
+      description: Snaps noisy mobile GPS coordinates onto the true road centerline using Meili HMM.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shape:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      lat:
+                        type: number
+                      lon:
+                        type: number
+      responses:
+        '200':
+          description: Snapped coordinates aligned with lane network
+
+  /v1/fleet/ping:
+    post:
+      summary: Rider Location Update (Dead-Reckoning Ingress)
+      description: Ingests rider telemetry, updates Tile38 spatial DB, computes H3 hexagon, and publishes to Centrifugo WebSocket.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rider_id, lat, lng, heading, speed]
+              properties:
+                rider_id:
+                  type: string
+                order_id:
+                  type: string
+                lat:
+                  type: number
+                lng:
+                  type: number
+                heading:
+                  type: number
+                speed:
+                  type: number
+      responses:
+        '200':
+          description: Acknowledged with current H3 hex cell
+
+  /v1/surge:
+    get:
+      summary: Real-Time Surge Pricing Multiplier
+      description: Calculates Uber H3 Resolution 8 demand vs rider supply multiplier in nanoseconds.
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Surge multiplier (e.g. 1.0x, 1.25x, 1.5x) and active driver count
+
+  /v1/offline/manifest:
+    get:
+      summary: Offline Bangladesh Map Manifest
+      description: Returns checksums, bounds, and download URLs for zero-internet PMTiles bundles.
+      responses:
+        '200':
+          description: Complete offline pack metadata
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+security:
+  - ApiKeyAuth: []

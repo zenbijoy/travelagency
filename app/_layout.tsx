@@ -41,6 +41,12 @@ initAlertPolyfill();
 const LazyIncomingCallBanner = lazy(() =>
   import("../src/components/IncomingCallBanner").then((m) => ({ default: m.IncomingCallBanner }))
 );
+const LazyActiveCallBanner = lazy(() =>
+  import("../src/features/calls").then((m) => ({ default: m.ActiveCallBanner }))
+);
+const LazyIncomingCallModal = lazy(() =>
+  import("../src/features/calls").then((m) => ({ default: m.IncomingCallModal }))
+);
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -150,6 +156,8 @@ const RootLayoutContent = () => {
     <Suspense fallback={<RouteChunkFallback />}>
       <Suspense fallback={null}>
         <LazyIncomingCallBanner />
+        <LazyActiveCallBanner />
+        <LazyIncomingCallModal />
       </Suspense>
       <Stack
         screenOptions={{
