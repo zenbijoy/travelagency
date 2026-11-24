@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#2563eb",
   },
   clearBtn: {
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   clearBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ef4444",
   },
 });

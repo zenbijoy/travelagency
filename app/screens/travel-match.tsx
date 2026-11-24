@@ -2012,7 +2012,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
   },
   aiBadge: {
@@ -2028,7 +2028,7 @@ const styles = StyleSheet.create({
   },
   aiBadgeText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FBBF24",
   },
   headerSubtitle: {
@@ -2057,7 +2057,7 @@ const styles = StyleSheet.create({
   },
   unreadBadgeText: {
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   modeSwitcherContainer: {
@@ -2086,7 +2086,7 @@ const styles = StyleSheet.create({
   },
   modeTabTextActive: {
     color: PRIMARY_BLUE,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   filterRow: {
     flexDirection: "row",
@@ -2113,7 +2113,7 @@ const styles = StyleSheet.create({
   },
   filterChipTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   centeredLoading: {
     flex: 1,
@@ -2194,7 +2194,7 @@ const styles = StyleSheet.create({
   },
   verifiedBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   matchScoreBadge: {
@@ -2213,13 +2213,13 @@ const styles = StyleSheet.create({
   },
   matchScoreVal: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   matchScoreSub: {
     fontSize: 10,
     color: "#E0E7FF",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   mutualFriendsPill: {
     flexDirection: "row",
@@ -2256,7 +2256,7 @@ const styles = StyleSheet.create({
   },
   cardNameText: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   cardAgeText: {
@@ -2292,7 +2292,7 @@ const styles = StyleSheet.create({
   },
   destPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#38BDF8",
   },
   datePill: {
@@ -2344,7 +2344,7 @@ const styles = StyleSheet.create({
   budgetTagText: {
     fontSize: 10.5,
     color: "#FDE68A",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   bioSnippetBox: {
     backgroundColor: "rgba(15, 23, 42, 0.6)",
@@ -2376,7 +2376,7 @@ const styles = StyleSheet.create({
   },
   likeStampText: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "600",
     color: EMERALD_GREEN,
   },
   nopeStamp: {
@@ -2386,7 +2386,7 @@ const styles = StyleSheet.create({
   },
   nopeStampText: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "600",
     color: CRIMSON_RED,
   },
 
@@ -2456,7 +2456,7 @@ const styles = StyleSheet.create({
   },
   emptyDeckTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
   },
@@ -2485,7 +2485,7 @@ const styles = StyleSheet.create({
   },
   resetDeckBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   editPlanAltBtn: {
@@ -2501,7 +2501,7 @@ const styles = StyleSheet.create({
   },
   editPlanAltBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: PRIMARY_BLUE,
   },
 
@@ -2536,7 +2536,7 @@ const styles = StyleSheet.create({
   },
   myIntentTagText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   myIntentEditBtn: {
@@ -2555,7 +2555,7 @@ const styles = StyleSheet.create({
   },
   myIntentDest: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
     marginTop: 6,
   },
@@ -2622,7 +2622,7 @@ const styles = StyleSheet.create({
   },
   sortPillTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   emptyFeedBox: {
     paddingVertical: 50,
@@ -2630,7 +2630,7 @@ const styles = StyleSheet.create({
   },
   emptyFeedText: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
     marginTop: 8,
   },
@@ -2665,7 +2665,7 @@ const styles = StyleSheet.create({
   },
   feedNameText: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   feedAgeText: {
@@ -2690,7 +2690,7 @@ const styles = StyleSheet.create({
   feedVerifiedPillText: {
     fontSize: 10.5,
     color: "#059669",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   tourTypePill: {
     backgroundColor: "#F1F5F9",
@@ -2713,13 +2713,13 @@ const styles = StyleSheet.create({
   },
   feedScoreText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   feedScoreSub: {
     fontSize: 9.5,
     color: "#E0E7FF",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   feedTripInfoBanner: {
     flexDirection: "row",
@@ -2738,7 +2738,7 @@ const styles = StyleSheet.create({
   },
   feedTripDestText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   feedTripDateText: {
@@ -2779,7 +2779,7 @@ const styles = StyleSheet.create({
   },
   feedStylePillTextActive: {
     color: "#4338CA",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   feedBioBox: {
     backgroundColor: "#F8FAFC",
@@ -2789,7 +2789,7 @@ const styles = StyleSheet.create({
   },
   feedBioLabel: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   feedBioText: {
@@ -2813,7 +2813,7 @@ const styles = StyleSheet.create({
   },
   feedBudgetValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   feedConnectBtn: {
@@ -2832,7 +2832,7 @@ const styles = StyleSheet.create({
   },
   feedConnectBtnText: {
     fontSize: 12.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
 
@@ -2860,7 +2860,7 @@ const styles = StyleSheet.create({
   },
   modalSheetTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSheetSubtitle: {
@@ -2890,7 +2890,7 @@ const styles = StyleSheet.create({
   },
   recipientName: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   recipientDest: {
@@ -2915,7 +2915,7 @@ const styles = StyleSheet.create({
   },
   recipientScoreText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   recipientVerifiedTag: {
@@ -2929,12 +2929,12 @@ const styles = StyleSheet.create({
   },
   recipientVerifiedText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284C7",
   },
   inputSectionLabel: {
     fontSize: 12.5,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#334155",
     marginBottom: 6,
     marginTop: 10,
@@ -3005,7 +3005,7 @@ const styles = StyleSheet.create({
   },
   sendRequestBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
 
@@ -3021,12 +3021,12 @@ const styles = StyleSheet.create({
   },
   scoreSummaryVal: {
     fontSize: 34,
-    fontWeight: "900",
+    fontWeight: "600",
     color: PRIMARY_BLUE,
   },
   scoreSummaryLabel: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0369A1",
     marginTop: 2,
   },
@@ -3060,7 +3060,7 @@ const styles = StyleSheet.create({
   },
   breakdownCardScore: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: PRIMARY_BLUE,
   },
   breakdownCardDesc: {
@@ -3094,7 +3094,7 @@ const styles = StyleSheet.create({
   },
   closeSheetBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
 
@@ -3109,7 +3109,7 @@ const styles = StyleSheet.create({
   },
   trustScoreTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#065F46",
   },
   trustScoreSubtitle: {
@@ -3141,7 +3141,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF2FF",
     color: "#4F46E5",
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -3181,7 +3181,7 @@ const styles = StyleSheet.create({
   },
   outboxDest: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   outboxDate: {
@@ -3298,7 +3298,7 @@ const styles = StyleSheet.create({
   },
   vibeBtnTextActive: {
     color: PRIMARY_BLUE,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   submitPlanBtn: {
     borderRadius: 12,
@@ -3311,7 +3311,7 @@ const styles = StyleSheet.create({
   },
   submitPlanBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#FFFFFF",
   },
 });

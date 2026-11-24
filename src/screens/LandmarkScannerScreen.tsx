@@ -1785,7 +1785,7 @@ const styles = StyleSheet.create({
   permissionBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // AR Reticle HUD
@@ -1922,7 +1922,7 @@ const styles = StyleSheet.create({
   zoomButtonText: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   zoomButtonTextActive: {
     color: "#FFFFFF",
@@ -1950,7 +1950,7 @@ const styles = StyleSheet.create({
   },
   presetChipTextSelected: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Floating AR Card
@@ -1986,7 +1986,7 @@ const styles = StyleSheet.create({
   unescoBadgeText: {
     color: "#38BDF8",
     fontSize: 12.5,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   banglaBadge: {
@@ -2014,7 +2014,7 @@ const styles = StyleSheet.create({
   confidenceText: {
     color: "#34D399",
     fontSize: 12.5,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   monumentTitleBlock: {
     flexDirection: "row",
@@ -2055,7 +2055,7 @@ const styles = StyleSheet.create({
   metaChipText: {
     color: "#CBD5E1",
     fontSize: 12.5,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   summaryText: {
     color: "#94A3B8",
@@ -2119,7 +2119,7 @@ const styles = StyleSheet.create({
   secondaryShortcutText: {
     color: "#34D399",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
   },
 
   // Modals Styling
@@ -2144,13 +2144,13 @@ const styles = StyleSheet.create({
   modalCategoryTitle: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.8,
   },
   modalMainTitle: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 2,
   },
   modalCloseCircle: {
@@ -2227,7 +2227,7 @@ const styles = StyleSheet.create({
   transcriptTagText: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   transcriptActiveText: {
     color: "#F1F5F9",
@@ -2288,13 +2288,13 @@ const styles = StyleSheet.create({
   viewer3DTagText: {
     color: "#06B6D4",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 0.8,
   },
   viewer3DTitle: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 2,
   },
   viewer3DSub: {
@@ -2345,7 +2345,7 @@ const styles = StyleSheet.create({
   renderModeBtnText: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   renderModeBtnTextActive: {
     color: "#FFFFFF",
@@ -2363,7 +2363,7 @@ const styles = StyleSheet.create({
   recenterBtnText: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   hotspotsSection: {
     flex: 1,
@@ -2371,7 +2371,7 @@ const styles = StyleSheet.create({
   hotspotsSectionTitle: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.6,
     marginBottom: 8,
   },
@@ -2398,7 +2398,7 @@ const styles = StyleSheet.create({
   },
   hotspotChipTextSelected: {
     color: "#F59E0B",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   hotspotDetailCard: {
     marginTop: 10,
@@ -2460,7 +2460,7 @@ const styles = StyleSheet.create({
   guideName: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   guideBio: {
     color: "#94A3B8",
@@ -2494,7 +2494,7 @@ const styles = StyleSheet.create({
   bookGuideActionText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Ticket Modal
@@ -2544,7 +2544,7 @@ const styles = StyleSheet.create({
   stepperValue: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     minWidth: 16,
     textAlign: "center",
   },
@@ -2565,7 +2565,7 @@ const styles = StyleSheet.create({
   totalValueBDT: {
     color: "#34D399",
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   confirmActionButton: {
     backgroundColor: "#0284C7",
@@ -2576,7 +2576,7 @@ const styles = StyleSheet.create({
   confirmActionText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // History Modal
@@ -2597,7 +2597,7 @@ const styles = StyleSheet.create({
   sectionHeaderTitle: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.6,
     marginTop: 12,
     marginBottom: 10,
@@ -2643,7 +2643,7 @@ const styles = StyleSheet.create({
   successStateTitle: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   successStateSub: {
     color: "#CBD5E1",
@@ -2751,7 +2751,7 @@ const styles = StyleSheet.create({
   alternativePctText: {
     color: "#34D399",
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   cloudAiConsentRow: {
     marginTop: 8,
@@ -2800,7 +2800,7 @@ const styles = StyleSheet.create({
   reportSectionLabel: {
     color: "#E2E8F0",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "600",
     marginTop: 14,
     marginBottom: 8,
   },
@@ -2824,7 +2824,7 @@ const styles = StyleSheet.create({
   correctionName: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   correctionNameSelected: {
     color: "#34D399",
@@ -2879,7 +2879,7 @@ const styles = StyleSheet.create({
   confirmCorrectionBtnText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   consentCard: {
     backgroundColor: "#0F172A",
@@ -2903,7 +2903,7 @@ const styles = StyleSheet.create({
   consentTitle: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     textAlign: "center",
   },
   consentSubtitle: {
@@ -2988,7 +2988,7 @@ const styles = StyleSheet.create({
   consentConfirmBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });
 

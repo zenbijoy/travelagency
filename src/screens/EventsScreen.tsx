@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 28,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     letterSpacing: -0.5,
   },
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#1E293B",
   },
 
@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   popularCarousel: {
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#E11D48",
   },
   badgeOnSaleText: {
@@ -797,13 +797,13 @@ const styles = StyleSheet.create({
   bannerLeftCol: {},
   bannerSmallText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
     opacity: 0.9,
   },
   bannerMainTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
     marginVertical: 1,
   },
@@ -832,7 +832,7 @@ const styles = StyleSheet.create({
   },
   claimText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FF2A55",
   },
 
@@ -881,7 +881,7 @@ const styles = StyleSheet.create({
   artistInfo: {},
   artistName: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   artistLocation: {
@@ -971,7 +971,7 @@ const styles = StyleSheet.create({
     color: "#1E293B",
   },
   locationSelectedText: {
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#2563EB",
   },
 
@@ -999,13 +999,13 @@ const styles = StyleSheet.create({
   },
   detailTitle: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   detailVenue: {
     fontSize: 15,
     color: "#2563EB",
-    fontWeight: "600",
+    fontWeight: "400",
     marginTop: 6,
   },
   detailDate: {
@@ -1039,7 +1039,7 @@ const styles = StyleSheet.create({
   },
   detailPriceVal: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#0F172A",
   },
   bookTicketBtn: {
@@ -1053,7 +1053,7 @@ const styles = StyleSheet.create({
   bookTicketText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   /* Claim Modal */
@@ -1066,7 +1066,7 @@ const styles = StyleSheet.create({
   },
   claimModalTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
     marginTop: 12,
@@ -1089,7 +1089,7 @@ const styles = StyleSheet.create({
   claimConfirmText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   eventLoadingBox: {
     backgroundColor: "#FFFFFF",

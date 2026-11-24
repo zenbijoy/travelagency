@@ -1989,7 +1989,7 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     marginTop: 4,
   },
@@ -2163,7 +2163,7 @@ const styles = StyleSheet.create({
   },
   vipBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -2245,7 +2245,7 @@ const styles = StyleSheet.create({
   },
   tabBtnTextActive: {
     color: "#0f172a",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   kycCard: {
     backgroundColor: "#ffffff",
@@ -2313,7 +2313,7 @@ const styles = StyleSheet.create({
   },
   kycInspectBtnText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#0f172a",
   },
   kycRejectBtn: {
@@ -2370,7 +2370,7 @@ const styles = StyleSheet.create({
   },
   splitStatusBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   splitPanesContainer: {
@@ -2463,7 +2463,7 @@ const styles = StyleSheet.create({
   },
   faceMatchTag: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   docFieldRow: {
@@ -2536,7 +2536,7 @@ const styles = StyleSheet.create({
   },
   metaValue: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#f8fafc",
   },
   riskScoreBadge: {
@@ -2547,7 +2547,7 @@ const styles = StyleSheet.create({
   },
   riskScoreText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#34d399",
   },
   discrepancyBox: {
@@ -2615,7 +2615,7 @@ const styles = StyleSheet.create({
   },
   footerRejectBtnText: {
     color: "#ffffff",
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 13,
   },
   footerApproveBtn: {
@@ -2629,7 +2629,7 @@ const styles = StyleSheet.create({
   },
   footerApproveBtnText: {
     color: "#ffffff",
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 13,
   },
   profileCard: {
@@ -2650,7 +2650,7 @@ const styles = StyleSheet.create({
   },
   profileName: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   profileEmail: {
@@ -2727,7 +2727,7 @@ const styles = StyleSheet.create({
   },
   logAction: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   logUserIp: {
@@ -2799,7 +2799,7 @@ const styles = StyleSheet.create({
   modalSubmitBtnText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   securityModalBanner: {
     flexDirection: "row",
@@ -2810,7 +2810,7 @@ const styles = StyleSheet.create({
   },
   securityModalBannerTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   securityModalBannerSub: {
@@ -2857,7 +2857,7 @@ const styles = StyleSheet.create({
   },
   securityInputLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     marginBottom: 6,
   },
@@ -2891,7 +2891,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 13,
     color: "#b91c1c",
-    fontWeight: "700",
+    fontWeight: "500",
     backgroundColor: "#fff5f5",
   },
   securityModalFooter: {
@@ -2923,7 +2923,7 @@ const styles = StyleSheet.create({
   },
   securityExecuteBtnText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
 });

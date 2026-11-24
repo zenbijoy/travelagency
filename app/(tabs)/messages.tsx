@@ -427,7 +427,16 @@ export default function MessagesTab() {
                     onPress={() => handleStartChatWithFriend(friend)}
                   >
                     <View style={styles.onlineAvatarWrap}>
-                      <AppImage placeholderCategory="avatar" source={{ uri: friend.avatar_url }} style={styles.onlineAvatar} />
+                      <Image
+                        source={{
+                          uri:
+                            friend.avatar_url ||
+                            (friend.display_name?.includes("Tania")
+                              ? "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200"
+                              : "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200"),
+                        }}
+                        style={styles.onlineAvatar}
+                      />
                       <View style={styles.activeGreenDot} />
                     </View>
                     <Text style={styles.onlineName} numberOfLines={1}>
@@ -486,11 +495,13 @@ export default function MessagesTab() {
                     style={styles.convoAvatarWrapper}
                     onPress={() => convo.other_participant && handleOpenProfile(convo.other_participant.id)}
                   >
-                    <AppImage placeholderCategory="avatar"
+                    <Image
                       source={{
                         uri:
                           convo.avatar_url ||
-                          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
+                          (convo.title?.includes("Tania")
+                            ? "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200"
+                            : "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200"),
                       }}
                       style={styles.convoAvatar}
                     />
@@ -936,7 +947,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   headerSubtitle: {
@@ -956,7 +967,7 @@ const styles = StyleSheet.create({
   communityBtnText: {
     color: PRIMARY,
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   tabSegmentsRow: {
     flexDirection: "row",
@@ -982,12 +993,12 @@ const styles = StyleSheet.create({
   },
   segmentText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   segmentTextActive: {
     color: PRIMARY,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   badgeCountPill: {
     backgroundColor: "#EF4444",
@@ -1000,7 +1011,7 @@ const styles = StyleSheet.create({
   badgeCountText: {
     color: "#fff",
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   scroll: {
     padding: 16,
@@ -1079,7 +1090,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 12,
   },
@@ -1091,7 +1102,7 @@ const styles = StyleSheet.create({
   },
   sectionCountText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#64748B",
   },
   emptyContainer: {
@@ -1105,7 +1116,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   emptySubtitle: {
@@ -1145,7 +1156,7 @@ const styles = StyleSheet.create({
   },
   convoName: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   convoTime: {
@@ -1191,7 +1202,7 @@ const styles = StyleSheet.create({
   },
   requestName: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   requestSubtitle: {
@@ -1217,7 +1228,7 @@ const styles = StyleSheet.create({
   acceptBtnText: {
     color: "#fff",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   declineBtn: {
     flex: 1,
@@ -1230,7 +1241,7 @@ const styles = StyleSheet.create({
   declineBtnText: {
     color: "#475569",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   sentReqCard: {
     flexDirection: "row",
@@ -1248,7 +1259,7 @@ const styles = StyleSheet.create({
   },
   sentReqName: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   sentReqTime: {
@@ -1263,7 +1274,7 @@ const styles = StyleSheet.create({
   },
   cancelReqText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   friendCard: {
@@ -1282,7 +1293,7 @@ const styles = StyleSheet.create({
   },
   friendName: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   friendHandle: {
@@ -1321,7 +1332,7 @@ const styles = StyleSheet.create({
   addFriendBtnText: {
     color: "#fff",
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   callLogCard: {
     flexDirection: "row",
@@ -1342,7 +1353,7 @@ const styles = StyleSheet.create({
   },
   callName: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   callNameMissed: {
@@ -1357,7 +1368,7 @@ const styles = StyleSheet.create({
   callMetaText: {
     fontSize: 11,
     color: "#64748B",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   callBackBtn: {
     width: 36,
@@ -1388,7 +1399,7 @@ const styles = StyleSheet.create({
   },
   notifFilterTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   notifCard: {
     flexDirection: "row",
@@ -1427,7 +1438,7 @@ const styles = StyleSheet.create({
   },
   notifTitleUnread: {
     color: "#111827",
-    fontWeight: "900",
+    fontWeight: "700",
   },
   unreadDot: {
     width: 8,
@@ -1458,7 +1469,7 @@ const styles = StyleSheet.create({
   },
   simulateCallBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0055F2",
   },
 });

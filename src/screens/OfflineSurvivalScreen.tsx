@@ -1537,13 +1537,13 @@ const styles = StyleSheet.create({
   },
   logoText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.emerald,
     letterSpacing: 0.5,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: THEME.textPrimary,
   },
   headerActionBtn: {
@@ -1591,7 +1591,7 @@ const styles = StyleSheet.create({
   },
   bannerActionBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.textPrimary,
   },
   telemetryBar: {
@@ -1613,7 +1613,7 @@ const styles = StyleSheet.create({
   },
   telemetryLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.textMuted,
   },
   telemetryValue: {
@@ -1655,7 +1655,7 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     color: THEME.emerald,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   scrollArea: {
     flex: 1,
@@ -1666,7 +1666,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: THEME.textMuted,
     letterSpacing: 1,
     marginTop: 6,
@@ -1699,7 +1699,7 @@ const styles = StyleSheet.create({
   },
   offlineReadyPillText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.emerald,
   },
   offlineReadySyncTime: {
@@ -1742,7 +1742,7 @@ const styles = StyleSheet.create({
   },
   syncButtonText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.emerald,
   },
   hotelCard: {
@@ -1765,13 +1765,13 @@ const styles = StyleSheet.create({
   },
   confirmedBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.emerald,
     letterSpacing: 0.5,
   },
   hotelName: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.textPrimary,
   },
   hotelAddress: {
@@ -1792,7 +1792,7 @@ const styles = StyleSheet.create({
   },
   gridLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.textMuted,
   },
   gridValue: {
@@ -1803,7 +1803,7 @@ const styles = StyleSheet.create({
   },
   gridValueBold: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.emerald,
     marginTop: 1,
   },
@@ -1845,7 +1845,7 @@ const styles = StyleSheet.create({
   },
   cardActionText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.textPrimary,
   },
   boardingPassCard: {
@@ -1871,7 +1871,7 @@ const styles = StyleSheet.create({
   },
   carrierName: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.textPrimary,
   },
   serviceNumber: {
@@ -1886,12 +1886,12 @@ const styles = StyleSheet.create({
   },
   routeCity: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.textPrimary,
   },
   routeTime: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.emerald,
     marginTop: 2,
   },
@@ -1907,7 +1907,7 @@ const styles = StyleSheet.create({
   },
   seatPill: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.textPrimary,
     backgroundColor: "#1E293B",
     paddingHorizontal: 6,
@@ -1924,7 +1924,7 @@ const styles = StyleSheet.create({
   },
   passLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.textMuted,
   },
   passValue: {
@@ -1935,7 +1935,7 @@ const styles = StyleSheet.create({
   },
   passValueBold: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.emerald,
     marginBottom: 4,
   },
@@ -1965,7 +1965,7 @@ const styles = StyleSheet.create({
   },
   itineraryDayText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.emerald,
   },
   itineraryTimeSlot: {
@@ -1987,7 +1987,7 @@ const styles = StyleSheet.create({
   },
   checkBtnTextDone: {
     color: THEME.emerald,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   itineraryTitle: {
     fontSize: 14,
@@ -2044,7 +2044,7 @@ const styles = StyleSheet.create({
   },
   mapTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: THEME.textPrimary,
   },
   mapSubtitle: {
@@ -2087,7 +2087,7 @@ const styles = StyleSheet.create({
   },
   filterChipTextActive: {
     color: THEME.emerald,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   mapCanvasContainer: {
     alignItems: "center",
@@ -2110,7 +2110,7 @@ const styles = StyleSheet.create({
   },
   miniHeadingText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: THEME.emerald,
     marginTop: 2,
   },
@@ -2134,7 +2134,7 @@ const styles = StyleSheet.create({
   },
   landmarkCategoryText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   landmarkDist: {
     fontSize: 12,
@@ -2142,7 +2142,7 @@ const styles = StyleSheet.create({
   },
   landmarkName: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.textPrimary,
   },
   landmarkDesc: {
@@ -2169,7 +2169,7 @@ const styles = StyleSheet.create({
   },
   landmarkNavBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   hiddenCameraContainer: {
@@ -2196,7 +2196,7 @@ const styles = StyleSheet.create({
   },
   compassCardTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: THEME.textMuted,
     letterSpacing: 0.5,
   },
@@ -2210,12 +2210,12 @@ const styles = StyleSheet.create({
   },
   headingBigText: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     color: THEME.textPrimary,
   },
   headingDirText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: THEME.emerald,
   },
   compassRoseContainer: {
@@ -2235,7 +2235,7 @@ const styles = StyleSheet.create({
   },
   hotelBearingText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.emerald,
   },
   torchCard: {
@@ -2281,7 +2281,7 @@ const styles = StyleSheet.create({
   },
   torchBtnLabel: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.textPrimary,
   },
   torchBtnLabelActive: {
@@ -2300,7 +2300,7 @@ const styles = StyleSheet.create({
   },
   screenTorchText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     textAlign: "center",
     letterSpacing: 0.5,
   },
@@ -2324,7 +2324,7 @@ const styles = StyleSheet.create({
   },
   contactName: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: THEME.textPrimary,
   },
   contactLoc: {
@@ -2349,7 +2349,7 @@ const styles = StyleSheet.create({
   },
   vhfText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.amber,
   },
   contactBtnRow: {
@@ -2369,7 +2369,7 @@ const styles = StyleSheet.create({
   },
   callBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   secondaryCallBtn: {
@@ -2384,7 +2384,7 @@ const styles = StyleSheet.create({
   },
   secondaryCallText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: THEME.emerald,
   },
   protocolCard: {
@@ -2403,7 +2403,7 @@ const styles = StyleSheet.create({
   },
   protocolTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: THEME.textPrimary,
   },
   protocolStepRow: {
@@ -2412,7 +2412,7 @@ const styles = StyleSheet.create({
   },
   stepNum: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.emerald,
   },
   stepText: {
@@ -2432,7 +2432,7 @@ const styles = StyleSheet.create({
   },
   warningBoxText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.crimson,
     flex: 1,
   },
@@ -2454,7 +2454,7 @@ const styles = StyleSheet.create({
   },
   phraseEng: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: THEME.textPrimary,
   },
   phrasePhonetic: {
@@ -2494,7 +2494,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: THEME.textPrimary,
     textAlign: "center",
   },
@@ -2526,7 +2526,7 @@ const styles = StyleSheet.create({
   },
   modalCloseBtnText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
 });

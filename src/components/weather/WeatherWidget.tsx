@@ -893,7 +893,7 @@ const styles = StyleSheet.create({
   },
   locName: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
     marginStart: 4,
   },
@@ -931,7 +931,7 @@ const styles = StyleSheet.create({
   },
   goldenPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FEF08A",
   },
   headerActions: {
@@ -951,7 +951,7 @@ const styles = StyleSheet.create({
   },
   myLocationText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#67E8F9",
   },
   cityPill: {
@@ -994,7 +994,7 @@ const styles = StyleSheet.create({
   },
   cityModalTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   cityModalGpsBtn: {
@@ -1010,7 +1010,7 @@ const styles = StyleSheet.create({
   },
   cityModalGpsText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284C7",
   },
   citySearchInputWrap: {
@@ -1030,7 +1030,7 @@ const styles = StyleSheet.create({
   },
   popularHubsLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
     marginBottom: 8,
     textTransform: "uppercase",
@@ -1048,7 +1048,7 @@ const styles = StyleSheet.create({
   },
   cityNameText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   cityMetaText: {
@@ -1073,7 +1073,7 @@ const styles = StyleSheet.create({
   },
   tempLarge: {
     fontSize: 48,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
     letterSpacing: -1.5,
   },
@@ -1155,7 +1155,7 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
     marginVertical: 1,
   },
@@ -1197,14 +1197,14 @@ const styles = StyleSheet.create({
   signalNumText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   cycloneTitleWrap: {
     flex: 1,
   },
   cycloneSignalName: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FEF08A",
     textTransform: "uppercase",
   },
@@ -1336,7 +1336,7 @@ const styles = StyleSheet.create({
   },
   essentialPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FCA5A5",
   },
   packingItemReason: {
@@ -1372,7 +1372,7 @@ const styles = StyleSheet.create({
   },
   forecastTabBtnTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Hourly Carousel
@@ -1400,7 +1400,7 @@ const styles = StyleSheet.create({
   },
   hourlyTempText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   hourlyRainRow: {
@@ -1480,7 +1480,7 @@ const styles = StyleSheet.create({
   },
   dailyMaxTemp: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
     width: 26,
   },
@@ -1513,7 +1513,7 @@ const styles = StyleSheet.create({
   },
   compactTemp: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   compactDot: {
@@ -1537,7 +1537,7 @@ const styles = StyleSheet.create({
   },
   compactSignalBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   compactPacking: {
@@ -1557,7 +1557,7 @@ const styles = StyleSheet.create({
   },
   microPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   compactContainer: {

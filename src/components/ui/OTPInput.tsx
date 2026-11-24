@@ -251,13 +251,13 @@ const styles = StyleSheet.create({
   },
   cellText: {
     fontSize: 22,
-    fontWeight: "700",
+    fontWeight: "500",
     color: colors.text.primary,
     textAlign: "center",
   },
   cellTextSmall: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   activeCursor: {
     position: "absolute",
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   separatorText: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "500",
     color: colors.text.muted,
   },
   errorContainer: {

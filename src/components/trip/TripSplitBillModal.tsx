@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   closeBtn: {
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
   inviteLinkBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   addMemberBtn: {
     flex: 1,
@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
   addMemberBtnText: {
     color: "#2563EB",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   addMemberForm: {
     backgroundColor: "#F8FAFC",
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
   },
   formLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
     marginBottom: 4,
   },
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
   submitMemberBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   navTabsRow: {
     flexDirection: "row",
@@ -760,7 +760,7 @@ const styles = StyleSheet.create({
   },
   navTabTextActive: {
     color: "#2563EB",
-    fontWeight: "800",
+    fontWeight: "600",
   },
   tabContent: {
     maxHeight: 450,
@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
   },
   totalSpendingAmount: {
     fontSize: 24,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
     marginVertical: 4,
   },
@@ -801,7 +801,7 @@ const styles = StyleSheet.create({
   },
   subHeaderTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   shareSummaryBtn: {
@@ -815,7 +815,7 @@ const styles = StyleSheet.create({
   },
   shareSummaryBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#15803D",
   },
   emptySettlementBox: {
@@ -828,7 +828,7 @@ const styles = StyleSheet.create({
   },
   emptySettlementTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#166534",
     marginTop: 8,
   },
@@ -871,7 +871,7 @@ const styles = StyleSheet.create({
   },
   payerBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#991B1B",
   },
   receiverBadge: {
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
   },
   receiverBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#166534",
   },
   debtRight: {
@@ -895,7 +895,7 @@ const styles = StyleSheet.create({
   },
   debtAmountValue: {
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   balancesContainer: {
@@ -918,7 +918,7 @@ const styles = StyleSheet.create({
   },
   balanceMemberName: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   balanceDetailsText: {
@@ -937,7 +937,7 @@ const styles = StyleSheet.create({
   balancePlusText: {
     color: "#059669",
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   balanceMinusPill: {
     backgroundColor: "#FEF2F2",
@@ -945,7 +945,7 @@ const styles = StyleSheet.create({
   balanceMinusText: {
     color: "#DC2626",
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   balanceZeroPill: {
     backgroundColor: "#F1F5F9",
@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
   primaryAddExpenseBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   emptyExpensesBox: {
     alignItems: "center",
@@ -979,7 +979,7 @@ const styles = StyleSheet.create({
   },
   emptyExpensesText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
     marginTop: 8,
   },
@@ -1011,7 +1011,7 @@ const styles = StyleSheet.create({
   },
   expenseMerchant: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   expenseTagRow: {
@@ -1042,7 +1042,7 @@ const styles = StyleSheet.create({
   },
   expenseTotalText: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   paidByRow: {
@@ -1059,7 +1059,7 @@ const styles = StyleSheet.create({
     color: "#475569",
   },
   paidByNameBold: {
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#2563EB",
   },
   splitCountText: {
@@ -1090,14 +1090,14 @@ const styles = StyleSheet.create({
   memberAvatarChar: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   memberDetailsCol: {
     flex: 1,
   },
   memberName: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   memberRoleText: {
@@ -1127,7 +1127,7 @@ const styles = StyleSheet.create({
   },
   innerModalTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   categoryGrid: {
@@ -1157,7 +1157,7 @@ const styles = StyleSheet.create({
   },
   catOptionTextActive: {
     color: "#2563EB",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   payerChipsRow: {
     flexDirection: "row",
@@ -1187,7 +1187,7 @@ const styles = StyleSheet.create({
   },
   payerChipTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   saveExpenseBtn: {
     backgroundColor: "#10B981",
@@ -1201,6 +1201,6 @@ const styles = StyleSheet.create({
   saveExpenseBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -53,6 +53,24 @@ const REGION_CENTERS: { [city: string]: { lat: number; lng: number; zoom: number
   Sreemangal: { lat: 24.321, lng: 91.734, zoom: 12 },
 };
 
+const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+  "cox's bazar": { lat: 21.4272, lng: 92.0058 },
+  coxsbazar: { lat: 21.4272, lng: 92.0058 },
+  dhaka: { lat: 23.7806, lng: 90.4193 },
+  sreemangal: { lat: 24.3065, lng: 91.7296 },
+  bogra: { lat: 24.8465, lng: 89.3777 },
+  bogura: { lat: 24.8465, lng: 89.3777 },
+  sylhet: { lat: 24.8949, lng: 91.8687 },
+  chittagong: { lat: 22.3569, lng: 91.7832 },
+  chattogram: { lat: 22.3569, lng: 91.7832 },
+  sajek: { lat: 23.382, lng: 92.2938 },
+  bandarban: { lat: 22.1953, lng: 92.2184 },
+  kuakata: { lat: 21.8167, lng: 90.1167 },
+  kyoto: { lat: 35.0116, lng: 135.7681 },
+  shanghai: { lat: 31.2304, lng: 121.4737 },
+  bali: { lat: -8.4095, lng: 115.1889 },
+};
+
 export const HotelMapView: React.FC<HotelMapViewProps> = ({
   hotels,
   selectedHotelId,
@@ -104,19 +122,46 @@ export const HotelMapView: React.FC<HotelMapViewProps> = ({
     webViewRef.current?.injectJavaScript(script);
   }, []);
 
+  // Web message listener for iframe
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+    const handleWebMsg = (e: MessageEvent) => {
+      try {
+        const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        if (data && data.type === "HOTEL_CLICKED" && data.hotelId) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          setActiveHotelId(data.hotelId);
+          const matched = hotels.find((h) => h.id === data.hotelId);
+          if (matched) {
+            onSelectHotel(matched);
+          }
+        }
+      } catch {}
+    };
+    window.addEventListener("message", handleWebMsg);
+    return () => window.removeEventListener("message", handleWebMsg);
+  }, [hotels, onSelectHotel]);
+
   // HTML content for Leaflet Map with Price Pins and MarkerCluster
   const leafletHtml = useMemo(() => {
-    const hotelMarkersData = hotels.map((h) => ({
-      id: h.id,
-      name: h.name,
-      city: h.city,
-      price: h.base_price,
-      lat: h.latitude || 21.42,
-      lng: h.longitude || 91.98,
-      rating: h.average_rating || h.star_rating || 4.8,
-      image: h.image_url || (h.images && h.images[0]) || "",
-      landmarks: h.landmarks_summary_bn || h.landmarks_summary_en || "",
-    }));
+    const hotelMarkersData = hotels.map((h, idx) => {
+      const cityKey = (h.city || "").toLowerCase().trim();
+      const cityFallback = CITY_COORDS[cityKey] || {
+        lat: 21.42 + (idx * 0.02),
+        lng: 91.98 + (idx * 0.02),
+      };
+      return {
+        id: h.id,
+        name: h.name,
+        city: h.city,
+        price: h.base_price,
+        lat: Number(h.latitude) || cityFallback.lat,
+        lng: Number(h.longitude) || cityFallback.lng,
+        rating: h.average_rating || h.star_rating || 4.8,
+        image: h.image_url || (h.images && h.images[0]) || "",
+        landmarks: h.landmarks_summary_bn || h.landmarks_summary_en || "",
+      };
+    });
 
     return `
       <!DOCTYPE html>
@@ -200,10 +245,9 @@ export const HotelMapView: React.FC<HotelMapViewProps> = ({
           }).setView([23.685, 90.3563], 7);
           window.map = map;
 
-          // OpenStreetMap Tiles (Clean CartoDB Positron style)
-          L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          // Genuine OpenStreetMap Tiles
+          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            subdomains: 'abcd',
           }).addTo(map);
 
           // Marker Cluster Group
@@ -240,12 +284,15 @@ export const HotelMapView: React.FC<HotelMapViewProps> = ({
               const el = document.getElementById('pin-' + hotel.id);
               if (el) el.classList.add('active');
 
-              // Send back to React Native
-              if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                  type: 'HOTEL_CLICKED',
-                  hotelId: hotel.id
-                }));
+              // Send back to React Native or Web parent
+              const payload = JSON.stringify({
+                type: 'HOTEL_CLICKED',
+                hotelId: hotel.id
+              });
+              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                window.ReactNativeWebView.postMessage(payload);
+              } else if (window.parent && window.parent.postMessage) {
+                window.parent.postMessage(payload, '*');
               }
             });
 
@@ -297,18 +344,26 @@ export const HotelMapView: React.FC<HotelMapViewProps> = ({
         </ScrollView>
       </View>
 
-      {/* The Leaflet Map WebView */}
+      {/* The Leaflet Map WebView or Web iframe */}
       <View style={styles.mapWrapper}>
-        <WebView
-          ref={webViewRef}
-          originWhitelist={["*"]}
-          source={{ html: leafletHtml }}
-          onMessage={handleMapMessage}
-          style={styles.webView}
-          scrollEnabled={false}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-        />
+        {Platform.OS === "web" ? (
+          <iframe
+            srcDoc={leafletHtml}
+            style={{ width: "100%", height: "100%", border: "none" }}
+            title="Hotel OpenStreetMap"
+          />
+        ) : (
+          <WebView
+            ref={webViewRef}
+            originWhitelist={["*"]}
+            source={{ html: leafletHtml }}
+            onMessage={handleMapMessage}
+            style={styles.webView}
+            scrollEnabled={false}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+          />
+        )}
       </View>
 
       {/* Floating Bottom Hotel Preview Card */}
@@ -411,7 +466,7 @@ const styles = StyleSheet.create({
   },
   regionChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   regionChipTextActive: {
@@ -463,7 +518,7 @@ const styles = StyleSheet.create({
   },
   previewTitle: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
     flex: 1,
     marginEnd: 4,
@@ -478,7 +533,7 @@ const styles = StyleSheet.create({
   },
   previewRatingText: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#B45309",
     marginStart: 2,
   },
@@ -496,7 +551,7 @@ const styles = StyleSheet.create({
   },
   previewLandmarkText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#0369A1",
   },
   previewBottomRow: {
@@ -508,11 +563,11 @@ const styles = StyleSheet.create({
   previewPriceLabel: {
     fontSize: 9,
     color: "#94A3B8",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   previewPrice: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "400",
     color: "#0055F2",
   },
   previewActionBtn: {
@@ -526,6 +581,6 @@ const styles = StyleSheet.create({
   previewActionBtnText: {
     color: "#FFFFFF",
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "400",
   },
 });

@@ -471,7 +471,7 @@ export function InviteEarnScreen() {
                     <Text style={styles.friendNameText}>রাকিব হাসান (০১৭১২...)</Text>
                     <Text style={styles.friendPhoneText}>অবস্থা: ১ম ট্রিপ সম্পন্ন</Text>
                   </View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: '#15803D' }}>+৳১০০ অর্জিত</Text>
+                  <Text style={{ fontSize: 12, fontWeight: "600", color: '#15803D' }}>+৳১০০ অর্জিত</Text>
                 </View>
                 <Text style={styles.rewardDetailStatusSuccess}>
                   ✓ বন্ধু প্রথম ট্রিপ সফলভাবে সম্পন্ন করায় ৳১০০ আপনার ওয়ালেটে যুক্ত হয়েছে।
@@ -487,7 +487,7 @@ export function InviteEarnScreen() {
                     <Text style={styles.friendNameText}>সুমাইয়া আক্তার (০১৮২৩...)</Text>
                     <Text style={styles.friendPhoneText}>অবস্থা: ইনস্টল ও সাইন-আপ সম্পন্ন</Text>
                   </View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: '#B45309' }}>৳১০০ অপেক্ষমান</Text>
+                  <Text style={{ fontSize: 12, fontWeight: "600", color: '#B45309' }}>৳১০০ অপেক্ষমান</Text>
                 </View>
                 <Text style={styles.rewardDetailStatusPending}>
                   ⏳ বন্ধু ১ম বুকিং সম্পন্ন করলেই সাথে সাথে ৳১০০ ওয়ালেটে পাবেন।
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
   },
   heroTitleLine1: {
     fontSize: 28,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
     letterSpacing: -0.5,
   },
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
   },
   heroTitleLine2: {
     fontSize: 28,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
     letterSpacing: -0.5,
   },
@@ -673,7 +673,7 @@ const styles = StyleSheet.create({
   tcBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   /* 3D Illustration Graphic */
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
   },
   coinSymbol: {
     color: "#FFFFFF",
-    fontWeight: "900",
+    fontWeight: "600",
     fontSize: 14,
   },
   friendAvatarBox: {
@@ -807,7 +807,7 @@ const styles = StyleSheet.create({
   primaryPillText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   outlinePillBtn: {
     height: 52,
@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
   outlinePillText: {
     color: "#2563EB",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   /* Share to Social Row */
@@ -889,11 +889,11 @@ const styles = StyleSheet.create({
   miniCoinText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   statVal: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   statLabel: {
@@ -914,7 +914,7 @@ const styles = StyleSheet.create({
   },
   viewDetailsText: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#2563EB",
   },
 
@@ -978,7 +978,7 @@ const styles = StyleSheet.create({
   },
   codeBoxVal: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#2563EB",
     letterSpacing: 1,
     marginTop: 4,
@@ -1061,7 +1061,7 @@ const styles = StyleSheet.create({
   },
   copyMessageBtnText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#0284C7',
   },
   shareDirectBtn: {
@@ -1076,7 +1076,7 @@ const styles = StyleSheet.create({
   },
   shareDirectBtnText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#FFFFFF',
   },
   invitationsHeaderRow: {
@@ -1102,7 +1102,7 @@ const styles = StyleSheet.create({
   },
   liveBadgeText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#15803D',
   },
   summaryHighlightPill: {
@@ -1119,7 +1119,7 @@ const styles = StyleSheet.create({
   },
   summaryHighlightText: {
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: "600",
     color: '#166534',
     flex: 1,
   },
@@ -1152,7 +1152,7 @@ const styles = StyleSheet.create({
   },
   friendNameText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#0F172A',
   },
   friendPhoneText: {
@@ -1167,7 +1167,7 @@ const styles = StyleSheet.create({
   },
   rewardSuccessBadgeText: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: "600",
     color: '#15803D',
   },
   rewardPendingBadge: {
@@ -1178,7 +1178,7 @@ const styles = StyleSheet.create({
   },
   rewardPendingBadgeText: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: "600",
     color: '#B45309',
   },
   rewardInvitedBadge: {
@@ -1189,7 +1189,7 @@ const styles = StyleSheet.create({
   },
   rewardInvitedBadgeText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#64748B',
   },
   stepTrackRow: {
@@ -1200,7 +1200,7 @@ const styles = StyleSheet.create({
   },
   stepTrackPillDone: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#166534',
     backgroundColor: '#DCFCE7',
     paddingHorizontal: 6,

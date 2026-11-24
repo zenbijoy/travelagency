@@ -785,7 +785,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 26,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
     letterSpacing: -0.3,
   },
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
   },
   serviceChatTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 14,
   },
@@ -1075,7 +1075,7 @@ const styles = StyleSheet.create({
   },
   videoHelpTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 12,
   },
@@ -1096,7 +1096,7 @@ const styles = StyleSheet.create({
   },
   videoLogoText: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   videoYellowDot: {
@@ -1159,7 +1159,7 @@ const styles = StyleSheet.create({
   },
   answerQText: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
     marginBottom: 8,
   },
@@ -1288,7 +1288,7 @@ const styles = StyleSheet.create({
   emergencyCallText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   /* Booking Search Sheet */
@@ -1344,7 +1344,7 @@ const styles = StyleSheet.create({
   },
   viewBookingDetailsText: {
     color: "#FFFFFF",
-    fontWeight: "600",
+    fontWeight: "400",
     fontSize: 13,
   },
   activeIssueCard: {
@@ -1379,12 +1379,12 @@ const styles = StyleSheet.create({
   },
   activeIssueBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#DC2626",
   },
   activeIssueId: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#991B1B",
     fontFamily: "monospace",
   },
@@ -1405,7 +1405,7 @@ const styles = StyleSheet.create({
   },
   activeIssueBtnText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   serviceChatPillCard: {
@@ -1429,7 +1429,7 @@ const styles = StyleSheet.create({
   },
   serviceChatCardTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   serviceChatCardSub: {
@@ -1450,7 +1450,7 @@ const styles = StyleSheet.create({
   },
   serviceChatActionText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#007A78",
   },
 });

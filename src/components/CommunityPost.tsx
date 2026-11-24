@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
   influencerBadgeText: {
     color: "#D97706",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   subMetaRow: {
     flexDirection: "row",
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#0055F2",
   },
   imageContainer: {
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   explorePillText: {
     color: "#000666",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   actions: {
     flexDirection: "row",
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   },
   commentAuthor: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1E293B",
   },
   commentBody: {
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
   },
   modalCancelText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
 });

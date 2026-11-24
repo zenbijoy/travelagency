@@ -1422,7 +1422,7 @@ const styles = StyleSheet.create({
   },
   roleChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   launcherTriggerBtn: {
     flexDirection: "row",
@@ -1448,7 +1448,7 @@ const styles = StyleSheet.create({
   launcherBadgeCountText: {
     color: "#4f46e5",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   tabScrollView: {
     marginTop: 4,
@@ -1553,7 +1553,7 @@ const styles = StyleSheet.create({
   },
   activeBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#ffffff",
   },
 
@@ -1610,7 +1610,7 @@ const styles = StyleSheet.create({
   },
   switchRoleSmallBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4f46e5",
   },
   searchContainer: {
@@ -1719,7 +1719,7 @@ const styles = StyleSheet.create({
   },
   col3BadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   activeTabTag: {
     backgroundColor: "#ffffff",
@@ -1729,7 +1729,7 @@ const styles = StyleSheet.create({
   },
   activeTabTagText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#4f46e5",
   },
   restrictedLockBadge: {
@@ -1743,7 +1743,7 @@ const styles = StyleSheet.create({
   },
   restrictedLockText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#dc2626",
   },
   col3Title: {
@@ -1789,7 +1789,7 @@ const styles = StyleSheet.create({
   },
   resetFiltersText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4f46e5",
   },
   // Desktop & Mobile SaaS Layout Styles

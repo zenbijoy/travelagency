@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   notFoundCode: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0055F2",
     letterSpacing: 2,
     marginBottom: 8,
@@ -227,6 +227,6 @@ const styles = StyleSheet.create({
   secondaryBtnText: {
     color: "#0055F2",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "400",
   },
 });

@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   rainBadgeText: {
     color: "#FFFFFF",
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   conditionText: {
     fontSize: 11,
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#1E40AF",
   },
   headerRight: {
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   expandLabel: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563EB",
   },
   expandedContent: {
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   },
   altName: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   altLocation: {
@@ -269,6 +269,6 @@ const styles = StyleSheet.create({
   addBtnText: {
     color: "#FFFFFF",
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });

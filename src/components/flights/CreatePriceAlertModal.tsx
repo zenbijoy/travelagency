@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     color: "#1E40AF",
   },
   capBold: {
-    fontWeight: "700",
+    fontWeight: "500",
   },
   section: {
     marginBottom: 16,
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   },
   flexPillTextSelected: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   tabBar: {
     flexDirection: "row",
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   },
   tabBtnTextActive: {
     color: "#0055F2",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   inputContainer: {
     marginBottom: 20,
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
   },
   takaSymbol: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0055F2",
     marginRight: 6,
   },
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   },
   pctPillTextSelected: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   submitBtn: {
     flexDirection: "row",
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
   },
   submitBtnText: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#FFFFFF",
   },
 });

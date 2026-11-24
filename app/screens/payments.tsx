@@ -1952,7 +1952,7 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
   },
@@ -2019,13 +2019,13 @@ const styles = StyleSheet.create({
   },
   passBadgeText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#2563EB",
     letterSpacing: 0.5,
   },
   passIdBadge: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#6B7280",
     backgroundColor: "#F3F4F6",
     paddingHorizontal: 8,
@@ -2034,7 +2034,7 @@ const styles = StyleSheet.create({
   },
   passTitleText: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
     marginBottom: 10,
   },
@@ -2056,7 +2056,7 @@ const styles = StyleSheet.create({
   passMetaText: {
     fontSize: 12,
     color: "#4B5563",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   passTotalDueRow: {
     flexDirection: "row",
@@ -2073,7 +2073,7 @@ const styles = StyleSheet.create({
   },
   passTotalDueValue: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#287DFA",
   },
 
@@ -2098,7 +2098,7 @@ const styles = StyleSheet.create({
   },
   flightBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
     letterSpacing: 0.5,
   },
@@ -2112,7 +2112,7 @@ const styles = StyleSheet.create({
   },
   pendingStatusText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#D97706",
     letterSpacing: 0.5,
   },
@@ -2126,12 +2126,12 @@ const styles = StyleSheet.create({
   flightAirportCol: { flex: 1 },
   flightCodeText: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#1E293B",
   },
   flightCitySubText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#64748B",
     marginTop: 2,
   },
@@ -2141,7 +2141,7 @@ const styles = StyleSheet.create({
   },
   flightDirectText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#287DFA",
     marginTop: 2,
   },
@@ -2170,7 +2170,7 @@ const styles = StyleSheet.create({
   },
   walletHeaderTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#065F46",
   },
   walletHeaderSubtitle: {
@@ -2195,12 +2195,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   sectionSubBadge: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#059669",
     backgroundColor: "#ECFDF5",
     paddingHorizontal: 8,
@@ -2241,7 +2241,7 @@ const styles = StyleSheet.create({
   },
   providerName: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   feePill: {
@@ -2251,7 +2251,7 @@ const styles = StyleSheet.create({
   },
   feePillText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   providerTagline: {
     fontSize: 12,
@@ -2280,7 +2280,7 @@ const styles = StyleSheet.create({
   },
   complianceText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   complianceDivider: {
@@ -2318,7 +2318,7 @@ const styles = StyleSheet.create({
   },
   txnMethodText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   txnDateText: {
@@ -2329,12 +2329,12 @@ const styles = StyleSheet.create({
   },
   txnAmountText: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   txnStatusBadge: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     marginTop: 2,
     textTransform: "capitalize",
   },
@@ -2382,7 +2382,7 @@ const styles = StyleSheet.create({
   },
   sheetProviderTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   sheetProviderCategory: {
@@ -2397,13 +2397,13 @@ const styles = StyleSheet.create({
   inputGroup: { marginTop: 14 },
   inputLabel: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
     marginBottom: 6,
   },
   validPhoneText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   amountInputRow: {
@@ -2417,7 +2417,7 @@ const styles = StyleSheet.create({
   },
   takaSymbol: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
     marginEnd: 8,
   },
@@ -2425,7 +2425,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   textInputWrap: {
@@ -2469,7 +2469,7 @@ const styles = StyleSheet.create({
   },
   splitTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#166534",
   },
   splitSubtitle: {
@@ -2481,7 +2481,7 @@ const styles = StyleSheet.create({
   },
   secondaryProviderPickerLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#166534",
     marginBottom: 8,
   },
@@ -2501,7 +2501,7 @@ const styles = StyleSheet.create({
   },
   secondaryProviderChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#15803D",
   },
   splitBreakdownPill: {
@@ -2515,7 +2515,7 @@ const styles = StyleSheet.create({
   },
   splitBreakdownText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#166534",
     flex: 1,
   },
@@ -2551,7 +2551,7 @@ const styles = StyleSheet.create({
   },
   breakdownTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 4,
     textTransform: "uppercase",
@@ -2569,7 +2569,7 @@ const styles = StyleSheet.create({
   },
   breakdownValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1E293B",
   },
   breakdownDivider: {
@@ -2579,12 +2579,12 @@ const styles = StyleSheet.create({
   },
   breakdownTotalLabel: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   breakdownTotalValue: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   // Action Button
@@ -2604,7 +2604,7 @@ const styles = StyleSheet.create({
   actionPayBtnDisabled: { opacity: 0.6 },
   actionPayBtnText: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
     letterSpacing: 0.3,
   },
@@ -2641,7 +2641,7 @@ const styles = StyleSheet.create({
   },
   pollingTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
     marginBottom: 6,
@@ -2671,17 +2671,17 @@ const styles = StyleSheet.create({
   },
   pollingInfoLabel: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#64748B",
   },
   pollingInfoValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#0F172A",
   },
   pollingInfoValueMono: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#2563EB",
     fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
   },
@@ -2700,7 +2700,7 @@ const styles = StyleSheet.create({
   },
   pollVerifyBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   pollCancelBtn: {
@@ -2713,7 +2713,7 @@ const styles = StyleSheet.create({
   },
   pollCancelBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   // Saved Payment Methods Styles
@@ -2731,7 +2731,7 @@ const styles = StyleSheet.create({
   },
   tokenizedBadgeText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   savedMethodsList: {
@@ -2794,7 +2794,7 @@ const styles = StyleSheet.create({
   savedCardPayBtnText: {
     color: "#fff",
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Forex & Save Method Styles
@@ -2873,7 +2873,7 @@ const styles = StyleSheet.create({
   },
   guaranteeBoxTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#065F46",
   },
   guaranteeBoxText: {
@@ -2897,7 +2897,7 @@ const styles = StyleSheet.create({
   supportContactBtnText: {
     color: "#fff",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   recheckBtn: {
     backgroundColor: "#EFF6FF",
@@ -2913,7 +2913,7 @@ const styles = StyleSheet.create({
   recheckBtnText: {
     color: "#2563EB",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   returnHomeBtn: {
     paddingVertical: 10,

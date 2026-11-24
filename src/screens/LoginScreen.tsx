@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "700",
     textAlign: 'center',
     marginBottom: 10,
     color: '#333',
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   orText: {
     paddingHorizontal: 10,
     color: '#666',
-    fontWeight: 'bold',
+    fontWeight: "500",
   },
   otherOptions: {
     alignItems: 'center',

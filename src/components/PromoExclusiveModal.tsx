@@ -374,12 +374,12 @@ const styles = StyleSheet.create({
   },
   coinText: {
     color: "#FFFFFF",
-    fontWeight: "900",
+    fontWeight: "600",
     fontSize: 18,
   },
   percentText: {
     color: "#E11D48",
-    fontWeight: "900",
+    fontWeight: "600",
     fontSize: 14,
     marginStart: 1,
   },
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
   },
   mainHeadline: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
     textAlign: "center",
     marginVertical: 14,
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
   },
   ticketDiscount: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
   },
   actionContainer: {
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   claimBtnText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 0.2,
   },
   bottomBarIndicator: {

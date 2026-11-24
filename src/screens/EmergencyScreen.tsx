@@ -47,6 +47,8 @@ import {
 } from "../services/safety/sosService";
 import { emergencySound } from "../utils/emergencySound";
 import { colors } from "../theme/colors";
+import { OpenStreetMap, MapMarkerItem } from "../components/common/OpenStreetMap";
+
 
 
 type TabKey = "sos" | "nearby" | "phrases" | "embassies";
@@ -391,6 +393,21 @@ export const EmergencyScreen: React.FC = () => {
       searchQuery: facilitySearch,
     });
   }, [currentCoords, facilityRadius, facilityTypeFilter, facilitySearch]);
+
+  const emergencyMapMarkers: MapMarkerItem[] = useMemo(() => {
+    const list = nearbyData.withinRadius.length > 0 ? nearbyData.withinRadius : nearbyData.allSorted.slice(0, 12);
+    return list.map((fac) => ({
+      id: fac.id,
+      title: fac.name,
+      subtitle: `${fac.type.toUpperCase()} • ${fac.distanceKm ? fac.distanceKm.toFixed(1) + " km" : ""}`,
+      latitude: fac.latitude,
+      longitude: fac.longitude,
+      badge: fac.type === "hospital" ? "🏥 হাসপাতাল" : fac.type === "police" ? "👮 থানা" : "💊 ফার্মেসি",
+      icon: fac.type === "hospital" ? "🏥" : fac.type === "police" ? "👮" : "💊",
+      category: "emergency" as const,
+      color: fac.type === "police" ? "#2563EB" : "#DC2626",
+    }));
+  }, [nearbyData]);
 
   // ── Medical Phrases Data Computation ─────────────────────────────────────
   const phraseData = useMemo(() => {
@@ -973,6 +990,32 @@ export const EmergencyScreen: React.FC = () => {
                   <Text style={styles.expandRadiusText}>Expand to 100km</Text>
                 </TouchableOpacity>
               )}
+            </View>
+
+            {/* OpenStreetMap Live Emergency Radar View */}
+            <View style={{ height: 200, marginHorizontal: 16, marginBottom: 14, borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: "#E2E8F0" }}>
+              <OpenStreetMap
+                markers={emergencyMapMarkers}
+                userLocation={
+                  coords
+                    ? {
+                        latitude: coords.latitude,
+                        longitude: coords.longitude,
+                        title: "আমার অবস্থান",
+                      }
+                    : {
+                        latitude: currentCoords.latitude,
+                        longitude: currentCoords.longitude,
+                        title: "বর্তমান এলাকা",
+                      }
+                }
+                initialRegion={{
+                  latitude: currentCoords.latitude,
+                  longitude: currentCoords.longitude,
+                  zoom: 13,
+                }}
+                interactive={true}
+              />
             </View>
 
             {/* FACILITIES LIST */}
@@ -1732,7 +1775,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   shareBtn: {
@@ -1821,7 +1864,7 @@ const styles = StyleSheet.create({
   },
   tabBtnTextActive: {
     color: "#ffffff",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   scrollArea: {
     flex: 1,
@@ -1851,7 +1894,7 @@ const styles = StyleSheet.create({
   },
   locationBadgeSuccessText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#065f46",
   },
   locationBadgeWarning: {
@@ -1867,7 +1910,7 @@ const styles = StyleSheet.create({
   },
   locationBadgeWarningText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#92400e",
   },
   locationBadgeLocating: {
@@ -1883,7 +1926,7 @@ const styles = StyleSheet.create({
   },
   locationBadgeLocatingText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#1e40af",
   },
   locationBadgeDenied: {
@@ -1899,7 +1942,7 @@ const styles = StyleSheet.create({
   },
   locationBadgeDeniedText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#991b1b",
   },
 
@@ -1933,7 +1976,7 @@ const styles = StyleSheet.create({
   },
   countryNameBold: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   countryCodeBadge: {
@@ -1944,7 +1987,7 @@ const styles = StyleSheet.create({
   },
   countryCodeBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   countryEmergencySub: {
@@ -1954,7 +1997,7 @@ const styles = StyleSheet.create({
   },
   boldRedText: {
     color: "#dc2626",
-    fontWeight: "800",
+    fontWeight: "600",
   },
   countrySwitchBtn: {
     flexDirection: "row",
@@ -1969,7 +2012,7 @@ const styles = StyleSheet.create({
   },
   countrySwitchBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284c7",
   },
 
@@ -1989,7 +2032,7 @@ const styles = StyleSheet.create({
   },
   contactsWarningTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#b45309",
   },
   contactsWarningDesc: {
@@ -2014,7 +2057,7 @@ const styles = StyleSheet.create({
   },
   phonebookPickBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   manualAddContactBtn: {
@@ -2030,7 +2073,7 @@ const styles = StyleSheet.create({
   },
   manualAddContactBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   contactHeaderActions: {
@@ -2051,7 +2094,7 @@ const styles = StyleSheet.create({
   },
   phonebookMiniBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284c7",
   },
 
@@ -2082,7 +2125,7 @@ const styles = StyleSheet.create({
   },
   offlineReadyPillText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#15803d",
   },
   offlineDownloadActionBtn: {
@@ -2098,7 +2141,7 @@ const styles = StyleSheet.create({
   },
   offlineDownloadActionText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284c7",
   },
   offlineChecklistHeading: {
@@ -2131,7 +2174,7 @@ const styles = StyleSheet.create({
   },
   openSurvivalModeBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
 
@@ -2180,12 +2223,12 @@ const styles = StyleSheet.create({
   },
   countdownHugeNumber: {
     fontSize: 52,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#ffffff",
   },
   countdownAlertTitle: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#fecaca",
     textAlign: "center",
     marginBottom: 8,
@@ -2217,7 +2260,7 @@ const styles = StyleSheet.create({
   },
   bigCancelButtonText: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#ffffff",
     letterSpacing: 0.5,
   },
@@ -2247,7 +2290,7 @@ const styles = StyleSheet.create({
   },
   countryModalTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   countryModalSub: {
@@ -2287,7 +2330,7 @@ const styles = StyleSheet.create({
   },
   countryItemNameBn: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   countryItemCode: {
@@ -2320,7 +2363,7 @@ const styles = StyleSheet.create({
   },
   phonebookPickBannerText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284c7",
   },
   recipientsStatusHeader: {
@@ -2422,7 +2465,7 @@ const styles = StyleSheet.create({
   panicTitle: {
     color: "#ffffff",
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 1,
     marginTop: 4,
   },
@@ -2440,12 +2483,12 @@ const styles = StyleSheet.create({
   countdownNumber: {
     color: "#ffffff",
     fontSize: 48,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   countdownLabel: {
     color: "#fef08a",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   panicHint: {
@@ -2470,7 +2513,7 @@ const styles = StyleSheet.create({
   },
   instantDispatchText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#dc2626",
   },
 
@@ -2490,7 +2533,7 @@ const styles = StyleSheet.create({
   },
   noteLabel: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#475569",
   },
   noteTextInput: {
@@ -2515,7 +2558,7 @@ const styles = StyleSheet.create({
   },
   blockTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   blockSub: {
@@ -2559,7 +2602,7 @@ const styles = StyleSheet.create({
   },
   hotlineName: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   hotlineBn: {
@@ -2580,7 +2623,7 @@ const styles = StyleSheet.create({
   },
   hotlineCallNumber: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#dc2626",
   },
   badgePill: {
@@ -2590,7 +2633,7 @@ const styles = StyleSheet.create({
   },
   badgePillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // ── EMERGENCY CONTACTS ────────────────────────────────────────────────────
@@ -2607,7 +2650,7 @@ const styles = StyleSheet.create({
   },
   addContactBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284c7",
   },
   emptyContactsCard: {
@@ -2645,7 +2688,7 @@ const styles = StyleSheet.create({
   contactAvatarText: {
     color: "#ffffff",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   contactDetails: {
     flex: 1,
@@ -2657,7 +2700,7 @@ const styles = StyleSheet.create({
   },
   contactName: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   primaryBadge: {
@@ -2668,7 +2711,7 @@ const styles = StyleSheet.create({
   },
   primaryBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#b45309",
   },
   contactPhone: {
@@ -2753,7 +2796,7 @@ const styles = StyleSheet.create({
     color: "#475569",
   },
   boldText: {
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   expandRadiusBtn: {
@@ -2764,7 +2807,7 @@ const styles = StyleSheet.create({
   },
   expandRadiusText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284c7",
   },
   noFacilitiesBox: {
@@ -2822,7 +2865,7 @@ const styles = StyleSheet.create({
   facTypePharm: { backgroundColor: "#dcfce7" },
   facTypePillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   open24Badge: {
@@ -2844,7 +2887,7 @@ const styles = StyleSheet.create({
   },
   open24Text: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#16a34a",
   },
   distanceBadge: {
@@ -2858,12 +2901,12 @@ const styles = StyleSheet.create({
   },
   distanceBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   facName: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0f172a",
   },
   facNameBn: {
@@ -2915,7 +2958,7 @@ const styles = StyleSheet.create({
   },
   facCallBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   facNavBtn: {
@@ -2932,7 +2975,7 @@ const styles = StyleSheet.create({
   },
   facNavBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284c7",
   },
 
@@ -2950,7 +2993,7 @@ const styles = StyleSheet.create({
   },
   offlinePillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#166534",
   },
   phraseCountText: {
@@ -2982,7 +3025,7 @@ const styles = StyleSheet.create({
   },
   phraseCategoryText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   urgencyBadge: {
@@ -2995,12 +3038,12 @@ const styles = StyleSheet.create({
   urgencyNormal: { backgroundColor: "#f1f5f9" },
   urgencyText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0f172a",
   },
   phraseEnglish: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     lineHeight: 20,
   },
@@ -3013,7 +3056,7 @@ const styles = StyleSheet.create({
   },
   phraseBengali: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0f172a",
     lineHeight: 24,
   },
@@ -3039,7 +3082,7 @@ const styles = StyleSheet.create({
   },
   showDoctorPrompt: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284c7",
   },
 
@@ -3081,7 +3124,7 @@ const styles = StyleSheet.create({
   },
   embassyCountry: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   embassyTitle: {
@@ -3096,7 +3139,7 @@ const styles = StyleSheet.create({
   },
   passportBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#b45309",
   },
   embassyDetailRow: {
@@ -3126,7 +3169,7 @@ const styles = StyleSheet.create({
   },
   embassyEmergencyBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   embassyNavBtn: {
@@ -3143,7 +3186,7 @@ const styles = StyleSheet.create({
   },
   embassyNavBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284c7",
   },
   embassyEmailBtn: {
@@ -3160,7 +3203,7 @@ const styles = StyleSheet.create({
   },
   embassyEmailBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
 
@@ -3185,7 +3228,7 @@ const styles = StyleSheet.create({
   },
   doctorModalTitle: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#dc2626",
     letterSpacing: 0.5,
   },
@@ -3213,7 +3256,7 @@ const styles = StyleSheet.create({
   },
   urgentBannerText: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#dc2626",
     letterSpacing: 0.5,
   },
@@ -3232,14 +3275,14 @@ const styles = StyleSheet.create({
   },
   doctorLangTag: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#64748b",
     marginBottom: 8,
     letterSpacing: 0.5,
   },
   hugeBengaliText: {
     fontSize: 26,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#0f172a",
     lineHeight: 38,
   },
@@ -3252,7 +3295,7 @@ const styles = StyleSheet.create({
   },
   doctorPhonicsText: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0369a1",
     lineHeight: 26,
   },
@@ -3285,7 +3328,7 @@ const styles = StyleSheet.create({
   doctorCallAmbulanceText: {
     color: "#ffffff",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   doctorDoneBtn: {
     alignItems: "center",
@@ -3293,7 +3336,7 @@ const styles = StyleSheet.create({
   },
   doctorDoneBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
 
@@ -3329,7 +3372,7 @@ const styles = StyleSheet.create({
   },
   resultModalTitle: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0f172a",
     textAlign: "center",
   },
@@ -3369,7 +3412,7 @@ const styles = StyleSheet.create({
   callNowModalBtnText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   callTouristPolModalBtn: {
     flexDirection: "row",
@@ -3385,7 +3428,7 @@ const styles = StyleSheet.create({
   callTouristPolModalBtnText: {
     color: "#0284c7",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   dismissModalBtn: {
     alignItems: "center",
@@ -3412,12 +3455,12 @@ const styles = StyleSheet.create({
   },
   contactsModalTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   inputLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
     marginTop: 2,
   },
@@ -3477,7 +3520,7 @@ const styles = StyleSheet.create({
   saveContactBtnText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });
 

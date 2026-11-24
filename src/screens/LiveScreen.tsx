@@ -1223,7 +1223,7 @@ const s = StyleSheet.create({
   liveBadgePillText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   storyName: {
     fontSize: 12,
@@ -1234,7 +1234,7 @@ const s = StyleSheet.create({
   },
   storyNameUnread: {
     color: TEXT_PRIMARY,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   filterTabs: { gap: 8, marginBottom: 14, paddingVertical: 4 },
   filterTab: {
@@ -1244,11 +1244,11 @@ const s = StyleSheet.create({
     backgroundColor: colors.neutral[200],
   },
   filterTabActive: { backgroundColor: PRIMARY },
-  filterTabText: { fontSize: 12, fontWeight: "800", color: colors.text.secondary },
+  filterTabText: { fontSize: 12, fontWeight: "600", color: colors.text.secondary },
   filterTabTextActive: { color: "#fff" },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: TEXT_PRIMARY,
     marginBottom: 10,
     marginTop: 4,
@@ -1281,14 +1281,14 @@ const s = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
-  livePillText: { color: "#fff", fontSize: 12, fontWeight: "900" },
+  livePillText: { color: "#fff", fontSize: 12, fontWeight: "600" },
   streamCardBadge: {
     backgroundColor: "rgba(255,255,255,0.2)",
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  streamCardBadgeText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  streamCardBadgeText: { color: "#fff", fontSize: 12, fontWeight: "500" },
   streamQuickActions: {
     flex: 1,
     flexDirection: "row",
@@ -1306,7 +1306,7 @@ const s = StyleSheet.create({
   quickIconBtnActive: {
     backgroundColor: "rgba(255,255,255,0.9)",
   },
-  streamCardTitle: { color: "#fff", fontSize: 15, fontWeight: "800", marginBottom: 4 },
+  streamCardTitle: { color: "#fff", fontSize: 15, fontWeight: "700", marginBottom: 4 },
   streamCardMeta: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -1322,7 +1322,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  viewerPillText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  viewerPillText: { color: "#fff", fontSize: 12, fontWeight: "500" },
   callGrid: { flexDirection: "row", gap: 10 },
   callCard: {
     flex: 1,
@@ -1341,7 +1341,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  callCardLabel: { fontSize: 12, fontWeight: "900", color: TEXT_PRIMARY },
+  callCardLabel: { fontSize: 12, fontWeight: "600", color: TEXT_PRIMARY },
   callCardDesc: { fontSize: 12, color: TEXT_MUTED, textAlign: "center" },
   emptyContainer: {
     alignItems: "center",
@@ -1384,7 +1384,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  liveBadgeText: { color: "#fff", fontSize: 13, fontWeight: "900" },
+  liveBadgeText: { color: "#fff", fontSize: 13, fontWeight: "600" },
   viewerCount: {
     flexDirection: "row",
     gap: 4,
@@ -1392,7 +1392,7 @@ const s = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
   },
-  viewerText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+  viewerText: { color: "#fff", fontSize: 13, fontWeight: "500" },
   streamBottomBar: {
     position: "absolute",
     bottom: 0,
@@ -1404,7 +1404,7 @@ const s = StyleSheet.create({
   },
   streamInfo: { marginBottom: 10 },
   streamHost: { color: "rgba(255,255,255,0.8)", fontSize: 13 },
-  streamTitle: { color: "#fff", fontSize: 16, fontWeight: "900", marginTop: 2 },
+  streamTitle: { color: "#fff", fontSize: 16, fontWeight: "700", marginTop: 2 },
   liveChatBox: {
     backgroundColor: "rgba(0, 0, 0, 0.4)",
     borderRadius: 12,
@@ -1413,7 +1413,7 @@ const s = StyleSheet.create({
   },
   noCommentsText: { color: TEXT_MUTED, fontSize: 12 },
   liveCommentRow: { flexDirection: "row", marginBottom: 4 },
-  liveCommentUser: { color: PRIMARY, fontWeight: "700", fontSize: 12 },
+  liveCommentUser: { color: PRIMARY, fontWeight: "500", fontSize: 12 },
   liveCommentText: { color: "#FFFFFF", fontSize: 12, flex: 1 },
   liveInteractiveRow: { flexDirection: "row", gap: 8, alignItems: "center" },
   liveChatInput: {
@@ -1494,7 +1494,7 @@ const s = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#FFFFFF",
   },
-  storyViewerAuthorName: { color: "#FFFFFF", fontSize: 14, fontWeight: "800" },
+  storyViewerAuthorName: { color: "#FFFFFF", fontSize: 14, fontWeight: "600" },
   storyViewerLocation: { color: "rgba(255, 255, 255, 0.8)", fontSize: 12 },
   storyCloseBtn: { padding: 6 },
   storyViewerBottomCaption: {
@@ -1505,7 +1505,7 @@ const s = StyleSheet.create({
   storyViewerCaptionText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "400",
     lineHeight: 22,
   },
   modalOverlay: {
@@ -1526,7 +1526,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  modalTitle: { fontSize: 18, fontWeight: "800", color: TEXT_PRIMARY },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: TEXT_PRIMARY },
   r2UploadBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -1542,7 +1542,7 @@ const s = StyleSheet.create({
   },
   r2UploadBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: PRIMARY,
   },
   progressBarWrap: {
@@ -1559,7 +1559,7 @@ const s = StyleSheet.create({
     alignSelf: "center",
     fontSize: 12,
     color: "#fff",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   previewBox: {
     flexDirection: "row",
@@ -1573,10 +1573,10 @@ const s = StyleSheet.create({
     gap: 10,
   },
   previewThumb: { width: 50, height: 35, borderRadius: 6 },
-  previewText: { fontSize: 12, fontWeight: "700", color: SUCCESS },
+  previewText: { fontSize: 12, fontWeight: "400", color: SUCCESS },
   inputLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: colors.text.secondary,
     marginBottom: 4,
   },
@@ -1597,5 +1597,5 @@ const s = StyleSheet.create({
     paddingVertical: 14,
     alignItems: "center",
   },
-  submitBtnText: { color: "#FFFFFF", fontSize: 15, fontWeight: "800" },
+  submitBtnText: { color: "#FFFFFF", fontSize: 15, fontWeight: "400" },
 });

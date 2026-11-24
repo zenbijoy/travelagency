@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
-  ActivityIndicator,
-  Animated,
   Dimensions,
-  Easing,
   Image,
-  ImageBackground,
+  Modal,
   Platform,
   Pressable,
   RefreshControl,
@@ -15,1514 +12,1125 @@ import {
   Text,
   View,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, Href } from "expo-router";
+import { router } from "expo-router";
 
+import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../hooks/useAuth";
-import { supabase } from "../utils/supabase";
-import { PromoExclusiveModal } from "../components/PromoExclusiveModal";
-import { DynamicHeroBanner } from "../components/home/DynamicHeroBanner";
-import { DestinationVitalsRow } from "../components/common/DestinationVitalsRow";
-import { useTheme } from "../theme";
-import { useAppConfig } from "../hooks/useAppConfig";
-import { useResponsive } from "../hooks/useResponsive";
-import { ResponsiveContainer, WebFooter } from "../components/layout";
+import { FONTS } from "../theme/typography";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const REFRESH_THRESHOLD = 80;
-const REFRESH_MAX_PULL = 130;
-const REFRESH_LOCK_HEIGHT = 90;
+// ─── COLOR PALETTE TOKENS ────────────────────────────────────────────────────
+const GOLD = {
+  primary: "#D4AF37",
+  light: "#FFE58F",
+  dark: "#99731C",
+  accent: "#ECC46E",
+  champagneBg: "#FAF5EC",
+  champagneBorder: "#E8D9BD",
+  iconBg: "#F3E8D3",
+  iconDark: "#382A14",
+  badgeBg: "#FFE699",
+  badgeText: "#3B2C04",
+};
 
-const elasticPullDistance = (distance: number) =>
-  Math.min(REFRESH_MAX_PULL, distance / (1 + distance / 220));
+// ─── SERVICES CONFIGURATION ──────────────────────────────────────────────────
+interface ServiceItem {
+  id: string;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  route: string;
+}
 
-export interface DynamicAd {
+const ROW_1_SERVICES: ServiceItem[] = [
+  { id: "hotels", label: "Hotels", icon: "bed", route: "/screens/hotels-homes" },
+  { id: "flights", label: "Flights", icon: "airplane", route: "/screens/flights" },
+  { id: "flight_hotel", label: "Flight + Hotel", icon: "business", route: "/screens/packages" },
+  { id: "trains", label: "Trains", icon: "train", route: "/screens/trains" },
+];
+
+const ROW_2_SERVICES: ServiceItem[] = [
+  { id: "vacation_rentals", label: "Vacation\nRentals", icon: "home", route: "/screens/hotels-homes" },
+  { id: "attractions_tours", label: "Attractions\n& Tours", icon: "people", route: "/screens/recommended-tours" },
+  { id: "car_rentals", label: "Car Rentals", icon: "car", route: "/screens/car-rentals" },
+  { id: "package_tours", label: "Package\nTours", icon: "earth", route: "/screens/packages" },
+  { id: "more", label: "+7 more", icon: "apps", route: "modal" },
+];
+
+const MORE_SERVICES: Array<{
   id: string;
   title: string;
-  subtitle?: string;
-  badge_text?: string;
-  button_text?: string;
-  banner_url: string;
-  target_url: string;
-  placement?: string;
-  status?: string;
-}
-
-export interface DynamicPost {
-  id: string;
-  user_id?: string;
-  title: string;
-  content?: string;
-  location?: string;
-  likes_count: number;
-  comments_count?: number;
-  metadata?: {
-    views_count?: number;
-    rating?: number;
-    tags?: string[];
-  };
-  author?: {
-    id?: string;
-    username?: string;
-    display_name?: string;
-    avatar_url?: string;
-  };
-  media?: Array<{
-    id?: string;
-    media_url: string;
-  }>;
-}
-
-export interface DynamicHotel {
-  id: string;
-  name: string;
-  city: string;
-  star_rating: number | string;
-  base_price?: number | string;
-  image_url?: string;
-}
-
-// Location tags with thumbnail photos for Light Mode & clean labels for Dark Mode
-const LOCATION_TAGS = [
+  subtitle: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  route: string;
+}> = [
   {
-    name: "Lalmonirhat",
-    image: "https://images.unsplash.com/photo-1585123388867-3bfe6dd4bdbf?w=120&auto=format&fit=crop&q=80",
+    id: "bus-launch",
+    title: "Bus & Launch",
+    subtitle: "AC coaches, sleeper & river ferries",
+    icon: "bus-outline",
+    route: "/screens/bus-launch",
   },
   {
-    name: "Beijing",
-    image: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=120&auto=format&fit=crop&q=80",
+    id: "admission-bus",
+    title: "Admission Bus",
+    subtitle: "Student university & exam shuttles",
+    icon: "school-outline",
+    route: "/screens/admission-bus",
   },
   {
-    name: "Shanghai",
-    image: "https://images.unsplash.com/photo-1538428494232-9c0d8a3ab403?w=120&auto=format&fit=crop&q=80",
+    id: "tour-guides",
+    title: "Tour Guides",
+    subtitle: "Certified local multilingual guides",
+    icon: "compass-outline",
+    route: "/screens/tour-guides",
   },
   {
-    name: "Singapore",
-    image: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=120&auto=format&fit=crop&q=80",
+    id: "abroad-agency",
+    title: "Abroad Agency",
+    subtitle: "Visa processing & global consulting",
+    icon: "globe-outline",
+    route: "/screens/abroad-agency",
+  },
+  {
+    id: "local-marketplace",
+    title: "Local Marketplace",
+    subtitle: "Authentic artisan goods & gear",
+    icon: "bag-handle-outline",
+    route: "/screens/local-marketplace",
+  },
+  {
+    id: "digital-passport",
+    title: "Digital Passport",
+    subtitle: "Secure encrypted travel wallet",
+    icon: "card-outline",
+    route: "/screens/digital-passport",
+  },
+  {
+    id: "emergency",
+    title: "Emergency SOS",
+    subtitle: "24/7 Police, Medical & Embassy hotline",
+    icon: "shield-checkmark-outline",
+    route: "/screens/emergency",
   },
 ];
 
+// ─── QUICK DESTINATION CHIPS ─────────────────────────────────────────────────
+interface DestinationChip {
+  id: string;
+  name: string;
+  imageUrl: string;
+}
+
+const DESTINATION_CHIPS: DestinationChip[] = [
+  {
+    id: "lalmonirhat",
+    name: "Lalmonirhat",
+    imageUrl: "https://images.unsplash.com/photo-1608958435020-e8a7109ba809?w=120&auto=format&fit=crop&q=80",
+  },
+  {
+    id: "beijing",
+    name: "Beijing",
+    imageUrl: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=120&auto=format&fit=crop&q=80",
+  },
+  {
+    id: "shanghai",
+    name: "Shanghai",
+    imageUrl: "https://images.unsplash.com/photo-1538428494232-9c0d8a3ab403?w=120&auto=format&fit=crop&q=80",
+  },
+  {
+    id: "singapore",
+    name: "Singapore",
+    imageUrl: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=120&auto=format&fit=crop&q=80",
+  },
+  {
+    id: "coxs_bazar",
+    name: "Cox's Bazar",
+    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=120&auto=format&fit=crop&q=80",
+  },
+  {
+    id: "sylhet",
+    name: "Sylhet",
+    imageUrl: "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?w=120&auto=format&fit=crop&q=80",
+  },
+];
+
+// ─── SECONDARY ACTION ICONS ──────────────────────────────────────────────────
+interface ActionIconItem {
+  id: string;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  route: string;
+}
+
+const ACTION_ICONS: ActionIconItem[] = [
+  { id: "deals", label: "Deals", icon: "pricetag", route: "/screens/rewards" },
+  { id: "events", label: "Events", icon: "calendar", route: "/screens/events" },
+  { id: "planner", label: "Trip.Planner", icon: "flash", route: "/screens/trip-planner" },
+  { id: "trending", label: "Trending", icon: "trending-up", route: "/screens/recommended-tours" },
+];
+
+// ─── DISCOVER CARDS ──────────────────────────────────────────────────────────
+interface DiscoverCard {
+  id: string;
+  badge?: string;
+  pageIndicator?: string;
+  verified?: boolean;
+  titlePrimary: string;
+  titleAccent?: string;
+  subtitle: string;
+  promoTag?: string;
+  buttonLabel: string;
+  imageUrl?: string;
+  imageLight?: any;
+  imageDark?: any;
+  route: string;
+}
+
+const DISCOVER_CARDS: DiscoverCard[] = [
+  {
+    id: "explore_asia",
+    badge: "FEATURED",
+    pageIndicator: "1/3",
+    titlePrimary: "Explore",
+    titleAccent: "Asia",
+    subtitle: "Unforgettable journeys\nacross Asia",
+    promoTag: "🎁 Special Offers & Deals",
+    buttonLabel: "View Deals →",
+    imageLight: require("../../assets/images/discover_asia_light.png"),
+    imageDark: require("../../assets/images/discover_asia_dark.png"),
+    route: "/screens/packages",
+  },
+  {
+    id: "trip_tuesday",
+    verified: true,
+    titlePrimary: "Trip.Tuesday",
+    subtitle: "Trip.Tuesday – $99 Flights to Canada & Asia ($40 Cou...",
+    buttonLabel: "SPECIAL PROMO",
+    imageLight: require("../../assets/images/discover_tuesday_light.png"),
+    imageDark: require("../../assets/images/discover_tuesday_dark.png"),
+    route: "/screens/flights",
+  },
+];
+
+// ─── MAIN HOMESCREEN COMPONENT ───────────────────────────────────────────────
 export function HomeScreen() {
-  const { isDesktop, isTablet, isPhone, width } = useResponsive();
+  const { colors, isDark } = useTheme();
   const { user } = useAuth();
-  const { theme, isDark, toggleTheme } = useTheme();
-  const { heroTitle, heroSubtitle, announcementTicker, announcementEnabled } = useAppConfig();
-
-  const [searchQuery, setSearchQuery] = useState("Bali");
-  const [activeFeedTab, setActiveFeedTab] = useState<"discover" | "nearby">("discover");
-  const [showPromoModal, setShowPromoModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshCount, setRefreshCount] = useState(0);
-  const [isArmed, setIsArmed] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
 
-  // Dynamic Supabase data
-  const [ads, setAds] = useState<DynamicAd[]>([]);
-  const [communityPosts, setCommunityPosts] = useState<DynamicPost[]>([]);
-  const [featuredHotels, setFeaturedHotels] = useState<DynamicHotel[]>([]);
-  const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
-
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const pullDistance = useRef(new Animated.Value(0)).current;
-  const spinnerRotate = useRef(new Animated.Value(0)).current;
-  const scrollRef = useRef<any>(null);
-
-  const isAtTopRef = useRef(true);
-  const isArmedRef = useRef(false);
-  const isRefreshingRef = useRef(false);
-
-  // Monitor scroll for sticky transitions and Back to Top
-  useEffect(() => {
-    const listenerId = scrollY.addListener(({ value }) => {
-      isAtTopRef.current = value <= 5;
-
-      if (value < 0 && !isRefreshingRef.current) {
-        const overscroll = elasticPullDistance(Math.abs(value));
-        pullDistance.setValue(overscroll);
-
-        if (overscroll >= REFRESH_THRESHOLD && !isArmedRef.current) {
-          isArmedRef.current = true;
-          setIsArmed(true);
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        } else if (overscroll < REFRESH_THRESHOLD && isArmedRef.current) {
-          isArmedRef.current = false;
-          setIsArmed(false);
-        }
-      }
-
-      if (value > 140) {
-        if (!isScrolled) setIsScrolled(true);
-      } else {
-        if (isScrolled) setIsScrolled(false);
-      }
-    });
-    return () => scrollY.removeListener(listenerId);
-  }, [isScrolled, pullDistance, scrollY]);
-
-  // Fetch real data from Supabase
-  const fetchHomeScreenData = useCallback(async () => {
-    try {
-      const { data: adData } = await supabase
-        .from("advertisements")
-        .select("*")
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
-
-      if (adData) setAds(adData);
-
-      const { data: postData } = await supabase
-        .from("posts")
-        .select("*, author:community_profiles!posts_user_id_fkey(*), media:post_media(*)")
-        .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(10);
-
-      if (postData) setCommunityPosts(postData);
-
-      const { data: hotelData } = await supabase
-        .from("hotels")
-        .select("id, name, city, star_rating, base_price, image_url")
-        .order("star_rating", { ascending: false })
-        .limit(6);
-
-      if (hotelData) setFeaturedHotels(hotelData);
-
-      if (user?.id) {
-        const { data: userLikes } = await supabase
-          .from("post_likes")
-          .select("post_id")
-          .eq("user_id", user.id);
-
-        if (userLikes) {
-          setLikedPostIds(new Set(userLikes.map((l: any) => l.post_id)));
-        }
-      }
-    } catch (err) {
-      console.warn("HomeScreen data fetch warning:", err);
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
-    fetchHomeScreenData();
-  }, [fetchHomeScreenData]);
-
-  // Pull to refresh handler
-  const triggerRefresh = useCallback(async () => {
-    if (isRefreshingRef.current) return;
-
-    isRefreshingRef.current = true;
+  const onRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    setIsArmed(false);
-    isArmedRef.current = false;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    Animated.spring(pullDistance, {
-      toValue: REFRESH_LOCK_HEIGHT,
-      useNativeDriver: false,
-      tension: 180,
-      friction: 12,
-    }).start();
-
-    await fetchHomeScreenData();
-    setRefreshCount((prev) => prev + 1);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-    isRefreshingRef.current = false;
-    setIsRefreshing(false);
-
-    Animated.timing(pullDistance, {
-      toValue: 0,
-      duration: 220,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
-    }).start(() => {
-      pullDistance.setValue(0);
-    });
-  }, [pullDistance, fetchHomeScreenData]);
-
-  // Globe rotation during refresh
-  useEffect(() => {
-    if (!isRefreshing) {
-      spinnerRotate.setValue(0);
-      return;
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await new Promise((resolve) => setTimeout(resolve, 800));
+    } finally {
+      setIsRefreshing(false);
     }
-    const animation = Animated.loop(
-      Animated.timing(spinnerRotate, {
-        toValue: 1,
-        duration: 850,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    );
-    animation.start();
-    return () => animation.stop();
-  }, [isRefreshing, spinnerRotate]);
+  }, []);
 
-  const handleScrollEndDrag = (e: any) => {
-    const offsetY = e.nativeEvent.contentOffset.y;
-    if (offsetY <= -REFRESH_THRESHOLD || isArmedRef.current) {
-      triggerRefresh();
-    }
-  };
+  const handleServicePress = (route: string) => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch {}
 
-  const handleToggleLike = async (post: DynamicPost) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const isLiked = likedPostIds.has(post.id);
-    const nextSet = new Set(likedPostIds);
-    if (isLiked) {
-      nextSet.delete(post.id);
+    if (route === "modal") {
+      setIsMoreModalOpen(true);
     } else {
-      nextSet.add(post.id);
+      router.push(route as any);
     }
-    setLikedPostIds(nextSet);
-
-    setCommunityPosts((prev) =>
-      prev.map((p) =>
-        p.id === post.id
-          ? { ...p, likes_count: Math.max(0, p.likes_count + (isLiked ? -1 : 1)) }
-          : p
-      )
-    );
   };
 
-  const numFeedCols = isDesktop ? 4 : isTablet ? 3 : 2;
-  const feedColumns = useMemo(() => {
-    const cols: DynamicPost[][] = Array.from({ length: numFeedCols }, () => []);
-    communityPosts.forEach((post, i) => {
-      cols[i % numFeedCols].push(post);
+  const handleDestinationPress = (destinationName: string) => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch {}
+    router.push({
+      pathname: "/screens/search" as any,
+      params: { q: destinationName },
     });
-    return cols;
-  }, [communityPosts, numFeedCols]);
+  };
+
+  const handleActionPress = (route: string) => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch {}
+    router.push(route as any);
+  };
+
+  const shellBg = isDark ? "#0A0A0C" : "#F8F9FA";
+  const headerBrandColor = isDark ? "#FFFFFF" : "#111827";
+  const headerSubtitleColor = isDark ? "#9CA3AF" : "#64748B";
+
+  // Service grid card styling
+  const serviceCardBg = isDark ? GOLD.champagneBg : "#FFFFFF";
+  const serviceCardBorder = isDark ? "#F0E3CA" : "#FFFFFF";
 
   return (
-    <SafeAreaView style={[styles.shell, { backgroundColor: theme.background }]} edges={["top"]}>
+    <SafeAreaView style={[styles.shell, { backgroundColor: shellBg }]} edges={["top"]}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
-        backgroundColor={theme.background}
+        backgroundColor="transparent"
+        translucent
       />
 
-      <Animated.ScrollView
-        ref={scrollRef}
+      <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scroll, { backgroundColor: theme.background }]}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-        onScrollEndDrag={handleScrollEndDrag}
-        scrollEventThrottle={16}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={triggerRefresh}
-            tintColor={theme.gold}
-            colors={[theme.gold]}
+            onRefresh={onRefresh}
+            tintColor={GOLD.primary}
+            colors={[GOLD.primary]}
           />
         }
       >
-        {/* ========================================================================= */}
-        {/* 1. DYNAMIC HERO BANNER: Full Admin Control, Search Engine, Auto-Suggest   */}
-        {/* ========================================================================= */}
-        <DynamicHeroBanner
-          refreshTrigger={refreshCount}
-          onSearchSubmit={(q) => {
-            setSearchQuery(q);
-            router.push({
-              pathname: "/screens/search",
-              params: { q },
-            } as Href);
-          }}
-        />
+        {/* ================================================================== */}
+        {/* 1. HERO HEADER WITH PASSENGER PLANE & COSMIC/SKY BACKDROP          */}
+        {/* ================================================================== */}
+        <View style={styles.heroContainer}>
+          <Image
+            source={
+              isDark
+                ? require("../../assets/images/hero_header_full_dark.png")
+                : require("../../assets/images/hero_header_full_light.png")
+            }
+            style={StyleSheet.absoluteFillObject}
+            resizeMode="cover"
+          />
 
-        {/* Responsive Content Container for Desktop & Mobile */}
-        <View style={isDesktop ? { maxWidth: 1320, width: "100%", alignSelf: "center" } : { width: "100%" }}>
-          <View style={styles.searchSectionWrap}>
-            {/* ========================================================================= */}
-            {/* 2. LOCATION TAGS ROW: Clean Pill Buttons (with City Photos in Light Mode) */}
-            {/* ========================================================================= */}
-            {isDesktop ? (
-              <View style={[styles.locationTagsScroll, { flexWrap: "wrap", gap: 10, paddingHorizontal: 0 }]}>
-                {LOCATION_TAGS.map((loc) => (
-                  <Pressable
-                    key={loc.name}
-                    style={[
-                      styles.locationPillBtn,
-                      {
-                        backgroundColor: isDark ? "#FFF8EE" : "#FFFFFF",
-                        borderColor: isDark ? "rgba(229, 169, 60, 0.25)" : "#E2E8F0",
-                        paddingHorizontal: 16,
-                        paddingVertical: 10,
-                      },
-                    ]}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSearchQuery(loc.name);
-                      router.push({
-                        pathname: "/screens/search",
-                        params: { q: loc.name },
-                      } as Href);
-                    }}
-                  >
-                    {!isDark && (
-                      <Image source={{ uri: loc.image }} style={styles.locationThumbPhoto} />
-                    )}
-                    <Text style={[styles.locationPillText, { fontSize: 13, fontWeight: "600" }]}>{loc.name}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.locationTagsScroll}
-              >
-                {LOCATION_TAGS.map((loc) => (
-                  <Pressable
-                    key={loc.name}
-                    style={[
-                      styles.locationPillBtn,
-                      {
-                        backgroundColor: isDark ? "#FFF8EE" : "#FFFFFF",
-                        borderColor: isDark ? "rgba(229, 169, 60, 0.25)" : "#E2E8F0",
-                      },
-                    ]}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSearchQuery(loc.name);
-                      router.push({
-                        pathname: "/screens/search",
-                        params: { q: loc.name },
-                      } as Href);
-                    }}
-                  >
-                    {!isDark && (
-                      <Image source={{ uri: loc.image }} style={styles.locationThumbPhoto} />
-                    )}
-                    <Text style={styles.locationPillText}>{loc.name}</Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            )}
-
-          {/* ========================================================================= */}
-          {/* 5. SUB-CATEGORY QUICK ACTIONS (Deals, Events, Trip.Planner, Trending)     */}
-          {/* ========================================================================= */}
-          <View style={styles.quickActionsGrid}>
-            {([
-              { label: "Deals", icon: "pricetag-outline", route: "deals" },
-              { label: "Travel Buddy", icon: "people-outline", route: "/screens/travel-match" },
-              { label: "Trip.Planner", icon: "flash-outline", route: "/screens/trip-planner" },
-              { label: "Launch & Bus", icon: "boat-outline", route: "/screens/bus-launch" },
-            ] as Array<{ label: string; icon: keyof typeof Ionicons.glyphMap; route: string }>).map((action) => (
-              <Pressable
-                key={action.label}
-                style={styles.quickActionCol}
-                onPress={() => {
+          {/* Header Row touch overlay for Avatar "T" */}
+          <View style={styles.headerRow}>
+            <View style={{ flex: 1 }} />
+            <Pressable
+              style={styles.avatarButton}
+              onPress={() => {
+                try {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  if (action.route === "deals") {
-                    setShowPromoModal(true);
-                  } else {
-                    router.push(action.route as Href);
-                  }
-                }}
+                } catch {}
+                router.push("/(tabs)/account" as any);
+              }}
+              accessibilityLabel="Account Profile"
+              accessibilityRole="button"
+            />
+          </View>
+        </View>
+
+        {/* ================================================================== */}
+        {/* 2. PRIMARY SERVICES CARD (DUAL ROW: 4 + 5 SERVICES)                */}
+        {/* ================================================================== */}
+        <View style={styles.sectionWrapper}>
+          <View
+            style={[
+              styles.primaryCard,
+              {
+                backgroundColor: serviceCardBg,
+                borderColor: serviceCardBorder,
+              },
+              isDark ? styles.primaryCardShadowDark : styles.primaryCardShadowLight,
+            ]}
+          >
+            {/* ROW 1: Hotels | Flights | Flight + Hotel | Trains */}
+            <View style={styles.serviceRow1}>
+              {ROW_1_SERVICES.map((item) => (
+                <Pressable
+                  key={item.id}
+                  style={styles.serviceItemCol}
+                  onPress={() => handleServicePress(item.route)}
+                  hitSlop={6}
+                >
+                  <View style={styles.serviceIconCircle1}>
+                    <Ionicons name={item.icon} size={24} color={GOLD.iconDark} />
+                  </View>
+                  <Text style={styles.serviceLabel1} numberOfLines={2}>
+                    {item.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* ROW 2: Vacation Rentals | Attractions | Car Rentals | Package Tours | +7 more */}
+            <View style={styles.serviceRow2}>
+              {ROW_2_SERVICES.map((item) => (
+                <Pressable
+                  key={item.id}
+                  style={styles.serviceItemCol2}
+                  onPress={() => handleServicePress(item.route)}
+                  hitSlop={6}
+                >
+                  <View style={styles.serviceIconCircle2}>
+                    <Ionicons
+                      name={item.icon}
+                      size={item.id === "more" ? 18 : 20}
+                      color={GOLD.iconDark}
+                    />
+                  </View>
+                  <Text style={styles.serviceLabel2} numberOfLines={2}>
+                    {item.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        {/* ================================================================== */}
+        {/* 3. SEARCH PILL BAR ("Bali")                                        */}
+        {/* ================================================================== */}
+        <View style={styles.sectionWrapper}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.searchBarContainer,
+              {
+                backgroundColor: isDark ? "#FFFDF8" : "#FFFFFF",
+                borderColor: isDark ? GOLD.primary : GOLD.champagneBorder,
+              },
+              isDark ? styles.searchBarShadowDark : styles.searchBarShadowLight,
+              pressed && { opacity: 0.94 },
+            ]}
+            onPress={() => handleDestinationPress("Bali")}
+            accessibilityLabel="Search destination Bali"
+            accessibilityRole="search"
+          >
+            {/* Left: Bronze Chat Icon with Dots */}
+            <View style={styles.searchLeftIconWrap}>
+              <Ionicons name="chatbubble-ellipses" size={20} color="#B8860B" />
+            </View>
+
+            {/* Middle: Destination Placeholder / Query */}
+            <Text style={styles.searchQueryText}>Bali</Text>
+
+            {/* Right: Golden Circular Search Button with Magnifying Glass */}
+            <View style={styles.searchCircleButton}>
+              <LinearGradient
+                colors={["#E2BF65", "#C59B27"]}
+                style={styles.searchCircleGradient}
+              >
+                <Ionicons name="search" size={19} color="#FFFFFF" />
+              </LinearGradient>
+            </View>
+          </Pressable>
+        </View>
+
+        {/* ================================================================== */}
+        {/* 4. QUICK DESTINATION CHIPS (HORIZONTAL SCROLL)                     */}
+        {/* ================================================================== */}
+        <View style={styles.chipsSectionWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipsScrollContent}
+          >
+            {DESTINATION_CHIPS.map((chip) => (
+              <Pressable
+                key={chip.id}
+                style={({ pressed }) => [
+                  styles.chipPill,
+                  {
+                    backgroundColor: isDark ? "#FFFDF7" : "#FFFFFF",
+                    borderColor: isDark ? "#EADBBA" : "#E5E7EB",
+                  },
+                  pressed && { opacity: 0.88 },
+                ]}
+                onPress={() => handleDestinationPress(chip.name)}
+              >
+                <Image
+                  source={{ uri: chip.imageUrl }}
+                  style={styles.chipThumbnail}
+                  resizeMode="cover"
+                />
+                <Text style={styles.chipText}>{chip.name}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* ================================================================== */}
+        {/* 5. SECONDARY ACTION ICONS (Deals | Events | Trip.Planner | Trending) */}
+        {/* ================================================================== */}
+        <View style={styles.sectionWrapper}>
+          <View style={styles.actionIconsRow}>
+            {ACTION_ICONS.map((action) => (
+              <Pressable
+                key={action.id}
+                style={styles.actionIconCol}
+                onPress={() => handleActionPress(action.route)}
+                hitSlop={6}
               >
                 <View
                   style={[
-                    styles.quickActionCircle,
-                    {
-                      backgroundColor: theme.quickActionBg,
-                      borderColor: theme.quickActionBorder,
-                      shadowColor: isDark ? "#000000" : "#D4A03D",
-                    },
+                    styles.actionCircle,
+                    isDark
+                      ? styles.actionCircleDark
+                      : styles.actionCircleLight,
                   ]}
                 >
                   <Ionicons
                     name={action.icon}
                     size={22}
-                    color={theme.quickActionIcon}
+                    color={isDark ? GOLD.accent : "#8C6615"}
                   />
                 </View>
                 <Text
                   style={[
-                    styles.quickActionLabel,
-                    { color: isDark ? "#F8FAFC" : "#1E293B" },
+                    styles.actionLabel,
+                    { color: isDark ? "#EDEDED" : "#374151" },
                   ]}
+                  numberOfLines={1}
                 >
                   {action.label}
                 </Text>
               </Pressable>
             ))}
           </View>
+        </View>
 
-          {/* Spotlight Cards: Travel Intelligence & 1-Click Itinerary Marketplace */}
-          <View style={{ flexDirection: "row", gap: 10, marginHorizontal: 16, marginTop: 14 }}>
-            <Pressable
-              style={{
-                flex: 1,
-                padding: 12,
-                borderRadius: 16,
-                backgroundColor: isDark ? "#1E293B" : "#EFF6FF",
-                borderWidth: 1,
-                borderColor: "#BFDBFE",
-              }}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/screens/travel-intelligence" as Href);
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                <Ionicons name="shield-checkmark" size={18} color="#287DFA" />
-                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#10B981" }} />
-              </View>
-              <Text style={{ fontSize: 13, fontWeight: "700", color: isDark ? "#FFFFFF" : "#1E3A8A", marginTop: 8 }}>
-                Travel Intelligence
-              </Text>
-              <Text style={{ fontSize: 11, color: isDark ? "#94A3B8" : "#3B82F6", marginTop: 2 }}>
-                Live disruption alerts & alternatives
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={{
-                flex: 1,
-                padding: 12,
-                borderRadius: 16,
-                backgroundColor: isDark ? "#1E293B" : "#FEF3C7",
-                borderWidth: 1,
-                borderColor: "#FDE68A",
-              }}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/screens/explore-trips" as Href);
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                <Ionicons name="sparkles" size={18} color="#D97706" />
-                <Text style={{ fontSize: 10, fontWeight: "800", color: "#B45309" }}>1-CLICK</Text>
-              </View>
-              <Text style={{ fontSize: 13, fontWeight: "700", color: isDark ? "#FFFFFF" : "#92400E", marginTop: 8 }}>
-                Explore Itineraries
-              </Text>
-              <Text style={{ fontSize: 11, color: isDark ? "#94A3B8" : "#B45309", marginTop: 2 }}>
-                Clone & customize complete trips
-              </Text>
-            </Pressable>
-          </View>
-
-          {/* ========================================================================= */}
-          {/* AI INSIGHTS TODAY (Image 4 Curated AI Insights Pattern)                  */}
-          {/* ========================================================================= */}
-          <View style={{ marginHorizontal: 16, marginTop: 18 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Ionicons name="sparkles" size={15} color="#D97706" />
-                <Text style={{ fontSize: 14, fontWeight: "700", color: isDark ? "#FFFFFF" : "#0F172A" }}>
-                  AI Insights Today
-                </Text>
-              </View>
-              <Text style={{ fontSize: 11, color: isDark ? "#94A3B8" : "#64748B" }}>
-                Updated 10m ago
-              </Text>
-            </View>
-
-            {isDesktop ? (
-              <View style={{ flexDirection: "row", gap: 12 }}>
-                <Pressable
-                  style={{
-                    flex: 1,
-                    padding: 14,
-                    borderRadius: 14,
-                    backgroundColor: isDark ? "#1E293B" : "#FEF3C7",
-                    borderWidth: 1,
-                    borderColor: isDark ? "rgba(245, 158, 11, 0.3)" : "#FDE68A",
-                  }}
-                  onPress={() => router.push("/screens/explore-trips" as Href)}
-                >
-                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#F59E0B20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
-                    <Ionicons name="flame" size={18} color="#D97706" />
-                  </View>
-                  <Text style={{ fontSize: 13, fontWeight: "700", color: isDark ? "#FFFFFF" : "#92400E" }}>
-                    Trending Spot
-                  </Text>
-                  <Text style={{ fontSize: 11, color: isDark ? "#94A3B8" : "#B45309", marginTop: 2 }}>
-                    Sajek Valley (+48% visits)
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  style={{
-                    flex: 1,
-                    padding: 14,
-                    borderRadius: 14,
-                    backgroundColor: isDark ? "#1E293B" : "#ECFDF5",
-                    borderWidth: 1,
-                    borderColor: isDark ? "rgba(16, 185, 129, 0.3)" : "#A7F3D0",
-                  }}
-                  onPress={() => router.push("/screens/explore" as Href)}
-                >
-                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#10B98120", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
-                    <Ionicons name="sunny" size={18} color="#059669" />
-                  </View>
-                  <Text style={{ fontSize: 13, fontWeight: "700", color: isDark ? "#FFFFFF" : "#065F46" }}>
-                    Weather Friendly
-                  </Text>
-                  <Text style={{ fontSize: 11, color: isDark ? "#94A3B8" : "#047857", marginTop: 2 }}>
-                    Cox's Bazar (Mild 24°C)
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  style={{
-                    flex: 1,
-                    padding: 14,
-                    borderRadius: 14,
-                    backgroundColor: isDark ? "#1E293B" : "#EFF6FF",
-                    borderWidth: 1,
-                    borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "#BFDBFE",
-                  }}
-                  onPress={() => router.push("/screens/explore-trips" as Href)}
-                >
-                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#287DFA20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
-                    <Ionicons name="diamond" size={18} color="#1D4ED8" />
-                  </View>
-                  <Text style={{ fontSize: 13, fontWeight: "700", color: isDark ? "#FFFFFF" : "#1E40AF" }}>
-                    Hidden Gem
-                  </Text>
-                  <Text style={{ fontSize: 11, color: isDark ? "#94A3B8" : "#2563EB", marginTop: 2 }}>
-                    Tanguar Haor Silence
-                  </Text>
-                </Pressable>
-
-                <View style={{ flex: 1.2 }}>
-                  <DestinationVitalsRow
-                    compact
-                    temperature={{ value: "Cold 16°C", condition: "Chilly morning mist" }}
-                    airQuality={{ aqi: 30, statusText: "Great" }}
-                    safety={{ statusText: "100% Safe" }}
-                    connectivity={{ statusText: "4G Active" }}
-                  />
-                </View>
-              </View>
-            ) : (
-              <>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-                  <Pressable
-                    style={{
-                      width: 140,
-                      padding: 12,
-                      borderRadius: 14,
-                      backgroundColor: isDark ? "#1E293B" : "#FEF3C7",
-                      borderWidth: 1,
-                      borderColor: isDark ? "rgba(245, 158, 11, 0.3)" : "#FDE68A",
-                    }}
-                    onPress={() => router.push("/screens/explore-trips" as Href)}
-                  >
-                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#F59E0B20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
-                      <Ionicons name="flame" size={18} color="#D97706" />
-                    </View>
-                    <Text style={{ fontSize: 12, fontWeight: "700", color: isDark ? "#FFFFFF" : "#92400E" }}>
-                      Trending Spot
-                    </Text>
-                    <Text style={{ fontSize: 10, color: isDark ? "#94A3B8" : "#B45309", marginTop: 2 }}>
-                      Sajek Valley (+48% visits)
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={{
-                      width: 140,
-                      padding: 12,
-                      borderRadius: 14,
-                      backgroundColor: isDark ? "#1E293B" : "#ECFDF5",
-                      borderWidth: 1,
-                      borderColor: isDark ? "rgba(16, 185, 129, 0.3)" : "#A7F3D0",
-                    }}
-                    onPress={() => router.push("/screens/explore" as Href)}
-                  >
-                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#10B98120", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
-                      <Ionicons name="sunny" size={18} color="#059669" />
-                    </View>
-                    <Text style={{ fontSize: 12, fontWeight: "700", color: isDark ? "#FFFFFF" : "#065F46" }}>
-                      Weather Friendly
-                    </Text>
-                    <Text style={{ fontSize: 10, color: isDark ? "#94A3B8" : "#047857", marginTop: 2 }}>
-                      Cox's Bazar (Mild 24°C)
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={{
-                      width: 140,
-                      padding: 12,
-                      borderRadius: 14,
-                      backgroundColor: isDark ? "#1E293B" : "#EFF6FF",
-                      borderWidth: 1,
-                      borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "#BFDBFE",
-                    }}
-                    onPress={() => router.push("/screens/explore-trips" as Href)}
-                  >
-                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#287DFA20", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
-                      <Ionicons name="diamond" size={18} color="#1D4ED8" />
-                    </View>
-                    <Text style={{ fontSize: 12, fontWeight: "700", color: isDark ? "#FFFFFF" : "#1E40AF" }}>
-                      Hidden Gem
-                    </Text>
-                    <Text style={{ fontSize: 10, color: isDark ? "#94A3B8" : "#2563EB", marginTop: 2 }}>
-                      Tanguar Haor Silence
-                    </Text>
-                  </Pressable>
-                </ScrollView>
-
-                {/* Live Destination Vitals for Selected Region (Image 1 UX Pattern) */}
-                <View style={{ marginTop: 12 }}>
-                  <DestinationVitalsRow
-                    compact
-                    temperature={{ value: "Cold 16°C", condition: "Chilly morning mist" }}
-                    airQuality={{ aqi: 30, statusText: "Great" }}
-                    safety={{ statusText: "100% Safe" }}
-                    connectivity={{ statusText: "4G Active" }}
-                  />
-                </View>
-              </>
-            )}
-          </View>
-
-          {/* ========================================================================= */}
-          {/* 6. DISCOVER HEADER: "Discover ✨ | Nearby", "See All →"                  */}
-          {/* ========================================================================= */}
+        {/* ================================================================== */}
+        {/* 6. "DISCOVER ✨" SECTION (HORIZONTAL CARDS)                       */}
+        {/* ================================================================== */}
+        <View style={styles.discoverSectionWrapper}>
+          {/* Section Header */}
           <View style={styles.discoverHeaderRow}>
             <View style={styles.discoverTitleGroup}>
               <Text
                 style={[
-                  styles.discoverHeading,
+                  styles.discoverTitle,
                   { color: isDark ? "#FFFFFF" : "#111827" },
                 ]}
               >
-                Discover
+                Discover ✨
               </Text>
-              <Text style={styles.discoverSparkle}>✨</Text>
-              <Text style={styles.discoverDivider}> | </Text>
-              <Pressable onPress={() => setActiveFeedTab(activeFeedTab === "discover" ? "nearby" : "discover")}>
-                <Text
-                  style={[
-                    styles.discoverNearbyTab,
-                    activeFeedTab === "nearby" && { color: theme.gold, fontWeight: "700" },
-                  ]}
-                >
-                  Nearby
-                </Text>
-              </Pressable>
+              {isDark && (
+                <Text style={styles.discoverNearbyText}> | Nearby</Text>
+              )}
             </View>
 
             <Pressable
-              style={styles.seeAllBtn}
-              onPress={() => router.push("/screens/explore" as Href)}
+              onPress={() => handleActionPress("/screens/explore")}
+              hitSlop={8}
             >
-              <Text style={[styles.seeAllText, { color: theme.gold }]}>See All →</Text>
+              <Text
+                style={[
+                  styles.seeAllText,
+                  { color: isDark ? GOLD.accent : "#B8860B" },
+                ]}
+              >
+                See All →
+              </Text>
             </Pressable>
           </View>
-        </View>
 
-        {/* ========================================================================= */}
-        {/* 7. FEATURED CARDS CAROUSEL: "Explore Asia" & "Trip.Tuesday" Verified Cards */}
-        {/* ========================================================================= */}
-        <View style={[styles.cardsCarouselWrap, isDesktop && { flexDirection: "row", gap: 16, marginHorizontal: 16 }]}>
-          {ads.length > 0 ? (
-            ads.map((ad, index) => (
-              <Pressable
-                key={ad.id || `ad-${index}`}
-                style={[
-                  styles.featuredCard,
-                  isDesktop && { flex: 1, marginHorizontal: 0, height: 230 },
-                  {
-                    borderColor: theme.cardBorder,
-                    shadowColor: isDark ? "#000" : "#94A3B8",
-                  },
-                ]}
-                onPress={() => router.push((ad.target_url || "/screens/explore") as Href)}
-              >
-                <ImageBackground
-                  source={{
-                    uri: ad.banner_url || "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800",
-                  }}
-                  style={styles.featuredCardBg}
-                  imageStyle={{ borderRadius: 20 }}
+          {/* Discover Cards Scroll */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.discoverScrollContent}
+          >
+            {DISCOVER_CARDS.map((card) => {
+              const cardImg = isDark ? card.imageDark : card.imageLight;
+              return (
+                <Pressable
+                  key={card.id}
+                  style={styles.discoverCardContainer}
+                  onPress={() => handleActionPress(card.route)}
                 >
-                  <LinearGradient
-                    colors={["rgba(0,0,0,0.15)", "rgba(0,0,0,0.85)"]}
-                    style={styles.featuredCardGradient}
-                  >
-                    <View style={styles.cardTopBadgeRow}>
-                      <View style={styles.featuredBadge}>
-                        <Text style={styles.featuredBadgeText}>
-                          {ad.badge_text || "FEATURED"}
-                        </Text>
-                      </View>
-                      <View style={styles.pageCounterPill}>
-                        <Text style={styles.pageCounterText}>
-                          {index + 1}/{ads.length}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.cardBottomContent}>
-                      <Text style={styles.exploreAsiaTitle} numberOfLines={1}>
-                        {ad.title}
-                      </Text>
-                      <Text style={styles.exploreAsiaSub} numberOfLines={2}>
-                        {ad.subtitle || "Special deals & handpicked journeys"}
-                      </Text>
-
-                      <Pressable
-                        style={[
-                          styles.viewDealsBtn,
-                          { backgroundColor: theme.ctaButtonBg },
-                        ]}
-                        onPress={() => router.push((ad.target_url || "/screens/explore") as Href)}
-                      >
-                        <Text
-                          style={[
-                            styles.viewDealsBtnText,
-                            { color: theme.ctaButtonText },
-                          ]}
-                        >
-                          {ad.button_text || "View Deals →"}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  </LinearGradient>
-                </ImageBackground>
-              </Pressable>
-            ))
-          ) : (
-            <>
-              {/* Card 1: Explore Asia */}
-          <Pressable
-            style={[
-              styles.featuredCard,
-              isDesktop && { flex: 1, marginHorizontal: 0, height: 230 },
-              {
-                borderColor: theme.cardBorder,
-                shadowColor: isDark ? "#000" : "#94A3B8",
-              },
-            ]}
-            onPress={() => router.push("/screens/explore" as Href)}
-          >
-            <ImageBackground
-              source={{
-                uri: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&auto=format&fit=crop&q=80",
-              }}
-              style={styles.featuredCardBg}
-              imageStyle={{ borderRadius: 20 }}
-            >
-              <LinearGradient
-                colors={["rgba(0,0,0,0.2)", "rgba(0,0,0,0.85)"]}
-                style={styles.featuredCardGradient}
-              >
-                {/* Top Badge & Counter */}
-                <View style={styles.cardTopBadgeRow}>
-                  <View style={styles.featuredBadge}>
-                    <Text style={styles.featuredBadgeText}>FEATURED</Text>
-                  </View>
-                  <View style={styles.pageCounterPill}>
-                    <Text style={styles.pageCounterText}>1/3</Text>
-                  </View>
-                </View>
-
-                {/* Bottom Content */}
-                <View style={styles.cardBottomContent}>
-                  <Text style={styles.exploreAsiaTitle}>
-                    Explore <Text style={{ color: theme.gold }}>Asia</Text>
-                  </Text>
-                  <Text style={styles.exploreAsiaSub}>
-                    Unforgettable journeys across Asia
-                  </Text>
-
-                  {/* Deals Pill */}
-                  <View style={styles.specialOffersPill}>
-                    <Ionicons name="gift" size={12} color="#FDE68A" />
-                    <Text style={styles.specialOffersText}>
-                      Special Offers & Deals
-                    </Text>
-                  </View>
-
-                  {/* View Deals CTA Button */}
-                  <Pressable
-                    style={[
-                      styles.viewDealsBtn,
-                      { backgroundColor: theme.ctaButtonBg },
-                    ]}
-                    onPress={() => router.push("/screens/explore" as Href)}
-                  >
-                    <Text
-                      style={[
-                        styles.viewDealsBtnText,
-                        { color: theme.ctaButtonText },
-                      ]}
-                    >
-                      View Deals →
-                    </Text>
-                  </Pressable>
-                </View>
-              </LinearGradient>
-            </ImageBackground>
-          </Pressable>
-
-          {/* Card 2: Trip.Tuesday */}
-          <Pressable
-            style={[
-              styles.featuredCard,
-              isDesktop && { flex: 1, marginHorizontal: 0, height: 230 },
-              {
-                borderColor: theme.cardBorder,
-                shadowColor: isDark ? "#000" : "#94A3B8",
-              },
-            ]}
-            onPress={() => router.push("/screens/flights" as Href)}
-          >
-            <ImageBackground
-              source={{
-                uri: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=800&auto=format&fit=crop&q=80",
-              }}
-              style={styles.featuredCardBg}
-              imageStyle={{ borderRadius: 20 }}
-            >
-              <LinearGradient
-                colors={["rgba(0,0,0,0.2)", "rgba(0,0,0,0.88)"]}
-                style={styles.featuredCardGradient}
-              >
-                {/* Top Title & Verified Badge */}
-                <View style={styles.cardTopBadgeRow}>
-                  <Text style={styles.tripTuesdayTitle}>Trip.Tuesday</Text>
-                  <View style={styles.verifiedBadge}>
-                    <Ionicons name="checkmark-circle" size={13} color="#18181B" />
-                    <Text style={styles.verifiedBadgeText}>VERIFIED</Text>
-                  </View>
-                </View>
-
-                {/* Bottom Content */}
-                <View style={styles.cardBottomContent}>
-                  <Text style={styles.tripTuesdaySub} numberOfLines={2}>
-                    Trip.Tuesday – $99 Flights to Canada & Asia ($40 Cou...
-                  </Text>
-
-                  {/* Special Promo CTA Button */}
-                  <Pressable
-                    style={[
-                      styles.specialPromoBtn,
-                      { backgroundColor: theme.ctaButtonBg },
-                    ]}
-                    onPress={() => router.push("/screens/flights" as Href)}
-                  >
-                    <Text
-                      style={[
-                        styles.specialPromoBtnText,
-                        { color: theme.ctaButtonText },
-                      ]}
-                    >
-                      SPECIAL PROMO
-                    </Text>
-                  </Pressable>
-                </View>
-              </LinearGradient>
-            </ImageBackground>
-          </Pressable>
-            </>
-          )} 
+                  <Image
+                    source={cardImg}
+                    style={styles.discoverCardImage}
+                    resizeMode="cover"
+                  />
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
 
-        {/* ========================================================================= */}
-        {/* 8. LIVE COMMUNITY & HOTEL FEED (Responsive 2 to 4 Columns)               */}
-        {/* ========================================================================= */}
-        {communityPosts.length > 0 && (
-          <View style={[styles.masonryFeedGrid, isDesktop && { gap: 16 }]}>
-            {feedColumns.map((colPosts, colIdx) => (
-              <View key={`col-${colIdx}`} style={[styles.masonryColumn, isDesktop && { gap: 16 }]}>
-                {colPosts.map((post) => {
-                  const isLiked = likedPostIds.has(post.id);
-                  const postImage =
-                    post.media?.[0]?.media_url ||
-                    "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=500";
-                  const authorName =
-                    post.author?.username || post.author?.display_name || "Traveler";
+        {/* Extra Bottom Padding for AI Concierge Pill & Bottom Tab Bar */}
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
 
-                  return (
-                    <Pressable
-                      key={post.id}
-                      style={[
-                        styles.feedCard,
-                        {
-                          backgroundColor: isDark ? "#121622" : "#FFFFFF",
-                          borderColor: theme.cardBorder,
-                        },
-                      ]}
-                      onPress={() =>
-                        router.push({
-                          pathname: "/(tabs)/community",
-                          params: { postId: post.id },
-                        } as Href)
-                      }
-                    >
-                      <Image source={{ uri: postImage }} style={[styles.feedCardImage, isDesktop && { height: 160 }]} />
-                      <View style={styles.feedCardContent}>
-                        <Text
-                          style={[
-                            styles.feedCardTitle,
-                            { color: isDark ? "#F8FAFC" : "#0F172A" },
-                          ]}
-                          numberOfLines={2}
-                        >
-                          {post.title}
-                        </Text>
-                        <View style={styles.feedCardAuthorRow}>
-                          <Text
-                            style={[
-                              styles.feedAuthorName,
-                              { color: isDark ? "#94A3B8" : "#64748B" },
-                            ]}
-                            numberOfLines={1}
-                          >
-                            {authorName}
-                          </Text>
-                          <Pressable
-                            style={styles.feedLikeBtn}
-                            onPress={(e) => {
-                              e.stopPropagation();
-                              handleToggleLike(post);
-                            }}
-                          >
-                            <Ionicons
-                              name={isLiked ? "heart" : "heart-outline"}
-                              size={14}
-                              color={isLiked ? "#EF4444" : "#94A3B8"}
-                            />
-                            <Text
-                              style={[
-                                styles.feedLikeCount,
-                                { color: isLiked ? "#EF4444" : "#94A3B8" },
-                              ]}
-                            >
-                              {post.likes_count}
-                            </Text>
-                          </Pressable>
-                        </View>
-                      </View>
-                    </Pressable>
-                  );
-                })}
+      {/* ================================================================== */}
+      {/* 7. "+7 MORE SERVICES" BOTTOM SHEET MODAL                           */}
+      {/* ================================================================== */}
+      <Modal
+        visible={isMoreModalOpen}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setIsMoreModalOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={StyleSheet.absoluteFillObject}
+            onPress={() => setIsMoreModalOpen(false)}
+          />
+          <View
+            style={[
+              styles.modalSheet,
+              { backgroundColor: isDark ? "#12141A" : "#FFFFFF" },
+            ]}
+          >
+            {/* Sheet Handle */}
+            <View style={styles.modalHandle} />
+
+            {/* Header with Close Button */}
+            <View style={styles.modalHeaderRow}>
+              <View>
+                <Text
+                  style={[
+                    styles.modalTitle,
+                    { color: isDark ? "#FFFFFF" : "#111827" },
+                  ]}
+                >
+                  +7 More Travel Services
+                </Text>
+                <Text
+                  style={[
+                    styles.modalSubtitle,
+                    { color: isDark ? "#9CA3AF" : "#64748B" },
+                  ]}
+                >
+                  Explore specialized travel & transit solutions
+                </Text>
               </View>
-            ))}
+
+              <Pressable
+                onPress={() => setIsMoreModalOpen(false)}
+                style={styles.modalCloseBtn}
+                hitSlop={8}
+              >
+                <Ionicons
+                  name="close"
+                  size={22}
+                  color={isDark ? "#FFFFFF" : "#374151"}
+                />
+              </Pressable>
+            </View>
+
+            {/* Services List */}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.modalListContent}
+            >
+              {MORE_SERVICES.map((item) => (
+                <Pressable
+                  key={item.id}
+                  style={({ pressed }) => [
+                    styles.modalServiceRow,
+                    {
+                      backgroundColor: isDark ? "#1A1D24" : "#F8FAFC",
+                      borderColor: isDark ? "#282C37" : "#E2E8F0",
+                    },
+                    pressed && { opacity: 0.8 },
+                  ]}
+                  onPress={() => {
+                    setIsMoreModalOpen(false);
+                    try {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    } catch {}
+                    router.push(item.route as any);
+                  }}
+                >
+                  <View
+                    style={[
+                      styles.modalIconWrap,
+                      { backgroundColor: isDark ? "#262319" : "#FEF9EC" },
+                    ]}
+                  >
+                    <Ionicons name={item.icon} size={22} color={GOLD.primary} />
+                  </View>
+                  <View style={styles.modalTextGroup}>
+                    <Text
+                      style={[
+                        styles.modalServiceTitle,
+                        { color: isDark ? "#FFFFFF" : "#111827" },
+                      ]}
+                    >
+                      {item.title}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.modalServiceSub,
+                        { color: isDark ? "#9CA3AF" : "#64748B" },
+                      ]}
+                    >
+                      {item.subtitle}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={18}
+                    color={isDark ? "#64748B" : "#94A3B8"}
+                  />
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
-        )}
         </View>
-
-        {/* Professional Desktop Web Footer (Rendered on Desktop/Laptop) */}
-        <WebFooter />
-
-        {/* Space at bottom for floating navigation bar (only needed on mobile) */}
-        <View style={{ height: isDesktop ? 20 : 130 }} />
-      </Animated.ScrollView>
-
-      {/* Promo Exclusive Voucher Modal */}
-      <PromoExclusiveModal
-        visible={showPromoModal}
-        onClose={() => setShowPromoModal(false)}
-        onClaimAll={() => setShowPromoModal(false)}
-      />
+      </Modal>
     </SafeAreaView>
   );
 }
 
+// ─── STYLESHEET ──────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   shell: {
     flex: 1,
   },
-  scroll: {
-    paddingBottom: 20,
+  scrollContent: {
+    paddingBottom: 40,
   },
-  heroHeaderContainer: {
+  bottomSpacer: {
+    height: 140,
+  },
+
+  // 1. Hero Header
+  heroContainer: {
+    height: 105,
     width: "100%",
-    paddingBottom: 4,
-  },
-  heroHeaderGradient: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 16,
     position: "relative",
-  },
-  airplaneHorizonOverlay: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    left: 0,
-    height: 120,
+    justifyContent: "flex-end",
     overflow: "hidden",
   },
-  earthHorizonCurve: {
-    position: "absolute",
-    top: 48,
-    right: -30,
-    width: 280,
-    height: 180,
-    borderRadius: 140,
-    borderWidth: 1.5,
-  },
-  airplaneContrail: {
-    position: "absolute",
-    top: 26,
-    right: 70,
-    width: 90,
-    height: 1.5,
-    transform: [{ rotate: "-22deg" }],
-    borderRadius: 1,
-  },
-  airplaneIcon: {
-    position: "absolute",
-    top: 10,
-    right: 54,
-    transform: [{ rotate: "45deg" }],
-  },
-  headerTopRow: {
+  headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-    zIndex: 2,
+    justifyContent: "flex-end",
+    width: "100%",
+    height: "100%",
   },
-  brandTitle: {
-    fontSize: 27,
-    fontWeight: "800",
-    letterSpacing: -0.6,
+  avatarButton: {
+    width: 50,
+    height: 50,
+    marginRight: 8,
+    marginTop: 6,
+    borderRadius: 25,
   },
-  brandSubtitle: {
-    fontSize: 13,
+  avatarGradient: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: {
+    color: "#FFFFFF",
+    fontSize: 18,
     fontWeight: "500",
-    marginTop: 2,
   },
-  headerRightControls: {
+
+  // 2. Primary Services Card
+  sectionWrapper: {
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  primaryCard: {
+    borderRadius: 22,
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    borderWidth: 1,
+  },
+  primaryCardShadowLight: {
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    elevation: 4,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 3px 14px rgba(0, 0, 0, 0.07)" } : {}),
+  },
+  primaryCardShadowDark: {
+    shadowColor: "#ECC46E",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 18,
+    elevation: 6,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 18px rgba(236, 196, 110, 0.14)" } : {}),
+  },
+  serviceRow1: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    paddingHorizontal: 2,
   },
-  themeToggleBtn: {
+  serviceItemCol: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  serviceIconCircle1: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: GOLD.iconBg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  serviceLabel1: {
+    fontSize: 11.5,
+    fontWeight: "500",
+    color: "#1F2937",
+    textAlign: "center",
+    letterSpacing: -0.1,
+  },
+  serviceRow2: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  serviceItemCol2: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  serviceIconCircle2: {
     width: 36,
     height: 36,
     borderRadius: 18,
+    backgroundColor: GOLD.iconBg,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    marginBottom: 3,
   },
-  goldAvatarCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    overflow: "hidden",
-    shadowColor: "#E5A93C",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
-    shadowRadius: 5,
-    elevation: 4,
-  },
-  goldAvatarGradient: {
-    width: "100%",
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  goldAvatarText: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#18181B",
+  serviceLabel2: {
+    fontSize: 10.5,
+    fontWeight: "500",
+    color: "#374151",
+    textAlign: "center",
+    lineHeight: 13,
   },
 
-  // Category Grid Card
-  categoryGridCard: {
-    borderRadius: 24,
-    paddingVertical: 18,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  categoryRow: {
+  // 3. Search Bar
+  searchBarContainer: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-around",
-  },
-  categoryCol: {
     alignItems: "center",
-    width: "23%",
+    height: 46,
+    borderRadius: 9999,
+    paddingHorizontal: 14,
+    borderWidth: 1.5,
   },
-  categoryColSecondary: {
-    alignItems: "center",
-    width: "19%",
-  },
-  goldIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#FBF0DC",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-    shadowColor: "#E5A93C",
+  searchBarShadowLight: {
+    shadowColor: "#C59B27",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  goldIconCircleSecondary: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#FBF0DC",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 6,
-  },
-  moreIconCircleBg: {
-    backgroundColor: "#18181B",
-  },
-  categoryLabelText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#111827",
-    textAlign: "center",
-  },
-  categoryLabelTextSecondary: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#111827",
-    textAlign: "center",
-    lineHeight: 12,
-  },
-
-  // Search Section
-  searchSectionWrap: {
-    paddingHorizontal: 16,
-    marginTop: 14,
-  },
-  searchBarPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 52,
-    borderRadius: 26,
-    paddingLeft: 14,
-    paddingRight: 6,
-    borderWidth: 1,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 3,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 8px rgba(197, 155, 39, 0.08)" } : {}),
   },
-  chatIconBox: {
+  searchBarShadowDark: {
+    shadowColor: "#FFE082",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 5,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 3px 12px rgba(255, 224, 130, 0.22)" } : {}),
+  },
+  searchLeftIconWrap: {
     marginRight: 10,
   },
-  searchInputText: {
+  searchQueryText: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0F172A",
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#1A1A1A",
   },
-  goldSearchBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  searchCircleButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     overflow: "hidden",
   },
-  goldSearchGradient: {
-    width: "100%",
-    height: "100%",
+  searchCircleGradient: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
 
-  // Location Tags Row
-  locationTagsScroll: {
-    paddingTop: 12,
-    paddingBottom: 16,
-    gap: 8,
-    alignItems: "center",
+  // 4. Quick Destination Chips
+  chipsSectionWrapper: {
+    marginTop: 8,
   },
-  locationPillBtn: {
+  chipsScrollContent: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  chipPill: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 11,
+    paddingLeft: 4,
+    borderRadius: 9999,
     borderWidth: 1,
-    gap: 6,
   },
-  locationThumbPhoto: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+  chipThumbnail: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
   },
-  locationPillText: {
+  chipText: {
     fontSize: 12,
-    fontWeight: "700",
-    color: "#18181B",
+    fontWeight: "500",
+    color: "#181818",
+    marginLeft: 6,
   },
 
-  // Sub-Category Quick Actions
-  quickActionsGrid: {
+  // 5. Secondary Action Icons
+  actionIconsRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 8,
+    marginTop: 4,
     paddingHorizontal: 4,
   },
-  quickActionCol: {
-    alignItems: "center",
-    width: "23%",
-  },
-  quickActionCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+  actionIconCol: {
     alignItems: "center",
     justifyContent: "center",
+    flex: 1,
+  },
+  actionCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  actionCircleLight: {
+    backgroundColor: "#FDFBF7",
+    borderWidth: 1,
+    borderColor: "#EDE6D8",
+  },
+  actionCircleDark: {
+    backgroundColor: "#141416",
     borderWidth: 1.5,
-    marginBottom: 6,
+    borderColor: "#C5A049",
+    shadowColor: "#ECC46E",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.25,
     shadowRadius: 6,
     elevation: 3,
   },
-  quickActionLabel: {
-    fontSize: 12,
-    fontWeight: "600",
+  actionLabel: {
+    fontSize: 11.5,
+    fontWeight: "500",
     textAlign: "center",
   },
 
-  // Discover Section Header
+  // 6. Discover Section
+  discoverSectionWrapper: {
+    marginTop: 12,
+  },
   discoverHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 18,
-    marginBottom: 12,
+    paddingHorizontal: 18,
+    marginBottom: 8,
   },
   discoverTitleGroup: {
     flexDirection: "row",
     alignItems: "center",
   },
-  discoverHeading: {
-    fontSize: 22,
-    fontWeight: "800",
-    letterSpacing: -0.4,
+  discoverTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    letterSpacing: -0.3,
   },
-  discoverSparkle: {
-    fontSize: 16,
-    marginLeft: 3,
-  },
-  discoverDivider: {
-    fontSize: 18,
-    color: "#64748B",
-  },
-  discoverNearbyTab: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#94A3B8",
-  },
-  seeAllBtn: {
-    paddingVertical: 4,
+  discoverNearbyText: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#8E8E93",
   },
   seeAllText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "600",
   },
-
-  // Featured Cards Carousel
-  cardsCarouselWrap: {
-    flexDirection: "row",
+  discoverScrollContent: {
     paddingHorizontal: 16,
     gap: 12,
-    marginBottom: 20,
   },
-  featuredCard: {
-    flex: 1,
-    height: 250,
-    borderRadius: 20,
+  discoverCardContainer: {
+    width: 178,
+    height: 220,
+    borderRadius: 18,
     overflow: "hidden",
-    borderWidth: 1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
+    position: "relative",
+    backgroundColor: "transparent",
   },
-  featuredCardBg: {
+  discoverCardImage: {
     width: "100%",
     height: "100%",
+    borderRadius: 18,
   },
-  featuredCardGradient: {
-    flex: 1,
-    padding: 12,
-    justifyContent: "space-between",
-  },
-  cardTopBadgeRow: {
+  cardHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    width: "100%",
   },
-  featuredBadge: {
-    backgroundColor: "#E5A93C",
+  cardHeaderTitle: {
+    color: "#FFFFFF",
+    fontSize: 14.5,
+    fontWeight: "600",
+  },
+  cardBadgeFeatured: {
+    backgroundColor: GOLD.badgeBg,
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingVertical: 3,
+    borderRadius: 999,
   },
-  featuredBadgeText: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: "#18181B",
-    letterSpacing: 0.4,
+  cardBadgeFeaturedText: {
+    color: GOLD.badgeText,
+    fontSize: 9.5,
+    fontWeight: "600",
+    letterSpacing: 0.3,
   },
-  pageCounterPill: {
-    backgroundColor: "rgba(0,0,0,0.5)",
+  cardPageBadge: {
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
     paddingHorizontal: 7,
     paddingVertical: 3,
-    borderRadius: 10,
+    borderRadius: 999,
   },
-  pageCounterText: {
+  cardPageBadgeText: {
+    color: "#FFFFFF",
     fontSize: 10,
+    fontWeight: "500",
+  },
+  cardVerifiedBadge: {
+    backgroundColor: GOLD.badgeBg,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  cardVerifiedText: {
+    color: GOLD.badgeText,
+    fontSize: 9,
+    fontWeight: "600",
+  },
+  cardBottomWrap: {
+    width: "100%",
+  },
+  cardMainTitle: {
+    color: "#FFFFFF",
+    fontSize: 21,
     fontWeight: "700",
-    color: "#FFFFFF",
+    lineHeight: 25,
+    marginBottom: 4,
   },
-  cardBottomContent: {
-    gap: 6,
-  },
-  exploreAsiaTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#FFFFFF",
-  },
-  exploreAsiaSub: {
-    fontSize: 11,
+  cardSubtitle: {
     color: "#E2E8F0",
-    lineHeight: 14,
+    fontSize: 11,
+    lineHeight: 15,
+    marginBottom: 6,
   },
-  specialOffersPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(24, 28, 38, 0.75)",
+  cardPromoPill: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     alignSelf: "flex-start",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
-    gap: 5,
-  },
-  specialOffersText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#FDE68A",
-  },
-  viewDealsBtn: {
-    borderRadius: 14,
-    paddingVertical: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-  },
-  viewDealsBtnText: {
-    fontSize: 12,
-    fontWeight: "800",
-  },
-
-  // Trip.Tuesday Card
-  tripTuesdayTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#FFFFFF",
-  },
-  verifiedBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#E5A93C",
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 6,
-    gap: 3,
-  },
-  verifiedBadgeText: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: "#18181B",
-  },
-  tripTuesdaySub: {
-    fontSize: 11,
-    color: "#CBD5E1",
-    lineHeight: 15,
-  },
-  specialPromoBtn: {
-    borderRadius: 14,
-    paddingVertical: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-  },
-  specialPromoBtnText: {
-    fontSize: 11,
-    fontWeight: "800",
-  },
-
-  // Feed Masonry Grid
-  masonryFeedGrid: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    gap: 12,
-  },
-  masonryColumn: {
-    flex: 1,
-    gap: 12,
-  },
-  feedCard: {
-    borderRadius: 14,
-    overflow: "hidden",
+    borderRadius: 8,
     borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    marginBottom: 10,
   },
-  feedCardImage: {
-    width: "100%",
-    height: 120,
-    backgroundColor: "#1E2638",
+  cardPromoText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "500",
   },
-  feedCardContent: {
-    padding: 10,
-    gap: 6,
+  cardCtaButton: {
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 9999,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  feedCardTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    lineHeight: 16,
+  cardCtaButtonText: {
+    color: "#181818",
+    fontSize: 11.5,
+    fontWeight: "600",
+    letterSpacing: 0.2,
   },
-  feedCardAuthorRow: {
+
+  // 7. "+7 More Services" Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "flex-end",
+  },
+  modalSheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 12,
+    paddingBottom: 36,
+    paddingHorizontal: 20,
+    maxHeight: "80%",
+  },
+  modalHandle: {
+    width: 44,
+    height: 5,
+    backgroundColor: "#94A3B8",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 14,
+  },
+  modalHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginBottom: 18,
   },
-  feedAuthorName: {
-    fontSize: 10,
-    fontWeight: "500",
-    flex: 1,
+  modalTitle: {
+    fontSize: 19,
+    fontWeight: "700",
+    letterSpacing: -0.3,
   },
-  feedLikeBtn: {
+  modalSubtitle: {
+    fontSize: 12.5,
+    fontWeight: "400",
+    marginTop: 2,
+  },
+  modalCloseBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalListContent: {
+    gap: 10,
+  },
+  modalServiceRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
   },
-  feedLikeCount: {
-    fontSize: 11,
+  modalIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  modalTextGroup: {
+    flex: 1,
+  },
+  modalServiceTitle: {
+    fontSize: 14.5,
     fontWeight: "600",
+  },
+  modalServiceSub: {
+    fontSize: 12,
+    fontWeight: "400",
+    marginTop: 2,
   },
 });

@@ -30,3 +30,10 @@ export { UniversalFilterModal, type UniversalFilterModalProps, type SortOption }
 export { BookingStepper, type BookingStepperProps, BOOKING_STEPS } from "./BookingStepper";
 export { DestinationVitalsRow, type DestinationVitalsRowProps, type VitalStatus } from "./DestinationVitalsRow";
 export { SonarRadarView, type SonarRadarViewProps, type RadarNode } from "./SonarRadarView";
+export {
+  OpenStreetMap,
+  type OpenStreetMapProps,
+  type MapMarkerItem,
+  type MapRouteItem,
+  type MapHeatPoint,
+} from "./OpenStreetMap";

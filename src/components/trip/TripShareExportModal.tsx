@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   subtitle: {
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   },
   recommendedBadgeText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563EB",
   },
   cardSub: {

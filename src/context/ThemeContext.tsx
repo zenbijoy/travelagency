@@ -57,8 +57,12 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
 
   // Sync with NativeWind and document / SystemUI
   useEffect(() => {
-    const targetScheme = isDark ? "dark" : "light";
-    setColorScheme(themeMode === "system" ? "system" : targetScheme);
+    try {
+      const targetScheme = isDark ? "dark" : "light";
+      setColorScheme(themeMode === "system" ? "system" : targetScheme);
+    } catch (e) {
+      console.warn("[ThemeContext] setColorScheme warning:", e);
+    }
 
     // Synchronize Web document.documentElement
     if (Platform.OS === "web" && typeof document !== "undefined") {

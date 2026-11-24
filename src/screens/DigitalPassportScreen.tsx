@@ -1745,7 +1745,7 @@ const styles = StyleSheet.create({
   },
   maskToggleBtnText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FDE047",
   },
   securitySubRow: {
@@ -1785,7 +1785,7 @@ const styles = StyleSheet.create({
   },
   privacyShieldTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#F8FAFC",
     marginTop: 14,
     textAlign: "center",
@@ -1860,7 +1860,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: "#F8FAFC",
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   headerSubtitle: {
@@ -1886,7 +1886,7 @@ const styles = StyleSheet.create({
   storyShareText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginStart: 4,
   },
   scrollContent: {
@@ -1937,7 +1937,7 @@ const styles = StyleSheet.create({
   emblemStar: {
     color: "#FDE047",
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   cardAuthorityText: {
     alignItems: "center",
@@ -1945,7 +1945,7 @@ const styles = StyleSheet.create({
   cardGovEn: {
     color: "#FDE047",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 1.5,
   },
   cardGovBn: {
@@ -1994,13 +1994,13 @@ const styles = StyleSheet.create({
   labelMuted: {
     color: "#64748B",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 1,
   },
   holderName: {
     color: "#F8FAFC",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     marginBottom: 4,
   },
   passportNumber: {
@@ -2026,7 +2026,7 @@ const styles = StyleSheet.create({
   nationalityText: {
     color: "#E2E8F0",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   xpBadge: {
     flexDirection: "row",
@@ -2041,7 +2041,7 @@ const styles = StyleSheet.create({
   xpText: {
     color: "#FDE047",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     marginStart: 3,
   },
   cardFooter: {
@@ -2066,7 +2066,7 @@ const styles = StyleSheet.create({
   levelPillText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     marginStart: 5,
   },
   cardFooterStats: {
@@ -2079,7 +2079,7 @@ const styles = StyleSheet.create({
   },
   footerStatBold: {
     color: "#FDE047",
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   // Milestone Progression Section
@@ -2103,7 +2103,7 @@ const styles = StyleSheet.create({
   milestoneSectionTitle: {
     color: "#F8FAFC",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   milestoneSub: {
     color: "#94A3B8",
@@ -2121,7 +2121,7 @@ const styles = StyleSheet.create({
   viewPerksText: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginEnd: 2,
   },
   progressBarTrack: {
@@ -2152,7 +2152,7 @@ const styles = StyleSheet.create({
   },
   activePerkBold: {
     color: "#F59E0B",
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Tab Bar
@@ -2184,7 +2184,7 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     color: "#FDE047",
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   tabContentContainer: {
@@ -2210,7 +2210,7 @@ const styles = StyleSheet.create({
   },
   scratchStatsAccent: {
     color: "#FDE047",
-    fontWeight: "800",
+    fontWeight: "700",
   },
   scratchStatsSub: {
     color: "#64748B",
@@ -2228,7 +2228,7 @@ const styles = StyleSheet.create({
   scratchAllBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginStart: 4,
   },
 
@@ -2257,7 +2257,7 @@ const styles = StyleSheet.create({
   },
   divisionTextActive: {
     color: "#0F172A",
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Districts Grid
@@ -2303,7 +2303,7 @@ const styles = StyleSheet.create({
   unvisitedCode: {
     color: "#334155",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     marginTop: 4,
     letterSpacing: 1,
   },
@@ -2326,13 +2326,13 @@ const styles = StyleSheet.create({
   scratchPillTitle: {
     color: "#FEF08A",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 1,
   },
   scratchDistrictName: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
     marginVertical: 6,
   },
   tapToRevealBtn: {
@@ -2344,7 +2344,7 @@ const styles = StyleSheet.create({
   tapToRevealText: {
     color: "#FDE047",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Scratched Unlocked Tile
@@ -2368,7 +2368,7 @@ const styles = StyleSheet.create({
   rarityText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   scratchedIcon: {
     alignSelf: "center",
@@ -2377,7 +2377,7 @@ const styles = StyleSheet.create({
   scratchedName: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   scratchedBn: {
     color: "rgba(255,255,255,0.8)",
@@ -2429,7 +2429,7 @@ const styles = StyleSheet.create({
   visitedPillText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginStart: 3,
   },
   lockPill: {
@@ -2443,13 +2443,13 @@ const styles = StyleSheet.create({
   lockPillText: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginStart: 3,
   },
   countryName: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 6,
   },
   countryBn: {
@@ -2473,7 +2473,7 @@ const styles = StyleSheet.create({
     color: "#FDE047",
     fontSize: 12,
     fontFamily: "monospace",
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Stamps Tab & Vintage Parchment Page
@@ -2486,7 +2486,7 @@ const styles = StyleSheet.create({
   stampsMainTitle: {
     color: "#F8FAFC",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   stampsSubTitle: {
     color: "#94A3B8",
@@ -2503,7 +2503,7 @@ const styles = StyleSheet.create({
   simulateTravelText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginStart: 4,
   },
   parchmentPage: {
@@ -2531,13 +2531,13 @@ const styles = StyleSheet.create({
   parchmentTitle: {
     color: "#78716C",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 2,
   },
   parchmentPageNo: {
     color: "#A8A29E",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   emptyStampsWrap: {
     alignItems: "center",
@@ -2547,7 +2547,7 @@ const styles = StyleSheet.create({
   emptyStampsTitle: {
     color: "#78716C",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 12,
   },
   emptyStampsSub: {
@@ -2582,7 +2582,7 @@ const styles = StyleSheet.create({
   },
   stampAuthority: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     letterSpacing: 1.5,
   },
   stampCenterRow: {
@@ -2592,17 +2592,17 @@ const styles = StyleSheet.create({
   },
   stampDest: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "600",
     marginStart: 4,
   },
   stampDate: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     fontFamily: "monospace",
   },
   stampSerial: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     fontFamily: "monospace",
     marginTop: 2,
   },
@@ -2614,7 +2614,7 @@ const styles = StyleSheet.create({
   perksHeaderTitle: {
     color: "#F8FAFC",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   perksHeaderSub: {
     color: "#94A3B8",
@@ -2653,12 +2653,12 @@ const styles = StyleSheet.create({
   milestoneLevelNumber: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   milestoneLevelTitle: {
     color: "#F8FAFC",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   milestoneLevelBn: {
     color: "#94A3B8",
@@ -2675,7 +2675,7 @@ const styles = StyleSheet.create({
   unlockedTagText: {
     color: "#10B981",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginStart: 3,
   },
   lockedTag: {
@@ -2689,7 +2689,7 @@ const styles = StyleSheet.create({
   lockedTagText: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginStart: 4,
   },
   perksListWrap: {},
@@ -2735,7 +2735,7 @@ const styles = StyleSheet.create({
   copyCouponText: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     fontFamily: "monospace",
     marginEnd: 4,
   },
@@ -2770,7 +2770,7 @@ const styles = StyleSheet.create({
   modalDistrictName: {
     color: "#FFFFFF",
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   modalDistrictBn: {
     color: "rgba(255,255,255,0.85)",
@@ -2787,7 +2787,7 @@ const styles = StyleSheet.create({
   modalRarityText: {
     color: "#FDE047",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   districtModalBody: {
     padding: 20,
@@ -2804,13 +2804,13 @@ const styles = StyleSheet.create({
   modalFieldLabel: {
     color: "#64748B",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 1,
   },
   modalFieldValue: {
     color: "#F8FAFC",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     marginTop: 2,
   },
   modalFieldBnSub: {
@@ -2828,7 +2828,7 @@ const styles = StyleSheet.create({
   modalCloseBtnText: {
     color: "#F8FAFC",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Stamp Details Modal
@@ -2849,17 +2849,17 @@ const styles = StyleSheet.create({
   },
   stampModalAuthority: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     letterSpacing: 1.5,
   },
   stampModalDest: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "600",
     marginVertical: 4,
   },
   stampModalSub: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   stampModalBody: {
     marginBottom: 16,
@@ -2875,19 +2875,19 @@ const styles = StyleSheet.create({
   stampInfoLabel: {
     color: "#78716C",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
   },
   stampInfoValue: {
     color: "#1C1917",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     fontFamily: "monospace",
   },
   stampVerifiedBadge: {
     backgroundColor: "#DCFCE7",
     color: "#15803D",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -2901,7 +2901,7 @@ const styles = StyleSheet.create({
   stampModalCloseText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Simulate Modal
@@ -2919,7 +2919,7 @@ const styles = StyleSheet.create({
   simulateModalTitle: {
     color: "#F8FAFC",
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 6,
   },
   simulateModalSubtitle: {
@@ -2932,7 +2932,7 @@ const styles = StyleSheet.create({
   simulateGroupTitle: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 10,
     marginBottom: 6,
   },
@@ -2949,7 +2949,7 @@ const styles = StyleSheet.create({
   simulateOptionText: {
     color: "#F8FAFC",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     flex: 1,
     marginStart: 10,
   },
@@ -2969,7 +2969,7 @@ const styles = StyleSheet.create({
   levelsModalTitle: {
     color: "#F8FAFC",
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     marginTop: 6,
   },
   levelsModalSub: {
@@ -3004,7 +3004,7 @@ const styles = StyleSheet.create({
   levelTrackNum: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   levelTrackInfo: {
     flex: 1,
@@ -3017,7 +3017,7 @@ const styles = StyleSheet.create({
   levelTrackTitle: {
     color: "#F8FAFC",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   currentLvlTag: {
     backgroundColor: "#EAB308",
@@ -3028,7 +3028,7 @@ const styles = StyleSheet.create({
   currentLvlTagText: {
     color: "#0F172A",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   levelTrackBn: {
     color: "#94A3B8",
@@ -3063,7 +3063,7 @@ const styles = StyleSheet.create({
   shareModalTitle: {
     color: "#F8FAFC",
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     marginTop: 4,
   },
   shareModalSub: {
@@ -3102,13 +3102,13 @@ const styles = StyleSheet.create({
   storyGovEn: {
     color: "#FDE047",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     letterSpacing: 2,
   },
   storyGovBn: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginBottom: 10,
   },
   storyProfileSection: {
@@ -3131,13 +3131,13 @@ const styles = StyleSheet.create({
   storyHolderName: {
     color: "#F8FAFC",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   storyPassNo: {
     color: "#38BDF8",
     fontSize: 12,
     fontFamily: "monospace",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   storyMilestonePill: {
     backgroundColor: "#065F46",
@@ -3149,7 +3149,7 @@ const styles = StyleSheet.create({
   storyMilestoneText: {
     color: "#34D399",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   storyStatsRow: {
     flexDirection: "row",
@@ -3167,7 +3167,7 @@ const styles = StyleSheet.create({
   storyStatVal: {
     color: "#FDE047",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   storyStatLbl: {
     color: "#94A3B8",
@@ -3182,7 +3182,7 @@ const styles = StyleSheet.create({
   storyRecentTitle: {
     color: "#64748B",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 1,
     marginBottom: 4,
   },
@@ -3202,7 +3202,7 @@ const styles = StyleSheet.create({
   },
   storyMiniStampText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   storyFooter: {
     flexDirection: "row",
@@ -3220,7 +3220,7 @@ const styles = StyleSheet.create({
   storyTag: {
     color: "#FDE047",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Share Buttons
@@ -3244,7 +3244,7 @@ const styles = StyleSheet.create({
   igShareText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     marginStart: 6,
   },
   waShareBtn: {
@@ -3262,7 +3262,7 @@ const styles = StyleSheet.create({
   waShareText: {
     color: "#25D366",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     marginStart: 6,
   },
 });

@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   activeBadgeText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0284C7",
   },
   subtitleText: {
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   },
   setupBtnText: {
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0369A1",
   },
 });

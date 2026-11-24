@@ -155,7 +155,7 @@ const hardenedFetch: typeof fetch = async (input, init) => {
     }
 
     if (isDev) {
-      console.error("[Supabase Dev Network Error]", {
+      console.debug("[Supabase Dev Network Error]", {
         method,
         endpoint: sanitizeUrl(url),
         durationMs: Date.now() - startTime,

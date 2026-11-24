@@ -1548,7 +1548,7 @@ const styles = StyleSheet.create({
   },
   brandTitle: {
     fontSize: 24,
-    fontWeight: "800",
+    fontWeight: "700",
     color: TRIP_BLUE,
     letterSpacing: -0.5,
   },
@@ -1628,7 +1628,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: "#ffffff",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   googleButton: {
     flexDirection: "row",
@@ -1928,7 +1928,7 @@ const styles = StyleSheet.create({
   resendActiveText: {
     color: TRIP_BLUE,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   resendDisabledText: {
     fontSize: 13,
@@ -1987,12 +1987,12 @@ const styles = StyleSheet.create({
   },
   biometricPrimaryBtnText: {
     color: "#ffffff",
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 15,
   },
   biometricSecondaryBtn: {},
   biometricSecondaryBtnText: {
-    fontWeight: "600",
+    fontWeight: "400",
     fontSize: 15,
   },
 });

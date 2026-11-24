@@ -286,7 +286,7 @@ function getSizeStyles(size: BadgeSize) {
         },
         text: {
           fontSize: 14,
-          fontWeight: "700" as const,
+          fontWeight: "500" as const,
         },
         dot: {
           width: 7,

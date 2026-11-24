@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   filterTextActive: {
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   refText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   statusBadge: {
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   },
   amountText: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   subtext: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   actionBtnText: {
     color: "#ffffff",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });
 

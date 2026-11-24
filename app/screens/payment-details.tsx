@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
   title: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   securityHeaderBadge: {
@@ -717,14 +717,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
   },
-  errorText: { fontSize: 16, fontWeight: "700", color: "#0F172A" },
+  errorText: { fontSize: 16, fontWeight: "500", color: "#0F172A" },
   retryButton: {
     backgroundColor: PRIMARY_COLOR,
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
-  retryButtonText: { color: "#FFFFFF", fontWeight: "700" },
+  retryButtonText: { color: "#FFFFFF", fontWeight: "500" },
 
   // Status Card
   statusCard: {
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  statusTitle: { fontSize: 18, fontWeight: "800", textAlign: "center" },
+  statusTitle: { fontSize: 18, fontWeight: "700", textAlign: "center" },
   statusSubtitle: {
     fontSize: 13,
     fontWeight: "500",
@@ -772,14 +772,14 @@ const styles = StyleSheet.create({
   },
   providerBadgeText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Sections
   section: { marginBottom: 18 },
   sectionTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 10,
     textTransform: "uppercase",
@@ -811,8 +811,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     marginTop: 4,
   },
-  totalAmountLabel: { fontSize: 15, fontWeight: "800", color: "#0F172A" },
-  totalAmountValue: { fontSize: 19, fontWeight: "900" },
+  totalAmountLabel: { fontSize: 15, fontWeight: "600", color: "#0F172A" },
+  totalAmountValue: { fontSize: 19, fontWeight: "700" },
 
   // Split Card
   splitCard: {
@@ -830,7 +830,7 @@ const styles = StyleSheet.create({
   },
   splitCardTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#065F46",
   },
   splitCardDesc: {
@@ -854,11 +854,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 8,
   },
-  detailLabel: { fontSize: 13, color: "#64748B", fontWeight: "600" },
+  detailLabel: { fontSize: 13, color: "#64748B", fontWeight: "400" },
   detailValue: {
     fontSize: 13,
     color: "#0F172A",
-    fontWeight: "700",
+    fontWeight: "400",
     marginStart: 12,
     flex: 1,
     textAlign: "right",
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
   detailValueMono: {
     fontSize: 12,
     color: "#2563EB",
-    fontWeight: "700",
+    fontWeight: "400",
     fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
     marginStart: 12,
     flex: 1,
@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
   },
   verifiedText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#047857",
   },
   divider: { height: 1, backgroundColor: "#F1F5F9" },
@@ -904,11 +904,11 @@ const styles = StyleSheet.create({
     gap: 10,
     flex: 1,
   },
-  dateTimeLabel: { fontSize: 12, color: "#64748B", fontWeight: "600" },
+  dateTimeLabel: { fontSize: 12, color: "#64748B", fontWeight: "400" },
   dateTimeValue: {
     fontSize: 13,
     color: "#0F172A",
-    fontWeight: "700",
+    fontWeight: "400",
     marginTop: 2,
   },
 
@@ -931,7 +931,7 @@ const styles = StyleSheet.create({
   btnDisabled: { opacity: 0.6 },
   primaryActionText: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   actionButton: {
@@ -946,7 +946,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: PRIMARY_COLOR,
     flex: 1,
   },

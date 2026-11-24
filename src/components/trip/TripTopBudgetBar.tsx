@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   amountBold: {
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   amountGreen: {
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   overPillText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#DC2626",
   },
   remainingPill: {
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   remainingPillText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   progressContainer: {
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   percentText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     minWidth: 32,
     textAlign: "right",
   },
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   },
   alertTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#991B1B",
     marginBottom: 2,
   },
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   boldSpan: {
-    fontWeight: "800",
+    fontWeight: "600",
   },
   nearLimitBanner: {
     flexDirection: "row",
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   },
   quickAddBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563EB",
   },
   splitBillBtn: {

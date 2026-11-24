@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   headerSub: {
@@ -678,7 +678,7 @@ const styles = StyleSheet.create({
   },
   attachmentText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   composerBar: {
@@ -764,7 +764,7 @@ const styles = StyleSheet.create({
   },
   replySenderText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   replySnippetText: {

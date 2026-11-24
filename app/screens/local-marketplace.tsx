@@ -2471,7 +2471,7 @@ const styles = StyleSheet.create({
   },
   floatingToastText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   header: {
@@ -2507,12 +2507,12 @@ const styles = StyleSheet.create({
   },
   badgeGovText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FEF3C7",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
     letterSpacing: -0.3,
   },
@@ -2561,7 +2561,7 @@ const styles = StyleSheet.create({
   },
   cartBadgeText: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   searchBox: {
@@ -2605,7 +2605,7 @@ const styles = StyleSheet.create({
   },
   regionChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#78350F",
   },
   regionChipTextActive: {
@@ -2637,7 +2637,7 @@ const styles = StyleSheet.create({
   },
   categoryTabTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   contentScroll: {
     flex: 1,
@@ -2678,7 +2678,7 @@ const styles = StyleSheet.create({
   },
   giGoldPillText: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#78350F",
   },
   spotlightSubtext: {
@@ -2687,7 +2687,7 @@ const styles = StyleSheet.create({
   },
   spotlightTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
     lineHeight: 20,
   },
@@ -2707,7 +2707,7 @@ const styles = StyleSheet.create({
   },
   spotlightIconLabel: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FDE68A",
     marginTop: 2,
   },
@@ -2719,7 +2719,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   sectionSub: {
@@ -2740,7 +2740,7 @@ const styles = StyleSheet.create({
   },
   deliveryBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   loadingBox: {
@@ -2777,7 +2777,7 @@ const styles = StyleSheet.create({
   resetFilterBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   productsGrid: {
     flexDirection: "row",
@@ -2824,7 +2824,7 @@ const styles = StyleSheet.create({
   },
   giRibbonText: {
     fontSize: 9.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
     flex: 1,
   },
@@ -2839,7 +2839,7 @@ const styles = StyleSheet.create({
   },
   regionPillText: {
     fontSize: 9.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   weightBadge: {
@@ -2856,7 +2856,7 @@ const styles = StyleSheet.create({
   },
   weightBadgeText: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#F1F5F9",
   },
   productInfo: {
@@ -2864,7 +2864,7 @@ const styles = StyleSheet.create({
   },
   productBanglaName: {
     fontSize: 12.5,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
     lineHeight: 17,
     minHeight: 34,
@@ -2890,7 +2890,7 @@ const styles = StyleSheet.create({
   },
   artisanSnippetName: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   artisanSnippetCoop: {
@@ -2910,7 +2910,7 @@ const styles = StyleSheet.create({
   },
   ratingNum: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   ratingCount: {
@@ -2925,7 +2925,7 @@ const styles = StyleSheet.create({
   verifiedArtisanText: {
     fontSize: 8.5,
     color: "#059669",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   priceRow: {
     flexDirection: "row",
@@ -2938,7 +2938,7 @@ const styles = StyleSheet.create({
   },
   priceCurrent: {
     fontSize: 14.5,
-    fontWeight: "900",
+    fontWeight: "700",
     color: THEME_ACCENT,
   },
   priceOld: {
@@ -2950,7 +2950,7 @@ const styles = StyleSheet.create({
   payoutArtisanTag: {
     fontSize: 8.5,
     color: "#059669",
-    fontWeight: "700",
+    fontWeight: "500",
     marginTop: 1,
   },
   quickAddBtn: {
@@ -2964,7 +2964,7 @@ const styles = StyleSheet.create({
   },
   quickAddBtnText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
 
@@ -2992,7 +2992,7 @@ const styles = StyleSheet.create({
   },
   modalDetailHeaderTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalDetailHeaderSub: {
@@ -3022,7 +3022,7 @@ const styles = StyleSheet.create({
   },
   modalCartBadgeText: {
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   galleryContainer: {
@@ -3047,7 +3047,7 @@ const styles = StyleSheet.create({
   },
   galleryGiOverlayText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   thumbnailsRow: {
@@ -3087,7 +3087,7 @@ const styles = StyleSheet.create({
   },
   giDetailTitle: {
     fontSize: 12.5,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#78350F",
   },
   giDetailSub: {
@@ -3097,7 +3097,7 @@ const styles = StyleSheet.create({
   },
   detailBanglaName: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#0F172A",
     lineHeight: 26,
   },
@@ -3117,7 +3117,7 @@ const styles = StyleSheet.create({
   },
   detailPriceCurrent: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "400",
     color: THEME_ACCENT,
   },
   detailPriceOld: {
@@ -3142,7 +3142,7 @@ const styles = StyleSheet.create({
   },
   stockBadgeText: {
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   detailSectionBox: {
@@ -3150,7 +3150,7 @@ const styles = StyleSheet.create({
   },
   detailSectionHeader: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 8,
   },
@@ -3198,7 +3198,7 @@ const styles = StyleSheet.create({
   specKey: {
     width: "35%",
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#475569",
   },
   specVal: {
@@ -3229,7 +3229,7 @@ const styles = StyleSheet.create({
   },
   artisanBioName: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#581C87",
   },
   artisanBioRole: {
@@ -3261,7 +3261,7 @@ const styles = StyleSheet.create({
   },
   artisanAwardText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#78350F",
   },
   artisanCoopFooter: {
@@ -3295,7 +3295,7 @@ const styles = StyleSheet.create({
   },
   certName: {
     fontSize: 12.5,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   certIssuer: {
@@ -3305,7 +3305,7 @@ const styles = StyleSheet.create({
   certCode: {
     fontSize: 10,
     color: "#78350F",
-    fontWeight: "700",
+    fontWeight: "500",
     marginTop: 1,
   },
   reviewsHeaderRow: {
@@ -3325,7 +3325,7 @@ const styles = StyleSheet.create({
   },
   ratingBadgeLargeText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   reviewItemCard: {
@@ -3351,11 +3351,11 @@ const styles = StyleSheet.create({
   reviewAvatarInitial: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
   },
   reviewAuthorName: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#0F172A",
   },
   reviewLocation: {
@@ -3373,7 +3373,7 @@ const styles = StyleSheet.create({
   },
   verifiedBuyerText: {
     fontSize: 9.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   reviewStarsRow: {
@@ -3414,7 +3414,7 @@ const styles = StyleSheet.create({
   },
   detailQtyVal: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#0F172A",
     minWidth: 18,
     textAlign: "center",
@@ -3431,7 +3431,7 @@ const styles = StyleSheet.create({
   },
   detailAddToCartText: {
     fontSize: 13.5,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#FFFFFF",
   },
 
@@ -3478,7 +3478,7 @@ const styles = StyleSheet.create({
   },
   drawerTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   drawerSub: {
@@ -3500,7 +3500,7 @@ const styles = StyleSheet.create({
   },
   drawerEmptyText: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
     marginTop: 10,
   },
@@ -3529,17 +3529,17 @@ const styles = StyleSheet.create({
   },
   cartItemName: {
     fontSize: 12.5,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   cartItemRegion: {
     fontSize: 10,
     color: "#78350F",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   cartItemUnitPrice: {
     fontSize: 11.5,
-    fontWeight: "800",
+    fontWeight: "700",
     color: THEME_ACCENT,
     marginTop: 1,
   },
@@ -3567,7 +3567,7 @@ const styles = StyleSheet.create({
   },
   cartStepVal: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
     minWidth: 14,
     textAlign: "center",
@@ -3592,7 +3592,7 @@ const styles = StyleSheet.create({
   },
   deliverySectionTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   districtToggleRow: {
@@ -3618,7 +3618,7 @@ const styles = StyleSheet.create({
   },
   districtToggleText: {
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   districtToggleTextActive: {
@@ -3647,7 +3647,7 @@ const styles = StyleSheet.create({
   },
   courierName: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   courierNameSelected: {
@@ -3663,7 +3663,7 @@ const styles = StyleSheet.create({
   },
   costCalculationTitle: {
     fontSize: 12.5,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#78350F",
     marginBottom: 8,
   },
@@ -3684,7 +3684,7 @@ const styles = StyleSheet.create({
   },
   costWeightNote: {
     fontSize: 10.5,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#D97706",
   },
   costDivider: {
@@ -3694,12 +3694,12 @@ const styles = StyleSheet.create({
   },
   costTotalLabel: {
     fontSize: 13.5,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#78350F",
   },
   costTotalVal: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: THEME_ACCENT,
   },
   vendorPayoutCard: {
@@ -3729,7 +3729,7 @@ const styles = StyleSheet.create({
   },
   checkoutSubmitText: {
     fontSize: 13.5,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#FFFFFF",
   },
 
@@ -3757,7 +3757,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSubHeader: {
@@ -3767,7 +3767,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
     marginBottom: 5,
     marginTop: 8,

@@ -1685,7 +1685,7 @@ const styles = StyleSheet.create({
   },
   displayName: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   handleText: {
@@ -1730,7 +1730,7 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   statLabel: {
@@ -1760,7 +1760,7 @@ const styles = StyleSheet.create({
   },
   editProfileText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   uploadKycPrimaryBtn: {
@@ -1775,7 +1775,7 @@ const styles = StyleSheet.create({
   },
   uploadKycPrimaryText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   primaryActionBtn: {
@@ -1791,7 +1791,7 @@ const styles = StyleSheet.create({
   primaryActionText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   followBtn: {
     paddingHorizontal: 16,
@@ -1812,7 +1812,7 @@ const styles = StyleSheet.create({
   followBtnText: {
     color: "#475569",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   followBtnTextActive: {
     color: TRIP_BLUE,
@@ -1841,7 +1841,7 @@ const styles = StyleSheet.create({
   },
   referralBannerTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#1E3A8A",
   },
   referralBannerSubtitle: {
@@ -1850,7 +1850,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   referralCodeHighlight: {
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   referralBannerActions: {
@@ -1872,7 +1872,7 @@ const styles = StyleSheet.create({
   },
   referralCopyText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   referralShareBtn: {
@@ -1886,7 +1886,7 @@ const styles = StyleSheet.create({
   },
   referralShareText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   tabBar: {
@@ -1915,7 +1915,7 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     color: TRIP_BLUE,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   tabSection: {
     paddingHorizontal: 16,
@@ -1929,7 +1929,7 @@ const styles = StyleSheet.create({
   },
   sectionHeading: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   sectionSub: {
@@ -1948,7 +1948,7 @@ const styles = StyleSheet.create({
   },
   addDocBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   revealToggleBtn: {
@@ -1960,7 +1960,7 @@ const styles = StyleSheet.create({
   },
   revealToggleText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   kycBannerCard: {
@@ -1974,7 +1974,7 @@ const styles = StyleSheet.create({
   },
   kycBannerTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   kycBannerDesc: {
     fontSize: 12,
@@ -2023,7 +2023,7 @@ const styles = StyleSheet.create({
   },
   emptyDocUploadText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   kycDocCard: {
@@ -2046,7 +2046,7 @@ const styles = StyleSheet.create({
   },
   kycDocType: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   kycDocNumber: {
@@ -2078,7 +2078,7 @@ const styles = StyleSheet.create({
   },
   kycDocStatusText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   infoCard: {
     backgroundColor: "#FFFFFF",
@@ -2099,7 +2099,7 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   infoRow: {
@@ -2115,7 +2115,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#0F172A",
     fontFamily: "monospace",
   },
@@ -2128,7 +2128,7 @@ const styles = StyleSheet.create({
   dietPillText: {
     color: "#059669",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   editSectionBtn: {
     flexDirection: "row",
@@ -2142,7 +2142,7 @@ const styles = StyleSheet.create({
   },
   editSectionBtnText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   emptyContainer: {
@@ -2165,7 +2165,7 @@ const styles = StyleSheet.create({
   },
   postTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 4,
   },
@@ -2219,7 +2219,7 @@ const styles = StyleSheet.create({
   },
   friendName: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   friendHandle: {
@@ -2243,7 +2243,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSubTitle: {
@@ -2257,7 +2257,7 @@ const styles = StyleSheet.create({
   },
   inputSectionHeading: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#475569",
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -2306,7 +2306,7 @@ const styles = StyleSheet.create({
   },
   dietChipTextSelected: {
     color: TRIP_BLUE,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   modalSubmitBtn: {
     backgroundColor: TRIP_BLUE,
@@ -2318,7 +2318,7 @@ const styles = StyleSheet.create({
   modalSubmitText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "400",
   },
   docTypeRow: {
     flexDirection: "row",
@@ -2347,7 +2347,7 @@ const styles = StyleSheet.create({
   },
   docTypeLabelSelected: {
     color: TRIP_BLUE,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   filePickerActionRow: {
     flexDirection: "row",
@@ -2368,7 +2368,7 @@ const styles = StyleSheet.create({
   },
   filePickerBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   selectedFileBox: {
@@ -2383,7 +2383,7 @@ const styles = StyleSheet.create({
   },
   selectedFileName: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#166534",
   },
   selectedFileSize: {

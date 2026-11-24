@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   cheapestPillText: {
     fontSize: 8,
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   dayNumText: {
     fontSize: 13,

@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   activeBadge: {
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   },
   activeBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563eb",
   },
   clearBtn: {
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   clearBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ef4444",
   },
   scrollBody: {
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#334155",
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
   },
   sortChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   sortChipTextActive: {
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   },
   resetFooterText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   applyBtn: {
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   applyBtnText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });
 

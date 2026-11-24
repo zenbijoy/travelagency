@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     color: "#1E3A8A",
   },
   counterBold: {
-    fontWeight: "800",
+    fontWeight: "700",
   },
   counterSub: {
     fontSize: 11,
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   },
   filterChipTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   listContent: {
     padding: 16,
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
   },
   routeCodes: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   serviceTypeName: {

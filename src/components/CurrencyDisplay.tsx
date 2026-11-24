@@ -46,7 +46,7 @@ const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
 const styles = StyleSheet.create({
   text: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "500",
     color: "#0F172A",
   },
 });

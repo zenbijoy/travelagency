@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  reviewLocation: { fontSize: 15, fontWeight: "700", color: "#111827" },
+  reviewLocation: { fontSize: 15, fontWeight: "400", color: "#111827" },
   ratingRow: { flexDirection: "row", gap: 2 },
   reviewText: { fontSize: 14, color: "#374151", lineHeight: 20, marginBottom: 6 },
   reviewDate: { fontSize: 12, color: "#9ca3af" },
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   trustBannerTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#065F46",
   },
   trustBannerText: {
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   verifiedBadgeText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#166534",
   },
   completedStayBadge: {
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   completedStayBadgeText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1D4ED8",
   },
 });

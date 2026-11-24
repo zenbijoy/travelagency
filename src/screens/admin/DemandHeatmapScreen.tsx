@@ -45,6 +45,8 @@ import {
   TimeWindow,
 } from "@/services/admin/heatmapService";
 import { AdminUser } from "@/types/admin";
+import { OpenStreetMap } from "../../components/common/OpenStreetMap";
+
 
 
 // Major transit routes connecting Bangladesh travel corridors for map visualization
@@ -95,6 +97,7 @@ export const DemandHeatmapScreen: React.FC<DemandHeatmapScreenProps> = ({
   const [velocityWindow, setVelocityWindow] = useState<TimeWindow>("1h");
   const [selectedDistrict, setSelectedDistrict] = useState<DistrictHeatmapPoint | null>(null);
   const [mapScale, setMapScale] = useState<number>(1.0);
+  const [mapDisplayMode, setMapDisplayMode] = useState<"osm" | "svg">("osm");
 
   // State: Modals & Actions
   const [selectedRecForAction, setSelectedRecForAction] = useState<SurgeRecommendation | null>(null);
@@ -409,23 +412,42 @@ export const DemandHeatmapScreen: React.FC<DemandHeatmapScreenProps> = ({
               </Text>
             </View>
 
-            {/* Map Scale / Reset Controls */}
-            <View style={styles.mapControls}>
-              <TouchableOpacity
-                style={styles.scaleBtn}
-                onPress={() => setMapScale((prev) => Math.min(1.4, prev + 0.1))}
-              >
-                <Ionicons name="add" size={16} color="#334155" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.scaleBtn}
-                onPress={() => setMapScale((prev) => Math.max(0.8, prev - 0.1))}
-              >
-                <Ionicons name="remove" size={16} color="#334155" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.scaleBtn} onPress={() => setMapScale(1.0)}>
-                <Ionicons name="scan-outline" size={14} color="#334155" />
-              </TouchableOpacity>
+            {/* Map Mode & Scale Controls */}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <View style={{ flexDirection: "row", backgroundColor: "#0f172a", borderRadius: 8, padding: 2, borderWidth: 1, borderColor: "#334155" }}>
+                <TouchableOpacity
+                  style={[styles.scaleBtn, mapDisplayMode === "osm" && { backgroundColor: "#4f46e5" }]}
+                  onPress={() => setMapDisplayMode("osm")}
+                >
+                  <Ionicons name="map" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.scaleBtn, mapDisplayMode === "svg" && { backgroundColor: "#4f46e5" }]}
+                  onPress={() => setMapDisplayMode("svg")}
+                >
+                  <Ionicons name="grid" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+
+              {mapDisplayMode === "svg" && (
+                <View style={styles.mapControls}>
+                  <TouchableOpacity
+                    style={styles.scaleBtn}
+                    onPress={() => setMapScale((prev) => Math.min(1.4, prev + 0.1))}
+                  >
+                    <Ionicons name="add" size={16} color="#334155" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.scaleBtn}
+                    onPress={() => setMapScale((prev) => Math.max(0.8, prev - 0.1))}
+                  >
+                    <Ionicons name="remove" size={16} color="#334155" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.scaleBtn} onPress={() => setMapScale(1.0)}>
+                    <Ionicons name="scan-outline" size={14} color="#334155" />
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </View>
 
@@ -528,8 +550,40 @@ export const DemandHeatmapScreen: React.FC<DemandHeatmapScreenProps> = ({
             </View>
           </View>
 
-          {/* SVG Map Canvas */}
-          <View style={styles.mapCanvasWrapper}>
+          {/* Map Display: OpenStreetMap or SVG */}
+          {mapDisplayMode === "osm" ? (
+            <View style={{ height: 380, borderRadius: 14, overflow: "hidden", marginHorizontal: 12, marginBottom: 14, borderWidth: 1, borderColor: "#334155" }}>
+              <OpenStreetMap
+                heatPoints={points.map((p) => ({
+                  latitude: p.lat,
+                  longitude: p.lng,
+                  radius: Math.min(30, Math.max(12, p.searchVolume / 100)),
+                  intensity: p.status === "high_demand_low_supply" ? 0.8 : p.status === "balanced" ? 0.5 : 0.3,
+                  color: p.status === "high_demand_low_supply" ? "#EF4444" : p.status === "balanced" ? "#10B981" : "#3B82F6",
+                  label: `${p.districtName}: ${p.searchVolume} searches`,
+                }))}
+                markers={filteredDistricts.map((p) => ({
+                  id: p.districtId,
+                  title: p.districtName,
+                  subtitle: `${p.searchVolume} searches/hr`,
+                  latitude: p.lat,
+                  longitude: p.lng,
+                  badge: `${p.demandSupplyRatio.toFixed(1)}x`,
+                  category: "admin" as const,
+                  color: p.status === "high_demand_low_supply" ? "#DC2626" : p.status === "balanced" ? "#059669" : "#2563EB",
+                }))}
+                initialRegion={{ latitude: 23.685, longitude: 90.3563, zoom: 7 }}
+                theme="dark"
+                tileLayer="dark"
+                interactive={true}
+                onSelectMarker={(id) => {
+                  const pt = points.find((p) => p.districtId === id);
+                  if (pt) setSelectedDistrict(pt);
+                }}
+              />
+            </View>
+          ) : (
+            <View style={styles.mapCanvasWrapper}>
             <View
               style={[
                 styles.mapSvgContainer,
@@ -676,6 +730,7 @@ export const DemandHeatmapScreen: React.FC<DemandHeatmapScreenProps> = ({
               </Text>
             </View>
           </View>
+          )}
 
           {/* District Quick-Select Carousel / Chips */}
           <ScrollView
@@ -1461,7 +1516,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1e293b",
   },
   loadingSubtext: {
@@ -1515,7 +1570,7 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
     letterSpacing: -0.3,
   },
@@ -1536,7 +1591,7 @@ const styles = StyleSheet.create({
   },
   livePillText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#dc2626",
     letterSpacing: 0.5,
   },
@@ -1625,7 +1680,7 @@ const styles = StyleSheet.create({
   },
   kpiValue: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0f172a",
     marginVertical: 4,
   },
@@ -1674,7 +1729,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   sectionSub: {
@@ -1709,7 +1764,7 @@ const styles = StyleSheet.create({
   },
   layerBarLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
     marginEnd: 10,
   },
@@ -1864,7 +1919,7 @@ const styles = StyleSheet.create({
   },
   districtChipName: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1e293b",
   },
   districtChipNameActive: {
@@ -1904,7 +1959,7 @@ const styles = StyleSheet.create({
   },
   drawerDistrictTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   drawerDistrictBn: {
@@ -1919,7 +1974,7 @@ const styles = StyleSheet.create({
   },
   drawerStatusText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   drawerCategoryText: {
     fontSize: 12,
@@ -1947,7 +2002,7 @@ const styles = StyleSheet.create({
   },
   metricBigVal: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0f172a",
     marginTop: 3,
   },
@@ -1986,7 +2041,7 @@ const styles = StyleSheet.create({
   surgeActionBtnText: {
     color: "#ffffff",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Velocity Section
@@ -2018,7 +2073,7 @@ const styles = StyleSheet.create({
   },
   windowBtnTextActive: {
     color: "#4f46e5",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   velocityList: {
     gap: 10,
@@ -2044,7 +2099,7 @@ const styles = StyleSheet.create({
   },
   destRankText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#475569",
   },
   destNameRow: {
@@ -2055,7 +2110,7 @@ const styles = StyleSheet.create({
   },
   destNameText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   surgeTag: {
@@ -2069,7 +2124,7 @@ const styles = StyleSheet.create({
   },
   surgeTagText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#dc2626",
   },
   destCategoryText: {
@@ -2082,7 +2137,7 @@ const styles = StyleSheet.create({
   },
   searchCountBig: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   velocitySubText: {
@@ -2130,7 +2185,7 @@ const styles = StyleSheet.create({
   },
   conversionText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#16a34a",
   },
 
@@ -2159,7 +2214,7 @@ const styles = StyleSheet.create({
   },
   routeNameText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   routeTerminalsText: {
@@ -2177,7 +2232,7 @@ const styles = StyleSheet.create({
   },
   congestionBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   routeProgressRow: {
     flexDirection: "row",
@@ -2198,7 +2253,7 @@ const styles = StyleSheet.create({
   },
   occupancyPercentText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   routeStatsRow: {
@@ -2263,7 +2318,7 @@ const styles = StyleSheet.create({
   },
   recZoneText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   severityPill: {
@@ -2273,7 +2328,7 @@ const styles = StyleSheet.create({
   },
   severityText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   recStatusBadge: {
     paddingHorizontal: 6,
@@ -2281,11 +2336,11 @@ const styles = StyleSheet.create({
   },
   recStatusText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   recHeadline: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
     marginBottom: 4,
   },
@@ -2312,7 +2367,7 @@ const styles = StyleSheet.create({
   },
   recMetricVal: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     marginTop: 2,
   },
@@ -2333,7 +2388,7 @@ const styles = StyleSheet.create({
   applyRecBtnText: {
     color: "#ffffff",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   dismissRecBtn: {
     paddingHorizontal: 12,
@@ -2353,7 +2408,7 @@ const styles = StyleSheet.create({
   },
   appliedSuccessText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#16a34a",
   },
 
@@ -2391,7 +2446,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   modalSubtitle: {
@@ -2436,7 +2491,7 @@ const styles = StyleSheet.create({
   },
   exportOptionPrimaryTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#ffffff",
   },
   exportOptionPrimarySub: {
@@ -2485,7 +2540,7 @@ const styles = StyleSheet.create({
   },
   policyInputLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     marginBottom: 6,
   },
@@ -2501,13 +2556,13 @@ const styles = StyleSheet.create({
   policyTextInput: {
     flex: 1,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     paddingVertical: 8,
   },
   unitText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   policyInputHelp: {
@@ -2532,7 +2587,7 @@ const styles = StyleSheet.create({
   },
   impactValue: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1e3a8a",
   },
   modalActionButtons: {
@@ -2553,7 +2608,7 @@ const styles = StyleSheet.create({
   confirmPolicyBtnText: {
     color: "#ffffff",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });
 

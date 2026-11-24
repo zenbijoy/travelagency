@@ -797,7 +797,7 @@ const styles: any = StyleSheet.create({
   tripLogoText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   logoYellowDot: {
     width: 4,
@@ -824,7 +824,7 @@ const styles: any = StyleSheet.create({
   timestampText: {
     textAlign: "center",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563EB",
     marginBottom: 2,
   },
@@ -986,7 +986,7 @@ const styles: any = StyleSheet.create({
   },
   badgeOneText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563EB",
   },
   attachedPreviewBar: {
@@ -1166,7 +1166,7 @@ const styles: any = StyleSheet.create({
   },
   historyBadge: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#16A34A",
     backgroundColor: "#DCFCE7",
     paddingHorizontal: 8,
@@ -1215,7 +1215,7 @@ const styles: any = StyleSheet.create({
   },
   replyBarAuthor: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563EB",
     marginBottom: 2,
   },

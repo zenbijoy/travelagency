@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     paddingHorizontal: 14,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     textAlign: "center",
     letterSpacing: 2,
   },
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   deleteBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
 });

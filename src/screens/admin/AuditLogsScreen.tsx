@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   },
   categoryChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   categoryChipTextActive: {
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   moduleText: {
     fontSize: 12,
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 12,
     color: "#64748b",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   detailVal: {
     fontSize: 12,

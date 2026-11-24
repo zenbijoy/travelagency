@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   trainTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   classSubtitle: {
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   },
   zoomResetText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   coachSelector: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   },
   coachLabel: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
     marginEnd: 10,
   },
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   },
   engineDirectionText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   cabinFrame: {
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   },
   footerSeatList: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
     marginTop: 2,
   },
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
   },
   footerFareValue: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#059669",
   },
   confirmButton: {
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });
 

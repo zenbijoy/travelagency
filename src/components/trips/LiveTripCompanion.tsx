@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   },
   liveIndicatorText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#A7F3D0",
   },
   refreshPill: {
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   },
   flightCodeTitle: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#FFFFFF",
     marginTop: 2,
   },
@@ -427,12 +427,12 @@ const styles = StyleSheet.create({
   },
   boardingLabel: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#BAE6FD",
   },
   boardingVal: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   countdownContainer: {
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
   },
   countdownNumber: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#FFFFFF",
   },
   countdownUnit: {
@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
   },
   countdownColon: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#FFFFFF",
   },
   journeyStagesWrapper: {
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
   },
   stagesTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#334155",
     marginBottom: 12,
   },
@@ -517,13 +517,13 @@ const styles = StyleSheet.create({
   },
   stageLabelText: {
     fontSize: 8,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#94A3B8",
     textAlign: "center",
   },
   stageLabelCurrent: {
     color: TRIP_BLUE,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   timelineConnectingLine: {
     flex: 1,
@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
   },
   glanceValue: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
     marginTop: 1,
   },
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
   },
   viewPassButtonText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
 });

@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   splitInput: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#4f46e5",
     marginTop: 4,
     padding: 0,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   agencyName: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   statusBadge: {
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   },
   amountText: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   dateText: {
@@ -278,6 +278,6 @@ const styles = StyleSheet.create({
   approveBtnText: {
     color: "#ffffff",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });

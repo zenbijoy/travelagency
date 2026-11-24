@@ -467,7 +467,7 @@ function Stat({
 const s = StyleSheet.create({
   shell: { flex: 1, backgroundColor: "#f5f7fa" },
   header: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
-  title: { fontSize: 22, fontWeight: "900", color: "#111827" },
+  title: { fontSize: 22, fontWeight: "700", color: "#111827" },
   subtitle: { fontSize: 13, color: "#9ca3af", marginTop: 2 },
   searchWrap: {
     flexDirection: "row",
@@ -492,7 +492,7 @@ const s = StyleSheet.create({
     backgroundColor: "#e5e7eb",
   },
   filterChipActive: { backgroundColor: PRIMARY },
-  filterChipText: { fontSize: 12, fontWeight: "700", color: "#667085" },
+  filterChipText: { fontSize: 12, fontWeight: "500", color: "#667085" },
   filterChipTextActive: { color: "#fff" },
   secondaryFilters: {
     flexDirection: "row",
@@ -511,7 +511,7 @@ const s = StyleSheet.create({
     borderColor: "#e5e7eb",
   },
   ratingChipActive: { backgroundColor: "#fef3c7", borderColor: "#f59e0b" },
-  ratingChipText: { fontSize: 12, fontWeight: "700", color: "#9ca3af" },
+  ratingChipText: { fontSize: 12, fontWeight: "500", color: "#9ca3af" },
   ratingChipTextActive: { color: "#92400e" },
   verifiedToggle: {
     flexDirection: "row",
@@ -525,7 +525,7 @@ const s = StyleSheet.create({
     backgroundColor: "#f0fdf4",
   },
   verifiedToggleActive: { backgroundColor: "#10b981", borderColor: "#10b981" },
-  verifiedToggleText: { fontSize: 12, fontWeight: "700", color: "#10b981" },
+  verifiedToggleText: { fontSize: 12, fontWeight: "500", color: "#10b981" },
   list: { padding: 16, paddingBottom: 140 },
   card: {
     backgroundColor: "#fff",
@@ -561,7 +561,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logoInitial: { color: "#fff", fontSize: 18, fontWeight: "900" },
+  logoInitial: { color: "#fff", fontSize: 18, fontWeight: "600" },
   topActions: {
     position: "absolute",
     top: 8,
@@ -586,7 +586,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 3,
   },
-  verifiedText: { color: "#fff", fontSize: 12, fontWeight: "800" },
+  verifiedText: { color: "#fff", fontSize: 12, fontWeight: "600" },
   cardBody: { padding: 14, paddingTop: 26 },
   nameRow: {
     flexDirection: "row",
@@ -594,7 +594,7 @@ const s = StyleSheet.create({
     gap: 6,
     marginBottom: 2,
   },
-  agencyName: { fontSize: 16, fontWeight: "900", color: "#111827", flex: 1 },
+  agencyName: { fontSize: 16, fontWeight: "600", color: "#111827", flex: 1 },
   agencyCity: { fontSize: 12, color: "#9ca3af", marginBottom: 8 },
   chipRow: { flexDirection: "row", gap: 6, marginBottom: 10, flexWrap: "wrap" },
   chip: {
@@ -603,10 +603,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  chipText: { fontSize: 12, color: PRIMARY, fontWeight: "700" },
+  chipText: { fontSize: 12, color: PRIMARY, fontWeight: "500" },
   statsRow: { flexDirection: "row", gap: 16, marginBottom: 12 },
   stat: { flexDirection: "row", alignItems: "center", gap: 3 },
-  statValue: { fontSize: 12, fontWeight: "900", color: "#374151" },
+  statValue: { fontSize: 12, fontWeight: "700", color: "#374151" },
   statLabel: { fontSize: 12, color: "#9ca3af" },
   actionRow: { flexDirection: "row", gap: 8 },
   followBtn: {
@@ -621,7 +621,7 @@ const s = StyleSheet.create({
     paddingVertical: 9,
   },
   followBtnActive: { backgroundColor: "#ef4444", borderColor: "#ef4444" },
-  followBtnText: { fontSize: 13, fontWeight: "800", color: PRIMARY },
+  followBtnText: { fontSize: 13, fontWeight: "600", color: PRIMARY },
   followBtnTextActive: { color: "#fff" },
   viewBtn: {
     flex: 2,
@@ -633,8 +633,8 @@ const s = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 9,
   },
-  viewBtnText: { fontSize: 13, fontWeight: "800", color: PRIMARY },
+  viewBtnText: { fontSize: 13, fontWeight: "600", color: PRIMARY },
   empty: { alignItems: "center", paddingTop: 60, gap: 8 },
-  emptyText: { fontSize: 18, fontWeight: "900", color: "#374151" },
+  emptyText: { fontSize: 18, fontWeight: "600", color: "#374151" },
   emptySubText: { fontSize: 13, color: "#9ca3af" },
 });

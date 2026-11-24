@@ -1865,7 +1865,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
   },
   examTag: {
@@ -1876,7 +1876,7 @@ const styles = StyleSheet.create({
   },
   examTagText: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#1E1B4B",
   },
   headerSubtitle: {
@@ -1933,12 +1933,12 @@ const styles = StyleSheet.create({
   },
   uniPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#E0E7FF",
   },
   uniPillTextActive: {
     color: VIOLET_PURPLE,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   uniPillSubText: {
     fontSize: 9.5,
@@ -1947,7 +1947,7 @@ const styles = StyleSheet.create({
   },
   uniPillSubTextActive: {
     color: "#6D28D9",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   contentScroll: {
     flex: 1,
@@ -1986,7 +1986,7 @@ const styles = StyleSheet.create({
   },
   activeExamUniName: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   activeExamSchedule: {
@@ -2013,7 +2013,7 @@ const styles = StyleSheet.create({
   },
   guaranteedArrivalText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   districtFilterBox: {
@@ -2061,7 +2061,7 @@ const styles = StyleSheet.create({
   },
   districtPillTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   featureCard: {
     borderRadius: 16,
@@ -2092,12 +2092,12 @@ const styles = StyleSheet.create({
   },
   studentBadgeText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FBBF24",
   },
   featureTitle: {
     fontSize: 13.5,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
     lineHeight: 19,
   },
@@ -2151,7 +2151,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15.5,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   sectionSubtitle: {
@@ -2169,7 +2169,7 @@ const styles = StyleSheet.create({
   },
   subsidyBadgeText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#166534",
   },
   loadingBox: {
@@ -2210,7 +2210,7 @@ const styles = StyleSheet.create({
   },
   resetFilterBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4338CA",
   },
   routeCard: {
@@ -2241,12 +2241,12 @@ const styles = StyleSheet.create({
   },
   uniBadgeText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: VIOLET_PURPLE,
   },
   uniFullName: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   unitNameText: {
@@ -2278,7 +2278,7 @@ const styles = StyleSheet.create({
   },
   guaranteeTagText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   journeyTimeline: {
@@ -2304,7 +2304,7 @@ const styles = StyleSheet.create({
   },
   pointName: {
     fontSize: 12.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
     marginTop: 1,
   },
@@ -2317,7 +2317,7 @@ const styles = StyleSheet.create({
   arrivalTimeText: {
     fontSize: 11.5,
     color: "#059669",
-    fontWeight: "700",
+    fontWeight: "500",
     marginTop: 2,
   },
   safetyBadgesWrap: {
@@ -2394,13 +2394,13 @@ const styles = StyleSheet.create({
   },
   coordinatorCallText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4338CA",
   },
   seatsLeftText: {
     fontSize: 11,
     color: "#DC2626",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   routeCardFooter: {
     flexDirection: "row",
@@ -2423,12 +2423,12 @@ const styles = StyleSheet.create({
   },
   miniDiscountTagText: {
     fontSize: 9.5,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#166534",
   },
   studentFare: {
     fontSize: 19,
-    fontWeight: "800",
+    fontWeight: "700",
     color: VIOLET_PURPLE,
   },
   regularFare: {
@@ -2449,7 +2449,7 @@ const styles = StyleSheet.create({
   },
   bookSeatsBtnText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   modalOverlay: {
@@ -2475,7 +2475,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSubHeader: {
@@ -2499,7 +2499,7 @@ const styles = StyleSheet.create({
   },
   modalGuaranteeText: {
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#065F46",
     flex: 1,
   },
@@ -2611,7 +2611,7 @@ const styles = StyleSheet.create({
   },
   seatText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
     marginTop: 2,
   },
@@ -2696,7 +2696,7 @@ const styles = StyleSheet.create({
   subsidyAppliedText: {
     fontSize: 11,
     color: "#166534",
-    fontWeight: "700",
+    fontWeight: "400",
     flex: 1,
   },
   subsidyPromptText: {
@@ -2766,7 +2766,7 @@ const styles = StyleSheet.create({
   },
   relationPillTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   fareSummaryCard: {
     backgroundColor: "#F5F3FF",
@@ -2778,7 +2778,7 @@ const styles = StyleSheet.create({
   },
   fareSummaryTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: VIOLET_PURPLE,
     marginBottom: 8,
   },
@@ -2815,7 +2815,7 @@ const styles = StyleSheet.create({
   },
   savingsBannerText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#166534",
   },
   fareDivider: {
@@ -2825,12 +2825,12 @@ const styles = StyleSheet.create({
   },
   totalFareLabel: {
     fontSize: 13.5,
-    fontWeight: "800",
+    fontWeight: "600",
     color: VIOLET_PURPLE,
   },
   totalFareValue: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: VIOLET_PURPLE,
   },
   quickAdvisoryNotice: {
@@ -2860,7 +2860,7 @@ const styles = StyleSheet.create({
   },
   confirmTicketBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   successModalCard: {
@@ -2881,7 +2881,7 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
   },
@@ -2930,7 +2930,7 @@ const styles = StyleSheet.create({
   },
   hotlineBtnText: {
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4338CA",
   },
   successCloseBtn: {
@@ -2942,7 +2942,7 @@ const styles = StyleSheet.create({
   },
   successCloseBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   advisoryModalCard: {
@@ -3027,7 +3027,7 @@ const styles = StyleSheet.create({
   },
   closeAdvisoryModalBtnText: {
     fontSize: 13.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
 });

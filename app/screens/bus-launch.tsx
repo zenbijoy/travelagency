@@ -2537,7 +2537,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
     letterSpacing: -0.3,
   },
@@ -2557,7 +2557,7 @@ const styles = StyleSheet.create({
   },
   verifiedText: {
     fontSize: 9.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   myTicketsHeaderBtn: {
@@ -2618,12 +2618,12 @@ const styles = StyleSheet.create({
   },
   dualModeSegmentMainText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   dualModeSegmentMainTextActive: {
     color: "#0F172A",
-    fontWeight: "800",
+    fontWeight: "600",
   },
   dualModeSegmentSubText: {
     fontSize: 10,
@@ -2645,7 +2645,7 @@ const styles = StyleSheet.create({
   },
   filterSectionLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#334155",
   },
   filterSectionSubLabel: {
@@ -2683,7 +2683,7 @@ const styles = StyleSheet.create({
   },
   filterChipTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   subFilterChip: {
     paddingHorizontal: 9,
@@ -2707,7 +2707,7 @@ const styles = StyleSheet.create({
   },
   subFilterChipTextActive: {
     color: "#0F172A",
-    fontWeight: "700",
+    fontWeight: "400",
   },
   contentScroll: {
     flex: 1,
@@ -2750,7 +2750,7 @@ const styles = StyleSheet.create({
   },
   policyDetailsBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "400",
     color: PRIMARY_BLUE,
   },
   policyBadgesGrid: {
@@ -2842,7 +2842,7 @@ const styles = StyleSheet.create({
   },
   operatorName: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   busTypeTag: {
@@ -2855,12 +2855,12 @@ const styles = StyleSheet.create({
   },
   busTypeTagText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: PRIMARY_BLUE,
   },
   seatCountBadge: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: DANGER_RED,
   },
   launchRouteText: {
@@ -2880,7 +2880,7 @@ const styles = StyleSheet.create({
   },
   ghatBadgeText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F766E",
   },
   fareTag: {
@@ -2888,7 +2888,7 @@ const styles = StyleSheet.create({
   },
   fareAmount: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: PRIMARY_BLUE,
   },
   fareSub: {
@@ -2909,7 +2909,7 @@ const styles = StyleSheet.create({
   },
   timeVal: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   cityVal: {
@@ -2929,7 +2929,7 @@ const styles = StyleSheet.create({
   },
   durationVal: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
     marginBottom: 3,
   },
@@ -3012,7 +3012,7 @@ const styles = StyleSheet.create({
   },
   cabPreviewType: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#0F172A",
   },
   cabPreviewAvail: {
@@ -3021,7 +3021,7 @@ const styles = StyleSheet.create({
   },
   cabPreviewFare: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "400",
     color: TEAL_WATER,
     marginVertical: 2,
   },
@@ -3062,7 +3062,7 @@ const styles = StyleSheet.create({
   },
   bookActionBtnText: {
     fontSize: 12.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   modalOverlay: {
@@ -3088,7 +3088,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSubHeader: {
@@ -3125,7 +3125,7 @@ const styles = StyleSheet.create({
   },
   busDriverText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   busDoorBox: {
@@ -3139,7 +3139,7 @@ const styles = StyleSheet.create({
   },
   busDoorText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#16A34A",
   },
   seatPlanInstruction: {
@@ -3165,7 +3165,7 @@ const styles = StyleSheet.create({
   },
   busAisleText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#94A3B8",
   },
   seatBox: {
@@ -3189,7 +3189,7 @@ const styles = StyleSheet.create({
   },
   seatLabel: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   seatLabelSelected: {
@@ -3237,7 +3237,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 12.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1E293B",
     marginTop: 10,
     marginBottom: 5,
@@ -3267,7 +3267,7 @@ const styles = StyleSheet.create({
   },
   boardingPointOptionTextActive: {
     color: PRIMARY_BLUE,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   quickDateRow: {
     flexDirection: "row",
@@ -3294,11 +3294,11 @@ const styles = StyleSheet.create({
   quickDateText: {
     fontSize: 11,
     color: "#475569",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   quickDateTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "400",
   },
   textInput: {
     backgroundColor: "#F8FAFC",
@@ -3335,7 +3335,7 @@ const styles = StyleSheet.create({
   },
   deckTabBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F766E",
   },
   deckTabBtnTextActive: {
@@ -3355,7 +3355,7 @@ const styles = StyleSheet.create({
   },
   vesselBowText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F766E",
   },
   cabinGridPlan: {
@@ -3384,7 +3384,7 @@ const styles = StyleSheet.create({
   },
   cabinPlanNumber: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   cabinPlanNumberSelected: {
@@ -3398,12 +3398,12 @@ const styles = StyleSheet.create({
   },
   balconyBadgeText: {
     fontSize: 9.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F766E",
   },
   cabinPlanFare: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TEAL_WATER,
   },
   cabinPlanFareSelected: {
@@ -3417,7 +3417,7 @@ const styles = StyleSheet.create({
   },
   cabinClassBadgeText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   cabinCapacityText: {
@@ -3446,7 +3446,7 @@ const styles = StyleSheet.create({
   },
   availablePillText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F766E",
   },
   selectedPill: {
@@ -3460,7 +3460,7 @@ const styles = StyleSheet.create({
   },
   selectedPillText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   bookedPill: {
@@ -3496,7 +3496,7 @@ const styles = StyleSheet.create({
   },
   summaryVal: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   summaryDivider: {
@@ -3506,7 +3506,7 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: PRIMARY_BLUE,
   },
   totalSub: {
@@ -3515,7 +3515,7 @@ const styles = StyleSheet.create({
   },
   totalVal: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: PRIMARY_BLUE,
   },
   selectedCabinSummaryLine: {
@@ -3529,7 +3529,7 @@ const styles = StyleSheet.create({
   },
   selectedCabinLineFare: {
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   confirmBtn: {
@@ -3543,7 +3543,7 @@ const styles = StyleSheet.create({
   },
   confirmBtnText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
     textAlign: "center",
   },
@@ -3566,7 +3566,7 @@ const styles = StyleSheet.create({
   },
   policySectionBlockTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   policyRuleItem: {
@@ -3576,7 +3576,7 @@ const styles = StyleSheet.create({
   },
   policyRuleBullet: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: PRIMARY_BLUE,
   },
   policyRuleHeading: {
@@ -3606,7 +3606,7 @@ const styles = StyleSheet.create({
   },
   myTicketOperator: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   confirmedPill: {
@@ -3617,12 +3617,12 @@ const styles = StyleSheet.create({
   },
   confirmedPillText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#16A34A",
   },
   myTicketRoute: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
     marginBottom: 4,
   },
@@ -3638,7 +3638,7 @@ const styles = StyleSheet.create({
   },
   myTicketFare: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: PRIMARY_BLUE,
   },
   myTicketSeatsWrap: {
@@ -3652,7 +3652,7 @@ const styles = StyleSheet.create({
   },
   myTicketSeatsVal: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   myTicketPassenger: {

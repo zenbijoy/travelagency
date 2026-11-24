@@ -755,7 +755,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   statNumber: {
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
   },
   statusPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   progressContainer: {
     marginTop: 4,
@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   progressStatusVal: {
@@ -885,7 +885,7 @@ const styles = StyleSheet.create({
   },
   breadcrumbText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   ticketIdTitle: {
@@ -947,12 +947,12 @@ const styles = StyleSheet.create({
   },
   stepLabelActive: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#003527",
   },
   stepLabelInactive: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   detailsExpandCard: {
@@ -982,7 +982,7 @@ const styles = StyleSheet.create({
   },
   priorityTagText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#991b1b",
   },
   detailsGridContent: {
@@ -1000,7 +1000,7 @@ const styles = StyleSheet.create({
   },
   detailsGridLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#64748b",
     marginBottom: 2,
   },
@@ -1049,7 +1049,7 @@ const styles = StyleSheet.create({
   },
   userBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#003527",
   },
   investigationCard: {
@@ -1108,7 +1108,7 @@ const styles = StyleSheet.create({
   updateStatusBtnText: {
     color: "#ffffff",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   replyTabHeader: {
     flexDirection: "row",
@@ -1132,7 +1132,7 @@ const styles = StyleSheet.create({
   },
   replyTabTextActive: {
     color: "#003527",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   editorBox: {
     backgroundColor: "#ffffff",
@@ -1221,7 +1221,7 @@ const styles = StyleSheet.create({
   },
   resourceCardSub: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#64748b",
     marginTop: 2,
   },

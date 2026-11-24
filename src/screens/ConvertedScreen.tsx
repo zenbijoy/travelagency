@@ -593,12 +593,12 @@ const styles = StyleSheet.create({
   sourceText: {
     color: "#98a2b3",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     textTransform: "uppercase",
   },
   topTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   profileDot: {
     alignItems: "center",
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
   brandText: {
     fontSize: 18,
     fontStyle: "italic",
-    fontWeight: "900",
+    fontWeight: "700",
   },
   avatar: {
     alignItems: "center",
@@ -650,11 +650,11 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: "#fff",
-    fontWeight: "900",
+    fontWeight: "600",
   },
   heroTitle: {
     fontSize: 30,
-    fontWeight: "900",
+    fontWeight: "700",
     lineHeight: 36,
   },
   heroSubtitle: {
@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   fieldRow: {
     alignItems: "center",
@@ -702,7 +702,7 @@ const styles = StyleSheet.create({
     color: "#333",
     flex: 1,
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   searchButton: {
     borderRadius: 18,
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
   searchButtonText: {
     color: "#fff",
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "600",
     textAlign: "center",
   },
   chipRow: {
@@ -727,7 +727,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   actionGrid: {
     backgroundColor: "#fff",
@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
   actionLabel: {
     color: "#475467",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     textAlign: "center",
   },
   benefitCard: {
@@ -771,13 +771,13 @@ const styles = StyleSheet.create({
   benefitTitle: {
     color: "#f0446b",
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   claimButton: {
     borderRadius: 999,
     color: "#fff",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     overflow: "hidden",
     paddingHorizontal: 13,
     paddingVertical: 7,
@@ -796,7 +796,7 @@ const styles = StyleSheet.create({
   benefitText: {
     color: "#f0446b",
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   imageFeature: {
     borderRadius: 24,
@@ -815,14 +815,14 @@ const styles = StyleSheet.create({
   featureTitle: {
     color: "#fff",
     fontSize: 24,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   section: {
     gap: 12,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   communityCard: {
     backgroundColor: "#fff",
@@ -838,13 +838,13 @@ const styles = StyleSheet.create({
   },
   communityMeta: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     textTransform: "uppercase",
   },
   communityTitle: {
     color: "#111827",
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     marginTop: 4,
   },
   communityCopy: {
@@ -877,7 +877,7 @@ const styles = StyleSheet.create({
   contentTitle: {
     color: "#111827",
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   contentSubtitle: {
     color: "#667085",
@@ -887,12 +887,12 @@ const styles = StyleSheet.create({
   },
   contentMeta: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     marginTop: 6,
   },
   priceText: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   aiWrap: {
     alignItems: "center",
@@ -920,7 +920,7 @@ const styles = StyleSheet.create({
   aiText: {
     color: "#333",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   bottomNav: {
     backgroundColor: "#fff",
@@ -941,6 +941,6 @@ const styles = StyleSheet.create({
   },
   bottomLabel: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });

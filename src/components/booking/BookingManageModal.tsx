@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   headerSubtitle: {
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   tabTextActive: {
@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
   },
   refundCardTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#166534",
   },
   refundRow: {
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
   },
   refundVal: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   divider: {
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
   },
   totalRefundTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#15803D",
   },
   totalRefundSub: {
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
   },
   totalRefundAmount: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#15803D",
   },
   payoutNotice: {
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
   cancelConfirmBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Reschedule
@@ -649,18 +649,18 @@ const styles = StyleSheet.create({
   dateChipDay: {
     fontSize: 11,
     color: "#64748B",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   dateChipDate: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#0F172A",
     marginVertical: 2,
   },
   dateChipFree: {
     fontSize: 10,
     color: "#059669",
-    fontWeight: "700",
+    fontWeight: "400",
   },
   textWhite: {
     color: "#FFFFFF",
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
   rescheduleConfirmBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Reminders / Calendar
@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
   },
   featureBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0055F2",
   },
   featureBtnGreen: {
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
   },
   featureBtnTextWhite: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   reminderActiveBanner: {
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
   },
   reminderActiveText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
 });

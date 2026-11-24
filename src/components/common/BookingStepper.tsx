@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   },
   crumbTextActive: {
     color: "#0F172A",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   crumbSeparator: {
     marginHorizontal: 4,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   },
   whereAmIText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0055F2",
   },
   stepperRow: {
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   },
   stepLabelActive: {
     color: "#0055F2",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   stepLabelCompleted: {
     color: "#10B981",

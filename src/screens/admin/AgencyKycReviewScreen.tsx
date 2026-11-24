@@ -674,7 +674,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   headerSubtitle: {
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
   },
   refreshBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563eb",
     marginLeft: 6,
   },
@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   filterChipTextActive: {
@@ -748,7 +748,7 @@ const styles = StyleSheet.create({
   },
   paneTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   paneSubtitle: {
@@ -774,7 +774,7 @@ const styles = StyleSheet.create({
   },
   queueAgencyName: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     flex: 1,
     marginRight: 8,
@@ -786,7 +786,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeSmallText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     textTransform: "capitalize",
   },
   badgeVerified: { backgroundColor: "#d1fae5" },
@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
   },
   detailAgencyTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   detailSubmissionId: {
@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
   btnReject: { backgroundColor: "#dc2626" },
   reviewActionBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#ffffff",
   },
   docTabsRow: {
@@ -886,7 +886,7 @@ const styles = StyleSheet.create({
   },
   docTabText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   docTabTextActive: {
@@ -922,7 +922,7 @@ const styles = StyleSheet.create({
   },
   viewerSub: {
     fontSize: 10,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#059669",
     backgroundColor: "#ecfdf5",
     paddingHorizontal: 6,
@@ -946,7 +946,7 @@ const styles = StyleSheet.create({
   },
   pdfFileName: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#991b1b",
     marginTop: 8,
   },
@@ -967,7 +967,7 @@ const styles = StyleSheet.create({
   },
   pdfOpenBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563eb",
     marginLeft: 6,
   },
@@ -1007,7 +1007,7 @@ const styles = StyleSheet.create({
   },
   fieldValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     marginTop: 2,
   },
@@ -1048,12 +1048,12 @@ const styles = StyleSheet.create({
   },
   checkNameText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#1e293b",
   },
   checkResultText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   checkDetailText: {
     fontSize: 11,
@@ -1074,7 +1074,7 @@ const styles = StyleSheet.create({
   },
   auditAction: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1e293b",
     width: 90,
   },
@@ -1109,7 +1109,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   modalInstruction: {
@@ -1158,7 +1158,7 @@ const styles = StyleSheet.create({
   },
   modalConfirmBtnText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
 });

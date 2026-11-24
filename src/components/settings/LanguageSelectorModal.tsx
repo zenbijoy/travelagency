@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   nativeName: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   englishName: {
     fontSize: 12,

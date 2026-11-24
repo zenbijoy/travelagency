@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   },
   actionBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   closeBtn: {
     padding: 4,

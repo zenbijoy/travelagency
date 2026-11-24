@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSubTitle: {
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   },
   presetChipText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0055F2",
   },
   monthNavRow: {
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   },
   monthTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   weekdaysRow: {
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   },
   weekdayText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#94A3B8",
     width: 42,
     textAlign: "center",
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   },
   dayNumberText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#1E293B",
   },
   dayNumberTextActive: {
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
   },
   dayPriceTextCheapest: {
     color: "#059669",
-    fontWeight: "900",
+    fontWeight: "700",
   },
   cheapestBadge: {
     position: "absolute",
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
   },
   cheapestBadgeText: {
     fontSize: 8,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#047857",
   },
   footerContainer: {
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   },
   summaryDate: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#0F172A",
     marginTop: 1,
   },
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
   },
   nightsBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0055F2",
     marginStart: 4,
   },
@@ -596,6 +596,6 @@ const styles = StyleSheet.create({
   confirmBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });

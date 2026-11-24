@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 12,
   },
-  heroTitle: { fontSize: 18, fontWeight: "800", textAlign: "center" },
+  heroTitle: { fontSize: 18, fontWeight: "700", textAlign: "center" },
   heroSubtitle: { fontSize: 12, textAlign: "center", marginTop: 4, lineHeight: 16 },
   consequencesCard: {
     backgroundColor: "rgba(239, 68, 68, 0.05)",
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     paddingHorizontal: 14,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     textAlign: "center",
     letterSpacing: 2,
   },
@@ -295,5 +295,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  deleteBtnText: { fontSize: 15, fontWeight: "700", color: "#ffffff" },
+  deleteBtnText: { fontSize: 15, fontWeight: "500", color: "#ffffff" },
 });

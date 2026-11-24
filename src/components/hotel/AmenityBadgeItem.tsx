@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   nameText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1E293B",
   },
   noteText: {
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   badgeTextFree: {
     color: "#047857",

@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
 
   failureTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: ERROR_COLOR,
     textAlign: "center",
     marginBottom: 4,
@@ -526,12 +526,12 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 13,
     color: "#0F172A",
-    fontWeight: "700",
+    fontWeight: "400",
   },
   detailValueMono: {
     fontSize: 12,
     color: "#2563EB",
-    fontWeight: "700",
+    fontWeight: "400",
     fontFamily: "monospace",
   },
   statusDeclinedText: {
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
   },
   providerNameText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   providerEnText: {
@@ -623,7 +623,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   supportButton: {
     backgroundColor: "#EFF6FF",
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
   supportButtonText: {
     color: PRIMARY,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   homeButton: {
     borderWidth: 1,

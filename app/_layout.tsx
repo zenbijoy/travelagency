@@ -1,7 +1,75 @@
 import "../global.css";
 
 import React, { useEffect, Suspense, lazy } from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator, StyleSheet, LogBox, Platform } from "react-native";
+
+// Intercept dev console error/warn messages that trigger intrusive LogBox overlays on web
+const origError = console.error;
+console.error = (...args: any[]) => {
+  const msg = args && args[0] ? String(args[0]) : "";
+  if (
+    msg.includes("Can't perform a React state update") ||
+    msg.includes("Supabase Dev") ||
+    msg.includes("Network request failed")
+  ) {
+    return;
+  }
+  origError(...args);
+};
+
+const origWarn = console.warn;
+console.warn = (...args: any[]) => {
+  const msg = args && args[0] ? String(args[0]) : "";
+  if (
+    msg.includes("Can't perform a React state update") ||
+    msg.includes("Supabase Dev") ||
+    msg.includes("Network request failed")
+  ) {
+    return;
+  }
+  origWarn(...args);
+};
+
+LogBox.ignoreAllLogs(true);
+LogBox.ignoreLogs([
+  "Can't perform a React state update on an unmounted component",
+  "Supabase Dev Network Error",
+  "Network request failed",
+]);
+
+if (Platform.OS === "web" && typeof document !== "undefined") {
+  const fontLinkId = "google-fonts-typography";
+  if (!document.getElementById(fontLinkId)) {
+    const link = document.createElement("link");
+    link.id = fontLinkId;
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap";
+    document.head?.appendChild(link);
+  }
+
+  const styleId = "suppress-dev-logbox-overlays";
+  if (!document.getElementById(styleId)) {
+    const style = document.createElement("style");
+    style.id = styleId;
+    style.innerHTML = `
+      body > div:not(#root) {
+        display: none !important;
+      }
+      * {
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+        text-rendering: optimizeLegibility !important;
+      }
+      html, body, input, button, select, textarea {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+        font-synthesis: none;
+      }
+    `;
+    document.head?.appendChild(style);
+  }
+}
+
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";

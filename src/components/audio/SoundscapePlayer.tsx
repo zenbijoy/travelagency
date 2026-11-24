@@ -1121,7 +1121,7 @@ const styles = StyleSheet.create({
   geoPillText: {
     color: '#ffffff',
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: "600",
   },
   offlinePillBadge: {
     position: 'absolute',
@@ -1156,7 +1156,7 @@ const styles = StyleSheet.create({
   duckedBadgeText: {
     color: '#f87171',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
   subtitleRow: {
     flexDirection: 'row',
@@ -1227,7 +1227,7 @@ const styles = StyleSheet.create({
   reopenText: {
     color: '#ffffff',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
   reopenPlayingDot: {
     width: 6,
@@ -1351,7 +1351,7 @@ const styles = StyleSheet.create({
   geofenceActiveBannerText: {
     color: '#10b981',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
   artworkMeta: {
     position: 'absolute',
@@ -1374,7 +1374,7 @@ const styles = StyleSheet.create({
   categoryBadgeText: {
     color: '#38bdf8',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
   districtBadge: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
@@ -1399,12 +1399,12 @@ const styles = StyleSheet.create({
   cachedBadgeText: {
     color: '#10b981',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
   artworkTitle: {
     color: '#ffffff',
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: "700",
   },
   artworkRegion: {
     color: '#cbd5e1',
@@ -1440,7 +1440,7 @@ const styles = StyleSheet.create({
   },
   modeSwitchTextActive: {
     color: '#ffffff',
-    fontWeight: '700',
+    fontWeight: "500",
   },
 
   // Description Card
@@ -1563,7 +1563,7 @@ const styles = StyleSheet.create({
   volumePercentText: {
     color: '#38bdf8',
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "500",
     fontVariant: ['tabular-nums'],
   },
   sliderTouchArea: {
@@ -1662,7 +1662,7 @@ const styles = StyleSheet.create({
   autoTriggerToggleText: {
     color: '#ffffff',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
   geofenceCardDesc: {
     color: '#cbd5e1',
@@ -1682,7 +1682,7 @@ const styles = StyleSheet.create({
   simulateArrivalBtnText: {
     color: '#ffffff',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
 
   // Tab 2: Catalog Styles
@@ -1692,7 +1692,7 @@ const styles = StyleSheet.create({
   tabSectionTitle: {
     color: '#f8fafc',
     fontSize: 17,
-    fontWeight: '800',
+    fontWeight: "700",
     marginBottom: 4,
   },
   tabSectionSubtitle: {
@@ -1770,7 +1770,7 @@ const styles = StyleSheet.create({
   catalogRadiusBadgeText: {
     color: '#34d399',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
   catalogActionCol: {
     paddingStart: 6,
@@ -1784,7 +1784,7 @@ const styles = StyleSheet.create({
   catalogPlayingPillText: {
     color: '#ffffff',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
 
   // Tab 3: Offline Styles
@@ -1808,7 +1808,7 @@ const styles = StyleSheet.create({
   metricValue: {
     color: '#f8fafc',
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: "600",
   },
   metricLabel: {
     color: '#94a3b8',
@@ -1834,7 +1834,7 @@ const styles = StyleSheet.create({
   preCacheAllText: {
     color: '#ffffff',
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "500",
   },
   offlineListTitle: {
     color: '#cbd5e1',
@@ -1885,7 +1885,7 @@ const styles = StyleSheet.create({
   downloadProgressText: {
     color: '#38bdf8',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
   },
   clearAllBtn: {
     alignSelf: 'center',

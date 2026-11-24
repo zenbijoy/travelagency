@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
     marginBottom: 8,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   targetNameText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   targetIdText: {
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   },
   keywordHighlight: {
     color: "#DC2626",
-    fontWeight: "800",
+    fontWeight: "600",
     fontFamily: "monospace",
   },
   confirmWordInput: {
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
     backgroundColor: "#F8FAFC",
   },
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   },
   confirmBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
 });

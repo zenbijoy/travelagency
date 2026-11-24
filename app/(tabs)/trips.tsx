@@ -106,10 +106,9 @@ export default function TripsTab() {
   const [manageBooking, setManageBooking] = useState<BookingManageData | null>(null);
   const [showManageModal, setShowManageModal] = useState(false);
   const [favoritePosts, setFavoritePosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const fetchTripsData = useCallback(async () => {
-    setLoading(true);
     try {
       // 1. Fetch user bookings (or public demo bookings)
       let bookingQuery = supabase
@@ -124,8 +123,10 @@ export default function TripsTab() {
       }
 
       const { data: bookingData } = await bookingQuery;
-      if (bookingData) {
+      if (bookingData && bookingData.length > 0) {
         setBookings(bookingData);
+      } else {
+        setBookings([]);
       }
 
       // Load cached offline tickets
@@ -676,7 +677,7 @@ export default function TripsTab() {
             renderItem={({ item: booking }) => {
               const hotel = booking.hotel;
               const flight = booking.flight;
-              const title = hotel?.name || flight?.flight_number ? `Flight ${flight.flight_number}` : booking.title || "Travel Reservation";
+              const title = hotel?.name || (flight?.flight_number ? `Flight ${flight.flight_number}` : (booking.title || "Travel Reservation"));
               const image = hotel?.image_url || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500";
               const status = booking.status || "Confirmed";
               const price = booking.total_price || booking.amount || hotel?.base_price || 120;
@@ -914,7 +915,7 @@ const styles = StyleSheet.create({
   },
   segmentTextActive: {
     color: TRIP_BLUE,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   backToBookingsPill: {
     flexDirection: "row",
@@ -927,7 +928,7 @@ const styles = StyleSheet.create({
   },
   backToBookingsText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   headerBar: {
@@ -942,7 +943,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   widgetBtn: {
@@ -1024,12 +1025,12 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   hotelName: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
     marginBottom: 4,
   },
@@ -1046,7 +1047,7 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: TRIP_BLUE,
   },
   pinkDiscountBadge: {
@@ -1073,7 +1074,7 @@ const styles = StyleSheet.create({
   },
   topManageBtnText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#DC2626",
   },
   addCalBtn: {
@@ -1089,7 +1090,7 @@ const styles = StyleSheet.create({
   },
   addCalBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0055F2",
   },
   emptyBookingsCard: {
@@ -1129,7 +1130,7 @@ const styles = StyleSheet.create({
   emptyStaysBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   emptyFlightsBtn: {
     backgroundColor: "#EFF6FF",
@@ -1142,7 +1143,7 @@ const styles = StyleSheet.create({
   emptyFlightsBtnText: {
     color: TRIP_BLUE,
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   quickAiActionRow: {
     flexDirection: "row",
@@ -1217,7 +1218,7 @@ const styles = StyleSheet.create({
     backgroundColor: ACCENT_YELLOW,
     color: "#000000",
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "600",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 4,
@@ -1230,7 +1231,7 @@ const styles = StyleSheet.create({
   },
   favoriteSubTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
     marginVertical: 4,
   },
@@ -1308,7 +1309,7 @@ const styles = StyleSheet.create({
   },
   voucherTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 4,
   },
@@ -1328,12 +1329,12 @@ const styles = StyleSheet.create({
   },
   voucherPnrLabel: {
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#1E40AF",
   },
   voucherPnrVal: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
     fontFamily: "monospace",
   },
@@ -1373,12 +1374,12 @@ const styles = StyleSheet.create({
   voucherMetaVal: {
     fontSize: 12,
     color: "#0F172A",
-    fontWeight: "700",
+    fontWeight: "400",
   },
   voucherStatusConfirmed: {
     fontSize: 12,
     color: "#059669",
-    fontWeight: "800",
+    fontWeight: "700",
   },
   voucherShareBtn: {
     backgroundColor: TRIP_BLUE,
@@ -1392,7 +1393,7 @@ const styles = StyleSheet.create({
   voucherShareBtnText: {
     color: "#fff",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   emptyTicketsCard: {
     backgroundColor: "#fff",
@@ -1405,7 +1406,7 @@ const styles = StyleSheet.create({
   },
   emptyTicketsTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     marginTop: 12,
     marginBottom: 6,
@@ -1427,7 +1428,7 @@ const styles = StyleSheet.create({
   browseServicesBtnText: {
     color: "#fff",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   boardingPassPill: {
     flexDirection: "row",
@@ -1443,7 +1444,7 @@ const styles = StyleSheet.create({
   },
   boardingPassPillText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   ticketSectionHeader: {
@@ -1456,7 +1457,7 @@ const styles = StyleSheet.create({
   },
   ticketSectionTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   ticketSectionSub: {
@@ -1472,7 +1473,7 @@ const styles = StyleSheet.create({
   },
   ticketCountBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   ticketsListWrapper: {
@@ -1510,13 +1511,13 @@ const styles = StyleSheet.create({
   },
   ticketCardTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     maxWidth: 180,
   },
   ticketCardPnr: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
     marginTop: 2,
   },
@@ -1531,12 +1532,12 @@ const styles = StyleSheet.create({
   },
   ticketSeatBadgeLabel: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   ticketSeatBadgeVal: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   ticketCardRouteRow: {
@@ -1547,7 +1548,7 @@ const styles = StyleSheet.create({
   },
   ticketCityName: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   ticketDepartureTime: {
@@ -1561,12 +1562,12 @@ const styles = StyleSheet.create({
   ticketDateSmall: {
     fontSize: 10,
     color: "#94A3B8",
-    fontWeight: "600",
+    fontWeight: "400",
     marginTop: 2,
   },
   ticketStatusTag: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#16A34A",
     backgroundColor: "#DCFCE7",
     paddingHorizontal: 6,
@@ -1593,7 +1594,7 @@ const styles = StyleSheet.create({
   },
   viewBoardingPassBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   pdfDownloadBtn: {
@@ -1607,7 +1608,7 @@ const styles = StyleSheet.create({
   },
   pdfDownloadBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   emptyTicketsBox: {

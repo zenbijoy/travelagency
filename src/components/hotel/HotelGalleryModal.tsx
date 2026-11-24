@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   counterText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   hotelHeading: {
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   },
   tabChipTextActive: {
     color: "#FFFFFF",
-    fontWeight: "800",
+    fontWeight: "600",
   },
   slideContainer: {
     width: SCREEN_WIDTH,
@@ -364,14 +364,14 @@ const styles = StyleSheet.create({
   captionCategory: {
     color: "#60A5FA",
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "400",
     textTransform: "uppercase",
     marginBottom: 2,
   },
   captionText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   thumbnailStrip: {
     paddingHorizontal: 16,

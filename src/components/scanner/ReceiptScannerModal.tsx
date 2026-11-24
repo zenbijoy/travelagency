@@ -1392,7 +1392,7 @@ const styles = StyleSheet.create({
   },
   confidenceBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#047857",
   },
   extractedCard: {
@@ -1482,7 +1482,7 @@ const styles = StyleSheet.create({
   },
   currencyPillTextSelected: {
     color: TRIP_BLUE,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   todayShortcut: {
     backgroundColor: "#e2e8f0",
@@ -1591,7 +1591,7 @@ const styles = StyleSheet.create({
   },
   splitPerPersonText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   splitCardSubtitle: {
@@ -1630,7 +1630,7 @@ const styles = StyleSheet.create({
   },
   payerChipTextSelected: {
     color: "#ffffff",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   memberChipsContainer: {
     flexDirection: "row",
@@ -1658,7 +1658,7 @@ const styles = StyleSheet.create({
   },
   memberChipTextSelected: {
     color: TRIP_BLUE,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   memberChipShare: {
     fontSize: 12,
@@ -1682,7 +1682,7 @@ const styles = StyleSheet.create({
   },
   confirmFeedButtonText: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
 
@@ -1709,7 +1709,7 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
     marginBottom: 4,
   },
@@ -1720,7 +1720,7 @@ const styles = StyleSheet.create({
   },
   successAmount: {
     fontSize: 32,
-    fontWeight: "800",
+    fontWeight: "700",
     color: TRIP_BLUE,
     marginBottom: 24,
   },
@@ -1764,7 +1764,7 @@ const styles = StyleSheet.create({
   },
   successSecondaryBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "400",
     color: TRIP_BLUE,
   },
   successPrimaryBtn: {
@@ -1777,7 +1777,7 @@ const styles = StyleSheet.create({
   },
   successPrimaryBtnText: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
 });

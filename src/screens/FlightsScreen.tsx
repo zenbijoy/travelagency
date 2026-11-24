@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Alert,
   ActivityIndicator,
@@ -42,45 +42,296 @@ import { FONTS } from "../theme/typography";
 import { formatLocalizedDate, formatLocalizedNumber, formatLocalizedCurrency, formatCurrency, formatPlural } from "../utils/formatters";
 import { RTLIcon } from "../components/ui";
 
-export {
-  TRIP_BLUE,
-  ACCENT_ORANGE,
-  ACCENT_GREEN,
-  FARE_RULES,
-  formatDisplayDate,
-  formatIsoDate,
-  getCurrencySymbol,
-  Airport,
-  CabinClassType,
-  PassengerCounts,
-  SortCriteria,
-  StopsFilterOption,
-  FlightItem,
-  FareBreakdown,
-  POPULAR_AIRPORTS,
-  CABIN_CLASSES,
-  calculateFareBreakdown,
-} from "../data/flightsData";
-import {
-  TRIP_BLUE,
-  ACCENT_ORANGE,
-  ACCENT_GREEN,
-  FARE_RULES,
-  formatDisplayDate,
-  formatIsoDate,
-  getCurrencySymbol,
-  Airport,
-  CabinClassType,
-  PassengerCounts,
-  SortCriteria,
-  StopsFilterOption,
-  FlightItem,
-  FareBreakdown,
-  POPULAR_AIRPORTS,
-  CABIN_CLASSES,
-  calculateFareBreakdown,
-} from "../data/flightsData";
-import { styles } from "../styles/flightsStyles";
+const TRIP_BLUE = "#287dfa";
+const ACCENT_ORANGE = "#ff7d00";
+const ACCENT_GREEN = "#10b981";
+
+// ============================================================================
+// Configuration & Business Rules
+// ============================================================================
+
+export const FARE_RULES = {
+  TAX_RATE: 0.12, // 12% Airport Authority, Terminal & Security Taxes
+  FUEL_SURCHARGE_RATE: 0.08, // 8% Carrier Jet Fuel Fluctuation Surcharge
+  CARBON_OFFSET_USD: 14, // $14 USD per passenger for certified climate contribution
+  CARBON_OFFSET_BDT: 1200, // ৳1200 BDT per passenger
+  CHILD_FARE_RATIO: 0.75, // 25% discount for children (2-11 yrs)
+  INFANT_FARE_RATIO: 0.1, // 90% discount for lap infants (under 2 yrs)
+};
+
+export const formatDisplayDate = (d: Date, locale?: string): string => {
+  return formatLocalizedDate(d, "short", locale);
+};
+
+export const formatIsoDate = (d: Date): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+export const getCurrencySymbol = (currency = "USD"): string => {
+  const c = currency.toUpperCase();
+  if (c === "BDT") return "৳";
+  if (c === "EUR") return "€";
+  if (c === "GBP") return "£";
+  if (c === "JPY") return "¥";
+  return "$";
+};
+
+// ============================================================================
+// Types & Catalogs
+// ============================================================================
+
+export interface Airport {
+  code: string;
+  name: string;
+  city: string;
+  country: string;
+  countryCode?: string;
+  id?: string;
+}
+
+export type CabinClassType = "Economy" | "Premium" | "Business" | "First";
+
+export interface PassengerCounts {
+  adults: number;
+  children: number;
+  infants: number;
+}
+
+export type SortCriteria = "cheapest" | "fastest" | "best" | "price" | "duration" | "departure";
+export type StopsFilterOption = "all" | "nonstop" | "stops";
+
+export interface FlightItem {
+  id: string;
+  flight_number: string;
+  airline_id?: string;
+  departure_airport_id?: string;
+  arrival_airport_id?: string;
+  departure_time: string;
+  arrival_time: string;
+  flight_duration: number; // in minutes
+  stops: number;
+  aircraft_type: string;
+  cabin_class: CabinClassType;
+  base_price: number;
+  currency: string;
+  total_seats: number;
+  available_seats: number;
+  baggage_allowance?: string;
+  amenities?: string[];
+  layover_info?: string;
+  layover_duration_minutes?: number;
+  cancellation_policy?: string;
+  is_live_db?: boolean;
+  departure_airport?: {
+    id?: string;
+    iata_code: string;
+    name: string;
+    city: string;
+    country?: string;
+  };
+  arrival_airport?: {
+    id?: string;
+    iata_code: string;
+    name: string;
+    city: string;
+    country?: string;
+  };
+  airline?: {
+    id?: string;
+    name: string;
+    iata_code?: string;
+    logo_url?: string;
+  };
+}
+
+export interface FareBreakdown {
+  adultCost: number;
+  childCost: number;
+  infantCost: number;
+  baseFare: number;
+  airportTaxes: number;
+  fuelSurcharge: number;
+  carbonOffset: number;
+  total: number;
+  perPerson: number;
+  totalPax: number;
+  currencySymbol: string;
+}
+
+// Global Hub Catalog
+export const POPULAR_AIRPORTS: Airport[] = [
+  {
+    code: "DAC",
+    name: "Hazrat Shahjalal International Airport",
+    city: "Dhaka",
+    country: "Bangladesh",
+    countryCode: "BD",
+  },
+  {
+    code: "BKK",
+    name: "Suvarnabhumi Airport",
+    city: "Bangkok",
+    country: "Thailand",
+    countryCode: "TH",
+  },
+  {
+    code: "DXB",
+    name: "Dubai International Airport",
+    city: "Dubai",
+    country: "United Arab Emirates",
+    countryCode: "AE",
+  },
+  {
+    code: "SIN",
+    name: "Singapore Changi Airport",
+    city: "Singapore",
+    country: "Singapore",
+    countryCode: "SG",
+  },
+  {
+    code: "LHR",
+    name: "London Heathrow Airport",
+    city: "London",
+    country: "United Kingdom",
+    countryCode: "GB",
+  },
+  {
+    code: "JFK",
+    name: "John F. Kennedy International Airport",
+    city: "New York",
+    country: "United States",
+    countryCode: "US",
+  },
+  {
+    code: "PVG",
+    name: "Shanghai Pudong International Airport",
+    city: "Shanghai",
+    country: "China",
+    countryCode: "CN",
+  },
+  {
+    code: "HND",
+    name: "Tokyo Haneda Airport",
+    city: "Tokyo",
+    country: "Japan",
+    countryCode: "JP",
+  },
+  {
+    code: "CXB",
+    name: "Cox's Bazar Airport",
+    city: "Cox's Bazar",
+    country: "Bangladesh",
+    countryCode: "BD",
+  },
+  {
+    code: "KUL",
+    name: "Kuala Lumpur International Airport",
+    city: "Kuala Lumpur",
+    country: "Malaysia",
+    countryCode: "MY",
+  },
+  {
+    code: "DOH",
+    name: "Hamad International Airport",
+    city: "Doha",
+    country: "Qatar",
+    countryCode: "QA",
+  },
+  {
+    code: "CDG",
+    name: "Paris Charles de Gaulle Airport",
+    city: "Paris",
+    country: "France",
+    countryCode: "FR",
+  },
+];
+
+export const CABIN_CLASSES: {
+  id: CabinClassType;
+  title: string;
+  subtitle: string;
+  multiplier: number;
+  badge: string;
+}[] = [
+  {
+    id: "Economy",
+    title: "Economy",
+    subtitle: "Standard comfort & best value fare",
+    multiplier: 1.0,
+    badge: "Best Value",
+  },
+  {
+    id: "Premium",
+    title: "Premium",
+    subtitle: "Extra 7\" legroom & priority boarding",
+    multiplier: 1.45,
+    badge: "Extra Comfort",
+  },
+  {
+    id: "Business",
+    title: "Business",
+    subtitle: "180° Lie-flat bed, lounge & fine dining",
+    multiplier: 2.3,
+    badge: "Popular VIP",
+  },
+  {
+    id: "First",
+    title: "First",
+    subtitle: "Private luxury suite & chauffeur service",
+    multiplier: 3.8,
+    badge: "Ultimate Luxury",
+  },
+];
+
+// Helper: Calculate 4-tier live fare breakdown matrix dynamically
+export function calculateFareBreakdown(
+  flight: FlightItem,
+  passengerCounts: PassengerCounts,
+  cabinClass: CabinClassType,
+  includeCarbonOffset = true
+): FareBreakdown {
+  const classOption = CABIN_CLASSES.find((c) => c.id === cabinClass) || CABIN_CLASSES[0];
+  const unitPrice = flight.base_price * classOption.multiplier;
+
+  const adultCost = Math.round(unitPrice * passengerCounts.adults);
+  const childCost = Math.round(unitPrice * FARE_RULES.CHILD_FARE_RATIO * passengerCounts.children);
+  const infantCost = Math.round(unitPrice * FARE_RULES.INFANT_FARE_RATIO * passengerCounts.infants);
+  const baseFare = adultCost + childCost + infantCost;
+
+  const totalPax = Math.max(1, passengerCounts.adults + passengerCounts.children + passengerCounts.infants);
+
+  // Requirements 4: Base Fare, Airport Taxes, Fuel Surcharge, Carbon Offset
+  const airportTaxes = Math.round(baseFare * FARE_RULES.TAX_RATE);
+  const fuelSurcharge = Math.round(baseFare * FARE_RULES.FUEL_SURCHARGE_RATE);
+  const carbonOffsetPerPax =
+    flight.currency?.toUpperCase() === "BDT" ? FARE_RULES.CARBON_OFFSET_BDT : FARE_RULES.CARBON_OFFSET_USD;
+  const carbonOffset = includeCarbonOffset ? totalPax * carbonOffsetPerPax : 0;
+
+  const total = baseFare + airportTaxes + fuelSurcharge + carbonOffset;
+  const perPerson = Math.round(total / totalPax);
+
+  return {
+    adultCost,
+    childCost,
+    infantCost,
+    baseFare,
+    airportTaxes,
+    fuelSurcharge,
+    carbonOffset,
+    total,
+    perPerson,
+    totalPax,
+    currencySymbol: getCurrencySymbol(flight.currency),
+  };
+}
+
+// ============================================================================
+// Main Flights Screen Component
+// ============================================================================
+
 export function FlightsScreen() {
   const { user } = useAuth();
   const { colors, isDark } = useTheme();
@@ -296,7 +547,7 @@ export function FlightsScreen() {
                 ? "25 kg check-in + 8 kg cabin"
                 : "20 kg check-in + 7 kg cabin",
             amenities: ["In-flight meal", "Free Wi-Fi", "USB Power", "Seatback HD Screen"],
-            layover_info: stops === 0 ? "Nonstop direct flight (0 layover)" : "1 Stop Â· 1h 45m Layover",
+            layover_info: stops === 0 ? "Nonstop direct flight (0 layover)" : "1 Stop · 1h 45m Layover",
             cancellation_policy: "Free cancellation within 24 hours of booking. Standard airline refund policy applies.",
             departure_airport: {
               iata_code: r.departure_airport_code || originAirport.code,
@@ -491,18 +742,18 @@ export function FlightsScreen() {
       .map((f: any) => ({
         id: f.id,
         title: `${f.airline} (${f.flight_number})`,
-        subtitle: `${f.departure_time} âž” ${f.arrival_time}`,
+        subtitle: `${f.departure_time} ➔ ${f.arrival_time}`,
         type: "flight" as const,
         price: calculateFareBreakdown(f, passengers, cabinClass, includeCarbonOffset).total,
         rating: 4.8,
         imageUrl: f.airline_logo,
         specs: [
-          { label: "à¦¸à¦®à¦¯à¦¼à¦•à¦¾à¦² (Duration)", value: `${Math.floor(f.flight_duration / 60)}h ${f.flight_duration % 60}m` },
-          { label: "à¦¬à¦¿à¦°à¦¤à¦¿ (Stops)", value: f.stops === 0 ? "à¦¸à¦°à¦¾à¦¸à¦°à¦¿ (Non-stop)" : `${f.stops}à¦Ÿà¦¿ à¦¬à¦¿à¦°à¦¤à¦¿` },
-          { label: "à¦°à§à¦Ÿ (Route)", value: `${originAirport.code} âž” ${destAirport.code}` },
-          { label: "à¦•à§‡à¦¬à¦¿à¦¨ à¦•à§à¦²à¦¾à¦¸", value: cabinClass },
+          { label: "সময়কাল (Duration)", value: `${Math.floor(f.flight_duration / 60)}h ${f.flight_duration % 60}m` },
+          { label: "বিরতি (Stops)", value: f.stops === 0 ? "সরাসরি (Non-stop)" : `${f.stops}টি বিরতি` },
+          { label: "রুট (Route)", value: `${originAirport.code} ➔ ${destAirport.code}` },
+          { label: "কেবিন ক্লাস", value: cabinClass },
         ],
-        cancellationPolicy: f.refundable ? "à¦¬à¦¿à¦¨à¦¾à¦®à§‚à¦²à§à¦¯à§‡ à¦¬à¦¾à¦¤à¦¿à¦²à¦¯à§‹à¦—à§à¦¯ (Refundable)" : "à¦…à¦«à§‡à¦°à¦¤à¦¯à§‹à¦—à§à¦¯ (Non-refundable)",
+        cancellationPolicy: f.refundable ? "বিনামূল্যে বাতিলযোগ্য (Refundable)" : "অফেরতযোগ্য (Non-refundable)",
         onSelect: () => openFlightDetails(f),
       }));
   }, [compareFlightIds, filteredAndSortedFlights, passengers, cabinClass, includeCarbonOffset, originAirport, destAirport]);
@@ -631,11 +882,11 @@ export function FlightsScreen() {
     if (flight.available_seats <= 0 || flight.available_seats < totalPassengersCount) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       Alert.alert(
-        "à¦…à¦ªà¦°à§à¦¯à¦¾à¦ªà§à¦¤ à¦†à¦¸à¦¨ (Insufficient Seats)",
+        "অপর্যাপ্ত আসন (Insufficient Seats)",
         flight.available_seats <= 0
-          ? "à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¿à¦¤ à¦«à§à¦²à¦¾à¦‡à¦Ÿà§‡ à¦•à§‹à¦¨à§‹ à¦†à¦¸à¦¨ à¦…à¦¬à¦¶à¦¿à¦·à§à¦Ÿ à¦¨à§‡à¦‡ (Sold Out)à¥¤ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦…à¦¨à§à¦¯ à¦«à§à¦²à¦¾à¦‡à¦Ÿ à¦¬à§‡à¦›à§‡ à¦¨à¦¿à¦¨à¥¤"
-          : `à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¿à¦¤ à¦«à§à¦²à¦¾à¦‡à¦Ÿà§‡ à¦®à¦¾à¦¤à§à¦° ${flight.available_seats}à¦Ÿà¦¿ à¦†à¦¸à¦¨ à¦¬à¦¾à¦•à¦¿ à¦†à¦›à§‡, à¦•à¦¿à¦¨à§à¦¤à§ à¦†à¦ªà¦¨à¦¿ ${totalPassengersCount} à¦œà¦¨ à¦¯à¦¾à¦¤à§à¦°à§€ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§‡à¦›à§‡à¦¨à¥¤ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦¯à¦¾à¦¤à§à¦°à§€ à¦¸à¦‚à¦–à§à¦¯à¦¾ à¦•à¦®à¦¾à¦¨ à¦…à¦¥à¦¬à¦¾ à¦…à¦¨à§à¦¯ à¦«à§à¦²à¦¾à¦‡à¦Ÿ à¦¬à§‡à¦›à§‡ à¦¨à¦¿à¦¨à¥¤`,
-        [{ text: "à¦ à¦¿à¦• à¦†à¦›à§‡", style: "default" }]
+          ? "নির্বাচিত ফ্লাইটে কোনো আসন অবশিষ্ট নেই (Sold Out)। অনুগ্রহ করে অন্য ফ্লাইট বেছে নিন।"
+          : `নির্বাচিত ফ্লাইটে মাত্র ${flight.available_seats}টি আসন বাকি আছে, কিন্তু আপনি ${totalPassengersCount} জন যাত্রী নির্বাচন করেছেন। অনুগ্রহ করে যাত্রী সংখ্যা কমান অথবা অন্য ফ্লাইট বেছে নিন।`,
+        [{ text: "ঠিক আছে", style: "default" }]
       );
       return;
     }
@@ -831,7 +1082,7 @@ export function FlightsScreen() {
               <View style={styles.decorativeImageWrap}>
                 <Image
                   source={{
-                    uri: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=500",
+                    uri: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=500&auto=format&fit=crop&q=80",
                   }}
                   style={styles.decorativeImage}
                 />
@@ -1061,7 +1312,7 @@ export function FlightsScreen() {
                     <Text style={styles.cityFieldLabel}>Departure Date & Return Schedule</Text>
                     <Text style={styles.inputValue}>
                       {selectedDate}
-                      {activeTab === "Round-trip" ? `  âž”  ${returnDate}` : ""}
+                      {activeTab === "Round-trip" ? `  ➔  ${returnDate}` : ""}
                     </Text>
                   </View>
                   {activeTab === "Round-trip" && (
@@ -1174,7 +1425,7 @@ export function FlightsScreen() {
               </View>
             </View>
 
-            {/* Requirement 6: Flexible Dates Strip (Â±3 days) & Monthly Calendar */}
+            {/* Requirement 6: Flexible Dates Strip (±3 days) & Monthly Calendar */}
             <FlexibleDateSelector
               currentDate={departureDateObj}
               basePrice={flightTabMetrics.lowestPrice || 250}
@@ -1209,19 +1460,19 @@ export function FlightsScreen() {
                     <Text style={styles.liveIndicatorText}>Live travelRepository Flow</Text>
                   </View>
                   <Text style={styles.routeHeadline}>
-                    {originAirport.code} âž” {destAirport.code}
+                    {originAirport.code} ➔ {destAirport.code}
                   </Text>
                 </View>
                 <View style={styles.countBadge}>
                   <ResultsSummaryHeader
                     count={filteredAndSortedFlights.length}
-                    entityName="à¦«à§à¦²à¦¾à¦‡à¦Ÿ"
+                    entityName="ফ্লাইট"
                     sortLabel={
                       sortBy === "cheapest"
-                        ? "à¦¸à¦¬à¦šà§‡à¦¯à¦¼à§‡ à¦•à¦® à¦¦à¦¾à¦®"
+                        ? "সবচেয়ে কম দাম"
                         : sortBy === "fastest"
-                        ? "à¦¸à¦¬à¦šà§‡à¦¯à¦¼à§‡ à¦•à¦® à¦¸à¦®à¦¯à¦¼"
-                        : "à¦¸à§‡à¦°à¦¾ à¦°à§‡à¦Ÿà¦¿à¦‚"
+                        ? "সবচেয়ে কম সময়"
+                        : "সেরা রেটিং"
                     }
                     filterCount={stopsFilter !== "all" ? 1 : 0}
                     onClearFilters={() => setStopsFilter("all")}
@@ -1233,7 +1484,7 @@ export function FlightsScreen() {
               <View style={styles.controlsCard}>
                 {/* Sorting options */}
                 <View style={styles.sortingSection}>
-                  <Text style={styles.controlHeaderLabel}>à¦«à§à¦²à¦¾à¦‡à¦Ÿ à¦¤à§à¦²à¦¨à¦¾ à¦“ à¦¬à¦¾à¦›à¦¾à¦‡:</Text>
+                  <Text style={styles.controlHeaderLabel}>ফ্লাইট তুলনা ও বাছাই:</Text>
                   <View style={styles.comparisonTabsRow}>
                     <Pressable
                       style={[
@@ -1256,7 +1507,7 @@ export function FlightsScreen() {
                           (sortBy === "cheapest" || sortBy === "price") && styles.comparisonTabTitleActive,
                         ]}
                       >
-                        à¦¸à¦¬à¦šà§‡à¦¯à¦¼à§‡ à¦¸à¦¸à§à¦¤à¦¾
+                        সবচেয়ে সস্তা
                       </Text>
                       <Text
                         style={[
@@ -1289,7 +1540,7 @@ export function FlightsScreen() {
                           (sortBy === "fastest" || sortBy === "duration") && styles.comparisonTabTitleActive,
                         ]}
                       >
-                        à¦¦à§à¦°à§à¦¤à¦¤à¦®
+                        দ্রুততম
                       </Text>
                       <Text
                         style={[
@@ -1324,7 +1575,7 @@ export function FlightsScreen() {
                           sortBy === "best" && styles.comparisonTabTitleActive,
                         ]}
                       >
-                        à¦¸à§‡à¦°à¦¾ à¦®à¦¾à¦¨
+                        সেরা মান
                       </Text>
                       <Text
                         style={[
@@ -1332,7 +1583,7 @@ export function FlightsScreen() {
                           sortBy === "best" && styles.comparisonTabSubActive,
                         ]}
                       >
-                        à¦¸à§‡à¦°à¦¾ à¦¸à¦®à¦¨à§à¦¬à§Ÿ
+                        সেরা সমন্বয়
                       </Text>
                     </Pressable>
                   </View>
@@ -1480,7 +1731,7 @@ export function FlightsScreen() {
                               <View style={{ marginStart: 8 }}>
                                 <Text style={styles.airlineTitle}>{flight.airline?.name}</Text>
                                 <Text style={styles.flightNumText}>
-                                  {flight.flight_number} Â· {flight.aircraft_type}
+                                  {flight.flight_number} · {flight.aircraft_type}
                                 </Text>
                               </View>
                             </View>
@@ -1555,12 +1806,12 @@ export function FlightsScreen() {
                                       : styles.layoverTextStop,
                                   ]}
                                 >
-                                  {flight.stops === 0 ? "Nonstop Â· Direct" : (
+                                  {flight.stops === 0 ? "Nonstop · Direct" : (
                                     (flight.layover_duration_minutes ?? (flight.flight_number.charCodeAt(1) % 3 === 0 ? 40 : (flight.flight_number.charCodeAt(1) % 2 === 0 ? 510 : 105))) <= 60
-                                      ? `à¦›à§‹à¦Ÿ à¦•à¦¾à¦¨à§‡à¦•à¦¶à¦¨ âš  (${flight.layover_duration_minutes ?? (flight.flight_number.charCodeAt(1) % 3 === 0 ? 40 : 105)} à¦®à¦¿.)`
+                                      ? `ছোট কানেকশন ⚠ (${flight.layover_duration_minutes ?? (flight.flight_number.charCodeAt(1) % 3 === 0 ? 40 : 105)} মি.)`
                                       : (flight.layover_duration_minutes ?? (flight.flight_number.charCodeAt(1) % 2 === 0 ? 510 : 105)) >= 420
-                                      ? `à¦°à¦¾à¦¤à§à¦°à¦¿à¦•à¦¾à¦²à§€à¦¨ à¦²à§‡à¦“à¦­à¦¾à¦° ðŸŒ™ (${Math.floor((flight.layover_duration_minutes ?? 510)/60)}h)`
-                                      : `${flight.stops} Stop Â· 1h 45m`
+                                      ? `রাত্রিকালীন লেওভার 🌙 (${Math.floor((flight.layover_duration_minutes ?? 510)/60)}h)`
+                                      : `${flight.stops} Stop · 1h 45m`
                                   )}
                                 </Text>
                               </View>
@@ -1580,7 +1831,7 @@ export function FlightsScreen() {
                               <Ionicons name="checkmark-circle" size={13} color="#059669" />
                               <Ionicons name="briefcase" size={12} color="#059669" />
                               <Text style={styles.baggageIncludedText}>
-                                à¦¬à§à¦¯à¦¾à¦—à§‡à¦œ à¦…à¦¨à§à¦¤à¦°à§à¦­à§à¦•à§à¦¤: {flight.baggage_allowance || "à§¨à§¦ à¦•à§‡à¦œà¦¿ à¦šà§‡à¦•-à¦‡à¦¨ + à§­ à¦•à§‡à¦œà¦¿ à¦•à§‡à¦¬à¦¿à¦¨"}
+                                ব্যাগেজ অন্তর্ভুক্ত: {flight.baggage_allowance || "২০ কেজি চেক-ইন + ৭ কেজি কেবিন"}
                               </Text>
                             </View>
 
@@ -1591,7 +1842,7 @@ export function FlightsScreen() {
                                 color={flight.available_seats <= 0 ? "#E11D48" : "#6B7280"}
                               />
                               <Text style={[styles.perkText, flight.available_seats <= 0 && { color: "#E11D48", fontWeight: "700" }]}>
-                                {flight.available_seats <= 0 ? "à¦†à¦¸à¦¨ à¦¶à§‡à¦· (Sold Out)" : `${flight.available_seats} seats left`}
+                                {flight.available_seats <= 0 ? "আসন শেষ (Sold Out)" : `${flight.available_seats} seats left`}
                               </Text>
                             </View>
 
@@ -1610,7 +1861,7 @@ export function FlightsScreen() {
                                 <Text style={styles.priceValue}>{formatCurrency(breakdown.total, flight.currency || "BDT")}</Text>
                                 <Text style={styles.priceCurrency}> {flight.currency}</Text>
                               </View>
-                              <Text style={styles.priceSubtitle}>{formatCurrency(breakdown.perPerson, flight.currency || "BDT")}/pax Â· {formatPlural(breakdown.totalPax, "passenger")}</Text>
+                              <Text style={styles.priceSubtitle}>{formatCurrency(breakdown.perPerson, flight.currency || "BDT")}/pax · {formatPlural(breakdown.totalPax, "passenger")}</Text>
                             </View>
 
                             <View style={styles.actionButtonsRow}>
@@ -1632,7 +1883,7 @@ export function FlightsScreen() {
                                     compareFlightIds.includes(flight.id) && styles.compareFlightBtnTextActive,
                                   ]}
                                 >
-                                  {compareFlightIds.includes(flight.id) ? "à¦¯à§‹à¦— à¦¹à¦¯à¦¼à§‡à¦›à§‡" : "à¦¤à§à¦²à¦¨à¦¾"}
+                                  {compareFlightIds.includes(flight.id) ? "যোগ হয়েছে" : "তুলনা"}
                                 </Text>
                               </Pressable>
                               <Pressable
@@ -1691,7 +1942,7 @@ export function FlightsScreen() {
                         <Text style={styles.inspCode}>{routeItem.to}</Text>
                       </View>
                       <Text style={styles.inspCarrier}>
-                        {routeItem.carrier} Â· {routeItem.time}
+                        {routeItem.carrier} · {routeItem.time}
                       </Text>
                       <View style={styles.inspPriceRow}>
                         <Text style={styles.inspPriceFrom}>from</Text>
@@ -2155,7 +2406,7 @@ export function FlightsScreen() {
               <View style={styles.sheetSummaryCol}>
                 <Text style={styles.sheetSummaryLabel}>Selection:</Text>
                 <Text style={styles.sheetSummaryVal}>
-                  {tempPassengers.adults + tempPassengers.children + tempPassengers.infants} Traveler(s) Â·{" "}
+                  {tempPassengers.adults + tempPassengers.children + tempPassengers.infants} Traveler(s) ·{" "}
                   {tempCabinClass}
                 </Text>
               </View>
@@ -2200,10 +2451,10 @@ export function FlightsScreen() {
                   <View style={styles.drawerHeaderRow}>
                     <View style={styles.drawerAirlineCol}>
                       <Text style={styles.drawerFlightNum}>
-                        {selectedFlightForDetails.airline?.name} Â· {selectedFlightForDetails.flight_number}
+                        {selectedFlightForDetails.airline?.name} · {selectedFlightForDetails.flight_number}
                       </Text>
                       <Text style={styles.drawerAircraft}>
-                        {selectedFlightForDetails.aircraft_type} Â· {selectedFlightForDetails.cabin_class}
+                        {selectedFlightForDetails.aircraft_type} · {selectedFlightForDetails.cabin_class}
                       </Text>
                     </View>
                     <Pressable style={styles.drawerCloseCircle} onPress={closeFlightDetails}>
@@ -2289,7 +2540,7 @@ export function FlightsScreen() {
                                 <Text style={styles.fareItemDesc}>
                                   {passengers.adults} Adult{passengers.adults > 1 ? "s" : ""}
                                   {passengers.children > 0 ? `, ${passengers.children} Child(ren)` : ""}
-                                  {passengers.infants > 0 ? `, ${passengers.infants} Infant(s)` : ""} Â·{" "}
+                                  {passengers.infants > 0 ? `, ${passengers.infants} Infant(s)` : ""} ·{" "}
                                   {selectedFlightForDetails.cabin_class}
                                 </Text>
                               </View>
@@ -2468,17 +2719,17 @@ export function FlightsScreen() {
                                 ) : isSoldOut ? (
                                   <>
                                     <Ionicons name="ban" size={18} color="#FFFFFF" style={{ marginEnd: 6 }} />
-                                    <Text style={styles.reserveCTAButtonText}>à¦†à¦¸à¦¨ à¦¶à§‡à¦· (Sold Out)</Text>
+                                    <Text style={styles.reserveCTAButtonText}>আসন শেষ (Sold Out)</Text>
                                   </>
                                 ) : isInsufficient ? (
                                   <>
                                     <Ionicons name="alert-circle" size={18} color="#FFFFFF" style={{ marginEnd: 6 }} />
-                                    <Text style={styles.reserveCTAButtonText}>à¦†à¦¸à¦¨ à¦…à¦ªà¦°à§à¦¯à¦¾à¦ªà§à¦¤ (à¦®à¦¾à¦¤à§à¦° {selectedFlightForDetails.available_seats}à¦Ÿà¦¿ à¦¬à¦¾à¦•à¦¿)</Text>
+                                    <Text style={styles.reserveCTAButtonText}>আসন অপর্যাপ্ত (মাত্র {selectedFlightForDetails.available_seats}টি বাকি)</Text>
                                   </>
                                 ) : (
                                   <>
                                     <Ionicons name="airplane" size={17} color="#FFFFFF" style={{ marginEnd: 6 }} />
-                                    <Text style={styles.reserveCTAButtonText}>à¦†à¦¸à¦¨ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦“ à¦¬à§à¦•à¦¿à¦‚ (Select Seats)</Text>
+                                    <Text style={styles.reserveCTAButtonText}>আসন নির্বাচন ও বুকিং (Select Seats)</Text>
                                     <RTLIcon name="arrow-forward" size={18} color="#FFFFFF" style={{ marginStart: 6 }} />
                                   </>
                                 )}
@@ -2504,7 +2755,7 @@ export function FlightsScreen() {
           >
             <Ionicons name="git-compare-outline" size={18} color="#ffffff" />
             <Text style={styles.floatingCompareBtnText}>
-              {compareFlightIds.length}à¦Ÿà¦¿ à¦«à§à¦²à¦¾à¦‡à¦Ÿ à¦¤à§à¦²à¦¨à¦¾ à¦•à¦°à§à¦¨
+              {compareFlightIds.length}টি ফ্লাইট তুলনা করুন
             </Text>
             <Ionicons name="arrow-forward" size={16} color="#ffffff" />
           </Pressable>
@@ -2552,3 +2803,1767 @@ export function FlightsScreen() {
 
 export default FlightsScreen;
 
+// ============================================================================
+// Stylesheet
+// ============================================================================
+
+const styles = StyleSheet.create({
+  shell: {
+    flex: 1,
+    backgroundColor: "#F5F7FA",
+  },
+  compareFlightBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: "#eff6ff",
+    borderWidth: 1,
+    borderColor: "#bfdbfe",
+  },
+  compareFlightBtnActive: {
+    backgroundColor: "#2563eb",
+    borderColor: "#2563eb",
+  },
+  compareFlightBtnText: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: "#2563eb",
+  },
+  compareFlightBtnTextActive: {
+    color: "#ffffff",
+  },
+  floatingCompareBar: {
+    position: "absolute",
+    bottom: 24,
+    left: 16,
+    right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    zIndex: 999,
+  },
+  floatingCompareBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#2563eb",
+    paddingVertical: 14,
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 8px rgba(15, 23, 42, 0.3)" } : {}),
+  },
+  floatingCompareBtnText: {
+    color: "#ffffff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  floatingCompareClose: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: "#1e293b",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 8px rgba(15, 23, 42, 0.3)" } : {}),
+  },
+  keyboardContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
+  },
+  headerHero: {
+    paddingTop: 12,
+    paddingBottom: 72,
+    paddingHorizontal: 16,
+    position: "relative",
+    overflow: "hidden",
+  },
+  topBarRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    zIndex: 10,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  backCircleBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  tripLogoText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: TRIP_BLUE,
+    fontStyle: "italic",
+  },
+  vDivider: {
+    width: 1,
+    height: 14,
+    backgroundColor: "#CBD5E1",
+  },
+  airlineBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  redDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#DC2626",
+  },
+  airlineName: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#4B5563",
+    letterSpacing: 0.5,
+  },
+  goldCoinBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: ACCENT_ORANGE,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  goldCoinText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  headlineBox: {
+    marginTop: 18,
+    zIndex: 10,
+  },
+  headlineTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1F2937",
+    lineHeight: 28,
+  },
+  headlineSubtitle: {
+    fontSize: 12,
+    color: "#4B5563",
+    marginTop: 6,
+    lineHeight: 16,
+    maxWidth: "65%",
+  },
+  decorativeImageWrap: {
+    position: "absolute",
+    right: -15,
+    top: 36,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderWidth: 4,
+    borderColor: "rgba(255, 255, 255, 0.6)",
+    overflow: "hidden",
+  },
+  decorativeImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  searchCardContainer: {
+    marginHorizontal: 16,
+    marginTop: -52,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    elevation: 6,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 6px 14px rgba(15, 23, 42, 0.1)" } : {}),
+    zIndex: 20,
+  },
+  tabRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabBtnActive: {
+    borderBottomWidth: 3,
+    borderBottomColor: TRIP_BLUE,
+  },
+  tabBtnText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+  tabBtnTextActive: {
+    color: TRIP_BLUE,
+    fontWeight: "600",
+  },
+  formContainer: {
+    padding: 16,
+  },
+  citiesBox: {
+    position: "relative",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    paddingBottom: 4,
+  },
+  cityInputRowWrap: {
+    position: "relative",
+  },
+  cityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingRight: 44,
+    gap: 12,
+  },
+  cityIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#EFF6FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cityTextCol: {
+    flex: 1,
+  },
+  cityFieldLabel: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  airportBadgeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 2,
+  },
+  airportCodeInput: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#111827",
+    minWidth: 70,
+    paddingVertical: 2,
+  },
+  clearInputBtn: {
+    padding: 2,
+  },
+  iataCodePill: {
+    backgroundColor: "#EFF6FF",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  iataCodePillText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: TRIP_BLUE,
+  },
+  airportSubName: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  hDivider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+  },
+  swapBtn: {
+    position: "absolute",
+    right: 8,
+    top: 42,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 4px rgba(15, 23, 42, 0.08)" } : {}),
+    zIndex: 10,
+  },
+  autocompleteDropdown: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#DBEAFE",
+    padding: 8,
+    marginVertical: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 5,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 8px rgba(15, 23, 42, 0.12)" } : {}),
+    zIndex: 30,
+  },
+  autocompleteHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    marginBottom: 4,
+  },
+  autocompleteHeaderTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: TRIP_BLUE,
+    textTransform: "uppercase",
+  },
+  autocompleteItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F8FAFC",
+    gap: 8,
+  },
+  autocompleteCodePill: {
+    backgroundColor: "#EFF6FF",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    minWidth: 44,
+    alignItems: "center",
+  },
+  autocompleteCodeText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: TRIP_BLUE,
+  },
+  autocompleteCityText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#1F2937",
+  },
+  autocompleteNameText: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  inputValue: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#1F2937",
+    marginTop: 2,
+  },
+  returnDateBadge: {
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  returnDateText: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: "#4B5563",
+  },
+  passengerClassRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  passengerSection: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  passengerCount: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginTop: 2,
+  },
+  vDividerLight: {
+    width: 1,
+    height: 32,
+    backgroundColor: "#F3F4F6",
+    marginHorizontal: 12,
+  },
+  classSection: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  classText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#1F2937",
+    marginTop: 2,
+  },
+  cabinClassSelectorBar: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  cabinClassSelectorLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#9CA3AF",
+    textTransform: "uppercase",
+    marginBottom: 6,
+  },
+  cabinSelectorGrid: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  cabinSelectorBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cabinSelectorBtnActive: {
+    backgroundColor: TRIP_BLUE,
+  },
+  cabinSelectorBtnText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#4B5563",
+  },
+  cabinSelectorBtnTextActive: {
+    color: "#FFFFFF",
+  },
+  bundleBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  bundlePill: {
+    backgroundColor: "#FEF3C7",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  bundlePillText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#B45309",
+  },
+  bundleCheckRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  bundleLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  searchSubmitBtn: {
+    marginTop: 14,
+    backgroundColor: TRIP_BLUE,
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: TRIP_BLUE,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  searchSubmitText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "400",
+    letterSpacing: 0.5,
+  },
+  resultsSection: {
+    marginHorizontal: 16,
+    marginTop: 24,
+  },
+  resultsHeaderRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  liveIndicatorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  greenPulseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: ACCENT_GREEN,
+  },
+  liveIndicatorText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: ACCENT_GREEN,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  routeHeadline: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+    marginTop: 2,
+  },
+  countBadge: {
+    backgroundColor: "#E0F2FE",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  countBadgeText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: TRIP_BLUE,
+  },
+  controlsCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    gap: 10,
+  },
+  controlHeaderLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64748B",
+    textTransform: "uppercase",
+    marginBottom: 6,
+  },
+  sortingSection: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
+    paddingBottom: 8,
+  },
+  sortingChipsRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  sortChip: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 7,
+    paddingHorizontal: 6,
+    borderRadius: 8,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  sortChipActive: {
+    backgroundColor: TRIP_BLUE,
+    borderColor: TRIP_BLUE,
+  },
+  sortChipText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#475569",
+  },
+  sortChipTextActive: {
+    color: "#FFFFFF",
+  },
+  comparisonTabsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 8,
+  },
+  comparisonTab: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    borderRadius: 12,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    alignItems: "center",
+  },
+  comparisonTabActive: {
+    backgroundColor: "#EFF6FF",
+    borderColor: TRIP_BLUE,
+  },
+  comparisonTabTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#334155",
+    marginTop: 2,
+  },
+  comparisonTabTitleActive: {
+    color: TRIP_BLUE,
+  },
+  comparisonTabSub: {
+    fontSize: 10.5,
+    fontWeight: "400",
+    color: "#64748B",
+    marginTop: 1,
+  },
+  comparisonTabSubActive: {
+    color: TRIP_BLUE,
+  },
+  shortLayoverBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "#FEE2E2",
+    borderWidth: 1,
+    borderColor: "#FCA5A5",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginTop: 4,
+  },
+  shortLayoverText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#DC2626",
+  },
+  overnightLayoverBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "#EDE9FE",
+    borderWidth: 1,
+    borderColor: "#C4B5FD",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginTop: 4,
+  },
+  overnightLayoverText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#6D28D9",
+  },
+  baggageIncludedPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "#ECFDF5",
+    borderWidth: 1,
+    borderColor: "#A7F3D0",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  baggageIncludedText: {
+    fontSize: 11.5,
+    fontWeight: "600",
+    color: "#047857",
+  },
+  filterSection: {
+    paddingTop: 2,
+  },
+  filterChipsRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  filterChip: {
+    flex: 1,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: "#F8FAFC",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  filterChipActive: {
+    backgroundColor: "#EFF6FF",
+    borderColor: TRIP_BLUE,
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#64748B",
+  },
+  filterChipTextActive: {
+    color: TRIP_BLUE,
+    fontWeight: "600",
+  },
+  flightCardsList: {
+    gap: 14,
+  },
+  flightTicketCard: {
+    backgroundColor: "#FFFFFF",
+    marginBottom: 12,
+  },
+  cardInnerPadding: {
+    padding: 16,
+  },
+  cardTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    paddingBottom: 10,
+  },
+  airlineInfoCol: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  airlineLogo: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    backgroundColor: "#F3F4F6",
+  },
+  airlineLogoPlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    backgroundColor: "#EFF6FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  airlineTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  flightNumText: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  topBadgesRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  refundableTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#ECFDF5",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  refundableTagText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#059669",
+  },
+  classBadge: {
+    backgroundColor: "#EFF6FF",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  classBadgeText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: TRIP_BLUE,
+  },
+  scheduleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+  },
+  timeBlock: {
+    minWidth: 80,
+  },
+  scheduleTime: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  scheduleCode: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: TRIP_BLUE,
+    marginTop: 2,
+  },
+  scheduleCity: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  durationBlock: {
+    alignItems: "center",
+    flex: 1,
+    paddingHorizontal: 8,
+  },
+  durationText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  flightLine: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
+  flightDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: TRIP_BLUE,
+  },
+  flightTrackLine: {
+    flex: 1,
+    height: 1.5,
+    backgroundColor: "#CBD5E1",
+  },
+  layoverBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginTop: 4,
+  },
+  layoverBadgeDirect: {
+    backgroundColor: "#ECFDF5",
+  },
+  layoverBadgeStop: {
+    backgroundColor: "#FEF3C7",
+  },
+  layoverBadgeText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  layoverTextDirect: {
+    color: "#059669",
+  },
+  layoverTextStop: {
+    color: "#D97706",
+  },
+  perksRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  baggageAllowancePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  baggageAllowanceText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#374151",
+  },
+  perkPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#F9FAFB",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  perkText: {
+    fontSize: 12,
+    color: "#4B5563",
+    fontWeight: "600",
+  },
+  cardBottomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 12,
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  priceValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  priceCurrency: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#6B7280",
+  },
+  priceSubtitle: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "600",
+  },
+  actionButtonsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  detailsBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: "#F3F4F6",
+  },
+  detailsBtnText: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: "#4B5563",
+  },
+  selectFlightBtn: {
+    backgroundColor: TRIP_BLUE,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  selectFlightBtnText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  inspirationSection: {
+    marginTop: 28,
+    paddingHorizontal: 16,
+  },
+  sectionHeading: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginBottom: 12,
+  },
+  horizontalScroll: {
+    gap: 12,
+    paddingEnd: 16,
+  },
+  inspirationCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    padding: 14,
+    width: 170,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 5px rgba(15, 23, 42, 0.05)" } : {}),
+  },
+  inspRouteRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  inspCode: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  inspCarrier: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 4,
+  },
+  inspPriceRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 4,
+    marginTop: 8,
+  },
+  inspPriceFrom: {
+    fontSize: 12,
+    color: "#9CA3AF",
+  },
+  inspPrice: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: TRIP_BLUE,
+  },
+
+  // Modal Styles
+  modalShell: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  modalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  searchBarWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 16,
+    marginVertical: 12,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: "#111827",
+    fontWeight: "600",
+  },
+  chipsSection: {
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  chipsSectionLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#6B7280",
+    marginBottom: 8,
+    textTransform: "uppercase",
+  },
+  chipsRow: {
+    gap: 8,
+    paddingEnd: 16,
+  },
+  chipBtn: {
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  chipBtnActive: {
+    backgroundColor: TRIP_BLUE,
+  },
+  chipBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  chipBtnTextActive: {
+    color: "#FFFFFF",
+  },
+  airportList: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  emptyAirportState: {
+    alignItems: "center",
+    paddingVertical: 60,
+  },
+  emptyAirportText: {
+    fontSize: 14,
+    color: "#9CA3AF",
+    marginTop: 10,
+    fontWeight: "600",
+  },
+  airportItemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  airportItemRowActive: {
+    backgroundColor: "#F0F7FF",
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+  },
+  airportCodeBox: {
+    width: 48,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 12,
+  },
+  airportCodeBoxActive: {
+    backgroundColor: TRIP_BLUE,
+  },
+  airportCodeText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  airportCodeTextActive: {
+    color: "#FFFFFF",
+  },
+  airportDetailsCol: {
+    flex: 1,
+  },
+  airportCityRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  airportCityName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  airportCountryName: {
+    fontSize: 13,
+    color: "#6B7280",
+    fontWeight: "600",
+  },
+  airportFullName: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 2,
+  },
+
+  // Sheet Overlays
+  sheetOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+  },
+  sheetBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  passengerSheetContainer: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: Platform.OS === "ios" ? 36 : 24,
+  },
+  sheetHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#D1D5DB",
+    alignSelf: "center",
+    marginBottom: 14,
+  },
+  sheetHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  sheetHeaderTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  sheetSectionTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#4B5563",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  counterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  counterLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1F2937",
+  },
+  counterSubtitle: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  stepperWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  stepperBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepperBtnDisabled: {
+    opacity: 0.5,
+  },
+  stepperCountText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+    minWidth: 20,
+    textAlign: "center",
+  },
+  cabinClassGrid: {
+    gap: 10,
+  },
+  cabinCard: {
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: "#FFFFFF",
+  },
+  cabinCardActive: {
+    borderColor: TRIP_BLUE,
+    backgroundColor: "#F0F7FF",
+  },
+  cabinCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  cabinCardTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  cabinCardTitleActive: {
+    color: TRIP_BLUE,
+  },
+  cabinBadge: {
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  cabinBadgeActive: {
+    backgroundColor: "#DBEAFE",
+  },
+  cabinBadgeText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#4B5563",
+  },
+  cabinBadgeTextActive: {
+    color: TRIP_BLUE,
+  },
+  cabinCardSubtitle: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 4,
+  },
+  sheetFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+  },
+  sheetSummaryCol: {
+    flex: 1,
+  },
+  sheetSummaryLabel: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "600",
+  },
+  sheetSummaryVal: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#111827",
+    marginTop: 2,
+  },
+  applyBtn: {
+    backgroundColor: TRIP_BLUE,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  applyBtnText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  // Drawer Styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  drawerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#000",
+  },
+  drawerSheet: {
+    height: "88%",
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: "hidden",
+  },
+  drawerHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  drawerAirlineCol: {
+    flex: 1,
+  },
+  drawerFlightNum: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  drawerAircraft: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  drawerCloseCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  drawerScroll: {
+    flex: 1,
+    paddingHorizontal: 18,
+    paddingTop: 14,
+  },
+  drawerTimelineCard: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    marginBottom: 16,
+  },
+  timelineRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  timelineDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: TRIP_BLUE,
+    marginTop: 5,
+    marginEnd: 12,
+  },
+  timelineContent: {
+    flex: 1,
+  },
+  timelineTime: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  timelineAirport: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: TRIP_BLUE,
+    marginTop: 2,
+  },
+  timelineCity: {
+    fontSize: 12,
+    color: "#64748B",
+    marginTop: 1,
+  },
+  timelineDurationRow: {
+    flexDirection: "row",
+    marginVertical: 10,
+  },
+  timelineVLine: {
+    width: 2,
+    backgroundColor: "#CBD5E1",
+    marginStart: 4,
+    marginEnd: 16,
+  },
+  layoverNoticeBox: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EFF6FF",
+    padding: 10,
+    borderRadius: 8,
+  },
+  layoverNoticeTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#1E3A8A",
+  },
+  layoverNoticeSubtitle: {
+    fontSize: 12,
+    color: "#2563EB",
+    marginTop: 2,
+  },
+
+  // Requirement 4: Itemized Live Fare Breakdown Matrix
+  fareMatrixContainer: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    marginBottom: 16,
+  },
+  fareMatrixHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+    marginBottom: 10,
+  },
+  fareMatrixTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1E293B",
+  },
+  fareMatrixList: {
+    gap: 10,
+  },
+  fareMatrixRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  fareItemCol: {
+    flex: 1,
+    paddingEnd: 12,
+  },
+  fareItemTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  fareItemTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1E293B",
+  },
+  carbonToggleBtn: {
+    padding: 2,
+    marginStart: 4,
+  },
+  fareItemDesc: {
+    fontSize: 12,
+    color: "#64748B",
+    marginTop: 2,
+  },
+  fareItemValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1E293B",
+  },
+  fareMatrixDivider: {
+    height: 1,
+    backgroundColor: "#CBD5E1",
+    marginVertical: 4,
+  },
+  fareMatrixTotalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 4,
+  },
+  fareMatrixTotalLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0F172A",
+  },
+  fareMatrixPerPerson: {
+    fontSize: 12,
+    color: "#64748B",
+    marginTop: 1,
+  },
+  fareMatrixTotalValue: {
+    fontSize: 19,
+    fontWeight: "700",
+    color: TRIP_BLUE,
+  },
+  drawerSectionBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    marginBottom: 14,
+  },
+  drawerSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  drawerSectionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1E293B",
+  },
+  baggageItemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F8FAFC",
+  },
+  baggageItemTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  baggageItemDetail: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 1,
+  },
+  includedTag: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: ACCENT_GREEN,
+    backgroundColor: "#ECFDF5",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  policyRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    marginVertical: 4,
+  },
+  policyText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#475569",
+    lineHeight: 17,
+  },
+  drawerFooterBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+  },
+  footerPriceLabel: {
+    fontSize: 12,
+    color: "#64748B",
+    fontWeight: "600",
+  },
+  footerPriceValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  reserveCTAButton: {
+    backgroundColor: TRIP_BLUE,
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: TRIP_BLUE,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  reserveCTAButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  datePickerModeTabs: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 12,
+    backgroundColor: "#F8FAFC",
+  },
+  datePickerModeTab: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+  },
+  datePickerModeTabActive: {
+    borderColor: TRIP_BLUE,
+    backgroundColor: "#EFF6FF",
+  },
+  datePickerModeLabel: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: "#64748B",
+    marginBottom: 4,
+  },
+  datePickerModeVal: {
+    fontSize: 13,
+    fontWeight: "400",
+    color: "#1E293B",
+  },
+  datePickerModeValActive: {
+    color: TRIP_BLUE,
+  },
+  quickDateChipsRow: {
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  quickDateChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: "#F1F5F9",
+  },
+  quickDateChipText: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: "#334155",
+  },
+  calendarMonthHeading: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#0F172A",
+    marginVertical: 12,
+  },
+  calendarDaysGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  calendarDayCell: {
+    width: "18%",
+    aspectRatio: 1,
+    borderRadius: 10,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  calendarDayCellActive: {
+    backgroundColor: TRIP_BLUE,
+    borderColor: TRIP_BLUE,
+  },
+  calendarDayName: {
+    fontSize: 12,
+    color: "#64748B",
+    fontWeight: "600",
+  },
+  calendarDayNameActive: {
+    color: "#FFFFFF",
+  },
+  calendarDayNum: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0F172A",
+  },
+  calendarDayNumActive: {
+    color: "#FFFFFF",
+  },
+  calendarPriceHint: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#10B981",
+  },
+  datePickerFooter: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+  },
+  confirmDateBtn: {
+    backgroundColor: TRIP_BLUE,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  confirmDateBtnText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "400",
+  },
+});

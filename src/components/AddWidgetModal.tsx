@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   },
   mainHeadline: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
     marginTop: 4,
@@ -328,11 +328,11 @@ const styles = StyleSheet.create({
   widgetDateDay: {
     fontSize: 12,
     color: "#64748B",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   widgetDateNum: {
     fontSize: 24,
-    fontWeight: "900",
+    fontWeight: "400",
     color: "#0F172A",
     lineHeight: 26,
   },
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   widgetLocationText: {
     fontSize: 12,
     color: "#64748B",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   toolsRow: {
     flexDirection: "row",
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
   toolLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
     textAlign: "center",
     marginTop: 2,
@@ -410,16 +410,16 @@ const styles = StyleSheet.create({
   widgetDateDaySmall: {
     fontSize: 12,
     color: "#64748B",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   widgetDateNumSmall: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "400",
     color: "#0F172A",
   },
   tripBadgeLogo: {
     color: TRIP_BLUE,
-    fontWeight: "900",
+    fontWeight: "600",
     fontSize: 13,
   },
   miniIconRow: {
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   },
   miniAskGenieText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   placeholderColumn: {
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
   addBtnText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   footerNoteText: {
     fontSize: 12,

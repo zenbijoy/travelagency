@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { openLink } from "../../utils/openLink";
+import { OpenStreetMap, MapMarkerItem } from "../common/OpenStreetMap";
 
 interface BoardingPointMapCardProps {
   boardingPoint: string;
@@ -77,6 +78,47 @@ export const BoardingPointMapCard: React.FC<BoardingPointMapCardProps> = ({
 
   const fullAddress = getFullAddress();
 
+  const [showMap, setShowMap] = useState(false);
+
+  const coordinates = useMemo(() => {
+    const lower = (boardingPoint + " " + (counterAddress || "")).toLowerCase();
+    if (transportType === "launch" || lower.includes("sadarghat") || lower.includes("সদরঘাট")) {
+      return { latitude: 23.7056, longitude: 90.4131 };
+    }
+    if (lower.includes("gabtoli") || lower.includes("গাবতলী")) {
+      return { latitude: 23.7844, longitude: 90.3444 };
+    }
+    if (lower.includes("sayedabad") || lower.includes("সায়েদাবাদ") || lower.includes("সায়দাবাদ")) {
+      return { latitude: 23.7145, longitude: 90.4287 };
+    }
+    if (lower.includes("mohakali") || lower.includes("মহাখালী")) {
+      return { latitude: 23.7781, longitude: 90.4019 };
+    }
+    if (lower.includes("arambagh") || lower.includes("আরামবাগ")) {
+      return { latitude: 23.7297, longitude: 90.4184 };
+    }
+    if (lower.includes("chattogram") || lower.includes("chittagong") || lower.includes("চট্টগ্রাম") || lower.includes("dampara")) {
+      return { latitude: 22.3552, longitude: 91.8213 };
+    }
+    if (lower.includes("cox") || lower.includes("কক্সবাজার")) {
+      return { latitude: 21.4326, longitude: 91.979 };
+    }
+    return { latitude: 23.7806, longitude: 90.4193 };
+  }, [boardingPoint, counterAddress, transportType]);
+
+  const mapMarkers: MapMarkerItem[] = useMemo(() => [
+    {
+      id: "boarding-pin",
+      title: boardingPoint,
+      subtitle: fullAddress,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+      badge: transportType === "launch" ? "🚢 লঞ্চ ঘাট" : "🚌 বাস টার্মিনাল",
+      category: "transit",
+      icon: transportType === "launch" ? "🚢" : "🚌",
+    }
+  ], [boardingPoint, fullAddress, coordinates, transportType]);
+
   const handleOpenMap = async () => {
     try {
       Haptics.selectionAsync();
@@ -146,15 +188,40 @@ export const BoardingPointMapCard: React.FC<BoardingPointMapCardProps> = ({
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.mapButton}
-          onPress={handleOpenMap}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="map" size={14} color="#FFFFFF" />
-          <Text style={styles.mapButtonText}>ম্যাপে দেখুন</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
+          <TouchableOpacity
+            style={[styles.mapButton, showMap && { backgroundColor: "#0F172A" }]}
+            onPress={() => {
+              Haptics.selectionAsync();
+              setShowMap(!showMap);
+            }}
+            activeOpacity={0.8}
+          >
+            <Ionicons name={showMap ? "chevron-up" : "map"} size={14} color="#FFFFFF" />
+            <Text style={styles.mapButtonText}>{showMap ? "ম্যাপ লুকান" : "ম্যাপে দেখুন"}</Text>
+          </TouchableOpacity>
+          {showMap && (
+            <TouchableOpacity onPress={handleOpenMap} style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+              <Text style={{ fontSize: 11, color: "#0055F2", fontWeight: "600" }}>দিকনির্দেশনা ↗</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
+
+      {/* Interactive OpenStreetMap Container */}
+      {showMap && (
+        <View style={styles.embeddedMapWrapper}>
+          <OpenStreetMap
+            markers={mapMarkers}
+            initialRegion={{
+              latitude: coordinates.latitude,
+              longitude: coordinates.longitude,
+              zoom: 14,
+            }}
+            interactive={true}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -180,7 +247,7 @@ const styles = StyleSheet.create({
   },
   advisoryBannerText: {
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#92400E",
     flex: 1,
   },
@@ -231,7 +298,7 @@ const styles = StyleSheet.create({
   mapButtonText: {
     color: "#FFFFFF",
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Compact styles
@@ -261,7 +328,7 @@ const styles = StyleSheet.create({
   mapPillTextSmall: {
     color: "#FFFFFF",
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   advisoryBadge: {
     flexDirection: "row",
@@ -278,5 +345,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#B45309",
     fontWeight: "600",
+  },
+  embeddedMapWrapper: {
+    height: 180,
+    marginHorizontal: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
   },
 });

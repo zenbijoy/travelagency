@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   },
   percentText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   track: {
     height: 7,
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   },
   actionBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   modalBackdrop: {
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
   },
   smallAddBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   modalPrimaryBtn: {
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   },
   modalPrimaryBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
 });

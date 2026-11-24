@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   badgeLabel: {
-    fontWeight: "700",
+    fontWeight: "500",
   },
   alertTriggerButton: {
     flexDirection: "row",
@@ -998,7 +998,7 @@ const styles = StyleSheet.create({
   },
   boundValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   cardFooter: {
     marginTop: 4,
@@ -1091,6 +1091,6 @@ const styles = StyleSheet.create({
   confirmBtnText: {
     color: colors.primary.foreground,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });

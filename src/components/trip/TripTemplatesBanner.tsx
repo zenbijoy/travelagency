@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   headerSubtitle: {
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   badgePillText: {
     color: "#FFFFFF",
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   iconCircle: {
     width: 26,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   cardSubtitle: {
     color: "rgba(255, 255, 255, 0.85)",
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   costValue: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   durationPill: {
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   durationText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   highlightsWrap: {
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   primaryCopyBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   secondaryFormBtn: {
     flex: 1,
@@ -304,6 +304,6 @@ const styles = StyleSheet.create({
   secondaryFormBtnText: {
     color: "#475569",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
   },
 });

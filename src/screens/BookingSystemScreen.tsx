@@ -1,4 +1,4 @@
-﻿import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -52,83 +52,378 @@ import { APP_EVENTS } from "../services/events/appEventBus";
 // DESIGN SYSTEM TOKENS & PALETTE
 // ============================================================================
 
-export {
-  primary,
-  primaryDark,
-  primaryLight,
-  success,
-  warning,
-  danger,
-  slateDark,
-  slateCard,
-  cardBg,
-  borderSubtle,
-  textPrimary,
-  textSecondary,
-  textMuted,
-  CurrencyCode,
-  CURRENCY_SYMBOLS,
-  FX_RATES_FROM_USD,
-  formatCurrency,
-  convertFromUSD,
-  getFutureDate,
-  emailZodSchema,
-  phoneZodSchema,
-  passportZodSchema,
-  nidZodSchema,
-  dateOfBirthZodSchema,
-  travelerFormZodSchema,
-  TravelerFormData,
-  CheckoutProductType,
-  ProductTemplate,
-  PRODUCT_TEMPLATES,
-  PromoRule,
-  REGISTERED_PROMOS,
-  STEP_TITLES,
-  SAVED_PASSENGERS_STORAGE_KEY,
-  BOOKING_DRAFT_STORAGE_KEY,
-  DEFAULT_SAVED_PASSENGERS,
-  defaultScreen,
-} from "../data/bookingSystemData";
-import {
-  primary,
-  primaryDark,
-  primaryLight,
-  success,
-  warning,
-  danger,
-  slateDark,
-  slateCard,
-  cardBg,
-  borderSubtle,
-  textPrimary,
-  textSecondary,
-  textMuted,
-  CurrencyCode,
-  CURRENCY_SYMBOLS,
-  FX_RATES_FROM_USD,
-  formatCurrency,
-  convertFromUSD,
-  getFutureDate,
-  emailZodSchema,
-  phoneZodSchema,
-  passportZodSchema,
-  nidZodSchema,
-  dateOfBirthZodSchema,
-  travelerFormZodSchema,
-  TravelerFormData,
-  CheckoutProductType,
-  ProductTemplate,
-  PRODUCT_TEMPLATES,
-  PromoRule,
-  REGISTERED_PROMOS,
-  STEP_TITLES,
-  SAVED_PASSENGERS_STORAGE_KEY,
-  BOOKING_DRAFT_STORAGE_KEY,
-  DEFAULT_SAVED_PASSENGERS,
-  defaultScreen,
-} from "../data/bookingSystemData";
-import { styles } from "../styles/bookingSystemStyles";
+const primary = "#287dfa";
+const primaryDark = "#1b5ec2";
+const primaryLight = "#e8f2ff";
+const success = "#10b981";
+const warning = "#f59e0b";
+const danger = "#ef4444";
+const slateDark = "#0f172a";
+const slateCard = "#1e293b";
+const cardBg = "#ffffff";
+const borderSubtle = "#e2e8f0";
+const textPrimary = "#0f172a";
+const textSecondary = "#64748b";
+const textMuted = "#94a3b8";
+
+// ============================================================================
+// DYNAMIC CURRENCY & RATE UTILITIES (Zero Hardcoded Currencies)
+// ============================================================================
+
+export type CurrencyCode = "USD" | "BDT" | "EUR" | "GBP";
+
+const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
+  USD: "$",
+  BDT: "à§³",
+  EUR: "â‚¬",
+  GBP: "Â£",
+};
+
+const FX_RATES_FROM_USD: Record<CurrencyCode, number> = {
+  USD: 1.0,
+  BDT: 121.5,
+  EUR: 0.92,
+  GBP: 0.79,
+};
+
+export function formatCurrency(
+  amount: number,
+  currency: CurrencyCode = "USD",
+): string {
+  const symbol = CURRENCY_SYMBOLS[currency] || currency;
+  const converted = Math.round(amount * (FX_RATES_FROM_USD[currency] || 1));
+  return `${symbol}${converted.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+export function convertFromUSD(amount: number, currency: CurrencyCode = "USD"): number {
+  return Math.round(amount * (FX_RATES_FROM_USD[currency] || 1));
+}
+
+// Dynamic date generator: departure = today + X days, return = departure + Y days
+function getFutureDate(daysFromNow: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// ============================================================================
+// 1. STRICT ZOD SCHEMAS FOR FORM VALIDATION (Requirement 2)
+// ============================================================================
+
+export const emailZodSchema = z
+  .string()
+  .trim()
+  .min(1, "Email address is required")
+  .max(254, "Email exceeds maximum length")
+  .email("Enter a valid RFC 5322 email address (e.g. traveler@domain.com)");
+
+export const phoneZodSchema = z
+  .string()
+  .trim()
+  .min(1, "Phone number is required")
+  .regex(
+    /^(\+?8801[3-9]\d{8}|01[3-9]\d{8}|\+[1-9]\d{1,14}|\d{10,14})$/,
+    "Enter a valid mobile or international phone (e.g. +8801712345678 or +15550198)",
+  );
+
+export const passportZodSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .min(1, "Passport number is required")
+  .regex(
+    /^[A-Z0-9]{6,12}$/,
+    "Passport must be 6-12 uppercase alphanumeric characters (ICAO Doc 9303)",
+  );
+
+export const nidZodSchema = z
+  .string()
+  .trim()
+  .min(1, "National ID (NID) is required")
+  .regex(
+    /^(\d{10}|\d{13}|\d{17})$/,
+    "National ID (NID) must be 10, 13, or 17 numeric digits",
+  );
+
+export const dateOfBirthZodSchema = z
+  .string()
+  .trim()
+  .min(1, "Date of birth is required")
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format")
+  .refine((val) => {
+    const parts = val.split("-");
+    if (parts.length !== 3) return false;
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    const d = parseInt(parts[2], 10);
+    if (!y || !m || !d || m < 1 || m > 12 || d < 1 || d > 31) return false;
+    const date = new Date(y, m - 1, d);
+    if (
+      date.getFullYear() !== y ||
+      date.getMonth() !== m - 1 ||
+      date.getDate() !== d
+    ) {
+      return false;
+    }
+    const today = new Date();
+    if (date > today) return false;
+    const age = today.getFullYear() - y;
+    return age >= 0 && age <= 125;
+  }, "Enter a valid past date of birth (YYYY-MM-DD)");
+
+export const travelerFormZodSchema = z.object({
+  first_name: z
+    .string()
+    .trim()
+    .min(2, "First name must be at least 2 characters")
+    .max(50),
+  last_name: z
+    .string()
+    .trim()
+    .min(2, "Last name must be at least 2 characters")
+    .max(50),
+  email: emailZodSchema,
+  phone: phoneZodSchema,
+  passport_number: passportZodSchema,
+  national_id: nidZodSchema,
+  date_of_birth: dateOfBirthZodSchema,
+  gender: z.enum(["male", "female", "other"]).default("male"),
+  nationality: z
+    .string()
+    .trim()
+    .min(2, "Nationality is required")
+    .default("Bangladeshi"),
+});
+
+export type TravelerFormData = z.infer<typeof travelerFormZodSchema>;
+
+// ============================================================================
+// 2. CENTRALIZED PRODUCT CATALOG & TEMPLATES (Multi-Category Engine)
+// ============================================================================
+
+export type CheckoutProductType =
+  | "flight"
+  | "hotel"
+  | "train"
+  | "bus"
+  | "tour";
+
+interface ProductTemplate {
+  type: CheckoutProductType;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  destinationCity: string;
+  destinationCountry: string;
+  originCity: string;
+  basePriceUSD: number;
+  summary: string;
+  departureOffsetDays: number;
+  durationDays: number;
+}
+
+const PRODUCT_TEMPLATES: Record<CheckoutProductType, ProductTemplate> = {
+  flight: {
+    type: "flight",
+    label: "Flights",
+    icon: "airplane-outline",
+    title: "DAC â†’ NRT (Tokyo Narita)",
+    originCity: "Dhaka",
+    destinationCity: "Tokyo",
+    destinationCountry: "Japan",
+    basePriceUSD: 1480,
+    departureOffsetDays: 14,
+    durationDays: 8,
+    summary: "Biman Bangladesh Airlines Boeing 787-9 Dreamliner (Economy Class)",
+  },
+  hotel: {
+    type: "hotel",
+    label: "Hotels",
+    icon: "bed-outline",
+    title: "Shinjuku Prince Grand Hotel & Suites",
+    originCity: "Tokyo",
+    destinationCity: "Tokyo",
+    destinationCountry: "Japan",
+    basePriceUSD: 850,
+    departureOffsetDays: 14,
+    durationDays: 6,
+    summary: "Deluxe Executive Twin Room with Skyline View & Daily Breakfast",
+  },
+  train: {
+    type: "train",
+    label: "Trains",
+    icon: "train-outline",
+    title: "Suborno Express (DAC â†’ CTG)",
+    originCity: "Dhaka",
+    destinationCity: "Chittagong",
+    destinationCountry: "Bangladesh",
+    basePriceUSD: 45,
+    departureOffsetDays: 3,
+    durationDays: 1,
+    summary: "AC Chair (Snigdha Class) with Reserved Ergonomic Seating",
+  },
+  bus: {
+    type: "bus",
+    label: "Buses",
+    icon: "bus-outline",
+    title: "Shohag Elite Scania Multi-Axle VIP",
+    originCity: "Dhaka",
+    destinationCity: "Cox's Bazar",
+    destinationCountry: "Bangladesh",
+    basePriceUSD: 35,
+    departureOffsetDays: 5,
+    durationDays: 3,
+    summary: "Luxury Business Class Sleeper Coach with Onboard Refreshments",
+  },
+  tour: {
+    type: "tour",
+    label: "Tours",
+    icon: "compass-outline",
+    title: "Sajek Valley Clouds & Eco-Retreat",
+    originCity: "Dhaka",
+    destinationCity: "Sajek Valley",
+    destinationCountry: "Bangladesh",
+    basePriceUSD: 320,
+    departureOffsetDays: 10,
+    durationDays: 3,
+    summary: "All-Inclusive Mountain Eco-Resort, 4x4 Chander Gari & Native Guide",
+  },
+};
+
+// ============================================================================
+// 3. EXTENSIBLE PROMO CODE REGISTRY & REUSABLE ASSETS
+// ============================================================================
+
+export interface PromoRule {
+  code: string;
+  title: string;
+  description: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  minSpendUSD: number;
+  expiryDate: string;
+  applicableCategory?: CheckoutProductType | "all";
+}
+
+const REGISTERED_PROMOS: PromoRule[] = [
+  {
+    code: "SHOPNO10",
+    title: "à¦—à§à¦²à§‹à¦¬à¦¾à¦² à§§à§¦% à¦›à¦¾à¦¡à¦¼ (Global 10% Off)",
+    description: "à¦¸à¦•à¦² à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸à§‡ à¦¬à§‡à¦¸ à¦«à§‡à¦¯à¦¼à¦¾à¦°à§‡ à§§à§¦% à¦¤à¦¾à§Žà¦•à§à¦·à¦£à¦¿à¦• à¦›à¦¾à¦¡à¦¼",
+    discountType: "percentage",
+    discountValue: 10,
+    minSpendUSD: 40,
+    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§¨-à§©à§§",
+    applicableCategory: "all",
+  },
+  {
+    code: "FLYMORE",
+    title: "à¦²à¦‚-à¦¹à¦² $50 (à§³6,000) à¦›à¦¾à¦¡à¦¼",
+    description: "à¦«à§à¦²à¦¾à¦‡à¦Ÿ à¦“ à¦ªà§à¦¯à¦¾à¦•à§‡à¦œ à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸à§‡ $50 à¦«à§à¦²à§à¦¯à¦¾à¦Ÿ à¦›à¦¾à¦¡à¦¼",
+    discountType: "fixed",
+    discountValue: 50,
+    minSpendUSD: 250,
+    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§§-à§©à§¦",
+    applicableCategory: "flight",
+  },
+  {
+    code: "EID15",
+    title: "à¦›à§à¦Ÿà¦¿à¦° à¦‰à§Žà¦¸à¦¬ à§§à§«% à¦›à¦¾à¦¡à¦¼ (Eid Special 15%)",
+    description: "à¦¡à¦®à§‡à¦¸à§à¦Ÿà¦¿à¦• à¦“ à¦†à¦¨à§à¦¤à¦°à§à¦œà¦¾à¦¤à¦¿à¦• à¦¬à§à¦•à¦¿à¦‚à¦¯à¦¼à§‡ à§§à§«% à¦¸à¦¿à¦œà¦¨à¦¾à¦² à¦¸à§‡à¦­à¦¿à¦‚à¦¸",
+    discountType: "percentage",
+    discountValue: 15,
+    minSpendUSD: 80,
+    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§¨-à§¨à§«",
+    applicableCategory: "all",
+  },
+  {
+    code: "EXPEDITION25",
+    title: "à¦Ÿà§à¦¯à§à¦° à¦­à¦¾à¦‰à¦šà¦¾à¦° $25 (à§³3,000) à¦›à¦¾à¦¡à¦¼",
+    description: "à¦¸à¦•à¦² à¦Ÿà§à¦¯à§à¦° à¦“ à¦à¦•à§à¦¸à¦ªà§‡à¦¡à¦¿à¦¶à¦¨ à¦¬à§à¦•à¦¿à¦‚à¦¯à¦¼à§‡ $25 à¦¤à¦¾à§Žà¦•à§à¦·à¦£à¦¿à¦• à¦›à¦¾à¦¡à¦¼",
+    discountType: "fixed",
+    discountValue: 25,
+    minSpendUSD: 120,
+    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§¨-à§§à§«",
+    applicableCategory: "tour",
+  },
+  {
+    code: "HOTELSTAY",
+    title: "à¦¹à§‹à¦Ÿà§‡à¦² à¦“ à¦°à¦¿à¦¸à§‹à¦°à§à¦Ÿ à§§à§¨% à¦›à¦¾à¦¡à¦¼",
+    description: "à¦ªà§à¦°à¦¿à¦®à¦¿à¦¯à¦¼à¦¾à¦® à¦¹à§‹à¦Ÿà§‡à¦² à¦“ à¦¹à§‹à¦®à¦¸à§à¦Ÿà§‡ à¦¬à§à¦•à¦¿à¦‚à¦¯à¦¼à§‡ à§§à§¨% à¦à¦•à§à¦¸à¦•à§à¦²à§à¦¸à¦¿à¦­ à¦›à¦¾à¦¡à¦¼",
+    discountType: "percentage",
+    discountValue: 12,
+    minSpendUSD: 60,
+    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§§-à§¨à§¦",
+    applicableCategory: "hotel",
+  },
+];
+
+export const STEP_TITLES: Record<1 | 2 | 3 | 4, string> = {
+  1: "à¦¯à¦¾à¦¤à§à¦°à§€à¦° à¦¤à¦¥à§à¦¯ (Traveler Details)",
+  2: "à¦…à§à¦¯à¦¾à¦¡-à¦…à¦¨ à¦“ à¦…à¦¤à¦¿à¦°à¦¿à¦•à§à¦¤ à¦¸à§‡à¦¬à¦¾ (Addons & Extras)",
+  3: "à¦¬à§à¦•à¦¿à¦‚ à¦¸à¦¾à¦°à¦¾à¦‚à¦¶ à¦“ à¦¨à§€à¦¤à¦¿ (Summary & Policy)",
+  4: "à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦“ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤à¦•à¦°à¦£ (Payment & Confirm)",
+};
+
+export const SAVED_PASSENGERS_STORAGE_KEY = "@travel_saved_passengers_v3";
+export const BOOKING_DRAFT_STORAGE_KEY = "@booking_active_draft_v3";
+
+export const DEFAULT_SAVED_PASSENGERS: TravelerFormData[] = [
+  {
+    first_name: "Tanvir",
+    last_name: "Hossain",
+    email: "tanvir.hossain@example.com",
+    phone: "+8801712345678",
+    passport_number: "A09876543",
+    national_id: "1994123456789",
+    date_of_birth: "1994-08-20",
+    gender: "male",
+    nationality: "Bangladeshi",
+  },
+  {
+    first_name: "Nusrat",
+    last_name: "Jahan",
+    email: "nusrat.jahan@example.com",
+    phone: "+8801812345678",
+    passport_number: "B12345678",
+    national_id: "1997987654321",
+    date_of_birth: "1997-03-15",
+    gender: "female",
+    nationality: "Bangladeshi",
+  },
+  {
+    first_name: "Rafiqul",
+    last_name: "Islam",
+    email: "rafiq.islam@example.com",
+    phone: "+8801912345678",
+    passport_number: "A11223344",
+    national_id: "1988112233445",
+    date_of_birth: "1988-11-10",
+    gender: "male",
+    nationality: "Bangladeshi",
+  },
+];
+
+// Fallback Default UI Screen
+const defaultScreen: UIScreen = {
+  slug: "booking-system",
+  source: "booking",
+  title: "Booking Checkout Engine",
+  subtitle: "Centralized Reservation & Payment Hub",
+  kind: "booking",
+  theme: "trip",
+};
+
+// ============================================================================
+// 4. MAIN CENTRALIZED CHECKOUT SCREEN (Lead Checkout Systems Architect)
+// ============================================================================
+
 export function BookingSystemScreen({
   screen = defaultScreen,
 }: {
@@ -225,7 +520,7 @@ export function BookingSystemScreen({
     airportLoungeAccess: false, // Priority Fast-track & Lounge
   });
 
-  // Loyalty Points Redemption State (Requirement: à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§à¦¨ (âˆ’à§³à§¨à§«à§¦) toggle)
+  // Loyalty Points Redemption State (Requirement: পয়েন্ট ব্যবহার করুন (−৳২৫০) toggle)
   const [usePointsDiscount, setUsePointsDiscount] = useState<boolean>(false);
 
   // Promo Code State
@@ -262,12 +557,12 @@ export function BookingSystemScreen({
     try {
       const token = await fcmNotificationService.registerForPushNotifications(user?.id, true);
       if (token) {
-        setFlightPushMsg("âœ“ à¦¨à§‹à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦¶à¦¨ à¦¸à¦•à§à¦°à¦¿à§Ÿ à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡! à¦«à§à¦²à¦¾à¦‡à¦Ÿà§‡à¦° à¦¸à¦•à¦² à¦—à§‡à¦Ÿ à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦“ à¦¸à¦®à§Ÿà¦¸à§‚à¦šà§€ à¦¸à¦¾à¦¥à§‡ à¦¸à¦¾à¦¥à§‡ à¦ªà¦¾à¦¬à§‡à¦¨à¥¤");
+        setFlightPushMsg("✓ নোটিফিকেশন সক্রিয় করা হয়েছে! ফ্লাইটের সকল গেট পরিবর্তন ও সময়সূচী সাথে সাথে পাবেন।");
       } else {
-        setFlightPushMsg("à¦¨à§‹à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦¶à¦¨ à¦…à¦¨à§à¦®à¦¤à¦¿ à¦ªà¦¾à¦“à§Ÿà¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿à¥¤ à¦¸à§‡à¦Ÿà¦¿à¦‚à¦¸à§‡ à¦—à¦¿à§Ÿà§‡ à¦ªà¦°à¦¬à¦°à§à¦¤à§€à¦¤à§‡ à¦šà¦¾à¦²à§ à¦•à¦°à¦¤à§‡ à¦ªà¦¾à¦°à§‡à¦¨à¥¤");
+        setFlightPushMsg("নোটিফিকেশন অনুমতি পাওয়া যায়নি। সেটিংসে গিয়ে পরবর্তীতে চালু করতে পারেন।");
       }
     } catch {
-      setFlightPushMsg("à¦¨à§‹à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦¶à¦¨ à¦¸à§‡à¦Ÿà¦¿à¦‚à¦¸à§‡ à¦ªà¦°à¦¬à¦°à§à¦¤à§€à¦¤à§‡ à¦šà¦¾à¦²à§ à¦•à¦°à¦¾ à¦¯à¦¾à¦¬à§‡à¥¤");
+      setFlightPushMsg("নোটিফিকেশন সেটিংসে পরবর্তীতে চালু করা যাবে।");
     } finally {
       setAskedFlightPush(true);
     }
@@ -356,7 +651,7 @@ export function BookingSystemScreen({
   const handleExtendHoldTimer = () => {
     setHoldSecondsLeft(600);
     setIsTimerExpired(false);
-    setActionMessage("Ã¢Å“â€œ Ã Â¦Â¸Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦â€œ Ã Â¦Å¸Ã Â¦Â¿Ã Â¦â€¢Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦Â§Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â°Ã Â¦Â¾Ã Â¦â€“Ã Â¦Â¾Ã Â¦Â° Ã Â¦Â¸Ã Â¦Â®Ã Â¦Â¯Ã Â¦Â¼ Ã Â¦â€ Ã Â¦Â°Ã Â§â€¹ Ã Â§Â§Ã Â§Â¦:Ã Â§Â¦Ã Â§Â¦ Ã Â¦Â®Ã Â¦Â¿Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦Â¬Ã Â§Æ’Ã Â¦Â¦Ã Â§ÂÃ Â¦Â§Ã Â¦Â¿ Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡!");
+    setActionMessage("âœ“ à¦¸à¦¿à¦Ÿ à¦“ à¦Ÿà¦¿à¦•à¦¿à¦Ÿ à¦§à¦°à§‡ à¦°à¦¾à¦–à¦¾à¦° à¦¸à¦®à¦¯à¦¼ à¦†à¦°à§‹ à§§à§¦:à§¦à§¦ à¦®à¦¿à¦¨à¦¿à¦Ÿ à¦¬à§ƒà¦¦à§à¦§à¦¿ à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡!");
   };
 
   // Saved Passengers State & Modal (Requirement 2)
@@ -380,7 +675,7 @@ export function BookingSystemScreen({
     setTraveler(p);
     setFormErrors({});
     setIsSavedPassengersModalOpen(false);
-    setActionMessage(`Ã¢Å“â€œ Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â¿Ã Â¦Â¤ Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¤Ã Â§ÂÃ Â¦Â°Ã Â§â‚¬ "${p.first_name} ${p.last_name}"-Ã Â¦ÂÃ Â¦Â° Ã Â¦Â¤Ã Â¦Â¥Ã Â§ÂÃ Â¦Â¯ Ã Â¦Â²Ã Â§â€¹Ã Â¦Â¡ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡!`);
+    setActionMessage(`âœ“ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¯à¦¾à¦¤à§à¦°à§€ "${p.first_name} ${p.last_name}"-à¦à¦° à¦¤à¦¥à§à¦¯ à¦²à§‹à¦¡ à¦¹à¦¯à¦¼à§‡à¦›à§‡!`);
     store.setTravelers([
       {
         firstName: p.first_name,
@@ -398,7 +693,7 @@ export function BookingSystemScreen({
 
   const handleSaveCurrentTraveler = async () => {
     if (!traveler.first_name || !traveler.last_name) {
-      Alert.alert("Ã Â¦â€¦Ã Â¦Â¸Ã Â¦Â®Ã Â§ÂÃ Â¦ÂªÃ Â§â€šÃ Â¦Â°Ã Â§ÂÃ Â¦Â£ Ã Â¦Â¤Ã Â¦Â¥Ã Â§ÂÃ Â¦Â¯", "Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¤Ã Â§ÂÃ Â¦Â°Ã Â§â‚¬Ã Â¦Â° Ã Â¦Â¨Ã Â¦Â¾Ã Â¦Â® Ã Â¦ÂªÃ Â§â€šÃ Â¦Â°Ã Â¦Â£ Ã Â¦Â¨Ã Â¦Â¾ Ã Â¦â€¢Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â£ Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾ Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¬Ã Â§â€¡ Ã Â¦Â¨Ã Â¦Â¾Ã Â¥Â¤");
+      Alert.alert("à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦¤à¦¥à§à¦¯", "à¦¯à¦¾à¦¤à§à¦°à§€à¦° à¦¨à¦¾à¦® à¦ªà§‚à¦°à¦£ à¦¨à¦¾ à¦•à¦°à§‡ à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦•à¦°à¦¾ à¦¯à¦¾à¦¬à§‡ à¦¨à¦¾à¥¤");
       return;
     }
     const updated = [
@@ -409,7 +704,7 @@ export function BookingSystemScreen({
     ];
     setSavedPassengers(updated);
     await AsyncStorage.setItem(SAVED_PASSENGERS_STORAGE_KEY, JSON.stringify(updated));
-    setActionMessage(`Ã¢Å“â€œ "${traveler.first_name} ${traveler.last_name}" Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â¿Ã Â¦Â¤ Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¤Ã Â§ÂÃ Â¦Â°Ã Â§â‚¬ Ã Â¦Â¤Ã Â¦Â¾Ã Â¦Â²Ã Â¦Â¿Ã Â¦â€¢Ã Â¦Â¾Ã Â¦Â¯Ã Â¦Â¼ Ã Â¦Â¸Ã Â§â€¡Ã Â¦Â­ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡!`);
+    setActionMessage(`âœ“ "${traveler.first_name} ${traveler.last_name}" à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¯à¦¾à¦¤à§à¦°à§€ à¦¤à¦¾à¦²à¦¿à¦•à¦¾à¦¯à¦¼ à¦¸à§‡à¦­ à¦¹à¦¯à¦¼à§‡à¦›à§‡!`);
   };
 
   const handleDeleteSavedPassenger = async (index: number) => {
@@ -451,7 +746,7 @@ export function BookingSystemScreen({
         isPrimary: true,
       },
     ]);
-    setActionMessage("Ã¢Å“â€œ Ã Â¦â€ Ã Â¦ÂªÃ Â¦Â¨Ã Â¦Â¾Ã Â¦Â° Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â§â€¹Ã Â¦Â«Ã Â¦Â¾Ã Â¦â€¡Ã Â¦Â² Ã Â¦Â¥Ã Â§â€¡Ã Â¦â€¢Ã Â§â€¡ Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Å“Ã Â§â€¡Ã Â¦Â° Ã Â¦Â¤Ã Â¦Â¥Ã Â§ÂÃ Â¦Â¯ Ã Â¦Â¸Ã Â¦Â«Ã Â¦Â²Ã Â¦Â­Ã Â¦Â¾Ã Â¦Â¬Ã Â§â€¡ Ã Â¦â€¦Ã Â¦Å¸Ã Â§â€¹Ã Â¦Â«Ã Â¦Â¿Ã Â¦Â² Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡!");
+    setActionMessage("âœ“ à¦†à¦ªà¦¨à¦¾à¦° à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦¥à§‡à¦•à§‡ à¦¨à¦¿à¦œà§‡à¦° à¦¤à¦¥à§à¦¯ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦…à¦Ÿà§‹à¦«à¦¿à¦² à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡!");
   };
 
   // Draft Exit Interception & Resume Banner State (Requirement 1)
@@ -481,7 +776,7 @@ export function BookingSystemScreen({
       if (savedDraftData.currentStep) goToStep(savedDraftData.currentStep);
       if (savedDraftData.holdSecondsLeft) setHoldSecondsLeft(savedDraftData.holdSecondsLeft);
       setHasPendingDraft(false);
-      setActionMessage(`Ã¢Å“â€œ Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â¿Ã Â¦Â¤ Ã Â¦â€“Ã Â¦Â¸Ã Â¦Â¡Ã Â¦Â¼Ã Â¦Â¾ Ã Â¦Â¥Ã Â§â€¡Ã Â¦â€¢Ã Â§â€¡ Ã Â¦Â§Ã Â¦Â¾Ã Â¦Âª ${savedDraftData.currentStep || 1} Ã Â¦ÂªÃ Â§ÂÃ Â¦Â¨Ã Â¦Â°Ã Â§ÂÃ Â¦Â¦Ã Â§ÂÃ Â¦Â§Ã Â¦Â¾Ã Â¦Â° Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡Ã Â¥Â¤ Ã Â¦Â¬Ã Â§ÂÃ Â¦â€¢Ã Â¦Â¿Ã Â¦â€š Ã Â¦Å¡Ã Â¦Â¾Ã Â¦Â²Ã Â¦Â¿Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡ Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¨!`);
+      setActionMessage(`âœ“ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦–à¦¸à¦¡à¦¼à¦¾ à¦¥à§‡à¦•à§‡ à¦§à¦¾à¦ª ${savedDraftData.currentStep || 1} à¦ªà§à¦¨à¦°à§à¦¦à§à¦§à¦¾à¦° à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤ à¦¬à§à¦•à¦¿à¦‚ à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦¨!`);
     }
   };
 
@@ -490,7 +785,7 @@ export function BookingSystemScreen({
     setSavedDraftData(null);
     await AsyncStorage.removeItem(BOOKING_DRAFT_STORAGE_KEY);
     store.resetDraft();
-    setActionMessage("Ã Â¦ÂªÃ Â§â€šÃ Â¦Â°Ã Â§ÂÃ Â¦Â¬Ã Â¦Â¬Ã Â¦Â°Ã Â§ÂÃ Â¦Â¤Ã Â§â‚¬ Ã Â¦â€“Ã Â¦Â¸Ã Â¦Â¡Ã Â¦Â¼Ã Â¦Â¾ Ã Â¦Â®Ã Â§ÂÃ Â¦â€ºÃ Â§â€¡ Ã Â¦Â¨Ã Â¦Â¤Ã Â§ÂÃ Â¦Â¨ Ã Â¦Â¬Ã Â§ÂÃ Â¦â€¢Ã Â¦Â¿Ã Â¦â€š Ã Â¦Â¶Ã Â§ÂÃ Â¦Â°Ã Â§Â Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡Ã Â¥Â¤");
+    setActionMessage("à¦ªà§‚à¦°à§à¦¬à¦¬à¦°à§à¦¤à§€ à¦–à¦¸à¦¡à¦¼à¦¾ à¦®à§à¦›à§‡ à¦¨à¦¤à§à¦¨ à¦¬à§à¦•à¦¿à¦‚ à¦¶à§à¦°à§ à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤");
   };
 
   const isBookingInProgress = Boolean(
@@ -500,16 +795,16 @@ export function BookingSystemScreen({
   const handleBackInterception = useCallback(
     (onConfirmExit?: () => void) => {
       Alert.alert(
-        "Ã Â¦â€“Ã Â¦Â¸Ã Â¦Â¡Ã Â¦Â¼Ã Â¦Â¾ Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â£ Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¬Ã Â§â€¡Ã Â¦Â¨? (Save Draft?)",
-        "Ã Â¦â€ Ã Â¦ÂªÃ Â¦Â¨Ã Â¦Â¾Ã Â¦Â° Ã Â¦Â¬Ã Â§ÂÃ Â¦â€¢Ã Â¦Â¿Ã Â¦â€šÃ Â¦Å¸Ã Â¦Â¿Ã Â¦Â° Ã Â¦Â¤Ã Â¦Â¥Ã Â§ÂÃ Â¦Â¯ Ã Â¦ÂÃ Â¦â€“Ã Â¦Â¨Ã Â¦â€œ Ã Â¦â€¦Ã Â¦Â¸Ã Â¦Â®Ã Â§ÂÃ Â¦ÂªÃ Â§â€šÃ Â¦Â°Ã Â§ÂÃ Â¦Â£ Ã Â¦Â°Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡Ã Â¥Â¤ Ã Â¦â€ Ã Â¦ÂªÃ Â¦Â¨Ã Â¦Â¿ Ã Â¦â€¢Ã Â¦Â¿ Ã Â¦â€“Ã Â¦Â¸Ã Â¦Â¡Ã Â¦Â¼Ã Â¦Â¾ Ã Â¦Â¹Ã Â¦Â¿Ã Â¦Â¸Ã Â§â€¡Ã Â¦Â¬Ã Â§â€¡ Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â£ Ã Â¦â€¢Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â¬Ã Â§â€¡Ã Â¦Â° Ã Â¦Â¹Ã Â¦Â¤Ã Â§â€¡ Ã Â¦Å¡Ã Â¦Â¾Ã Â¦Â¨, Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¤Ã Â§â€¡ Ã Â¦ÂªÃ Â¦Â°Ã Â§â€¡ Ã Â¦ÂÃ Â¦Â¸Ã Â§â€¡ Ã Â¦Å¡Ã Â¦Â¾Ã Â¦Â²Ã Â¦Â¿Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡ Ã Â¦Â¯Ã Â§â€¡Ã Â¦Â¤Ã Â§â€¡ Ã Â¦ÂªÃ Â¦Â¾Ã Â¦Â°Ã Â§â€¡Ã Â¦Â¨?",
+        "à¦–à¦¸à¦¡à¦¼à¦¾ à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦•à¦°à¦¬à§‡à¦¨? (Save Draft?)",
+        "à¦†à¦ªà¦¨à¦¾à¦° à¦¬à§à¦•à¦¿à¦‚à¦Ÿà¦¿à¦° à¦¤à¦¥à§à¦¯ à¦à¦–à¦¨à¦“ à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦°à¦¯à¦¼à§‡à¦›à§‡à¥¤ à¦†à¦ªà¦¨à¦¿ à¦•à¦¿ à¦–à¦¸à¦¡à¦¼à¦¾ à¦¹à¦¿à¦¸à§‡à¦¬à§‡ à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦•à¦°à§‡ à¦¬à§‡à¦° à¦¹à¦¤à§‡ à¦šà¦¾à¦¨, à¦¯à¦¾à¦¤à§‡ à¦ªà¦°à§‡ à¦à¦¸à§‡ à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à§‡à¦¤à§‡ à¦ªà¦¾à¦°à§‡à¦¨?",
         [
           {
-            text: "Ã Â¦Å¡Ã Â¦Â¾Ã Â¦Â²Ã Â¦Â¿Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡ Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¨ (Stay)",
+            text: "à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦¨ (Stay)",
             style: "cancel",
             onPress: () => {},
           },
           {
-            text: "Ã Â¦Â®Ã Â§ÂÃ Â¦â€ºÃ Â§â€¡ Ã Â¦Â¬Ã Â§â€¡Ã Â¦Â° Ã Â¦Â¹Ã Â¦Â¨ (Discard)",
+            text: "à¦®à§à¦›à§‡ à¦¬à§‡à¦° à¦¹à¦¨ (Discard)",
             style: "destructive",
             onPress: async () => {
               isExitingAllowed.current = true;
@@ -523,7 +818,7 @@ export function BookingSystemScreen({
             },
           },
           {
-            text: "Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â£ Ã Â¦â€œ Ã Â¦Â¬Ã Â§â€¡Ã Â¦Â° Ã Â¦Â¹Ã Â¦Â¨ (Save & Exit)",
+            text: "à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦“ à¦¬à§‡à¦° à¦¹à¦¨ (Save & Exit)",
             style: "default",
             onPress: async () => {
               isExitingAllowed.current = true;
@@ -612,7 +907,7 @@ export function BookingSystemScreen({
     }));
     setFormErrors({});
     setActionMessage(
-      `Ã¢Å“â€œ Verified ${mrz.documentType === "PASSPORT" ? "Passport" : "National ID"} via On-Device MRZ Scanner`
+      `âœ“ Verified ${mrz.documentType === "PASSPORT" ? "Passport" : "National ID"} via On-Device MRZ Scanner`
     );
   };
 
@@ -743,7 +1038,7 @@ export function BookingSystemScreen({
     }
     discountUSD = Math.min(discountUSD, baseFareUSD);
 
-    // Loyalty Points Discount (Requirement: à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§à¦¨ (âˆ’à§³à§¨à§«à§¦) toggle: 2,500 points = à§³250)
+    // Loyalty Points Discount (Requirement: পয়েন্ট ব্যবহার করুন (−৳২৫০) toggle: 2,500 points = ৳250)
     const pointsAvailable = 2500;
     const pointsValueBDT = 250;
     const bdtRate = FX_RATES_FROM_USD["BDT"] || 120;
@@ -929,23 +1224,23 @@ export function BookingSystemScreen({
       const missingPassport = !!fieldErrors["passport_number"];
       setActionMessage(
         missingPassport
-          ? "âš ï¸ à¦¬à§à¦•à¦¿à¦‚ à¦¬à§à¦¯à¦°à§à¦¥: à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦¨à¦®à§à¦¬à¦° à¦†à¦¬à¦¶à§à¦¯à¦•à¥¤ à¦•à§à¦¯à¦¾à¦®à§‡à¦°à¦¾ à¦¦à¦¿à¦¯à¦¼à§‡ à¦¸à§à¦•à§à¦¯à¦¾à¦¨ à¦•à¦°à§à¦¨ à¦¬à¦¾ à¦Ÿà¦¾à¦‡à¦ª à¦•à¦°à§à¦¨à¥¤"
-          : `âš ï¸ ${count}à¦Ÿà¦¿ à¦¤à¦¥à§à¦¯à§‡ à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£à¦¤à¦¾ à¦°à¦¯à¦¼à§‡à¦›à§‡à¥¤ à¦²à¦¾à¦² à¦šà¦¿à¦¹à§à¦¨à¦¿à¦¤ à¦˜à¦°à¦—à§à¦²à§‹ à¦ªà§‚à¦°à¦£ à¦•à¦°à§à¦¨à¥¤`
+          ? "⚠️ বুকিং ব্যর্থ: পাসপোর্ট নম্বর আবশ্যক। ক্যামেরা দিয়ে স্ক্যান করুন বা টাইপ করুন।"
+          : `⚠️ ${count}টি তথ্যে অসম্পূর্ণতা রয়েছে। লাল চিহ্নিত ঘরগুলো পূরণ করুন।`
       );
       Alert.alert(
-        missingPassport ? "à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦¤à¦¥à§à¦¯ à¦†à¦¬à¦¶à§à¦¯à¦•" : "à¦¤à¦¥à§à¦¯ à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£",
+        missingPassport ? "পাসপোর্ট তথ্য আবশ্যক" : "তথ্য অসম্পূর্ণ",
         missingPassport
-          ? "à¦«à§à¦²à¦¾à¦‡à¦Ÿ à¦“ à¦­à§à¦°à¦®à¦£ à¦¬à§à¦•à¦¿à¦‚ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤ à¦•à¦°à¦¾à¦° à¦œà¦¨à§à¦¯ à¦¬à§ˆà¦§ à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦¨à¦®à§à¦¬à¦° à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦¬à¦¾à¦§à§à¦¯à¦¤à¦¾à¦®à§‚à¦²à¦•à¥¤"
-          : `à¦¬à§à¦•à¦¿à¦‚ à¦¸à¦®à§à¦ªà¦¨à§à¦¨ à¦•à¦°à¦¤à§‡ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦²à¦¾à¦² à¦šà¦¿à¦¹à§à¦¨à¦¿à¦¤ à¦˜à¦°à¦—à§à¦²à§‹ à¦ªà§‚à¦°à¦£ à¦•à¦°à§à¦¨à¥¤`
+          ? "ফ্লাইট ও ভ্রমণ বুকিং নিশ্চিত করার জন্য বৈধ পাসপোর্ট নম্বর প্রদান বাধ্যতামূলক।"
+          : `বুকিং সম্পন্ন করতে অনুগ্রহ করে লাল চিহ্নিত ঘরগুলো পূরণ করুন।`
       );
       return;
       const _legacyCount = 0;
       setActionMessage(
-        `Ã¢Å¡Â Ã¯Â¸Â ${count}Ã Â¦Å¸Ã Â¦Â¿ Ã Â¦Â¤Ã Â¦Â¥Ã Â§ÂÃ Â¦Â¯Ã Â§â€¡ Ã Â¦Â­Ã Â§ÂÃ Â¦Â² Ã Â¦Â°Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡Ã Â¥Â¤ Ã Â¦Â²Ã Â¦Â¾Ã Â¦Â² Ã Â¦Å¡Ã Â¦Â¿Ã Â¦Â¹Ã Â§ÂÃ Â¦Â¨Ã Â¦Â¿Ã Â¦Â¤ Ã Â¦ËœÃ Â¦Â°Ã Â¦â€”Ã Â§ÂÃ Â¦Â²Ã Â§â€¹ Ã Â¦Â¸Ã Â¦Â Ã Â¦Â¿Ã Â¦â€¢Ã Â¦Â­Ã Â¦Â¾Ã Â¦Â¬Ã Â§â€¡ Ã Â¦ÂªÃ Â§â€šÃ Â¦Â°Ã Â¦Â£ Ã Â¦â€¢Ã Â¦Â°Ã Â§ÂÃ Â¦Â¨Ã Â¥Â¤`
+        `âš ï¸ ${count}à¦Ÿà¦¿ à¦¤à¦¥à§à¦¯à§‡ à¦­à§à¦² à¦°à¦¯à¦¼à§‡à¦›à§‡à¥¤ à¦²à¦¾à¦² à¦šà¦¿à¦¹à§à¦¨à¦¿à¦¤ à¦˜à¦°à¦—à§à¦²à§‹ à¦¸à¦ à¦¿à¦•à¦­à¦¾à¦¬à§‡ à¦ªà§‚à¦°à¦£ à¦•à¦°à§à¦¨à¥¤`
       );
       Alert.alert(
-        "Ã Â¦Â«Ã Â¦Â°Ã Â§ÂÃ Â¦Â® Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â¶Ã Â§â€¹Ã Â¦Â§Ã Â¦Â¨ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¹Ã Â¦Å“Ã Â¦Â¨ (Validation Required)",
-        `Ã Â¦â€¦Ã Â¦Â¨Ã Â§ÂÃ Â¦â€”Ã Â§ÂÃ Â¦Â°Ã Â¦Â¹ Ã Â¦â€¢Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â²Ã Â¦Â¾Ã Â¦Â² Ã Â¦Å¡Ã Â¦Â¿Ã Â¦Â¹Ã Â§ÂÃ Â¦Â¨Ã Â¦Â¿Ã Â¦Â¤ ${count}Ã Â¦Å¸Ã Â¦Â¿ Ã Â¦Â«Ã Â¦Â¿Ã Â¦Â²Ã Â§ÂÃ Â¦Â¡Ã Â§â€¡Ã Â¦Â° Ã Â¦Â­Ã Â§ÂÃ Â¦Â² Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â¶Ã Â§â€¹Ã Â¦Â§Ã Â¦Â¨ Ã Â¦â€¢Ã Â¦Â°Ã Â§â€¡ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â¨Ã Â¦Â°Ã Â¦Â¾Ã Â¦Â¯Ã Â¦Â¼ Ã Â¦Å¡Ã Â§â€¡Ã Â¦Â·Ã Â§ÂÃ Â¦Å¸Ã Â¦Â¾ Ã Â¦â€¢Ã Â¦Â°Ã Â§ÂÃ Â¦Â¨Ã Â¥Â¤ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â¦Â¥Ã Â¦Â® Ã Â¦Â­Ã Â§ÂÃ Â¦Â²Ã Â§â€¡Ã Â¦Â° Ã Â¦Â¸Ã Â§ÂÃ Â¦Â¥Ã Â¦Â¾Ã Â¦Â¨Ã Â§â€¡ Ã Â¦Â¸Ã Â§ÂÃ Â¦â€¢Ã Â§ÂÃ Â¦Â°Ã Â¦Â² Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡Ã Â¥Â¤`,
+        "à¦«à¦°à§à¦® à¦¸à¦‚à¦¶à§‹à¦§à¦¨ à¦ªà§à¦°à¦¯à¦¼à§‹à¦œà¦¨ (Validation Required)",
+        `à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦²à¦¾à¦² à¦šà¦¿à¦¹à§à¦¨à¦¿à¦¤ ${count}à¦Ÿà¦¿ à¦«à¦¿à¦²à§à¦¡à§‡à¦° à¦­à§à¦² à¦¸à¦‚à¦¶à§‹à¦§à¦¨ à¦•à¦°à§‡ à¦ªà§à¦¨à¦°à¦¾à¦¯à¦¼ à¦šà§‡à¦·à§à¦Ÿà¦¾ à¦•à¦°à§à¦¨à¥¤ à¦ªà§à¦°à¦¥à¦® à¦­à§à¦²à§‡à¦° à¦¸à§à¦¥à¦¾à¦¨à§‡ à¦¸à§à¦•à§à¦°à¦² à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤`,
       );
       return;
     }
@@ -984,7 +1279,7 @@ export function BookingSystemScreen({
   const handleApplyPromo = (overrideCode?: string) => {
     const code = (overrideCode || promoInput).trim().toUpperCase();
     if (!code) {
-      setPromoStatus({ error: "Ã Â¦â€¦Ã Â¦Â¨Ã Â§ÂÃ Â¦â€”Ã Â§ÂÃ Â¦Â°Ã Â¦Â¹ Ã Â¦â€¢Ã Â¦Â°Ã Â§â€¡ Ã Â¦ÂÃ Â¦â€¢Ã Â¦Å¸Ã Â¦Â¿ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â§â€¹Ã Â¦Â®Ã Â§â€¹ Ã Â¦â€¢Ã Â§â€¹Ã Â¦Â¡ Ã Â¦Â²Ã Â¦Â¿Ã Â¦â€“Ã Â§ÂÃ Â¦Â¨ Ã Â¦Â¬Ã Â¦Â¾ Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Å¡Ã Â§â€¡Ã Â¦Â° Ã Â¦Â¤Ã Â¦Â¾Ã Â¦Â²Ã Â¦Â¿Ã Â¦â€¢Ã Â¦Â¾ Ã Â¦Â¥Ã Â§â€¡Ã Â¦â€¢Ã Â§â€¡ Ã Â¦Â¬Ã Â¦Â¾Ã Â¦â€ºÃ Â§ÂÃ Â¦Â¨Ã Â¥Â¤" });
+      setPromoStatus({ error: "à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦à¦•à¦Ÿà¦¿ à¦ªà§à¦°à§‹à¦®à§‹ à¦•à§‹à¦¡ à¦²à¦¿à¦–à§à¦¨ à¦¬à¦¾ à¦¨à¦¿à¦šà§‡à¦° à¦¤à¦¾à¦²à¦¿à¦•à¦¾ à¦¥à§‡à¦•à§‡ à¦¬à¦¾à¦›à§à¦¨à¥¤" });
       return;
     }
 
@@ -997,15 +1292,15 @@ export function BookingSystemScreen({
         matchedRule.applicableCategory !== selectedProductType
       ) {
         const catMap: Record<string, string> = {
-          flight: "Ã Â¦Â«Ã Â§ÂÃ Â¦Â²Ã Â¦Â¾Ã Â¦â€¡Ã Â¦Å¸",
-          hotel: "Ã Â¦Â¹Ã Â§â€¹Ã Â¦Å¸Ã Â§â€¡Ã Â¦Â²",
-          train: "Ã Â¦Å¸Ã Â§ÂÃ Â¦Â°Ã Â§â€¡Ã Â¦Â¨",
-          bus: "Ã Â¦Â¬Ã Â¦Â¾Ã Â¦Â¸",
-          tour: "Ã Â¦Å¸Ã Â§ÂÃ Â¦Â¯Ã Â§ÂÃ Â¦Â°",
+          flight: "à¦«à§à¦²à¦¾à¦‡à¦Ÿ",
+          hotel: "à¦¹à§‹à¦Ÿà§‡à¦²",
+          train: "à¦Ÿà§à¦°à§‡à¦¨",
+          bus: "à¦¬à¦¾à¦¸",
+          tour: "à¦Ÿà§à¦¯à§à¦°",
         };
         const catLabel = catMap[matchedRule.applicableCategory] || matchedRule.applicableCategory;
         setPromoStatus({
-          error: `"${code}" Ã Â¦â€¢Ã Â§â€¹Ã Â¦Â¡Ã Â¦Å¸Ã Â¦Â¿ Ã Â¦Â¶Ã Â§ÂÃ Â¦Â§Ã Â§ÂÃ Â¦Â®Ã Â¦Â¾Ã Â¦Â¤Ã Â§ÂÃ Â¦Â° ${catLabel} Ã Â¦Â¬Ã Â§ÂÃ Â¦â€¢Ã Â¦Â¿Ã Â¦â€šÃ Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦Â° Ã Â¦Å“Ã Â¦Â¨Ã Â§ÂÃ Â¦Â¯ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â¦Â¯Ã Â§â€¹Ã Â¦Å“Ã Â§ÂÃ Â¦Â¯, ${selectedProductType} Ã Â¦Â¸Ã Â¦Â¾Ã Â¦Â°Ã Â§ÂÃ Â¦Â­Ã Â¦Â¿Ã Â¦Â¸Ã Â§â€¡ Ã Â¦Â¨Ã Â¦Â¯Ã Â¦Â¼Ã Â¥Â¤`,
+          error: `"${code}" à¦•à§‹à¦¡à¦Ÿà¦¿ à¦¶à§à¦§à§à¦®à¦¾à¦¤à§à¦° ${catLabel} à¦¬à§à¦•à¦¿à¦‚à¦¯à¦¼à§‡à¦° à¦œà¦¨à§à¦¯ à¦ªà§à¦°à¦¯à§‹à¦œà§à¦¯, ${selectedProductType} à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸à§‡ à¦¨à¦¯à¦¼à¥¤`,
         });
         return;
       }
@@ -1018,7 +1313,7 @@ export function BookingSystemScreen({
         const minSpendLocal = formatCurrency(matchedRule.minSpendUSD, currency);
         const currentFareLocal = formatCurrency(pricingCalculation.baseFare, currency);
         setPromoStatus({
-          error: `"${code}" Ã Â¦â€¢Ã Â§â€¹Ã Â¦Â¡Ã Â§â€¡Ã Â¦Â° Ã Â¦Å“Ã Â¦Â¨Ã Â§ÂÃ Â¦Â¯ Ã Â¦Â¸Ã Â¦Â°Ã Â§ÂÃ Â¦Â¬Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Â®Ã Â§ÂÃ Â¦Â¨ ${minSpendLocal} ($${matchedRule.minSpendUSD}) Ã Â¦Â¬Ã Â§â€¡Ã Â¦Â¸ Ã Â¦Â­Ã Â¦Â¾Ã Â¦Â¡Ã Â¦Â¼Ã Â¦Â¾ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¹Ã Â¦Å“Ã Â¦Â¨Ã Â¥Â¤ Ã Â¦â€ Ã Â¦ÂªÃ Â¦Â¨Ã Â¦Â¾Ã Â¦Â° Ã Â¦Â¬Ã Â¦Â°Ã Â§ÂÃ Â¦Â¤Ã Â¦Â®Ã Â¦Â¾Ã Â¦Â¨ Ã Â¦Â¬Ã Â§â€¡Ã Â¦Â¸ Ã Â¦Â­Ã Â¦Â¾Ã Â¦Â¡Ã Â¦Â¼Ã Â¦Â¾ ${currentFareLocal}Ã Â¥Â¤`,
+          error: `"${code}" à¦•à§‹à¦¡à§‡à¦° à¦œà¦¨à§à¦¯ à¦¸à¦°à§à¦¬à¦¨à¦¿à¦®à§à¦¨ ${minSpendLocal} ($${matchedRule.minSpendUSD}) à¦¬à§‡à¦¸ à¦­à¦¾à¦¡à¦¼à¦¾ à¦ªà§à¦°à¦¯à¦¼à§‹à¦œà¦¨à¥¤ à¦†à¦ªà¦¨à¦¾à¦° à¦¬à¦°à§à¦¤à¦®à¦¾à¦¨ à¦¬à§‡à¦¸ à¦­à¦¾à¦¡à¦¼à¦¾ ${currentFareLocal}à¥¤`,
         });
         return;
       }
@@ -1032,7 +1327,7 @@ export function BookingSystemScreen({
           matchedRule.discountValue,
         );
         setPromoStatus({
-          success: `Ã¢Å“â€œ ${matchedRule.code} Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¹Ã Â¦â€” Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡! ${matchedRule.discountValue}% Ã Â¦Â¡Ã Â¦Â¿Ã Â¦Â¸Ã Â¦â€¢Ã Â¦Â¾Ã Â¦â€°Ã Â¦Â¨Ã Â§ÂÃ Â¦Å¸ Ã Â¦Â¸Ã Â¦Â«Ã Â¦Â²Ã Â¦Â­Ã Â¦Â¾Ã Â¦Â¬Ã Â§â€¡ Ã Â¦Â¯Ã Â§â€¹Ã Â¦â€” Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡Ã Â¥Â¤`,
+          success: `âœ“ ${matchedRule.code} à¦ªà§à¦°à¦¯à¦¼à§‹à¦— à¦¹à¦¯à¦¼à§‡à¦›à§‡! ${matchedRule.discountValue}% à¦¡à¦¿à¦¸à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦¯à§‹à¦— à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤`,
         });
       } else {
         store.applyPromoCode(
@@ -1041,12 +1336,12 @@ export function BookingSystemScreen({
           "fixed",
         );
         setPromoStatus({
-          success: `Ã¢Å“â€œ ${matchedRule.code} Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¹Ã Â¦â€” Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡! ${formatCurrency(matchedRule.discountValue, currency)} Ã Â¦Â«Ã Â§ÂÃ Â¦Â²Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦Å¸ Ã Â¦Â¡Ã Â¦Â¿Ã Â¦Â¸Ã Â¦â€¢Ã Â¦Â¾Ã Â¦â€°Ã Â¦Â¨Ã Â§ÂÃ Â¦Å¸ Ã Â¦Â¸Ã Â¦Â«Ã Â¦Â²Ã Â¦Â­Ã Â¦Â¾Ã Â¦Â¬Ã Â§â€¡ Ã Â¦Â¯Ã Â§â€¹Ã Â¦â€” Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡Ã Â¥Â¤`,
+          success: `âœ“ ${matchedRule.code} à¦ªà§à¦°à¦¯à¦¼à§‹à¦— à¦¹à¦¯à¦¼à§‡à¦›à§‡! ${formatCurrency(matchedRule.discountValue, currency)} à¦«à§à¦²à§à¦¯à¦¾à¦Ÿ à¦¡à¦¿à¦¸à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦¯à§‹à¦— à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤`,
         });
       }
     } else {
       setPromoStatus({
-        error: `"${code}" Ã Â¦â€¦Ã Â¦â€¢Ã Â¦Â¾Ã Â¦Â°Ã Â§ÂÃ Â¦Â¯Ã Â¦â€¢Ã Â¦Â° Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â§â€¹Ã Â¦Â®Ã Â§â€¹ Ã Â¦â€¢Ã Â§â€¹Ã Â¦Â¡Ã Â¥Â¤ Ã Â¦â€¦Ã Â¦Â¨Ã Â§ÂÃ Â¦â€”Ã Â§ÂÃ Â¦Â°Ã Â¦Â¹ Ã Â¦â€¢Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â¸Ã Â¦Â Ã Â¦Â¿Ã Â¦â€¢ Ã Â¦â€¢Ã Â§â€¹Ã Â¦Â¡ Ã Â¦Â¦Ã Â¦Â¿Ã Â¦Â¨ Ã Â¦â€¦Ã Â¦Â¥Ã Â¦Â¬Ã Â¦Â¾ Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Å¡Ã Â§â€¡Ã Â¦Â° Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â¦Â¯Ã Â§â€¹Ã Â¦Å“Ã Â§ÂÃ Â¦Â¯ Ã Â¦â€¢Ã Â§â€¹Ã Â¦Â¡ Ã Â¦Â¤Ã Â¦Â¾Ã Â¦Â²Ã Â¦Â¿Ã Â¦â€¢Ã Â¦Â¾ Ã Â¦Â¥Ã Â§â€¡Ã Â¦â€¢Ã Â§â€¡ Ã Â¦Â¬Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡ Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Â¨Ã Â¥Â¤`,
+        error: `"${code}" à¦…à¦•à¦¾à¦°à§à¦¯à¦•à¦° à¦ªà§à¦°à§‹à¦®à§‹ à¦•à§‹à¦¡à¥¤ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦¸à¦ à¦¿à¦• à¦•à§‹à¦¡ à¦¦à¦¿à¦¨ à¦…à¦¥à¦¬à¦¾ à¦¨à¦¿à¦šà§‡à¦° à¦ªà§à¦°à¦¯à§‹à¦œà§à¦¯ à¦•à§‹à¦¡ à¦¤à¦¾à¦²à¦¿à¦•à¦¾ à¦¥à§‡à¦•à§‡ à¦¬à§‡à¦›à§‡ à¦¨à¦¿à¦¨à¥¤`,
       });
     }
   };
@@ -1068,8 +1363,8 @@ export function BookingSystemScreen({
     if (!hasAgreedToPolicy) {
       setPolicyError(true);
       Alert.alert(
-        "Ã Â¦Â¸Ã Â¦Â®Ã Â§ÂÃ Â¦Â®Ã Â¦Â¤Ã Â¦Â¿ Ã Â¦â€ Ã Â¦Â¬Ã Â¦Â¶Ã Â§ÂÃ Â¦Â¯Ã Â¦â€¢ (Consent Required)",
-        "Ã Â¦ÂªÃ Â§â€¡Ã Â¦Â®Ã Â§â€¡Ã Â¦Â¨Ã Â§ÂÃ Â¦Å¸Ã Â§â€¡ Ã Â¦ÂÃ Â¦â€”Ã Â¦Â¿Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡ Ã Â¦Â¯Ã Â¦Â¾Ã Â¦â€œÃ Â¦Â¯Ã Â¦Â¼Ã Â¦Â¾Ã Â¦Â° Ã Â¦â€ Ã Â¦â€”Ã Â§â€¡ Ã Â¦â€¦Ã Â¦Â¨Ã Â§ÂÃ Â¦â€”Ã Â§ÂÃ Â¦Â°Ã Â¦Â¹ Ã Â¦â€¢Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â¬Ã Â¦Â¾Ã Â¦Â¤Ã Â¦Â¿Ã Â¦Â²Ã Â§â€¡Ã Â¦Â° Ã Â¦Â¨Ã Â§â‚¬Ã Â¦Â¤Ã Â¦Â¿ Ã Â¦â€œ Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Â¯Ã Â¦Â¼Ã Â¦Â®-Ã Â¦Â¶Ã Â¦Â°Ã Â§ÂÃ Â¦Â¤Ã Â¦Â¾Ã Â¦Â¬Ã Â¦Â²Ã Â§â‚¬Ã Â¦Â¤Ã Â§â€¡ Ã Â¦Â¸Ã Â¦Â®Ã Â§ÂÃ Â¦Â®Ã Â¦Â¤Ã Â¦Â¿ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â¦Â¦Ã Â¦Â¾Ã Â¦Â¨ Ã Â¦â€¢Ã Â¦Â°Ã Â§ÂÃ Â¦Â¨Ã Â¥Â¤"
+        "à¦¸à¦®à§à¦®à¦¤à¦¿ à¦†à¦¬à¦¶à§à¦¯à¦• (Consent Required)",
+        "à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿà§‡ à¦à¦—à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦“à¦¯à¦¼à¦¾à¦° à¦†à¦—à§‡ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦¬à¦¾à¦¤à¦¿à¦²à§‡à¦° à¦¨à§€à¦¤à¦¿ à¦“ à¦¨à¦¿à¦¯à¦¼à¦®-à¦¶à¦°à§à¦¤à¦¾à¦¬à¦²à§€à¦¤à§‡ à¦¸à¦®à§à¦®à¦¤à¦¿ à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦•à¦°à§à¦¨à¥¤"
       );
       return;
     }
@@ -1178,12 +1473,12 @@ export function BookingSystemScreen({
         !networkStatusService.isOnline() ||
         error?.message?.includes("Network") ||
         error?.message?.includes("fetch") ||
-        error?.message?.includes("à¦§à§€à¦°")
+        error?.message?.includes("ধীর")
       ) {
         await offlineQueueService.enqueue(
           "CREATE_BOOKING_DRAFT",
           { userId, draftPayload },
-          `à¦¬à§à¦•à¦¿à¦‚ à¦¡à§à¦°à¦¾à¦«à¦Ÿ (${trip.destination_city || "à¦­à§à¦°à¦®à¦£"})`
+          `বুকিং ড্রাফট (${trip.destination_city || "ভ্রমণ"})`
         );
 
         const offlineDraft: any = {
@@ -1202,7 +1497,7 @@ export function BookingSystemScreen({
         });
         goToStep(4);
         setActionMessage(
-          "à¦…à¦«à¦²à¦¾à¦‡à¦¨ à¦¡à§à¦°à¦¾à¦«à¦Ÿ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤ à¦¨à§‡à¦Ÿ à¦¸à¦‚à¦¯à§‹à¦— à¦«à¦¿à¦°à¦²à§‡ à¦¸à§à¦¬à¦¯à¦¼à¦‚à¦•à§à¦°à¦¿à¦¯à¦¼ à¦¸à¦¿à¦™à§à¦• à¦¹à¦¬à§‡à¥¤"
+          "অফলাইন ড্রাফট সফলভাবে সংরক্ষিত হয়েছে। নেট সংযোগ ফিরলে স্বয়ংক্রিয় সিঙ্ক হবে।"
         );
         return;
       }
@@ -1407,10 +1702,10 @@ export function BookingSystemScreen({
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.resumeDraftTitle}>
-                  Ã°Å¸â€œÅ’ Ã Â¦â€¦Ã Â¦Â¸Ã Â¦Â®Ã Â§ÂÃ Â¦ÂªÃ Â§â€šÃ Â¦Â°Ã Â§ÂÃ Â¦Â£ Ã Â¦Â¬Ã Â§ÂÃ Â¦â€¢Ã Â¦Â¿Ã Â¦â€š Ã Â¦â€“Ã Â¦Â¸Ã Â¦Â¡Ã Â¦Â¼Ã Â¦Â¾ Ã Â¦Â°Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡ (Ã Â¦Â§Ã Â¦Â¾Ã Â¦Âª {savedDraftData.currentStep || 1}/Ã Â§Âª)
+                  ðŸ“Œ à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦¬à§à¦•à¦¿à¦‚ à¦–à¦¸à¦¡à¦¼à¦¾ à¦°à¦¯à¦¼à§‡à¦›à§‡ (à¦§à¦¾à¦ª {savedDraftData.currentStep || 1}/à§ª)
                 </Text>
                 <Text style={styles.resumeDraftSub}>
-                  {savedDraftData.trip?.destination_city || "Ã Â¦â€”Ã Â¦Â¨Ã Â§ÂÃ Â¦Â¤Ã Â¦Â¬Ã Â§ÂÃ Â¦Â¯"} Ã¢â‚¬Â¢ {savedDraftData.traveler?.first_name ? `${savedDraftData.traveler.first_name} ${savedDraftData.traveler.last_name}` : "Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¤Ã Â§ÂÃ Â¦Â°Ã Â§â‚¬Ã Â¦Â° Ã Â¦Â¤Ã Â¦Â¥Ã Â§ÂÃ Â¦Â¯ Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â¿Ã Â¦Â¤"}
+                  {savedDraftData.trip?.destination_city || "à¦—à¦¨à§à¦¤à¦¬à§à¦¯"} â€¢ {savedDraftData.traveler?.first_name ? `${savedDraftData.traveler.first_name} ${savedDraftData.traveler.last_name}` : "à¦¯à¦¾à¦¤à§à¦°à§€à¦° à¦¤à¦¥à§à¦¯ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤"}
                 </Text>
                 <View style={styles.resumeDraftActionsRow}>
                   <TouchableOpacity
@@ -1419,7 +1714,7 @@ export function BookingSystemScreen({
                     activeOpacity={0.8}
                   >
                     <Ionicons name="play" size={13} color="#ffffff" />
-                    <Text style={styles.resumeDraftConfirmBtnText}>Ã Â¦Â¬Ã Â§ÂÃ Â¦â€¢Ã Â¦Â¿Ã Â¦â€š Ã Â¦Å¡Ã Â¦Â¾Ã Â¦Â²Ã Â¦Â¿Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡ Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¨</Text>
+                    <Text style={styles.resumeDraftConfirmBtnText}>à¦¬à§à¦•à¦¿à¦‚ à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦¨</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleDiscardDraft}
@@ -1427,7 +1722,7 @@ export function BookingSystemScreen({
                     activeOpacity={0.8}
                   >
                     <Ionicons name="trash-outline" size={13} color="#ef4444" />
-                    <Text style={styles.resumeDraftDiscardBtnText}>Ã Â¦Â¨Ã Â¦Â¤Ã Â§ÂÃ Â¦Â¨ Ã Â¦Â¶Ã Â§ÂÃ Â¦Â°Ã Â§Â Ã Â¦â€¢Ã Â¦Â°Ã Â§ÂÃ Â¦Â¨</Text>
+                    <Text style={styles.resumeDraftDiscardBtnText}>à¦¨à¦¤à§à¦¨ à¦¶à§à¦°à§ à¦•à¦°à§à¦¨</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1476,17 +1771,17 @@ export function BookingSystemScreen({
                     ]}
                   >
                     {isTimerExpired
-                      ? "Ã¢â€ºâ€ Ã Â¦Â¸Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦Â§Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â°Ã Â¦Â¾Ã Â¦â€“Ã Â¦Â¾Ã Â¦Â° Ã Â¦Â®Ã Â§â€¡Ã Â¦Â¯Ã Â¦Â¼Ã Â¦Â¾Ã Â¦Â¦ Ã Â¦Â¶Ã Â§â€¡Ã Â¦Â· Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡!"
+                      ? "â›” à¦¸à¦¿à¦Ÿ à¦§à¦°à§‡ à¦°à¦¾à¦–à¦¾à¦° à¦®à§‡à¦¯à¦¼à¦¾à¦¦ à¦¶à§‡à¦· à¦¹à¦¯à¦¼à§‡à¦›à§‡!"
                       : holdSecondsLeft <= 120
-                        ? `Ã¢Å¡Â Ã¯Â¸Â Ã Â¦Â¸Ã Â¦Â¤Ã Â¦Â°Ã Â§ÂÃ Â¦â€¢Ã Â¦Â¤Ã Â¦Â¾: Ã Â¦Â¸Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦Â§Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â°Ã Â¦Â¾Ã Â¦â€“Ã Â¦Â¾Ã Â¦Â° Ã Â¦Â¸Ã Â¦Â®Ã Â¦Â¯Ã Â¦Â¼ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â¦Â¾Ã Â¦Â¯Ã Â¦Â¼ Ã Â¦Â¶Ã Â§â€¡Ã Â¦Â·! Ã Â¦Â®Ã Â¦Â¾Ã Â¦Â¤Ã Â§ÂÃ Â¦Â° ${Math.floor(holdSecondsLeft / 60)}:${String(holdSecondsLeft % 60).padStart(2, "0")} Ã Â¦Â®Ã Â¦Â¿Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦Â¬Ã Â¦Â¾Ã Â¦â€¢Ã Â¦Â¿`
-                        : `Ã Â¦Â¸Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦â€œ Ã Â¦Å¸Ã Â¦Â¿Ã Â¦â€¢Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦Â§Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â°Ã Â¦Â¾Ã Â¦â€“Ã Â¦Â¾ Ã Â¦Â¹Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡: ${Math.floor(holdSecondsLeft / 60)}:${String(holdSecondsLeft % 60).padStart(2, "0")} Ã Â¦Â®Ã Â¦Â¿Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Å¸`}
+                        ? `âš ï¸ à¦¸à¦¤à¦°à§à¦•à¦¤à¦¾: à¦¸à¦¿à¦Ÿ à¦§à¦°à§‡ à¦°à¦¾à¦–à¦¾à¦° à¦¸à¦®à¦¯à¦¼ à¦ªà§à¦°à¦¾à¦¯à¦¼ à¦¶à§‡à¦·! à¦®à¦¾à¦¤à§à¦° ${Math.floor(holdSecondsLeft / 60)}:${String(holdSecondsLeft % 60).padStart(2, "0")} à¦®à¦¿à¦¨à¦¿à¦Ÿ à¦¬à¦¾à¦•à¦¿`
+                        : `à¦¸à¦¿à¦Ÿ à¦“ à¦Ÿà¦¿à¦•à¦¿à¦Ÿ à¦§à¦°à§‡ à¦°à¦¾à¦–à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡: ${Math.floor(holdSecondsLeft / 60)}:${String(holdSecondsLeft % 60).padStart(2, "0")} à¦®à¦¿à¦¨à¦¿à¦Ÿ`}
                   </Text>
                   <Text style={styles.holdTimerSub}>
                     {isTimerExpired
-                      ? "Ã Â¦Â®Ã Â§â€¡Ã Â¦Â¯Ã Â¦Â¼Ã Â¦Â¾Ã Â¦Â¦ Ã Â¦â€°Ã Â¦Â¤Ã Â§ÂÃ Â¦Â¤Ã Â§â‚¬Ã Â¦Â°Ã Â§ÂÃ Â¦Â£ Ã Â¦Â¹Ã Â¦â€œÃ Â¦Â¯Ã Â¦Â¼Ã Â¦Â¾Ã Â¦Â¯Ã Â¦Â¼ Ã Â¦Â¸Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦ÂªÃ Â¦Â°Ã Â¦Â¿Ã Â¦Â¬Ã Â¦Â°Ã Â§ÂÃ Â¦Â¤Ã Â¦Â¨ Ã Â¦Â¹Ã Â¦Â¤Ã Â§â€¡ Ã Â¦ÂªÃ Â¦Â¾Ã Â¦Â°Ã Â§â€¡Ã Â¥Â¤ Ã Â¦ÂÃ Â¦â€¢ Ã Â¦Å¸Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦ÂªÃ Â§â€¡ Ã Â¦â€ Ã Â¦Â¬Ã Â¦Â¾Ã Â¦Â° Ã Â§Â§Ã Â§Â¦ Ã Â¦Â®Ã Â¦Â¿Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦Â¸Ã Â¦Â®Ã Â¦Â¯Ã Â¦Â¼ Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Â¨Ã Â¥Â¤"
+                      ? "à¦®à§‡à¦¯à¦¼à¦¾à¦¦ à¦‰à¦¤à§à¦¤à§€à¦°à§à¦£ à¦¹à¦“à¦¯à¦¼à¦¾à¦¯à¦¼ à¦¸à¦¿à¦Ÿ à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦¹à¦¤à§‡ à¦ªà¦¾à¦°à§‡à¥¤ à¦à¦• à¦Ÿà§à¦¯à¦¾à¦ªà§‡ à¦†à¦¬à¦¾à¦° à§§à§¦ à¦®à¦¿à¦¨à¦¿à¦Ÿ à¦¸à¦®à¦¯à¦¼ à¦¨à¦¿à¦¨à¥¤"
                       : holdSecondsLeft <= 120
-                        ? "Ã Â¦â€¦Ã Â¦Â¨Ã Â§ÂÃ Â¦Â¯ Ã Â¦â€”Ã Â§ÂÃ Â¦Â°Ã Â¦Â¾Ã Â¦Â¹Ã Â¦â€¢ Ã Â¦Â¬Ã Â§ÂÃ Â¦â€¢ Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾Ã Â¦Â° Ã Â¦â€ Ã Â¦â€”Ã Â§â€¡Ã Â¦â€¡ Ã Â¦Â¦Ã Â§ÂÃ Â¦Â°Ã Â§ÂÃ Â¦Â¤ Ã Â¦â€ Ã Â¦ÂªÃ Â¦Â¨Ã Â¦Â¾Ã Â¦Â° Ã Â¦ÂªÃ Â§â€¡Ã Â¦Â®Ã Â§â€¡Ã Â¦Â¨Ã Â§ÂÃ Â¦Å¸ Ã Â¦Â¸Ã Â¦Â®Ã Â§ÂÃ Â¦ÂªÃ Â¦Â¨Ã Â§ÂÃ Â¦Â¨ Ã Â¦â€¢Ã Â¦Â°Ã Â§ÂÃ Â¦Â¨Ã Â¥Â¤"
-                        : "Ã Â¦â€ Ã Â¦ÂªÃ Â¦Â¨Ã Â¦Â¾Ã Â¦Â° Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Â°Ã Â§ÂÃ Â¦Â¬Ã Â¦Â¾Ã Â¦Å¡Ã Â¦Â¿Ã Â¦Â¤ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦â€¢Ã Â§â€¡Ã Â¦Å“ Ã Â¦â€œ Ã Â¦Â¸Ã Â¦Â¿Ã Â¦Å¸ Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Â°Ã Â§ÂÃ Â¦Â¦Ã Â¦Â¿Ã Â¦Â·Ã Â§ÂÃ Â¦Å¸ Ã Â¦Â¸Ã Â¦Â®Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦Â° Ã Â¦Å“Ã Â¦Â¨Ã Â§ÂÃ Â¦Â¯ Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â¿Ã Â¦Â¤ Ã Â¦Â°Ã Â¦Â¯Ã Â¦Â¼Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡Ã Â¥Â¤"}
+                        ? "à¦…à¦¨à§à¦¯ à¦—à§à¦°à¦¾à¦¹à¦• à¦¬à§à¦• à¦•à¦°à¦¾à¦° à¦†à¦—à§‡à¦‡ à¦¦à§à¦°à§à¦¤ à¦†à¦ªà¦¨à¦¾à¦° à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦¸à¦®à§à¦ªà¦¨à§à¦¨ à¦•à¦°à§à¦¨à¥¤"
+                        : "à¦†à¦ªà¦¨à¦¾à¦° à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¿à¦¤ à¦ªà§à¦¯à¦¾à¦•à§‡à¦œ à¦“ à¦¸à¦¿à¦Ÿ à¦¨à¦¿à¦°à§à¦¦à¦¿à¦·à§à¦Ÿ à¦¸à¦®à¦¯à¦¼à§‡à¦° à¦œà¦¨à§à¦¯ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦°à¦¯à¦¼à§‡à¦›à§‡à¥¤"}
                   </Text>
                 </View>
               </View>
@@ -1498,7 +1793,7 @@ export function BookingSystemScreen({
                   activeOpacity={0.8}
                 >
                   <Ionicons name="refresh" size={13} color="#ffffff" />
-                  <Text style={styles.reholdSeatBtnText}>Ã Â¦ÂªÃ Â§ÂÃ Â¦Â¨Ã Â¦Â°Ã Â¦Â¾Ã Â¦Â¯Ã Â¦Â¼ Ã Â¦Â§Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â°Ã Â¦Â¾Ã Â¦â€“Ã Â§ÂÃ Â¦Â¨ (Ã Â§Â§Ã Â§Â¦ Ã Â¦Â®Ã Â¦Â¿Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Å¸)</Text>
+                  <Text style={styles.reholdSeatBtnText}>à¦ªà§à¦¨à¦°à¦¾à¦¯à¦¼ à¦§à¦°à§‡ à¦°à¦¾à¦–à§à¦¨ (à§§à§¦ à¦®à¦¿à¦¨à¦¿à¦Ÿ)</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -1587,18 +1882,18 @@ export function BookingSystemScreen({
             </ScrollView>
           </View>
 
-          {/* Stepper Header (Requirement 3: Universal Step Indicator with "Ã Â¦Â§Ã Â¦Â¾Ã Â¦Âª Ã Â§Â¨/Ã Â§Âª" & Interactive Tapping) */}
+          {/* Stepper Header (Requirement 3: Universal Step Indicator with "à¦§à¦¾à¦ª à§¨/à§ª" & Interactive Tapping) */}
           <View style={styles.stepperCard}>
             {/* Top Indicator Badge & Progress Line */}
             <View style={styles.stepHeaderTopRow}>
               <View style={styles.stepHeaderPill}>
                 <Ionicons name="navigate-circle-outline" size={16} color={primary} />
                 <Text style={styles.stepHeaderPillText}>
-                  Ã Â¦Â§Ã Â¦Â¾Ã Â¦Âª {currentStep}/Ã Â§Âª: {STEP_TITLES[currentStep]}
+                  à¦§à¦¾à¦ª {currentStep}/à§ª: {STEP_TITLES[currentStep]}
                 </Text>
               </View>
               <Text style={styles.stepSubtitleHint}>
-                Ã Â¦â€ Ã Â¦â€”Ã Â§â€¡Ã Â¦Â° Ã Â¦Â§Ã Â¦Â¾Ã Â¦ÂªÃ Â§â€¡ Ã Â¦Å¸Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦Âª Ã Â¦â€¢Ã Â¦Â°Ã Â§â€¡ Ã Â¦Â«Ã Â¦Â¿Ã Â¦Â°Ã Â¦Â¤Ã Â§â€¡ Ã Â¦ÂªÃ Â¦Â¾Ã Â¦Â°Ã Â§â€¡Ã Â¦Â¨
+                à¦†à¦—à§‡à¦° à¦§à¦¾à¦ªà§‡ à¦Ÿà§à¦¯à¦¾à¦ª à¦•à¦°à§‡ à¦«à¦¿à¦°à¦¤à§‡ à¦ªà¦¾à¦°à§‡à¦¨
               </Text>
             </View>
 
@@ -1650,7 +1945,7 @@ export function BookingSystemScreen({
                     currentStep === 1 && styles.stepLabelActive,
                   ]}
                 >
-                  Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¤Ã Â§ÂÃ Â¦Â°Ã Â§â‚¬ (Traveler)
+                  à¦¯à¦¾à¦¤à§à¦°à§€ (Traveler)
                 </Text>
               </TouchableOpacity>
 
@@ -1700,7 +1995,7 @@ export function BookingSystemScreen({
                     currentStep === 2 && styles.stepLabelActive,
                   ]}
                 >
-                  Ã Â¦â€¦Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦Â¡-Ã Â¦â€¦Ã Â¦Â¨ (Addons)
+                  à¦…à§à¦¯à¦¾à¦¡-à¦…à¦¨ (Addons)
                 </Text>
               </TouchableOpacity>
 
@@ -1748,7 +2043,7 @@ export function BookingSystemScreen({
                     currentStep === 3 && styles.stepLabelActive,
                   ]}
                 >
-                  Ã Â¦Â¸Ã Â¦Â¾Ã Â¦Â°Ã Â¦Â¾Ã Â¦â€šÃ Â¦Â¶ (Summary)
+                  à¦¸à¦¾à¦°à¦¾à¦‚à¦¶ (Summary)
                 </Text>
               </TouchableOpacity>
 
@@ -1790,7 +2085,7 @@ export function BookingSystemScreen({
                     currentStep === 4 && styles.stepLabelActive,
                   ]}
                 >
-                  Ã Â¦ÂªÃ Â§â€¡Ã Â¦Â®Ã Â§â€¡Ã Â¦Â¨Ã Â§ÂÃ Â¦Å¸ (Payment)
+                  à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ (Payment)
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1831,7 +2126,7 @@ export function BookingSystemScreen({
                     accessibilityLabel="Choose from saved passengers"
                   >
                     <Ionicons color={primary} name="people-outline" size={14} />
-                    <Text style={styles.demoFillBtnText}>Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â¿Ã Â¦Â¤ Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¤Ã Â§ÂÃ Â¦Â°Ã Â§â‚¬ ({savedPassengers.length})</Text>
+                    <Text style={styles.demoFillBtnText}>à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¯à¦¾à¦¤à§à¦°à§€ ({savedPassengers.length})</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1840,7 +2135,7 @@ export function BookingSystemScreen({
                     accessibilityLabel="Auto-fill from Profile"
                   >
                     <Ionicons color="#10b981" name="person-circle-outline" size={14} />
-                    <Text style={[styles.demoFillBtnText, { color: "#10b981" }]}>Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â§â€¹Ã Â¦Â«Ã Â¦Â¾Ã Â¦â€¡Ã Â¦Â² Ã Â¦â€¦Ã Â¦Å¸Ã Â§â€¹Ã Â¦Â«Ã Â¦Â¿Ã Â¦Â²</Text>
+                    <Text style={[styles.demoFillBtnText, { color: "#10b981" }]}>à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦…à¦Ÿà§‹à¦«à¦¿à¦²</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1860,7 +2155,7 @@ export function BookingSystemScreen({
                   <View style={{ flex: 1 }}>
                     <Text style={styles.routeKicker}>Routing</Text>
                     <Text style={styles.routeTitle}>
-                      {trip.origin_city} Ã¢â€ â€™ {trip.destination_city},{" "}
+                      {trip.origin_city} â†’ {trip.destination_city},{" "}
                       {trip.destination_country}
                     </Text>
                   </View>
@@ -1985,18 +2280,18 @@ export function BookingSystemScreen({
                 <View style={styles.dataAssuranceHeader}>
                   <Ionicons name="shield-checkmark" size={18} color="#059669" />
                   <Text style={styles.dataAssuranceTitle}>
-                    à¦¬à§à¦¯à¦•à§à¦¤à¦¿à¦—à¦¤ à¦¤à¦¥à§à¦¯à§‡à¦° à¦¨à¦¿à¦°à¦¾à¦ªà¦¤à§à¦¤à¦¾ à¦“ à¦†à¦‡à¦¨à¦¿ à¦ªà§à¦°à§Ÿà§‹à¦œà¦¨à§€à§Ÿà¦¤à¦¾
+                    ব্যক্তিগত তথ্যের নিরাপত্তা ও আইনি প্রয়োজনীয়তা
                   </Text>
                 </View>
                 <Text style={styles.dataAssuranceDesc}>
-                  à¦†à¦¨à§à¦¤à¦°à§à¦œà¦¾à¦¤à¦¿à¦• à¦¬à§‡à¦¸à¦¾à¦®à¦°à¦¿à¦• à¦¬à¦¿à¦®à¦¾à¦¨ à¦šà¦²à¦¾à¦šà¦² à¦¸à¦‚à¦¸à§à¦¥à¦¾ (ICAO) à¦“ à¦‡à¦®à¦¿à¦—à§à¦°à§‡à¦¶à¦¨ à¦¨à¦¿à§Ÿà¦® à¦…à¦¨à§à¦¯à¦¾à§Ÿà§€ à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦“ NID à¦†à¦¬à¦¶à§à¦¯à¦•à¥¤ à¦†à¦ªà¦¨à¦¾à¦° à¦¸à¦•à¦² à¦¤à¦¥à§à¦¯ AES-256 à¦¬à¦¿à¦Ÿ à¦à¦¨à¦•à§à¦°à¦¿à¦ªà¦¶à¦¨à§‡ à¦¸à§à¦°à¦•à§à¦·à¦¿à¦¤ à¦°à¦¾à¦–à¦¾ à¦¹à§Ÿà¥¤
+                  আন্তর্জাতিক বেসামরিক বিমান চলাচল সংস্থা (ICAO) ও ইমিগ্রেশন নিয়ম অনুযায়ী পাসপোর্ট ও NID আবশ্যক। আপনার সকল তথ্য AES-256 বিট এনক্রিপশনে সুরক্ষিত রাখা হয়।
                 </Text>
               </View>
 
               <ValidatedField
-                label="à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦¨à¦®à§à¦¬à¦° (Passport Number) *"
+                label="পাসপোর্ট নম্বর (Passport Number) *"
                 value={traveler.passport_number}
-                securityNote="à¦à¦¯à¦¼à¦¾à¦°à¦²à¦¾à¦‡à¦¨ à¦¨à¦¿à¦¯à¦¼à¦® à¦…à¦¨à§à¦¯à¦¾à¦¯à¦¼à§€ à¦¦à¦°à¦•à¦¾à¦°, à¦à¦¨à¦•à§à¦°à¦¿à¦ªà§à¦Ÿà§‡à¦¡ à¦¥à¦¾à¦•à§‡"
+                securityNote="এয়ারলাইন নিয়ম অনুযায়ী দরকার, এনক্রিপ্টেড থাকে"
                 isMaskable={true}
                 onChangeText={(val) =>
                   handleTravelerFieldChange(
@@ -2014,9 +2309,9 @@ export function BookingSystemScreen({
               />
 
               <ValidatedField
-                label="à¦œà¦¾à¦¤à§€à¦¯à¦¼ à¦ªà¦°à¦¿à¦šà¦¯à¦¼à¦ªà¦¤à§à¦° / NID (National ID) *"
+                label="জাতীয় পরিচয়পত্র / NID (National ID) *"
                 value={traveler.national_id}
-                securityNote="à¦†à¦‡à¦¨à¦—à¦¤ à¦ªà¦°à¦¿à¦šà¦¯à¦¼ à¦¯à¦¾à¦šà¦¾à¦‡à¦¯à¦¼à§‡à¦° à¦œà¦¨à§à¦¯ à¦†à¦¬à¦¶à§à¦¯à¦•, à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦à¦¨à¦•à§à¦°à¦¿à¦ªà§à¦Ÿà§‡à¦¡"
+                securityNote="আইনগত পরিচয় যাচাইয়ের জন্য আবশ্যক, সম্পূর্ণ এনক্রিপ্টেড"
                 isMaskable={true}
                 onChangeText={(val) =>
                   handleTravelerFieldChange("national_id", val)
@@ -2081,7 +2376,7 @@ export function BookingSystemScreen({
               >
                 <Ionicons name="bookmark-outline" size={15} color="#2563eb" />
                 <Text style={styles.saveTravelerSecondaryBtnText}>
-                  Ã Â¦Â­Ã Â¦Â¬Ã Â¦Â¿Ã Â¦Â·Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¤Ã Â§â€¡Ã Â¦Â° Ã Â¦Å“Ã Â¦Â¨Ã Â§ÂÃ Â¦Â¯ Ã Â¦ÂÃ Â¦â€¡ Ã Â¦Â¯Ã Â¦Â¾Ã Â¦Â¤Ã Â§ÂÃ Â¦Â°Ã Â§â‚¬Ã Â¦Â° Ã Â¦Â¤Ã Â¦Â¥Ã Â§ÂÃ Â¦Â¯ Ã Â¦Â¸Ã Â¦â€šÃ Â¦Â°Ã Â¦â€¢Ã Â§ÂÃ Â¦Â·Ã Â¦Â£ Ã Â¦â€¢Ã Â¦Â°Ã Â§ÂÃ Â¦Â¨ (Save Traveler)
+                  à¦­à¦¬à¦¿à¦·à§à¦¯à¦¤à§‡à¦° à¦œà¦¨à§à¦¯ à¦à¦‡ à¦¯à¦¾à¦¤à§à¦°à§€à¦° à¦¤à¦¥à§à¦¯ à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦•à¦°à§à¦¨ (Save Traveler)
                 </Text>
               </TouchableOpacity>
 
@@ -2090,7 +2385,7 @@ export function BookingSystemScreen({
                 style={styles.primaryButton}
               >
                 <Text style={styles.primaryButtonText}>
-                  Validate & Continue to Addons Ã¢â€ â€™
+                  Validate & Continue to Addons â†’
                 </Text>
               </Pressable>
             </View>
@@ -2355,7 +2650,7 @@ export function BookingSystemScreen({
                   style={styles.continueButton}
                 >
                   <Text style={styles.continueButtonText}>
-                    Review Fare Summary Ã¢â€ â€™
+                    Review Fare Summary â†’
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -2464,15 +2759,15 @@ export function BookingSystemScreen({
 
                 {/* Full Promo Card List - Requirement 5 */}
                 <Text style={styles.promoSuggestionsLabel}>
-                  à¦ªà§à¦°à¦¯à§‹à¦œà§à¦¯ à¦•à§à¦ªà¦¨ à¦•à§‹à¦¡ à¦¤à¦¾à¦²à¦¿à¦•à¦¾ (Tap to Apply):
+                  প্রযোজ্য কুপন কোড তালিকা (Tap to Apply):
                 </Text>
                 {REGISTERED_PROMOS.map((p) => {
                   const isCurrent = store.appliedPromo?.code === p.code;
                   const catMap: Record<string, string> = {
-                    all: "à¦¸à¦•à¦² à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸", flight: "à¦«à§à¦²à¦¾à¦‡à¦Ÿ", hotel: "à¦¹à§‹à¦Ÿà§‡à¦²", tour: "à¦Ÿà§à¦¯à§à¦°", bus: "à¦¬à¦¾à¦¸",
+                    all: "সকল সার্ভিস", flight: "ফ্লাইট", hotel: "হোটেল", tour: "ট্যুর", bus: "বাস",
                   };
-                  const catLabel = catMap[p.applicableCategory || "all"] || p.applicableCategory || "à¦¸à¦•à¦²";
-                  const discountLabel = p.discountType === "percentage" ? p.discountValue + "% à¦›à¦¾à¦¡à¦¼" : "$" + p.discountValue + " à¦«à§à¦²à§à¦¯à¦¾à¦Ÿ à¦›à¦¾à¦¡à¦¼";
+                  const catLabel = catMap[p.applicableCategory || "all"] || p.applicableCategory || "সকল";
+                  const discountLabel = p.discountType === "percentage" ? p.discountValue + "% ছাড়" : "$" + p.discountValue + " ফ্ল্যাট ছাড়";
                   return (
                     <TouchableOpacity
                       key={p.code}
@@ -2489,21 +2784,21 @@ export function BookingSystemScreen({
                           </View>
                           <Text style={[styles.promoFullCardDesc, isCurrent && { color: "#d1fae5" }]}>{p.description}</Text>
                           <Text style={[styles.promoFullCardMetaText, isCurrent && { color: "#a7f3d0" }]}>
-                            ðŸ· {catLabel} â€¢ à¦®à¦¿à¦¨:  â€¢ à¦®à§‡à¦¯à¦¼à¦¾à¦¦: {p.expiryDate}
+                            🏷 {catLabel} • মিন:  • মেয়াদ: {p.expiryDate}
                           </Text>
                         </View>
                       </View>
                       <View style={[styles.promoApplyChip, isCurrent && styles.promoApplyChipActive]}>
                         {isCurrent
                           ? <Ionicons name="checkmark-circle" size={16} color="#fff" />
-                          : <Text style={styles.promoApplyChipText}>à¦ªà§à¦°à¦¯à¦¼à§‹à¦—</Text>}
+                          : <Text style={styles.promoApplyChipText}>প্রয়োগ</Text>}
                       </View>
                     </TouchableOpacity>
                   );
                 })}
               </View>
 
-              {/* REQUIREMENT: POINTS REDEMPTION IN BOOKING CHECKOUT (à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§à¦¨ (âˆ’à§³à§¨à§«à§¦)) */}
+              {/* REQUIREMENT: POINTS REDEMPTION IN BOOKING CHECKOUT (পয়েন্ট ব্যবহার করুন (−৳২৫০)) */}
               <View style={styles.pointsRedeemCard}>
                 <View style={styles.pointsRedeemTopRow}>
                   <View style={styles.pointsIconBubble}>
@@ -2511,13 +2806,13 @@ export function BookingSystemScreen({
                   </View>
                   <View style={{ flex: 1 }}>
                     <View style={styles.pointsTitleRow}>
-                      <Text style={styles.pointsRedeemTitle}>à¦²à¦¯à¦¼à§à¦¯à¦¾à¦²à¦Ÿà¦¿ à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§à¦¨</Text>
+                      <Text style={styles.pointsRedeemTitle}>লয়্যালটি পয়েন্ট ব্যবহার করুন</Text>
                       <View style={styles.pointsRateBadge}>
-                        <Text style={styles.pointsRateBadgeText}>à§§à§¦à§¦ à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ = à§³à§§à§¦</Text>
+                        <Text style={styles.pointsRateBadgeText}>১০০ পয়েন্ট = ৳১০</Text>
                       </View>
                     </View>
                     <Text style={styles.pointsBalanceSubText}>
-                      à¦†à¦ªà¦¨à¦¾à¦° à¦¬à§à¦¯à¦¾à¦²à§‡à¦¨à§à¦¸: à§¨,à§«à§¦à§¦ à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ (à¦¨à¦—à¦¦ à¦®à§‚à¦²à§à¦¯: à§³à§¨à§«à§¦)
+                      আপনার ব্যালেন্স: ২,৫০০ পয়েন্ট (নগদ মূল্য: ৳২৫০)
                     </Text>
                   </View>
                 </View>
@@ -2535,12 +2830,12 @@ export function BookingSystemScreen({
                 >
                   <View style={{ flex: 1, paddingEnd: 10 }}>
                     <Text style={[styles.pointsToggleLabel, usePointsDiscount && styles.pointsToggleLabelActive]}>
-                      à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§à¦¨ (âˆ’à§³à§¨à§«à§¦)
+                      পয়েন্ট ব্যবহার করুন (−৳২৫০)
                     </Text>
                     <Text style={styles.pointsToggleSub}>
                       {usePointsDiscount
-                        ? "âœ“ à§¨,à§«à§¦à§¦ à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ à¦ªà§à¦°à¦¯à¦¼à§‹à¦— à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡ (à¦®à§‹à¦Ÿ à¦­à¦¾à¦¡à¦¼à¦¾ à¦¥à§‡à¦•à§‡ à§³à§¨à§«à§¦ à¦¬à¦¾à¦¦)"
-                        : "à¦šà§‡à¦•à¦†à¦‰à¦Ÿ à¦¥à§‡à¦•à§‡ à§¨,à§«à§¦à§¦ à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§‡ à§³à§¨à§«à§¦ à¦¸à¦¾à¦¶à§à¦°à¦¯à¦¼ à¦•à¦°à§à¦¨"}
+                        ? "✓ ২,৫০০ পয়েন্ট প্রয়োগ করা হয়েছে (মোট ভাড়া থেকে ৳২৫০ বাদ)"
+                        : "চেকআউট থেকে ২,৫০০ পয়েন্ট ব্যবহার করে ৳২৫০ সাশ্রয় করুন"}
                     </Text>
                   </View>
 
@@ -2556,7 +2851,7 @@ export function BookingSystemScreen({
                   <View style={styles.pointsAppliedConfirmation}>
                     <Ionicons name="checkmark-circle" size={15} color="#10B981" />
                     <Text style={styles.pointsAppliedText}>
-                      à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à§³à§¨à§«à§¦ à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ à¦¡à¦¿à¦¸à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦®à§‹à¦Ÿ à¦­à¦¾à¦¡à¦¼à¦¾à¦¯à¦¼ à¦ªà§à¦°à¦¯à¦¼à§‹à¦— à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡!
+                      সফলভাবে ৳২৫০ পয়েন্ট ডিসকাউন্ট মোট ভাড়ায় প্রয়োগ করা হয়েছে!
                     </Text>
                   </View>
                 )}
@@ -2602,7 +2897,7 @@ export function BookingSystemScreen({
                 {/* Sub-itemization box for transparency */}
                 <View style={styles.itemizedBox}>
                   <View style={styles.itemizedRow}>
-                    <Text style={styles.itemizedLabel}>Ã¢â‚¬Â¢ 2% System & Payment Fee</Text>
+                    <Text style={styles.itemizedLabel}>â€¢ 2% System & Payment Fee</Text>
                     <Text style={styles.itemizedVal}>
                       +{formatCurrency(pricingCalculation.platformServiceFee, currency)}
                     </Text>
@@ -2610,7 +2905,7 @@ export function BookingSystemScreen({
                   {addons.travelInsurance ? (
                     <View style={styles.itemizedRow}>
                       <Text style={styles.itemizedLabel}>
-                        Ã¢â‚¬Â¢ Travel Medical Insurance ({trip.number_of_guests}x)
+                        â€¢ Travel Medical Insurance ({trip.number_of_guests}x)
                       </Text>
                       <Text style={styles.itemizedVal}>
                         +{formatCurrency(pricingCalculation.insuranceCost, currency)}
@@ -2620,7 +2915,7 @@ export function BookingSystemScreen({
                   {addons.extraLuggageCount > 0 ? (
                     <View style={styles.itemizedRow}>
                       <Text style={styles.itemizedLabel}>
-                        Ã¢â‚¬Â¢ Extra Checked Baggage ({addons.extraLuggageCount} bag)
+                        â€¢ Extra Checked Baggage ({addons.extraLuggageCount} bag)
                       </Text>
                       <Text style={styles.itemizedVal}>
                         +{formatCurrency(pricingCalculation.luggageCost, currency)}
@@ -2630,7 +2925,7 @@ export function BookingSystemScreen({
                   {addons.inFlightMealsCount > 0 ? (
                     <View style={styles.itemizedRow}>
                       <Text style={styles.itemizedLabel}>
-                        Ã¢â‚¬Â¢ Gourmet Catering ({addons.inFlightMealsCount} meal)
+                        â€¢ Gourmet Catering ({addons.inFlightMealsCount} meal)
                       </Text>
                       <Text style={styles.itemizedVal}>
                         +{formatCurrency(pricingCalculation.mealsCost, currency)}
@@ -2640,7 +2935,7 @@ export function BookingSystemScreen({
                   {addons.airportLoungeAccess ? (
                     <View style={styles.itemizedRow}>
                       <Text style={styles.itemizedLabel}>
-                        Ã¢â‚¬Â¢ VIP Fast-Track & Lounge
+                        â€¢ VIP Fast-Track & Lounge
                       </Text>
                       <Text style={styles.itemizedVal}>
                         +{formatCurrency(pricingCalculation.loungeCost, currency)}
@@ -2661,7 +2956,7 @@ export function BookingSystemScreen({
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                       <Ionicons color="#10b981" name="sparkles" size={14} />
                       <Text style={[styles.breakdownLabel, { color: "#10b981", fontWeight: "700" }]}>
-                        - à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° (à§¨,à§«à§¦à§¦ à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ)
+                        - পয়েন্ট ব্যবহার (২,৫০০ পয়েন্ট)
                       </Text>
                     </View>
                     <Text style={[styles.breakdownValue, styles.pointsDiscountText]}>
@@ -2691,37 +2986,37 @@ export function BookingSystemScreen({
                 <View style={styles.policyHeader}>
                   <Ionicons name="shield-checkmark-outline" size={18} color="#b45309" />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.policyTitle}>à¦¬à¦¾à¦¤à¦¿à¦²à§‡à¦° à¦¨à§€à¦¤à¦¿ à¦“ à¦¶à¦°à§à¦¤à¦¾à¦¬à¦²à§€ (Cancellation Policy)</Text>
-                    <Text style={styles.policySubtitle}>à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿà§‡à¦° à¦†à¦—à§‡ à¦®à¦¨à§‹à¦¯à§‹à¦— à¦¦à¦¿à¦¯à¦¼à§‡ à¦ªà¦¡à¦¼à§à¦¨</Text>
+                    <Text style={styles.policyTitle}>বাতিলের নীতি ও শর্তাবলী (Cancellation Policy)</Text>
+                    <Text style={styles.policySubtitle}>পেমেন্টের আগে মনোযোগ দিয়ে পড়ুন</Text>
                   </View>
                 </View>
                 <View style={styles.policyTimeline}>
                   <View style={styles.policyStep}>
                     <View style={[styles.policyDot, { backgroundColor: "#22c55e" }]} />
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.policyStepTitle}>à§ªà§®+ à¦˜à¦£à§à¦Ÿà¦¾ à¦†à¦—à§‡ à¦¬à¦¾à¦¤à¦¿à¦² â†’ à§¯à§¦% à¦«à§‡à¦°à¦¤</Text>
-                      <Text style={styles.policyStepDesc}>à¦ªà§à¦°à¦¸à§à¦¥à¦¾à¦¨ à¦¤à¦¾à¦°à¦¿à¦–à§‡à¦° à§ªà§® à¦˜à¦£à§à¦Ÿà¦¾à¦°à¦“ à¦¬à§‡à¦¶à¦¿ à¦†à¦—à§‡ à¦¬à¦¾à¦¤à¦¿à¦² à¦•à¦°à¦²à§‡ à¦®à§‹à¦Ÿ à¦ªà¦°à¦¿à¦¶à§‹à¦§à¦¿à¦¤ à¦…à¦°à§à¦¥à§‡à¦° à§¯à§¦% à¦«à§‡à¦°à¦¤ à¦ªà¦¾à¦¬à§‡à¦¨à¥¤ à§§à§¦% à¦ªà§à¦²à§à¦¯à¦¾à¦Ÿà¦«à¦°à§à¦® à¦ªà§à¦°à¦¸à§‡à¦¸à¦¿à¦‚ à¦«à¦¿ à¦•à¦¾à¦Ÿà¦¾ à¦¹à¦¬à§‡à¥¤</Text>
+                      <Text style={styles.policyStepTitle}>৪৮+ ঘণ্টা আগে বাতিল → ৯০% ফেরত</Text>
+                      <Text style={styles.policyStepDesc}>প্রস্থান তারিখের ৪৮ ঘণ্টারও বেশি আগে বাতিল করলে মোট পরিশোধিত অর্থের ৯০% ফেরত পাবেন। ১০% প্ল্যাটফর্ম প্রসেসিং ফি কাটা হবে।</Text>
                     </View>
                   </View>
                   <View style={styles.policyStep}>
                     <View style={[styles.policyDot, { backgroundColor: "#f59e0b" }]} />
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.policyStepTitle}>à§¨à§ªâ€“à§ªà§® à¦˜à¦£à§à¦Ÿà¦¾à¦° à¦®à¦§à§à¦¯à§‡ à¦¬à¦¾à¦¤à¦¿à¦² â†’ à§«à§¦% à¦«à§‡à¦°à¦¤</Text>
-                      <Text style={styles.policyStepDesc}>à¦ªà§à¦°à¦¸à§à¦¥à¦¾à¦¨ à¦¤à¦¾à¦°à¦¿à¦–à§‡à¦° à§¨à§ªâ€“à§ªà§® à¦˜à¦£à§à¦Ÿà¦¾à¦° à¦®à¦§à§à¦¯à§‡ à¦¬à¦¾à¦¤à¦¿à¦² à¦•à¦°à¦²à§‡ à¦®à§‹à¦Ÿ à¦ªà¦°à¦¿à¦¶à§‹à¦§à¦¿à¦¤ à¦…à¦°à§à¦¥à§‡à¦° à§«à§¦% à¦«à§‡à¦°à¦¤ à¦ªà¦¾à¦¬à§‡à¦¨à¥¤</Text>
+                      <Text style={styles.policyStepTitle}>২৪–৪৮ ঘণ্টার মধ্যে বাতিল → ৫০% ফেরত</Text>
+                      <Text style={styles.policyStepDesc}>প্রস্থান তারিখের ২৪–৪৮ ঘণ্টার মধ্যে বাতিল করলে মোট পরিশোধিত অর্থের ৫০% ফেরত পাবেন।</Text>
                     </View>
                   </View>
                   <View style={styles.policyStep}>
                     <View style={[styles.policyDot, { backgroundColor: "#ef4444" }]} />
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.policyStepTitle}>à§¨à§ª à¦˜à¦£à§à¦Ÿà¦¾à¦° à¦•à¦® à¦¸à¦®à¦¯à¦¼à§‡ à¦¬à¦¾à¦¤à¦¿à¦² â†’ à¦«à§‡à¦°à¦¤ à¦¨à§‡à¦‡</Text>
-                      <Text style={styles.policyStepDesc}>à¦ªà§à¦°à¦¸à§à¦¥à¦¾à¦¨ à¦¤à¦¾à¦°à¦¿à¦–à§‡à¦° à§¨à§ª à¦˜à¦£à§à¦Ÿà¦¾à¦°à¦“ à¦•à¦® à¦¸à¦®à¦¯à¦¼à§‡ à¦¬à¦¾à¦¤à¦¿à¦² à¦•à¦°à¦²à§‡ à¦•à§‹à¦¨à§‹ à¦…à¦°à§à¦¥ à¦«à§‡à¦°à¦¤ à¦¦à§‡à¦“à¦¯à¦¼à¦¾ à¦¹à¦¬à§‡ à¦¨à¦¾à¥¤ à¦Ÿà§à¦°à¦¾à¦­à§‡à¦² à¦‡à¦¨à§à¦¸à§à¦¯à§à¦°à§‡à¦¨à§à¦¸ à¦¨à¦¿à¦²à§‡ à¦à¦‡ à¦¨à¦¿à¦¯à¦¼à¦®à¦Ÿà¦¿ à¦ªà§à¦°à¦¯à§‹à¦œà§à¦¯ à¦¨à¦¾à¦“ à¦¹à¦¤à§‡ à¦ªà¦¾à¦°à§‡à¥¤</Text>
+                      <Text style={styles.policyStepTitle}>২৪ ঘণ্টার কম সময়ে বাতিল → ফেরত নেই</Text>
+                      <Text style={styles.policyStepDesc}>প্রস্থান তারিখের ২৪ ঘণ্টারও কম সময়ে বাতিল করলে কোনো অর্থ ফেরত দেওয়া হবে না। ট্রাভেল ইন্স্যুরেন্স নিলে এই নিয়মটি প্রযোজ্য নাও হতে পারে।</Text>
                     </View>
                   </View>
                 </View>
                 <View style={styles.policyNoteBox}>
                   <Ionicons name="information-circle-outline" size={14} color="#92400e" />
                   <Text style={styles.policyNoteText}>
-                    à¦«à§‡à¦°à¦¤ à¦¸à¦‚à¦•à§à¦°à¦¾à¦¨à§à¦¤ à¦¯à§‡à¦•à§‹à¦¨à§‹ à¦ªà§à¦°à¦¶à§à¦¨à§‡à¦° à¦œà¦¨à§à¦¯ support@trevelagency.com à¦…à¦¥à¦¬à¦¾ à¦…à§à¦¯à¦¾à¦ªà§‡à¦° Help à¦¸à§‡à¦•à¦¶à¦¨à§‡ à¦¯à§‹à¦—à¦¾à¦¯à§‹à¦— à¦•à¦°à§à¦¨à¥¤
+                    ফেরত সংক্রান্ত যেকোনো প্রশ্নের জন্য support@trevelagency.com অথবা অ্যাপের Help সেকশনে যোগাযোগ করুন।
                   </Text>
                 </View>
                 <Pressable
@@ -2732,12 +3027,12 @@ export function BookingSystemScreen({
                     {hasAgreedToPolicy && <Ionicons name="checkmark" size={14} color="#fff" />}
                   </View>
                   <Text style={styles.checkboxLabel}>
-                    à¦†à¦®à¦¿ à¦‰à¦ªà¦°à§‡à¦° à¦¬à¦¾à¦¤à¦¿à¦²à§‡à¦° à¦¨à§€à¦¤à¦¿, à¦«à§‡à¦°à¦¤-à¦¶à¦°à§à¦¤ à¦“ à¦¨à¦¿à¦¯à¦¼à¦®-à¦¶à¦°à§à¦¤à¦¾à¦¬à¦²à§€ à¦ªà¦¡à¦¼à§‡à¦›à¦¿ à¦à¦¬à¦‚ à¦¸à¦®à§à¦®à¦¤ à¦†à¦›à¦¿à¥¤ *
+                    আমি উপরের বাতিলের নীতি, ফেরত-শর্ত ও নিয়ম-শর্তাবলী পড়েছি এবং সম্মত আছি। *
                   </Text>
                 </Pressable>
                 {policyError && (
                   <Text style={styles.promoErrorText}>
-                    âš ï¸ à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿà§‡ à¦à¦—à¦¿à¦¯à¦¼à§‡ à¦¯à§‡à¦¤à§‡ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦¨à§€à¦¤à¦¿à¦®à¦¾à¦²à¦¾à¦¯à¦¼ à¦¸à¦®à§à¦®à¦¤à¦¿ à¦¦à¦¿à¦¨à¥¤
+                    ⚠️ পেমেন্টে এগিয়ে যেতে অনুগ্রহ করে নীতিমালায় সম্মতি দিন।
                   </Text>
                 )}
               </View>
@@ -2765,7 +3060,7 @@ export function BookingSystemScreen({
                     <ActivityIndicator color="#fff" />
                   ) : (
                     <Text style={styles.primaryButtonText}>
-                      Create Draft & Continue to Pay Ã¢â€ â€™
+                      Create Draft & Continue to Pay â†’
                     </Text>
                   )}
                 </Pressable>
@@ -2836,9 +3131,9 @@ export function BookingSystemScreen({
                           <Ionicons name="airplane" size={20} color="#0055F2" />
                         </View>
                         <View style={{ flex: 1, marginStart: 10 }}>
-                          <Text style={styles.flightUpdateTitle}>à¦«à§à¦²à¦¾à¦‡à¦Ÿà§‡à¦° à¦†à¦ªà¦¡à§‡à¦Ÿ à¦ªà§‡à¦¤à§‡ à¦šà¦¾à¦¨?</Text>
+                          <Text style={styles.flightUpdateTitle}>ফ্লাইটের আপডেট পেতে চান?</Text>
                           <Text style={styles.flightUpdateSub}>
-                            à¦—à§‡à¦Ÿ à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨, à¦«à§à¦²à¦¾à¦‡à¦Ÿ à¦¬à¦¿à¦²à¦®à§à¦¬, à¦¬à¦¾ à¦¬à§‹à¦°à§à¦¡à¦¿à¦‚ à¦•à¦¾à¦‰à¦¨à§à¦Ÿà¦¡à¦¾à¦‰à¦¨à§‡à¦° à¦œà¦°à§à¦°à¦¿ à¦¨à§‹à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦¶à¦¨ à¦ªà§‡à¦¤à§‡ à¦…à¦¨à§à¦®à¦¤à¦¿ à¦¦à¦¿à¦¨à¥¤
+                            গেট পরিবর্তন, ফ্লাইট বিলম্ব, বা বোর্ডিং কাউন্টডাউনের জরুরি নোটিফিকেশন পেতে অনুমতি দিন।
                           </Text>
                         </View>
                       </View>
@@ -2849,14 +3144,14 @@ export function BookingSystemScreen({
                           activeOpacity={0.8}
                         >
                           <Ionicons name="notifications-outline" size={16} color="#fff" style={{ marginEnd: 6 }} />
-                          <Text style={styles.flightUpdateEnableText}>à¦¹à§à¦¯à¦¾à¦, à¦†à¦ªà¦¡à§‡à¦Ÿ à¦šà¦¾à¦‡</Text>
+                          <Text style={styles.flightUpdateEnableText}>হ্যাঁ, আপডেট চাই</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={styles.flightUpdateDismissBtn}
                           onPress={() => setAskedFlightPush(true)}
                           activeOpacity={0.8}
                         >
-                          <Text style={styles.flightUpdateDismissText}>à¦à¦–à¦¨ à¦¨à§Ÿ</Text>
+                          <Text style={styles.flightUpdateDismissText}>এখন নয়</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -2932,7 +3227,7 @@ export function BookingSystemScreen({
                     />
                     <PaymentOptionCard
                       title="Shopno Travel Wallet"
-                      sub="Balance: Ã Â§Â³45,000 / $500 available"
+                      sub="Balance: à§³45,000 / $500 available"
                       icon="cash-outline"
                       isSelected={selectedPaymentMethod === "wallet"}
                       onSelect={() => setSelectedPaymentMethod("wallet")}
@@ -3104,11 +3399,11 @@ export function BookingSystemScreen({
               <View style={{ backgroundColor: "#FEF2F2", borderWidth: 1, borderColor: "#FCA5A5", borderRadius: 12, padding: 12, marginVertical: 8 }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                   <View style={{ flex: 1, marginRight: 8 }}>
-                    <Text style={{ fontSize: 13, fontWeight: "800", color: "#991B1B" }}>
-                      à¦¬à§à¦•à¦¿à¦‚ à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦¬à¦¾ à¦¬à¦¾à¦¤à¦¿à¦²à§‡à¦° à¦¸à§à¦¯à§‹à¦—
+                    <Text style={{ fontSize: 13, fontWeight: "600", color: "#991B1B" }}>
+                      বুকিং পরিবর্তন বা বাতিলের সুযোগ
                     </Text>
                     <Text style={{ fontSize: 11, color: "#B91C1C", marginTop: 2 }}>
-                      à¦¸à¦®à§à¦­à¦¾à¦¬à§à¦¯ à¦°à¦¿à¦«à¦¾à¦¨à§à¦¡: à§¯à§¦% ({latestBooking.currency ?? "BDT"} {Math.round(Number(latestBooking.final_price || 0) * 0.9)})
+                      সম্ভাব্য রিফান্ড: ৯০% ({latestBooking.currency ?? "BDT"} {Math.round(Number(latestBooking.final_price || 0) * 0.9)})
                     </Text>
                   </View>
                   <TouchableOpacity
@@ -3116,7 +3411,7 @@ export function BookingSystemScreen({
                     style={{ backgroundColor: "#DC2626", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, flexDirection: "row", alignItems: "center", gap: 4 }}
                   >
                     <Ionicons name="swap-horizontal" size={14} color="#FFFFFF" />
-                    <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "800" }}>à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ / à¦¬à¦¾à¦¤à¦¿à¦²</Text>
+                    <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "600" }}>পরিবর্তন / বাতিল</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -3166,7 +3461,7 @@ export function BookingSystemScreen({
                 <View style={styles.timelineText}>
                   <Text style={styles.timelineTitle}>{event.title}</Text>
                   <Text style={styles.timelineMeta}>
-                    {event.event_type} Ã¢â‚¬Â¢{" "}
+                    {event.event_type} â€¢{" "}
                     {new Date(
                       event.event_at || event.event_time || Date.now(),
                     ).toLocaleTimeString()}
@@ -3207,7 +3502,7 @@ export function BookingSystemScreen({
         autoPopulateImmediately={true}
         onManualEntry={() => {
           setIsPassportScannerOpen(false);
-          setActionMessage("âœï¸ à¦®à§à¦¯à¦¾à¦¨à§à¦¯à¦¼à¦¾à¦² à¦à¦¨à§à¦Ÿà§à¦°à¦¿ à¦®à§‹à¦¡ à¦¸à¦•à§à¦°à¦¿à¦¯à¦¼à¥¤ à¦¨à¦¿à¦šà§‡ à¦¸à¦°à¦¾à¦¸à¦°à¦¿ à¦¤à¦¥à§à¦¯ à¦ªà§‚à¦°à¦£ à¦•à¦°à§à¦¨à¥¤");
+          setActionMessage("✏️ ম্যানুয়াল এন্ট্রি মোড সক্রিয়। নিচে সরাসরি তথ্য পূরণ করুন।");
         }}
       />
 
@@ -3218,14 +3513,14 @@ export function BookingSystemScreen({
         newPrice={pricingCalculation.totalDue}
         currency={pricingCalculation.currency}
         breakdown={[
-          { label: "Ã Â¦Â®Ã Â§â€šÃ Â¦Â² Ã Â¦Â­Ã Â¦Â¾Ã Â¦Â¡Ã Â¦Â¼Ã Â¦Â¾ (Base Fare)", amount: pricingCalculation.baseFare },
-          { label: "Ã Â¦Â¸Ã Â¦Â°Ã Â¦â€¢Ã Â¦Â¾Ã Â¦Â°Ã Â¦Â¿ Ã Â¦Å¸Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦â€¢Ã Â§ÂÃ Â¦Â¸ Ã Â¦â€œ Ã Â¦Â­Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦Å¸ (Govt Taxes)", amount: pricingCalculation.taxes, isAddition: true },
-          { label: "Ã Â¦ÂªÃ Â§ÂÃ Â¦Â²Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦Å¸Ã Â¦Â«Ã Â¦Â°Ã Â§ÂÃ Â¦Â® Ã Â¦Â¸Ã Â¦Â¾Ã Â¦Â°Ã Â§ÂÃ Â¦Â­Ã Â¦Â¿Ã Â¦Â¸ Ã Â¦Â«Ã Â¦Â¿ (Service Fee)", amount: pricingCalculation.platformServiceFee, isAddition: true },
+          { label: "à¦®à§‚à¦² à¦­à¦¾à¦¡à¦¼à¦¾ (Base Fare)", amount: pricingCalculation.baseFare },
+          { label: "à¦¸à¦°à¦•à¦¾à¦°à¦¿ à¦Ÿà§à¦¯à¦¾à¦•à§à¦¸ à¦“ à¦­à§à¦¯à¦¾à¦Ÿ (Govt Taxes)", amount: pricingCalculation.taxes, isAddition: true },
+          { label: "à¦ªà§à¦²à§à¦¯à¦¾à¦Ÿà¦«à¦°à§à¦® à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸ à¦«à¦¿ (Service Fee)", amount: pricingCalculation.platformServiceFee, isAddition: true },
           ...(pricingCalculation.addonsCost > 0
-            ? [{ label: "Ã Â¦Â¨Ã Â¦Â¿Ã Â¦Â°Ã Â§ÂÃ Â¦Â¬Ã Â¦Â¾Ã Â¦Å¡Ã Â¦Â¿Ã Â¦Â¤ Ã Â¦â€¦Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦Â¡-Ã Â¦â€¦Ã Â¦Â¨ Ã Â¦Â¸Ã Â¦Â¾Ã Â¦Â°Ã Â§ÂÃ Â¦Â­Ã Â¦Â¿Ã Â¦Â¸", amount: pricingCalculation.addonsCost, isAddition: true }]
+            ? [{ label: "à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¿à¦¤ à¦…à§à¦¯à¦¾à¦¡-à¦…à¦¨ à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸", amount: pricingCalculation.addonsCost, isAddition: true }]
             : []),
           ...(pricingCalculation.discount > 0
-            ? [{ label: "Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â§â€¹Ã Â¦Â®Ã Â§â€¹ Ã Â¦Â¡Ã Â¦Â¿Ã Â¦Â¸Ã Â¦â€¢Ã Â¦Â¾Ã Â¦â€°Ã Â¦Â¨Ã Â§ÂÃ Â¦Å¸ (Promo Savings)", amount: pricingCalculation.discount, isDiscount: true }]
+            ? [{ label: "à¦ªà§à¦°à§‹à¦®à§‹ à¦¡à¦¿à¦¸à¦•à¦¾à¦‰à¦¨à§à¦Ÿ (Promo Savings)", amount: pricingCalculation.discount, isDiscount: true }]
             : []),
         ]}
         onAccept={() => {
@@ -3252,7 +3547,7 @@ export function BookingSystemScreen({
             <View style={styles.savedPassengersHandle} />
             <View style={styles.savedPassengersHeader}>
               <Ionicons name="people" size={20} color={primary} />
-              <Text style={styles.savedPassengersTitle}>à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¯à¦¾à¦¤à§à¦°à§€ à¦¤à¦¾à¦²à¦¿à¦•à¦¾ ({savedPassengers.length})</Text>
+              <Text style={styles.savedPassengersTitle}>সংরক্ষিত যাত্রী তালিকা ({savedPassengers.length})</Text>
               <TouchableOpacity onPress={() => setIsSavedPassengersModalOpen(false)}>
                 <Ionicons name="close-circle" size={24} color="#94a3b8" />
               </TouchableOpacity>
@@ -3262,7 +3557,7 @@ export function BookingSystemScreen({
                 <View style={{ alignItems: "center", padding: 32 }}>
                   <Ionicons name="person-add-outline" size={40} color="#cbd5e1" />
                   <Text style={{ color: "#94a3b8", marginTop: 12, textAlign: "center" }}>
-                    à¦•à§‹à¦¨à§‹ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¯à¦¾à¦¤à§à¦°à§€ à¦¨à§‡à¦‡à¥¤{"\n"}à¦§à¦¾à¦ª à§§-à¦ à¦¤à¦¥à§à¦¯ à¦ªà§‚à¦°à¦£ à¦•à¦°à§‡ à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦•à¦°à§à¦¨à¥¤
+                    কোনো সংরক্ষিত যাত্রী নেই।{"\n"}ধাপ ১-এ তথ্য পূরণ করে সংরক্ষণ করুন।
                   </Text>
                 </View>
               ) : (
@@ -3273,10 +3568,10 @@ export function BookingSystemScreen({
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.savedPassengerName}>{p.first_name} {p.last_name}</Text>
-                      <Text style={styles.savedPassengerMeta}>ðŸ“§ {p.email || "â€”"}</Text>
-                      <Text style={styles.savedPassengerMeta}>ðŸ“ž {p.phone || "â€”"}</Text>
+                      <Text style={styles.savedPassengerMeta}>📧 {p.email || "—"}</Text>
+                      <Text style={styles.savedPassengerMeta}>📞 {p.phone || "—"}</Text>
                       {p.passport_number ? (
-                        <Text style={styles.savedPassengerMeta}>ðŸ›‚ Passport: {p.passport_number}</Text>
+                        <Text style={styles.savedPassengerMeta}>🛂 Passport: {p.passport_number}</Text>
                       ) : null}
                     </View>
                     <View style={styles.savedPassengerActions}>
@@ -3290,7 +3585,7 @@ export function BookingSystemScreen({
                         activeOpacity={0.8}
                       >
                         <Ionicons name="checkmark" size={14} color="#fff" />
-                        <Text style={styles.selectPassengerBtnText}>à¦¬à¦¾à¦›à¦¾à¦‡</Text>
+                        <Text style={styles.selectPassengerBtnText}>বাছাই</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => handleDeleteSavedPassenger(idx)}
@@ -3315,7 +3610,7 @@ export function BookingSystemScreen({
         onClose={() => setShowManageModal(false)}
         onBookingCancelled={() => {
           refetch();
-          setActionMessage("à¦¬à§à¦•à¦¿à¦‚ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦¬à¦¾à¦¤à¦¿à¦² à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡ à¦à¦¬à¦‚ à¦°à¦¿à¦«à¦¾à¦¨à§à¦¡ à¦°à¦¿à¦­à¦¿à¦‰ à¦¶à§à¦°à§ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤");
+          setActionMessage("বুকিং সফলভাবে বাতিল করা হয়েছে এবং রিফান্ড রিভিউ শুরু হয়েছে।");
         }}
       />
 
@@ -3506,3 +3801,1742 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 // ============================================================================
+// STYLESHEET
+// ============================================================================
+
+const styles = StyleSheet.create({
+  shell: {
+    backgroundColor: "#f8fafc",
+    flex: 1,
+  },
+  content: {
+    gap: 16,
+    padding: 16,
+    paddingBottom: 120,
+  },
+  header: {
+    backgroundColor: slateDark,
+    borderRadius: 14,
+    padding: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 4,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 4px 10px rgba(15, 23, 42, 0.15)" } : {}),
+  },
+  headerTopRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  headerBadge: {
+    alignItems: "center",
+    backgroundColor: "rgba(143, 211, 255, 0.15)",
+    borderRadius: 999,
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  kicker: {
+    color: "#8fd3ff",
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  currencySelector: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 8,
+    flexDirection: "row",
+    padding: 2,
+  },
+  currencyPill: {
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  currencyPillActive: {
+    backgroundColor: primary,
+  },
+  currencyText: {
+    color: "#cbd5e1",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  currencyTextActive: {
+    color: "#ffffff",
+  },
+  title: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "700",
+    lineHeight: 30,
+    marginTop: 10,
+  },
+  subtitle: {
+    color: "#cbd5e1",
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 6,
+  },
+  productTypeContainer: {
+    gap: 8,
+  },
+  sectionSmallTitle: {
+    color: "#475569",
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  productTabsRow: {
+    flexDirection: "row",
+    gap: 8,
+    paddingVertical: 2,
+  },
+  productTab: {
+    alignItems: "center",
+    backgroundColor: cardBg,
+    borderColor: borderSubtle,
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  productTabActive: {
+    backgroundColor: primary,
+    borderColor: primary,
+  },
+  productTabText: {
+    color: "#334155",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  productTabTextActive: {
+    color: "#fff",
+  },
+  stepperCard: {
+    backgroundColor: cardBg,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.05)" } : {}),
+  },
+  stepperRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  stepItem: {
+    alignItems: "center",
+    gap: 4,
+    zIndex: 2,
+  },
+  stepCircle: {
+    alignItems: "center",
+    borderRadius: 999,
+    height: 32,
+    justifyContent: "center",
+    width: 32,
+  },
+  stepCircleActive: {
+    backgroundColor: primary,
+    elevation: 3,
+    shadowColor: primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+  },
+  stepCircleCompleted: {
+    backgroundColor: success,
+  },
+  stepCircleInactive: {
+    backgroundColor: "#e2e8f0",
+  },
+  stepNumber: {
+    color: "#64748b",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  stepNumberActive: {
+    color: "#ffffff",
+  },
+  stepLabel: {
+    color: "#64748b",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  stepLabelActive: {
+    color: primary,
+    fontWeight: "600",
+  },
+  stepConnector: {
+    backgroundColor: "#e2e8f0",
+    flex: 1,
+    height: 2,
+    marginHorizontal: 4,
+    marginTop: -16,
+    zIndex: 1,
+  },
+  stepConnectorActive: {
+    backgroundColor: success,
+  },
+  alertBanner: {
+    alignItems: "center",
+    backgroundColor: "#eff6ff",
+    borderColor: "#bfdbfe",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    padding: 10,
+  },
+  alertText: {
+    color: "#1e40af",
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  section: {
+    backgroundColor: cardBg,
+    borderRadius: 12,
+    gap: 14,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 8px rgba(15, 23, 42, 0.05)" } : {}),
+  },
+  sectionHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  sectionIcon: {
+    alignItems: "center",
+    backgroundColor: primaryLight,
+    borderRadius: 10,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  sectionTitle: {
+    color: textPrimary,
+    fontSize: 17,
+    fontWeight: "700",
+  },
+  sectionSubtitle: {
+    color: textSecondary,
+    fontSize: 12,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  demoFillBtn: {
+    alignItems: "center",
+    backgroundColor: primaryLight,
+    borderRadius: 8,
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  demoFillBtnText: {
+    color: primary,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  tripSummaryHeaderBox: {
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 8,
+    padding: 12,
+  },
+  routeRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  routeKicker: {
+    color: textMuted,
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  routeTitle: {
+    color: textPrimary,
+    fontSize: 15,
+    fontWeight: "700",
+    marginTop: 1,
+  },
+  passengerCounterWrap: {
+    alignItems: "flex-end",
+  },
+  guestCounter: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: borderSubtle,
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: "row",
+    marginTop: 2,
+  },
+  guestCounterBtn: {
+    alignItems: "center",
+    height: 26,
+    justifyContent: "center",
+    width: 26,
+  },
+  guestCountText: {
+    color: textPrimary,
+    fontSize: 12,
+    fontWeight: "700",
+    minWidth: 20,
+    textAlign: "center",
+  },
+  dateRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+  },
+  dateRangeText: {
+    color: textSecondary,
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  fieldWrap: {
+    gap: 4,
+  },
+  compactField: {
+    flex: 1,
+  },
+  fieldLabel: {
+    color: "#334155",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  inputContainer: {
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    minHeight: 46,
+    paddingHorizontal: 10,
+  },
+  inputErrorBorder: {
+    backgroundColor: "#fef2f2",
+    borderColor: danger,
+  },
+  fieldIcon: {
+    marginEnd: 8,
+  },
+  textInputStyle: {
+    color: textPrimary,
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "500",
+    paddingVertical: 10,
+  },
+  errorRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+    marginTop: 2,
+  },
+  errorMessage: {
+    color: danger,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  split: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  genderRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  genderOption: {
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 8,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "center",
+    paddingVertical: 10,
+  },
+  genderOptionActive: {
+    backgroundColor: "#e0f2fe",
+    borderColor: primary,
+  },
+  genderText: {
+    color: "#475569",
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  genderTextActive: {
+    color: primary,
+    fontWeight: "600",
+  },
+  primaryButton: {
+    alignItems: "center",
+    backgroundColor: primary,
+    borderRadius: 10,
+    justifyContent: "center",
+    minHeight: 48,
+    marginTop: 8,
+  },
+  primaryButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  secondaryButton: {
+    alignItems: "center",
+    backgroundColor: primaryLight,
+    borderRadius: 8,
+    justifyContent: "center",
+    minHeight: 44,
+  },
+  secondaryButtonText: {
+    color: primary,
+    fontSize: 13,
+    fontWeight: "400",
+  },
+  disabled: {
+    opacity: 0.6,
+  },
+  addonCard: {
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 12,
+    padding: 12,
+  },
+  addonInfo: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  addonIconBadge: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: borderSubtle,
+    borderRadius: 8,
+    borderWidth: 1,
+    height: 42,
+    justifyContent: "center",
+    width: 42,
+  },
+  addonTitleRow: {
+    alignItems: "baseline",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  addonTitle: {
+    color: textPrimary,
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  addonPrice: {
+    color: primary,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  addonUnit: {
+    color: textSecondary,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  addonDesc: {
+    color: textSecondary,
+    fontSize: 12,
+    lineHeight: 16,
+    marginTop: 3,
+  },
+  addonActionRow: {
+    alignItems: "center",
+    borderTopColor: borderSubtle,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 8,
+  },
+  addonCounterRow: {
+    alignItems: "center",
+    borderTopColor: borderSubtle,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 8,
+  },
+  addonStatusText: {
+    color: "#334155",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  counterControls: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: borderSubtle,
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: "row",
+    overflow: "hidden",
+  },
+  counterBtn: {
+    alignItems: "center",
+    height: 32,
+    justifyContent: "center",
+    width: 32,
+  },
+  counterValue: {
+    color: textPrimary,
+    fontSize: 13,
+    fontWeight: "700",
+    minWidth: 26,
+    textAlign: "center",
+  },
+  surchargeSubtotalBanner: {
+    alignItems: "center",
+    backgroundColor: "#f0fdf4",
+    borderColor: "#bbf7d0",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 12,
+  },
+  surchargeSubtotalLabel: {
+    color: "#166534",
+    fontSize: 13,
+    fontWeight: "400",
+  },
+  surchargeSubtotalSub: {
+    color: "#15803d",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  surchargeSubtotalValue: {
+    color: "#166534",
+    fontSize: 16,
+    fontWeight: "400",
+  },
+  navButtonsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 8,
+  },
+  backButton: {
+    alignItems: "center",
+    backgroundColor: "#f1f5f9",
+    borderRadius: 10,
+    flex: 1,
+    flexDirection: "row",
+    gap: 6,
+    justifyContent: "center",
+    minHeight: 48,
+  },
+  backButtonText: {
+    color: "#334155",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  continueButton: {
+    alignItems: "center",
+    backgroundColor: primary,
+    borderRadius: 10,
+    flex: 1.6,
+    justifyContent: "center",
+    minHeight: 48,
+  },
+  continueButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  createDraftBtn: {
+    flex: 1.6,
+    marginTop: 0,
+  },
+  summaryRecapCard: {
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 6,
+    padding: 12,
+  },
+  summaryRecapHeading: {
+    color: textPrimary,
+    fontSize: 13,
+    fontWeight: "700",
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
+  recapRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  recapLabel: {
+    color: textSecondary,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  recapVal: {
+    color: "#1e293b",
+    fontSize: 12,
+    fontWeight: "600",
+    maxWidth: "65%",
+    textAlign: "right",
+  },
+  promoBox: {
+    backgroundColor: "#ffffff",
+    borderColor: borderSubtle,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 8,
+    padding: 12,
+  },
+  promoBoxTitle: {
+    color: "#334155",
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  promoInputRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  promoInput: {
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 8,
+    borderWidth: 1,
+    color: textPrimary,
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "500",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  promoApplyBtn: {
+    alignItems: "center",
+    backgroundColor: primary,
+    borderRadius: 8,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  promoApplyBtnText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  appliedPromoBadge: {
+    alignItems: "center",
+    backgroundColor: "#ecfdf5",
+    borderColor: "#a7f3d0",
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  appliedPromoText: {
+    color: "#065f46",
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  removePromoBtn: {
+    padding: 2,
+  },
+  promoErrorText: {
+    color: danger,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  promoSuccessText: {
+    color: success,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  promoSuggestionsLabel: {
+    color: textSecondary,
+    fontSize: 12,
+    fontWeight: "500",
+    marginTop: 4,
+  },
+  promoSuggestionsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  promoChip: {
+    backgroundColor: "#f1f5f9",
+    borderColor: borderSubtle,
+    borderRadius: 6,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  promoChipActive: {
+    backgroundColor: "#dbeafe",
+    borderColor: primary,
+  },
+  promoChipText: {
+    color: "#334155",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  promoChipTextActive: {
+    color: primary,
+    fontWeight: "600",
+  },
+  fareBreakdownCard: {
+    backgroundColor: slateDark,
+    borderRadius: 12,
+    gap: 8,
+    padding: 16,
+  },
+  fareCardHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  fareCardTitle: {
+    color: "#f8fafc",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  formulaNote: {
+    color: "#94a3b8",
+    fontSize: 12,
+    fontStyle: "italic",
+    marginBottom: 6,
+  },
+  breakdownRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  breakdownLabel: {
+    color: "#cbd5e1",
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  breakdownValue: {
+    color: "#f8fafc",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  discountText: {
+    color: "#34d399",
+  },
+  itemizedBox: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 6,
+    gap: 4,
+    marginVertical: 4,
+    padding: 8,
+  },
+  itemizedRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  itemizedLabel: {
+    color: "#94a3b8",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  itemizedVal: {
+    color: "#cbd5e1",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  divider: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    height: 1,
+    marginVertical: 6,
+  },
+  totalDueRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 2,
+  },
+  totalDueLabel: {
+    color: "#38bdf8",
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+  totalDueSubtitle: {
+    color: "#94a3b8",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  totalDueAmount: {
+    color: "#ffffff",
+    fontSize: 22,
+    fontWeight: "700",
+  },
+  draftStatusCard: {
+    backgroundColor: "#fffbeb",
+    borderColor: "#fde68a",
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 8,
+    padding: 12,
+  },
+  draftStatusHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  statusPillDraft: {
+    alignItems: "center",
+    backgroundColor: "#fef3c7",
+    borderColor: warning,
+    borderRadius: 999,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  statusPillDraftText: {
+    color: "#b45309",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  draftRefNumber: {
+    color: textPrimary,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  draftNote: {
+    color: "#78350f",
+    fontSize: 12,
+    lineHeight: 15,
+  },
+  draftPriceTag: {
+    alignItems: "center",
+    borderTopColor: "#fde68a",
+    borderTopWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 8,
+  },
+  draftPriceLabel: {
+    color: "#92400e",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  draftPriceVal: {
+    color: "#b45309",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  selectPaymentHeader: {
+    color: textPrimary,
+    fontSize: 14,
+    fontWeight: "700",
+    marginTop: 4,
+  },
+  paymentMethodsGrid: {
+    gap: 8,
+  },
+  paymentCard: {
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    flexDirection: "row",
+    gap: 12,
+    padding: 12,
+  },
+  paymentCardSelected: {
+    backgroundColor: "#eff6ff",
+    borderColor: primary,
+  },
+  paymentIconBox: {
+    alignItems: "center",
+    backgroundColor: "#e2e8f0",
+    borderRadius: 8,
+    height: 38,
+    justifyContent: "center",
+    width: 38,
+  },
+  paymentIconBoxSelected: {
+    backgroundColor: primary,
+  },
+  paymentCardTitle: {
+    color: textPrimary,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  paymentCardTitleSelected: {
+    color: primary,
+  },
+  paymentCardSub: {
+    color: textSecondary,
+    fontSize: 12,
+    fontWeight: "400",
+    marginTop: 2,
+  },
+  radioCircle: {
+    alignItems: "center",
+    borderColor: "#94a3b8",
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 20,
+    justifyContent: "center",
+    width: 20,
+  },
+  radioCircleSelected: {
+    borderColor: primary,
+  },
+  radioInner: {
+    backgroundColor: primary,
+    borderRadius: 999,
+    height: 10,
+    width: 10,
+  },
+  gatewayDetailBox: {
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 8,
+    padding: 12,
+  },
+  gatewayDetailTitle: {
+    color: "#334155",
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  gatewayInput: {
+    backgroundColor: "#ffffff",
+    borderColor: borderSubtle,
+    borderRadius: 8,
+    borderWidth: 1,
+    color: textPrimary,
+    fontSize: 14,
+    fontWeight: "500",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  mfsHint: {
+    color: textSecondary,
+    fontSize: 12,
+    lineHeight: 15,
+  },
+  walletBalanceBadge: {
+    alignItems: "center",
+    backgroundColor: "#ecfdf5",
+    borderColor: "#a7f3d0",
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    padding: 10,
+  },
+  walletBalanceText: {
+    color: "#065f46",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  payNowBtn: {
+    backgroundColor: success,
+    minHeight: 52,
+    marginTop: 6,
+  },
+  successReceiptCard: {
+    alignItems: "center",
+    backgroundColor: "#f0fdf4",
+    borderColor: "#bbf7d0",
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 10,
+    padding: 20,
+  },
+  successHeading: {
+    color: "#166534",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  successSub: {
+    color: "#15803d",
+    fontSize: 12,
+    textAlign: "center",
+  },
+  receiptDetails: {
+    backgroundColor: "#ffffff",
+    borderColor: "#dcfce7",
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 12,
+    width: "100%",
+  },
+  newBookingBtn: {
+    alignItems: "center",
+    backgroundColor: primary,
+    borderRadius: 8,
+    marginTop: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  // Point 1: Flight update prompt styles
+  flightUpdateCard: {
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+  },
+  flightUpdateHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  flightIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#DBEAFE",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  flightUpdateTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1E3A8A",
+  },
+  flightUpdateSub: {
+    fontSize: 12,
+    color: "#3B82F6",
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  flightUpdateBtnRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 12,
+  },
+  flightUpdateEnableBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0055F2",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
+  flightUpdateEnableText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  flightUpdateDismissBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    backgroundColor: "rgba(0, 85, 242, 0.08)",
+  },
+  flightUpdateDismissText: {
+    color: "#1E3A8A",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  flightPushConfirmedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ECFDF5",
+    borderWidth: 1,
+    borderColor: "#A7F3D0",
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 16,
+  },
+  flightPushConfirmedText: {
+    fontSize: 12,
+    color: "#065F46",
+    fontWeight: "600",
+    flex: 1,
+  },
+
+  // Point 5: Data privacy & security note styles
+  dataAssuranceCard: {
+    backgroundColor: "#F0FDF4",
+    borderWidth: 1,
+    borderColor: "#BBF7D0",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 14,
+  },
+  dataAssuranceHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 4,
+  },
+  dataAssuranceTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#166534",
+  },
+  dataAssuranceDesc: {
+    fontSize: 12,
+    color: "#15803D",
+    lineHeight: 17,
+  },
+  securityNoteRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#F0FDF4",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 6,
+    alignSelf: "flex-start",
+  },
+  securityNoteText: {
+    fontSize: 11,
+    color: "#059669",
+    fontWeight: "400",
+  },
+  maskToggleBtn: {
+    position: "absolute",
+    right: 12,
+    top: 14,
+  },
+  fieldLabelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  newBookingBtnText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  infoRow: {
+    alignItems: "flex-start",
+    borderTopColor: "#f1f5f9",
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    paddingTop: 8,
+  },
+  infoLabel: {
+    color: textSecondary,
+    fontSize: 12,
+    fontWeight: "400",
+    width: 120,
+  },
+  infoValue: {
+    color: textPrimary,
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "400",
+    textAlign: "right",
+  },
+  timelineRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  timelineDot: {
+    backgroundColor: primary,
+    borderRadius: 999,
+    height: 10,
+    marginTop: 5,
+    width: 10,
+  },
+  timelineText: {
+    flex: 1,
+  },
+  timelineTitle: {
+    color: textPrimary,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  timelineMeta: {
+    color: textSecondary,
+    fontSize: 12,
+    fontWeight: "400",
+    marginTop: 2,
+  },
+
+  // ── Requirement 1: Draft Resume Banner ───────────────────────────────────────
+  resumeDraftBanner: {
+    backgroundColor: "#eff6ff",
+    borderColor: "#bfdbfe",
+    borderRadius: 12,
+    borderWidth: 1.5,
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+    padding: 14,
+  },
+  resumeDraftIconWrap: {
+    alignItems: "center",
+    backgroundColor: "#dbeafe",
+    borderRadius: 999,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
+  resumeDraftTitle: {
+    color: "#1d4ed8",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  resumeDraftSub: {
+    color: "#3b82f6",
+    fontSize: 12,
+    fontWeight: "400",
+    marginTop: 2,
+  },
+  resumeDraftActionsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  resumeDraftConfirmBtn: {
+    alignItems: "center",
+    backgroundColor: "#2563eb",
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  resumeDraftConfirmBtnText: {
+    color: "#ffffff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  resumeDraftDiscardBtn: {
+    alignItems: "center",
+    backgroundColor: "#fee2e2",
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  resumeDraftDiscardBtnText: {
+    color: "#ef4444",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+
+  // ── Requirement 4: Hold Timer Card ───────────────────────────────────────────
+  holdTimerCard: {
+    alignItems: "center",
+    borderRadius: 12,
+    borderWidth: 1.5,
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+    padding: 12,
+  },
+  holdTimerCardNormal: {
+    backgroundColor: "#f0fdf4",
+    borderColor: "#86efac",
+  },
+  holdTimerCardWarning: {
+    backgroundColor: "#fffbeb",
+    borderColor: "#fcd34d",
+  },
+  holdTimerCardExpired: {
+    backgroundColor: "#fef2f2",
+    borderColor: "#fca5a5",
+  },
+  holdTimerLeft: {
+    alignItems: "center",
+    flexDirection: "row",
+    flex: 1,
+    gap: 8,
+  },
+  holdTimerTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  holdTimerTitleNormal: { color: "#166534" },
+  holdTimerTitleWarning: { color: "#92400e" },
+  holdTimerTitleExpired: { color: "#991b1b" },
+  holdTimerSub: {
+    color: "#64748b",
+    fontSize: 11,
+    fontWeight: "400",
+    marginTop: 1,
+  },
+  reholdSeatBtn: {
+    alignItems: "center",
+    backgroundColor: "#ef4444",
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  reholdSeatBtnText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+
+  // ── Requirement 3: Step Header in stepper card ───────────────────────────────
+  stepHeaderTopRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  stepHeaderPill: {
+    alignItems: "center",
+    backgroundColor: "#dbeafe",
+    borderRadius: 999,
+    flexDirection: "row",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  stepHeaderPillText: {
+    color: "#1d4ed8",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  stepSubtitleHint: {
+    color: "#64748b",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  stepProgressBar: {
+    flexDirection: "row",
+    gap: 4,
+    marginBottom: 10,
+  },
+  stepProgressSegment: {
+    backgroundColor: "#e2e8f0",
+    borderRadius: 999,
+    flex: 1,
+    height: 4,
+  },
+  stepProgressSegmentActive: {
+    backgroundColor: primary,
+  },
+
+  // ── Requirement 2: Save Traveler Button ──────────────────────────────────────
+  saveTravelerSecondaryBtn: {
+    alignItems: "center",
+    backgroundColor: "#eff6ff",
+    borderColor: "#bfdbfe",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 6,
+    justifyContent: "center",
+    marginTop: 4,
+    paddingVertical: 10,
+  },
+  saveTravelerSecondaryBtnText: {
+    color: "#2563eb",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+
+  // ── Requirement 8: Cancellation Policy Card ──────────────────────────────────
+  policyCard: {
+    backgroundColor: "#fffbeb",
+    borderColor: "#fde68a",
+    borderRadius: 12,
+    borderWidth: 1.5,
+    gap: 10,
+    marginVertical: 8,
+    padding: 14,
+  },
+  policyCardError: {
+    borderColor: danger,
+    backgroundColor: "#fef2f2",
+  },
+  policyHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 8,
+  },
+  policyTitle: {
+    color: "#78350f",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  policySubtitle: {
+    color: "#92400e",
+    fontSize: 11,
+    fontWeight: "600",
+    marginTop: 1,
+  },
+  policyTimeline: {
+    gap: 8,
+  },
+  policyStep: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  policyDot: {
+    borderRadius: 999,
+    height: 10,
+    marginTop: 5,
+    width: 10,
+  },
+  policyStepTitle: {
+    color: "#1e293b",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  policyStepDesc: {
+    color: "#475569",
+    fontSize: 11,
+    fontWeight: "500",
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  policyNoteBox: {
+    alignItems: "flex-start",
+    backgroundColor: "#fef3c7",
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 6,
+    padding: 8,
+  },
+  policyNoteText: {
+    color: "#78350f",
+    flex: 1,
+    fontSize: 11,
+    fontWeight: "400",
+    lineHeight: 15,
+  },
+  checkboxRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 4,
+  },
+  customCheckbox: {
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderColor: "#cbd5e1",
+    borderRadius: 4,
+    borderWidth: 2,
+    height: 20,
+    justifyContent: "center",
+    marginTop: 1,
+    width: 20,
+  },
+  customCheckboxActive: {
+    backgroundColor: primary,
+    borderColor: primary,
+  },
+  customCheckboxError: {
+    borderColor: danger,
+    backgroundColor: "#fef2f2",
+  },
+  checkboxLabel: {
+    color: "#334155",
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "500",
+    lineHeight: 17,
+  },
+
+  // ── Requirement 5: Full Promo Cards ──────────────────────────────────────────
+  promoFullCard: {
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "space-between",
+    padding: 10,
+  },
+  promoFullCardActive: {
+    backgroundColor: "#1d4ed8",
+    borderColor: "#1d4ed8",
+  },
+  promoFullCardLeft: {
+    alignItems: "flex-start",
+    flex: 1,
+    flexDirection: "row",
+    gap: 8,
+  },
+  promoFullCardTitleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  promoFullCardCode: {
+    color: "#1e293b",
+    fontSize: 13,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+  promoFullCardCodeActive: {
+    color: "#ffffff",
+  },
+  promoFullCardDiscount: {
+    color: success,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  promoFullCardDesc: {
+    color: "#475569",
+    fontSize: 11,
+    fontWeight: "400",
+    lineHeight: 15,
+    marginTop: 2,
+  },
+  promoFullCardMetaText: {
+    color: "#64748b",
+    fontSize: 10,
+    fontWeight: "400",
+    marginTop: 3,
+  },
+  promoApplyChip: {
+    alignItems: "center",
+    backgroundColor: "#dbeafe",
+    borderRadius: 6,
+    justifyContent: "center",
+    minWidth: 44,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  promoApplyChipActive: {
+    backgroundColor: "#22c55e",
+  },
+  promoApplyChipText: {
+    color: "#1d4ed8",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+
+  // ── Requirement 2: Saved Passengers Modal ────────────────────────────────────
+  savedPassengersOverlay: {
+    backgroundColor: "rgba(0,0,0,0.5)",
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  savedPassengersSheet: {
+    backgroundColor: "#ffffff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 32,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  savedPassengersHandle: {
+    alignSelf: "center",
+    backgroundColor: "#cbd5e1",
+    borderRadius: 999,
+    height: 4,
+    marginBottom: 14,
+    width: 48,
+  },
+  savedPassengersHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 12,
+  },
+  savedPassengersTitle: {
+    color: "#1e293b",
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  savedPassengerCard: {
+    alignItems: "flex-start",
+    backgroundColor: "#f8fafc",
+    borderColor: borderSubtle,
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 8,
+    padding: 12,
+  },
+  savedPassengerAvatar: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  savedPassengerName: {
+    color: "#1e293b",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  savedPassengerMeta: {
+    color: "#64748b",
+    fontSize: 11,
+    fontWeight: "400",
+    marginTop: 2,
+  },
+  savedPassengerActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+  },
+  selectPassengerBtn: {
+    alignItems: "center",
+    backgroundColor: primary,
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  selectPassengerBtnText: {
+    color: "#ffffff",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  deletePassengerBtn: {
+    alignItems: "center",
+    backgroundColor: "#fee2e2",
+    borderRadius: 6,
+    justifyContent: "center",
+    padding: 6,
+  },
+  // Additional Styles for Points Redemption in Step 3
+  pointsRedeemCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 8px rgba(15, 23, 42, 0.04)" } : {}),
+  },
+  pointsRedeemTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  pointsIconBubble: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pointsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  pointsRedeemTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  pointsRateBadge: {
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  pointsRateBadgeText: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: '#0284C7',
+  },
+  pointsBalanceSubText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  pointsToggleDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 12,
+  },
+  pointsToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  pointsToggleRowActive: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#86EFAC',
+  },
+  pointsToggleLabel: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  pointsToggleLabelActive: {
+    color: '#15803D',
+  },
+  pointsToggleSub: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  pointsAppliedConfirmation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#DCFCE7',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginTop: 10,
+  },
+  pointsAppliedText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#166534',
+    flex: 1,
+  },
+  pointsDiscountText: {
+    color: '#10B981',
+    fontWeight: "700",
+  },
+});

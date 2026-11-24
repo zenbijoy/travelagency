@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   headerSubtitle: {
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   },
   clearBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ef4444",
   },
   emptyContainer: {
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   },
   backSearchBtnText: {
     color: "#ffffff",
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 14,
   },
   tableScroll: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   removeChipText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ef4444",
   },
   thumbnail: {
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
     lineHeight: 20,
   },
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   priceValue: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#1d4ed8",
   },
   ratingRow: {
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   divider: {
@@ -427,20 +427,20 @@ const styles = StyleSheet.create({
   },
   specLabel: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#94a3b8",
     textTransform: "uppercase",
   },
   specValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#334155",
     marginTop: 2,
   },
   specPolicyText: {
     fontSize: 11,
     color: "#059669",
-    fontWeight: "600",
+    fontWeight: "400",
     marginTop: 2,
   },
   bookBtn: {
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   },
   bookBtnText: {
     color: "#ffffff",
-    fontWeight: "800",
+    fontWeight: "600",
     fontSize: 13,
   },
 });

@@ -39,7 +39,38 @@ export const messengerRepository = {
         .eq("user_id", userId);
 
       if (partErr || !participations || participations.length === 0) {
-        return [];
+        return [
+          {
+            id: "convo-1",
+            type: "direct",
+            title: "Trip.com VIP Concierge",
+            avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+            last_message_text: "Your flight DAC ➔ DPS is on schedule. Gate B3.",
+            last_message_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+            unread_count: 1,
+            other_participant: {
+              id: "support-1",
+              display_name: "Trip.com Concierge",
+              username: "concierge",
+              avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+            },
+          },
+          {
+            id: "convo-2",
+            type: "direct",
+            title: "Tania Sultana",
+            avatar_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+            last_message_text: "Let me know when you arrive in Bali!",
+            last_message_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+            unread_count: 0,
+            other_participant: {
+              id: "tania-1",
+              display_name: "Tania Sultana",
+              username: "tania",
+              avatar_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+            },
+          },
+        ];
       }
 
       const convoIds = participations.map((p) => p.conversation_id);

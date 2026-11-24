@@ -1355,7 +1355,7 @@ const styles = StyleSheet.create({
   },
   streakLabelText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#F8FAFC",
   },
   readyBadge: {
@@ -1368,7 +1368,7 @@ const styles = StyleSheet.create({
   },
   readyBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#F59E0B",
     letterSpacing: 0.5,
   },
@@ -1431,15 +1431,15 @@ const styles = StyleSheet.create({
   streakDaySubText: {
     fontSize: 12,
     color: "#64748B",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   streakDaySubTextCurrent: {
     color: "#F59E0B",
-    fontWeight: "700",
+    fontWeight: "400",
   },
   streakDaySubTextJackpot: {
     color: "#FDE047",
-    fontWeight: "800",
+    fontWeight: "400",
   },
   streakBonusNote: {
     flexDirection: "row",
@@ -1642,7 +1642,7 @@ const styles = StyleSheet.create({
   },
   tapToOpenText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FDE047",
   },
   claimedPromptBadge: {
@@ -1688,7 +1688,7 @@ const styles = StyleSheet.create({
   },
   tierPillText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
     letterSpacing: 0.5,
   },
@@ -1700,7 +1700,7 @@ const styles = StyleSheet.create({
   },
   rewardExpiryText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   rewardBody: {
@@ -1718,7 +1718,7 @@ const styles = StyleSheet.create({
   },
   rewardTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
     textAlign: "center",
   },
@@ -1742,13 +1742,13 @@ const styles = StyleSheet.create({
   },
   rewardTicketValue: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#38BDF8",
     letterSpacing: 0.5,
   },
   rewardTicketCategory: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#7DD3FC",
     letterSpacing: 0.5,
   },
@@ -1778,12 +1778,12 @@ const styles = StyleSheet.create({
   },
   voucherCodeLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#94A3B8",
   },
   voucherCodeText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FDE047",
     letterSpacing: 0.5,
   },
@@ -1798,7 +1798,7 @@ const styles = StyleSheet.create({
   },
   copyCodeButtonText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   walletConfirmationBadge: {
@@ -1824,7 +1824,7 @@ const styles = StyleSheet.create({
   },
   coinsBonusText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#F59E0B",
   },
 
@@ -1847,7 +1847,7 @@ const styles = StyleSheet.create({
   },
   unboxPrimaryText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
     letterSpacing: 0.5,
   },
@@ -1869,7 +1869,7 @@ const styles = StyleSheet.create({
   },
   secondaryWalletButtonText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#38BDF8",
   },
   primaryDoneButton: {
@@ -1884,7 +1884,7 @@ const styles = StyleSheet.create({
   },
   primaryDoneText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   claimedFooterRow: {
@@ -1905,7 +1905,7 @@ const styles = StyleSheet.create({
   },
   viewInventoryBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   demoRespinBtn: {
@@ -1922,7 +1922,7 @@ const styles = StyleSheet.create({
   },
   demoRespinBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#F59E0B",
   },
 
@@ -1956,7 +1956,7 @@ const styles = StyleSheet.create({
   },
   subModalTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#FFFFFF",
   },
   oddsScrollContent: {
@@ -1985,7 +1985,7 @@ const styles = StyleSheet.create({
   },
   tierOddsBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   tierOddsItems: {
@@ -2064,12 +2064,12 @@ const styles = StyleSheet.create({
   },
   voucherTierPillText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   voucherValueTag: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#38BDF8",
   },
   voucherItemTitle: {
@@ -2095,7 +2095,7 @@ const styles = StyleSheet.create({
   voucherItemCodeBox: {},
   voucherItemCode: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FDE047",
     letterSpacing: 0.5,
   },
@@ -2106,7 +2106,7 @@ const styles = StyleSheet.create({
   },
   voucherItemCopyText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#38BDF8",
   },
   // Additional Styles for Transparency & Accessibility

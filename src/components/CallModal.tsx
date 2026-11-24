@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   videoUserName: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   videoLiveBadgeRow: {
     flexDirection: "row",
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
   },
   audioCallerName: {
     fontSize: 24,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#fff",
     marginBottom: 6,
   },
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
   callBtnText: {
     color: "#fff",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   audioActionControls: {
     alignItems: "center",

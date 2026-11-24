@@ -1850,7 +1850,7 @@ const styles = StyleSheet.create({
   },
   greetingTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   liveIndicatorBadge: {
@@ -1872,7 +1872,7 @@ const styles = StyleSheet.create({
   },
   liveIndicatorText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#059669",
     letterSpacing: 0.5,
   },
@@ -1901,7 +1901,7 @@ const styles = StyleSheet.create({
   },
   currencyPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   currencyPillTextActive: {
@@ -1923,7 +1923,7 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
 
@@ -2052,7 +2052,7 @@ const styles = StyleSheet.create({
   },
   trendPillTextGreen: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#16a34a",
   },
   trendPillAmber: {
@@ -2066,7 +2066,7 @@ const styles = StyleSheet.create({
   },
   trendPillTextAmber: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#b45309",
   },
   trendPillRed: {
@@ -2077,12 +2077,12 @@ const styles = StyleSheet.create({
   },
   trendPillTextRed: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#dc2626",
   },
   kpiValue: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0f172a",
     letterSpacing: -0.3,
   },
@@ -2108,17 +2108,17 @@ const styles = StyleSheet.create({
   },
   kpiFootHighlightGreen: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#16a34a",
   },
   kpiFootHighlightBlue: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563eb",
   },
   kpiFootHighlightRed: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#dc2626",
   },
   kpiRoleAction: {
@@ -2128,7 +2128,7 @@ const styles = StyleSheet.create({
   },
   kpiRoleActionText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#d97706",
   },
 
@@ -2159,7 +2159,7 @@ const styles = StyleSheet.create({
   },
   analyticsTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   verifiedRoleBadge: {
@@ -2173,7 +2173,7 @@ const styles = StyleSheet.create({
   },
   verifiedRoleBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#059669",
   },
   restrictedRoleBadge: {
@@ -2187,7 +2187,7 @@ const styles = StyleSheet.create({
   },
   restrictedRoleBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#dc2626",
   },
   analyticsSub: {
@@ -2237,11 +2237,11 @@ const styles = StyleSheet.create({
   hudDateLabel: {
     fontSize: 12,
     color: "#64748b",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   hudRevValue: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#4f46e5",
   },
   hudRightBox: {
@@ -2286,7 +2286,7 @@ const styles = StyleSheet.create({
   },
   chartSummaryValue: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     marginTop: 1,
   },
@@ -2317,7 +2317,7 @@ const styles = StyleSheet.create({
   },
   restrictedGuardTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#991b1b",
     textAlign: "center",
   },
@@ -2359,7 +2359,7 @@ const styles = StyleSheet.create({
   switchPersonaBtnText: {
     color: "#ffffff",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Donut Chart & Booking Breakdown
@@ -2381,12 +2381,12 @@ const styles = StyleSheet.create({
   },
   donutCenterValue: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0f172a",
   },
   donutCenterLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4f46e5",
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -2426,12 +2426,12 @@ const styles = StyleSheet.create({
   verticalCardLabel: {
     flex: 1,
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   verticalPercentText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   verticalMetricRow: {
     flexDirection: "row",
@@ -2446,7 +2446,7 @@ const styles = StyleSheet.create({
   },
   verticalRevText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   verticalRevTextMasked: {
@@ -2466,7 +2466,7 @@ const styles = StyleSheet.create({
   },
   viewDetailLink: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#4f46e5",
   },
 
@@ -2497,7 +2497,7 @@ const styles = StyleSheet.create({
   },
   telemetryTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0f172a",
   },
   telemetrySubtitle: {
@@ -2516,7 +2516,7 @@ const styles = StyleSheet.create({
   },
   pingDiagnosticsText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   telemetryGrid: {
@@ -2559,12 +2559,12 @@ const styles = StyleSheet.create({
   },
   statusPillTextGreen: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   telemetryServiceName: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   telemetryServiceDesc: {
@@ -2679,7 +2679,7 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4f46e5",
   },
   attentionGrid: {

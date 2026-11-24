@@ -368,12 +368,12 @@ const styles = StyleSheet.create({
   },
   highlightedText: {
     color: "#2563eb",
-    fontWeight: "800",
+    fontWeight: "600",
     backgroundColor: "#eff6ff",
   },
   highlightTextBold: {
     color: "#2563eb",
-    fontWeight: "900",
+    fontWeight: "600",
     backgroundColor: "#dbeafe",
   },
   suggestionSubtitle: {
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
   },
   noResultsText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
     marginTop: 8,
     textAlign: "center",

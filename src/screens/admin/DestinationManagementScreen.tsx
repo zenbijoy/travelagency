@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#fff",
     marginBottom: 5,
   },
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   },
   destinationName: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1f2937",
     marginBottom: 4,
   },

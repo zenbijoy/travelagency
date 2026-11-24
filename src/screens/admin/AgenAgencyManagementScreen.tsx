@@ -748,7 +748,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#fff",
     marginBottom: 4,
   },
@@ -925,7 +925,7 @@ const styles = StyleSheet.create({
   },
   notesLabel: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#6b7280",
     marginBottom: 4,
   },
@@ -979,7 +979,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#1f2937",
   },
   infoSection: {
@@ -991,7 +991,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#1f2937",
     marginBottom: 12,
   },
@@ -1011,7 +1011,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 14,
     color: "#1f2937",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   notesInput: {
     backgroundColor: "#f9fafb",

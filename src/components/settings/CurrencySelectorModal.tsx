@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   },
   symbolText: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   detailsBlock: {
     justifyContent: "center",

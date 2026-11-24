@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   },
   tripDotCom: {
     color: TRIP_BLUE,
-    fontWeight: 'bold',
+    fontWeight: "500",
     fontSize: 16,
   },
   rewardsBadge: {
@@ -400,11 +400,11 @@ const styles = StyleSheet.create({
   rewardsBadgeText: {
     color: '#000',
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "500",
   },
   tierTitle: {
     fontSize: 48,
-    fontWeight: 'bold',
+    fontWeight: "700",
     color: '#4A6B9E',
     marginBottom: 4,
   },
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
   },
   timelineDotText: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "500",
     color: '#fff',
   },
   mainContent: {
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "700",
     color: '#0f172a',
     marginBottom: 20,
   },
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
   },
   couponTypeText: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "500",
     color: '#ec4899',
     marginStart: 6,
   },
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
   },
   couponLabel: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#64748b',
     marginBottom: 2,
   },
@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
   useNowText: {
     color: TRIP_BLUE,
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "500",
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
   multiplierText: {
     color: TRIP_BLUE,
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "500",
   },
   rewardCard: {
     backgroundColor: '#fff',
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
   },
   rewardCardTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "700",
     color: '#1e293b',
   },
   coinVisual: {
@@ -749,13 +749,13 @@ const styles = StyleSheet.create({
   },
   mysteryBoxBadgeText: {
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: "600",
     color: '#F59E0B',
     letterSpacing: 0.5,
   },
   mysteryBoxStreakTag: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#38BDF8',
     backgroundColor: 'rgba(56, 189, 248, 0.15)',
     paddingHorizontal: 6,
@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
   coinT: {
     color: '#fff',
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "500",
   },
   // Additional Styles for Points Valuation & Expiry Alerts
   conversionRatePill: {
@@ -829,13 +829,13 @@ const styles = StyleSheet.create({
   },
   pointsLargeNumber: {
     fontSize: 32,
-    fontWeight: '900',
+    fontWeight: "700",
     color: '#0f172a',
     letterSpacing: -0.5,
   },
   pointsUnitText: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#3b82f6',
   },
   cashEquivalentRow: {
@@ -850,7 +850,7 @@ const styles = StyleSheet.create({
   },
   cashEquivalentAmount: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: "700",
     color: '#10b981',
   },
   pointsRateExplainBox: {
@@ -905,7 +905,7 @@ const styles = StyleSheet.create({
   },
   expiryAlertBadge: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: "600",
     color: '#ea580c',
     backgroundColor: '#ffedd5',
     paddingHorizontal: 8,
@@ -914,12 +914,12 @@ const styles = StyleSheet.create({
   },
   expiryAlertDays: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#dc2626',
   },
   expiryAlertTitle: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: "700",
     color: '#9a3412',
     marginBottom: 4,
   },
@@ -940,7 +940,7 @@ const styles = StyleSheet.create({
   },
   expiryAlertActionText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "500",
     color: '#ffffff',
   },
   howToRedeemCard: {
@@ -974,7 +974,7 @@ const styles = StyleSheet.create({
   },
   stepCircleNumText: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: "600",
     color: '#ffffff',
   },
   stepItemText: {

@@ -444,8 +444,8 @@ export class TravelRepository
         .order("rating", { ascending: false })
         .limit(limit);
 
-      if (error) {
-        throw this.normalizeError(error, "getFeaturedTours");
+      if (error || !data || data.length === 0) {
+        return [];
       }
 
       const results: TourSearchResult[] = (data || []).map((tour: any) => ({

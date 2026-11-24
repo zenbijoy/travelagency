@@ -569,7 +569,7 @@ const zoomStyles = StyleSheet.create({
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   headerCounter: {
     color: "#9CA3AF",
@@ -609,7 +609,7 @@ const zoomStyles = StyleSheet.create({
   pinchHintText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   quickZoomRow: {
     flexDirection: "row",
@@ -631,7 +631,7 @@ const zoomStyles = StyleSheet.create({
   zoomActionBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   thumbnailStripContainer: {
     backgroundColor: "rgba(0,0,0,0.6)",
@@ -714,8 +714,8 @@ function TourImageCarousel({
       >
         {images.map((img, i) => (
           <Pressable key={`slide-${img}-${i}`} onPress={() => onOpenZoom(i)} style={tourCarouselStyles.slide}>
-            <AppImage source={{ uri: img }} placeholderCategory="destination" style={tourCarouselStyles.image} />
-            <LinearGradient colors={["rgba(15, 23, 42, 0.45)", "transparent", "rgba(15, 23, 42, 0.75)"]} style={StyleSheet.absoluteFill} />
+            <Image source={{ uri: img }} style={tourCarouselStyles.image} resizeMode="cover" />
+            <LinearGradient colors={["rgba(15, 23, 42, 0.3)", "transparent", "rgba(15, 23, 42, 0.6)"]} style={StyleSheet.absoluteFill} />
           </Pressable>
         ))}
       </ScrollView>
@@ -774,8 +774,11 @@ const tourCarouselStyles = StyleSheet.create({
     height: "100%",
   },
   slide: {
-    width: "100%",
+    width: Dimensions.get("window").width - 32,
     height: 200,
+    flexShrink: 0,
+    position: "relative",
+    overflow: "hidden",
   },
   image: {
     width: "100%",
@@ -799,7 +802,7 @@ const tourCarouselStyles = StyleSheet.create({
   categoryBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   zoomBtn: {
     flexDirection: "row",
@@ -815,7 +818,7 @@ const tourCarouselStyles = StyleSheet.create({
   zoomBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   bottomRow: {
     position: "absolute",
@@ -851,7 +854,7 @@ const tourCarouselStyles = StyleSheet.create({
   },
   ratingBadgeVal: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   ratingBadgeCount: {
@@ -1768,7 +1771,7 @@ export function RecommendedToursScreen() {
                             <Text style={styles.rateGuestLabel}>/ guest</Text>
                           </View>
                           <Text style={styles.totalForGuestsSummary}>
-                            Total: <Text style={{ fontWeight: "800", color: "#111827" }}>{formatCurrency(pricing.totalAmount, tour.currency)}</Text> for {size} guests
+                            Total: <Text style={{ fontWeight: "600", color: "#111827" }}>{formatCurrency(pricing.totalAmount, tour.currency)}</Text> for {size} guests
                             {pricing.totalSavings > 0 && (
                               <Text style={{ color: "#059669", fontWeight: "700" }}> (Save {formatCurrency(pricing.totalSavings, tour.currency)})</Text>
                             )}
@@ -1963,7 +1966,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   headerSubtitle: {
@@ -2018,7 +2021,7 @@ const styles = StyleSheet.create({
   },
   listingHeading: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   listingSubheading: {
@@ -2063,7 +2066,7 @@ const styles = StyleSheet.create({
   },
   tourTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     lineHeight: 22,
     marginBottom: 6,
@@ -2099,7 +2102,7 @@ const styles = StyleSheet.create({
   },
   badgeInstantText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   tierStatusBadge: {
@@ -2115,7 +2118,7 @@ const styles = StyleSheet.create({
   },
   tierStatusBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#7C3AED",
   },
 
@@ -2133,13 +2136,13 @@ const styles = StyleSheet.create({
   },
   inclusionsSectionTitle: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#065F46",
     letterSpacing: 0.5,
   },
   exclusionsSectionTitle: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#991B1B",
     letterSpacing: 0.5,
   },
@@ -2161,7 +2164,7 @@ const styles = StyleSheet.create({
   },
   inclusionHighContrastText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#065F46",
   },
   exclusionsRow: {
@@ -2182,7 +2185,7 @@ const styles = StyleSheet.create({
   },
   exclusionHighContrastText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#991B1B",
   },
 
@@ -2203,12 +2206,12 @@ const styles = StyleSheet.create({
   },
   itinerarySectionTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   itineraryCountBadge: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   itineraryAccordionCard: {
@@ -2233,7 +2236,7 @@ const styles = StyleSheet.create({
   },
   dayPillText: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#2563EB",
   },
   dayTitle: {
@@ -2271,7 +2274,7 @@ const styles = StyleSheet.create({
   },
   timelineLabel: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#334155",
   },
   timelineDesc: {
@@ -2288,7 +2291,7 @@ const styles = StyleSheet.create({
   },
   mealBarLabel: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#64748B",
     marginBottom: 4,
   },
@@ -2315,7 +2318,7 @@ const styles = StyleSheet.create({
   },
   mealBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#94A3B8",
   },
   mealBadgeTextActive: {
@@ -2371,7 +2374,7 @@ const styles = StyleSheet.create({
   },
   guideName: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   guideRole: {
@@ -2387,7 +2390,7 @@ const styles = StyleSheet.create({
   },
   guideRatingText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   guideActionsStack: {
@@ -2405,7 +2408,7 @@ const styles = StyleSheet.create({
   },
   guideProfileBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#2563EB",
   },
   guideCallGroup: {
@@ -2436,7 +2439,7 @@ const styles = StyleSheet.create({
   },
   sectionBlockTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#334155",
   },
   dateSelectorRow: {
@@ -2458,12 +2461,12 @@ const styles = StyleSheet.create({
   },
   dateOptionText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#64748B",
   },
   dateOptionTextActive: {
     color: "#2563EB",
-    fontWeight: "900",
+    fontWeight: "400",
   },
 
   // Time Slot
@@ -2499,7 +2502,7 @@ const styles = StyleSheet.create({
   },
   timeSlotTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#1E293B",
   },
   timeSlotTitleActive: {
@@ -2530,13 +2533,13 @@ const styles = StyleSheet.create({
   },
   groupTierHeading: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   groupTierSub: {
     fontSize: 12,
     color: "#2563EB",
-    fontWeight: "600",
+    fontWeight: "400",
     marginTop: 1,
   },
   groupTierActiveBadge: {
@@ -2552,7 +2555,7 @@ const styles = StyleSheet.create({
   },
   groupTierActiveBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#065F46",
   },
   tierProgressionBar: {
@@ -2580,12 +2583,12 @@ const styles = StyleSheet.create({
   },
   tierStepNum: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   tierStepLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   tierStepLine: {
@@ -2618,12 +2621,12 @@ const styles = StyleSheet.create({
   },
   quickTierBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   quickTierBtnTextActive: {
     color: "#2563EB",
-    fontWeight: "900",
+    fontWeight: "600",
   },
   stepperWrapRow: {
     flexDirection: "row",
@@ -2657,7 +2660,7 @@ const styles = StyleSheet.create({
   },
   stepperValueText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   stepperSubText: {
@@ -2684,7 +2687,7 @@ const styles = StyleSheet.create({
   },
   discountedRateBig: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   rateGuestLabel: {
@@ -2708,7 +2711,7 @@ const styles = StyleSheet.create({
   bookTourBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Digital Tour Pass Modal
@@ -2742,7 +2745,7 @@ const styles = StyleSheet.create({
   },
   passVerifiedText: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#059669",
     letterSpacing: 0.5,
   },
@@ -2778,13 +2781,13 @@ const styles = StyleSheet.create({
   ticketBrand: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   ticketIdBadge: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   ticketBody: {
     padding: 16,
@@ -2792,7 +2795,7 @@ const styles = StyleSheet.create({
   },
   ticketTourTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   ticketDestRow: {
@@ -2816,14 +2819,14 @@ const styles = StyleSheet.create({
   },
   ticketLabel: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#94A3B8",
     marginBottom: 3,
     letterSpacing: 0.5,
   },
   ticketValPrimary: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   ticketValSub: {
@@ -2833,7 +2836,7 @@ const styles = StyleSheet.create({
   },
   ticketDiscountTag: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#059669",
     marginTop: 2,
   },
@@ -2855,18 +2858,18 @@ const styles = StyleSheet.create({
   },
   ticketGuideHeaderLabel: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#64748B",
   },
   ticketGuideName: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   ticketGuideRole: {
     fontSize: 12,
     color: "#2563EB",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   ticketGuideCallBtn: {
     width: 32,
@@ -2897,7 +2900,7 @@ const styles = StyleSheet.create({
   },
   passInclusionChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#065F46",
   },
   qrCodeSection: {
@@ -2928,7 +2931,7 @@ const styles = StyleSheet.create({
   },
   ticketAmountValue: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#2563EB",
   },
   passIssuedDateBox: {
@@ -2936,12 +2939,12 @@ const styles = StyleSheet.create({
   },
   passIssuedLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   passIssuedDate: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#0F172A",
   },
   modalActionsStack: {
@@ -2965,7 +2968,7 @@ const styles = StyleSheet.create({
   proceedPaymentBtnText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   sharePassBtn: {
     flexDirection: "row",
@@ -2981,6 +2984,6 @@ const styles = StyleSheet.create({
   sharePassBtnText: {
     color: "#2563EB",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });

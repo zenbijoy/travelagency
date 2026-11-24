@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   filterTextActive: {
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   },
   refText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   statusBadge: {
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
   },
   mainRef: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#4f46e5",
     marginTop: 4,
   },
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
   actionBtnText: {
     color: "#ffffff",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });
 

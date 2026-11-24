@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   },
   idText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   changeLink: {
     paddingVertical: 4,
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   },
   sendOtpBtnText: {
     color: "#ffffff",
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 14,
   },
   btnDisabled: {
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   resendActiveText: {
     color: "#3166ee",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   resendDisabledText: {
     fontSize: 13,

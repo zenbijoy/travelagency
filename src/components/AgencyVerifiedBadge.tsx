@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   badgeText: {
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0369a1",
     letterSpacing: 0.2,
   },

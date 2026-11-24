@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#fff',
     marginStart: 10,
-    fontWeight: 'bold',
+    fontWeight: "500",
   },
   fallbackButton: {
     backgroundColor: '#4285F4',
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
   fallbackText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontWeight: "500",
     fontSize: 16,
   },
 });

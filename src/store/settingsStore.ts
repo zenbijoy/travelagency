@@ -91,6 +91,8 @@ export interface SettingsState {
 }
 
 // Universal Secure Storage Adapter
+const toSafeKey = (key: string) => key.replace(/[^a-zA-Z0-9._-]/g, "_");
+
 const universalStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
     if (Platform.OS === "web") {
@@ -105,7 +107,7 @@ const universalStorage: StateStorage = {
     }
 
     try {
-      return await SecureStore.getItemAsync(name);
+      return await SecureStore.getItemAsync(toSafeKey(name));
     } catch (err) {
       console.warn("[settingsStore] SecureStore getItem error:", err);
       return null;
@@ -124,7 +126,7 @@ const universalStorage: StateStorage = {
     }
 
     try {
-      await SecureStore.setItemAsync(name, value);
+      await SecureStore.setItemAsync(toSafeKey(name), value);
     } catch (err) {
       console.warn("[settingsStore] SecureStore setItem error:", err);
     }
@@ -142,7 +144,7 @@ const universalStorage: StateStorage = {
     }
 
     try {
-      await SecureStore.deleteItemAsync(name);
+      await SecureStore.deleteItemAsync(toSafeKey(name));
     } catch (err) {
       console.warn("[settingsStore] SecureStore deleteItem error:", err);
     }
@@ -286,7 +288,7 @@ export const useSettingsStore = create<SettingsState>()(
       setHydrated: (isHydrated: boolean) => set({ isHydrated }),
     }),
     {
-      name: "@travel_app_unified_settings_v2",
+      name: "travel_app_unified_settings_v2",
       storage: createJSONStorage(() => universalStorage),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);

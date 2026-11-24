@@ -94,13 +94,13 @@ const styles = StyleSheet.create({
   },
   sourceText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   topTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   profileDot: {
     alignItems: "center",

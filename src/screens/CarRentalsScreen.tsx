@@ -1281,7 +1281,7 @@ const styles = StyleSheet.create({
   brandBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   goldBadge: {
@@ -1295,14 +1295,14 @@ const styles = StyleSheet.create({
   goldBadgeText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   heroTitleBox: {
     marginTop: 18,
   },
   heroMainTitle: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#FFFFFF",
     lineHeight: 28,
   },
@@ -1348,7 +1348,7 @@ const styles = StyleSheet.create({
   },
   dropoffTabTextActive: {
     color: TRIP_BLUE,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   inputFieldGroup: {
     flexDirection: "row",
@@ -1375,7 +1375,7 @@ const styles = StyleSheet.create({
   inputFieldLabel: {
     fontSize: 12,
     color: "#9CA3AF",
-    fontWeight: "700",
+    fontWeight: "500",
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -1387,7 +1387,7 @@ const styles = StyleSheet.create({
   },
   inputTextBold: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#111827",
   },
   locationCodeBadge: {
@@ -1398,7 +1398,7 @@ const styles = StyleSheet.create({
   },
   locationCodeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     color: TRIP_BLUE,
   },
   inputSubText: {
@@ -1442,18 +1442,18 @@ const styles = StyleSheet.create({
   dateTimeLabel: {
     fontSize: 12,
     color: "#9CA3AF",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   dateTimeValue: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#1E293B",
     marginTop: 2,
   },
   dateTimeSub: {
     fontSize: 12,
     color: TRIP_BLUE,
-    fontWeight: "700",
+    fontWeight: "400",
     marginTop: 1,
   },
   durationPill: {
@@ -1467,7 +1467,7 @@ const styles = StyleSheet.create({
   },
   durationPillText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   driverAgeRow: {
@@ -1485,7 +1485,7 @@ const styles = StyleSheet.create({
   },
   driverAgeText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#1F2937",
   },
   driverAgeSubText: {
@@ -1510,7 +1510,7 @@ const styles = StyleSheet.create({
   searchSubmitBtnText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "400",
     letterSpacing: 0.5,
   },
   perksStrip: {
@@ -1525,13 +1525,16 @@ const styles = StyleSheet.create({
     borderColor: "#F3F4F6",
   },
   perkItem: {
+    flex: 1,
     alignItems: "center",
     gap: 4,
+    paddingHorizontal: 2,
   },
   perkText: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 10,
+    fontWeight: "500",
     color: "#4B5563",
+    textAlign: "center",
   },
   sectionHeader: {
     flexDirection: "row",
@@ -1543,7 +1546,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
   },
   sectionCount: {
@@ -1570,7 +1573,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4B5563",
   },
   filterChipTextActive: {
@@ -1618,7 +1621,7 @@ const styles = StyleSheet.create({
   },
   carBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   providerBadge: {
@@ -1629,7 +1632,7 @@ const styles = StyleSheet.create({
   },
   providerText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#374151",
   },
   carContentRow: {
@@ -1643,7 +1646,7 @@ const styles = StyleSheet.create({
   },
   carName: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#111827",
     marginBottom: 4,
   },
@@ -1655,7 +1658,7 @@ const styles = StyleSheet.create({
   },
   ratingNumber: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#1F2937",
   },
   reviewCount: {
@@ -1678,7 +1681,7 @@ const styles = StyleSheet.create({
   },
   specText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#4B5563",
   },
   carImage: {
@@ -1719,7 +1722,7 @@ const styles = StyleSheet.create({
   },
   priceDaily: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
   },
   priceUnit: {
@@ -1746,7 +1749,7 @@ const styles = StyleSheet.create({
   },
   viewSpecsBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#4B5563",
   },
   bookBtn: {
@@ -1760,7 +1763,7 @@ const styles = StyleSheet.create({
   bookBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Modal Common Styles
@@ -1787,7 +1790,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
   },
   searchBarWrap: {
@@ -1814,7 +1817,7 @@ const styles = StyleSheet.create({
   },
   chipsSectionLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#6B7280",
     marginBottom: 8,
     textTransform: "uppercase",
@@ -1834,7 +1837,7 @@ const styles = StyleSheet.create({
   },
   chipBtnText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#374151",
   },
   chipBtnTextActive: {
@@ -1878,7 +1881,7 @@ const styles = StyleSheet.create({
   },
   locCityText: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#111827",
   },
   locCodeBadge: {
@@ -1889,7 +1892,7 @@ const styles = StyleSheet.create({
   },
   locCodeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   locFullNameText: {
@@ -1930,12 +1933,12 @@ const styles = StyleSheet.create({
   },
   sheetHeaderTitle: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
   },
   sheetSectionTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#4B5563",
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -1961,7 +1964,7 @@ const styles = StyleSheet.create({
   },
   presetDaysNumber: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#1F2937",
   },
   presetDaysNumberActive: {
@@ -1989,7 +1992,7 @@ const styles = StyleSheet.create({
   },
   timeSlotBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#374151",
   },
   timeSlotBtnTextActive: {
@@ -2011,7 +2014,7 @@ const styles = StyleSheet.create({
   },
   sheetSummaryVal: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#111827",
     marginTop: 2,
   },
@@ -2024,7 +2027,7 @@ const styles = StyleSheet.create({
   applyBtnText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Specs Drawer Styles
@@ -2054,7 +2057,7 @@ const styles = StyleSheet.create({
   },
   drawerCarTitle: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
   },
   drawerCarCategory: {
@@ -2092,7 +2095,7 @@ const styles = StyleSheet.create({
   },
   drawerBoxTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#1E293B",
     marginBottom: 10,
   },
@@ -2116,7 +2119,7 @@ const styles = StyleSheet.create({
   },
   specBoxVal: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#1E293B",
     marginTop: 4,
   },
@@ -2156,7 +2159,7 @@ const styles = StyleSheet.create({
   },
   fareCardTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#334155",
     marginBottom: 10,
   },
@@ -2172,7 +2175,7 @@ const styles = StyleSheet.create({
   },
   fareVal: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1E293B",
   },
   fareDivider: {
@@ -2182,12 +2185,12 @@ const styles = StyleSheet.create({
   },
   fareTotalLabel: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   fareTotalVal: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: TRIP_BLUE,
   },
   drawerFooterBar: {
@@ -2207,7 +2210,7 @@ const styles = StyleSheet.create({
   },
   footerPriceValue: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   reserveCTAButton: {
@@ -2226,6 +2229,6 @@ const styles = StyleSheet.create({
   reserveCTAButtonText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });

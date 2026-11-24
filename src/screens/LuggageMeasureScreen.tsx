@@ -1042,7 +1042,7 @@ export function LuggageMeasureScreen() {
                 <Text
                   style={{
                     color: dimDifferences.isWithinCabinLimit ? "#34D399" : "#F87171",
-                    fontWeight: "800",
+                    fontWeight: "600",
                     fontSize: 11,
                   }}
                 >
@@ -1522,7 +1522,7 @@ const styles = StyleSheet.create({
   grantPermText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "bold",
+    fontWeight: "500",
   },
 
   // Header
@@ -1572,7 +1572,7 @@ const styles = StyleSheet.create({
   headerSuperTitle: {
     color: "#00E5FF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 1.2,
   },
   headerTitle: {
@@ -1615,7 +1615,7 @@ const styles = StyleSheet.create({
   },
   classToggleTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   sizingCageToggleBtn: {
     flexDirection: "row",
@@ -1634,7 +1634,7 @@ const styles = StyleSheet.create({
   sizingCageToggleText: {
     color: "#94A3B8",
     fontSize: 12.5,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Airline Selector
@@ -1646,7 +1646,7 @@ const styles = StyleSheet.create({
   sectionCaption: {
     color: "#94A3B8",
     fontSize: 12.5,
-    fontWeight: "700",
+    fontWeight: "600",
     letterSpacing: 0.8,
     paddingHorizontal: 16,
     marginBottom: 5,
@@ -1679,7 +1679,7 @@ const styles = StyleSheet.create({
   airlineIataText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   airlineChipTextWrap: {
     maxWidth: 130,
@@ -1691,7 +1691,7 @@ const styles = StyleSheet.create({
   },
   airlineChipNameSelected: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   airlineChipLimits: {
     color: "#94A3B8",
@@ -1717,7 +1717,7 @@ const styles = StyleSheet.create({
   },
   airlineVerdictBadgeText: {
     fontSize: 10.5,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   textVerdictOk: {
     color: "#34D399",
@@ -1747,7 +1747,7 @@ const styles = StyleSheet.create({
   },
   primaryVerdictTitle: {
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 0.3,
   },
   primaryVerdictSubtitle: {
@@ -1774,7 +1774,7 @@ const styles = StyleSheet.create({
   selectedAirlineSubText: {
     color: "#38BDF8",
     fontSize: 11.5,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   dimVerdictTag: {
     marginTop: 4,
@@ -1790,7 +1790,7 @@ const styles = StyleSheet.create({
   },
   dimVerdictTagText: {
     fontSize: 10.5,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Tracking HUD
@@ -1828,7 +1828,7 @@ const styles = StyleSheet.create({
   trackingConfidenceText: {
     color: "#00E5FF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   orbitPill: {
     flexDirection: "row",
@@ -1898,7 +1898,7 @@ const styles = StyleSheet.create({
   stepperDimName: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   stepperDiffText: {
     fontSize: 12.5,
@@ -1907,7 +1907,7 @@ const styles = StyleSheet.create({
   stepperValueText: {
     color: "#FFFFFF",
     fontSize: 17,
-    fontWeight: "bold",
+    fontWeight: "500",
     marginVertical: 2,
   },
   stepperActionRow: {
@@ -1993,7 +1993,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontSize: 14.5,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   headerRightBadges: {
@@ -2049,11 +2049,11 @@ const styles = StyleSheet.create({
   dimEvalTitle: {
     color: "#94A3B8",
     fontSize: 12.5,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   dimEvalValue: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontWeight: "500",
     marginVertical: 1,
   },
   dimEvalAllowed: {
@@ -2063,7 +2063,7 @@ const styles = StyleSheet.create({
   dimEvalOverBadge: {
     color: "#EF4444",
     fontSize: 12.5,
-    fontWeight: "bold",
+    fontWeight: "500",
     marginTop: 2,
   },
 
@@ -2083,7 +2083,7 @@ const styles = StyleSheet.create({
   },
   linearValue: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   linearTrack: {
     height: 4,
@@ -2132,7 +2132,7 @@ const styles = StyleSheet.create({
   addonBtnPrimaryText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   addonBtnSubText: {
     color: "rgba(255, 255, 255, 0.8)",
@@ -2149,7 +2149,7 @@ const styles = StyleSheet.create({
   addonSaveBadgeText: {
     color: "#DC2626",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   compliantNoticeRow: {
     flexDirection: "row",
@@ -2198,12 +2198,12 @@ const styles = StyleSheet.create({
   modalDiscountTagText: {
     color: "#EF4444",
     fontSize: 12.5,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   modalTitle: {
     color: "#FFFFFF",
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   modalSubtitle: {
     color: "#94A3B8",
@@ -2247,7 +2247,7 @@ const styles = StyleSheet.create({
   tierSectionTitle: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.8,
   },
   currencyTogglePill: {
@@ -2298,7 +2298,7 @@ const styles = StyleSheet.create({
   tierWeightText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "bold",
+    fontWeight: "500",
   },
   tierPopularBadge: {
     backgroundColor: "#0055F2",
@@ -2309,7 +2309,7 @@ const styles = StyleSheet.create({
   tierPopularBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   tierDescText: {
     color: "#94A3B8",
@@ -2333,7 +2333,7 @@ const styles = StyleSheet.create({
   tierPrebookPrice: {
     color: "#00E5FF",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   guaranteeBox: {
     flexDirection: "row",
@@ -2364,7 +2364,7 @@ const styles = StyleSheet.create({
   modalSubmitText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "400",
   },
 
   // Receipt confirmation
@@ -2378,7 +2378,7 @@ const styles = StyleSheet.create({
   receiptTitle: {
     color: "#FFFFFF",
     fontSize: 19,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   receiptSubtitle: {
     color: "#94A3B8",
@@ -2415,13 +2415,13 @@ const styles = StyleSheet.create({
   receiptValueCode: {
     color: "#00E5FF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 1,
   },
   receiptValueHighlight: {
     color: "#10B981",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   receiptPriceText: {
     color: "#FFFFFF",
@@ -2431,7 +2431,7 @@ const styles = StyleSheet.create({
   receiptSavedText: {
     color: "#10B981",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   doneBtn: {
     width: "100%",
@@ -2443,7 +2443,7 @@ const styles = StyleSheet.create({
   doneBtnText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Certificate Modal
@@ -2471,7 +2471,7 @@ const styles = StyleSheet.create({
   certTitle: {
     color: "#FFFFFF",
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   certSubtitle: {
     color: "#94A3B8",
@@ -2502,7 +2502,7 @@ const styles = StyleSheet.create({
   certValueHighlight: {
     color: "#00E5FF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   certCloseBtn: {
     backgroundColor: "#0055F2",
@@ -2513,7 +2513,7 @@ const styles = StyleSheet.create({
   certCloseBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Helper text colors

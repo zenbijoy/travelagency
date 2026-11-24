@@ -9,48 +9,44 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { useTheme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import { FONTS } from "../theme/typography";
 import { useLanguage } from "../context/LanguageContext";
 import { AudioMiniBar } from "../components/audio/AudioMiniBar";
 import { useAuthStore } from "../store/authStore";
 import { useNotificationStore } from "../store/notificationStore";
-import { useResponsive } from "../hooks/useResponsive";
+import * as Haptics from "expo-haptics";
 
 // ─── Tab Config Matching Reference Screenshots & Clean Expo Router Paths ─────
 export const TABS = [
-  { label: "Home", name: "index", icon: "home" as const, outlineIcon: "home-outline" as const, route: "/(tabs)" },
+  { label: "Home", name: "index", icon: "home-outline" as const, route: "/(tabs)" },
   {
     label: "Messages",
     name: "messages",
-    icon: "mail" as const,
-    outlineIcon: "mail-outline" as const,
+    icon: "mail-outline" as const,
     route: "/(tabs)/messages",
   },
   {
     label: "Community",
     name: "community",
-    icon: "people" as const,
-    outlineIcon: "people-outline" as const,
+    icon: "people-outline" as const,
     route: "/(tabs)/community",
   },
   {
     label: "My Trips",
     name: "trips",
-    icon: "briefcase" as const,
-    outlineIcon: "briefcase-outline" as const,
+    icon: "briefcase-outline" as const,
     route: "/(tabs)/trips",
   },
   {
     label: "Account",
     name: "account",
-    icon: "person-circle" as const,
-    outlineIcon: "person-circle-outline" as const,
+    icon: "person-circle-outline" as const,
     route: "/(tabs)/account",
   },
 ] as const;
@@ -82,9 +78,11 @@ export function getLocalizedTabLabel(t: (k: string, d?: string) => string, label
   }
 }
 
-// ─── Floating AI Assistant Pill with Gold Mic Button ────────────────────────
-export function AiPill({ color, extraBottomOffset = 0 }: { color?: string; extraBottomOffset?: number }) {
-  const { theme, isDark } = useTheme();
+// ─── Floating AI Assistant Pill ───────────────────────────────────────────────
+export function AiPill({ color, extraBottomOffset = 0 }: { color: string; extraBottomOffset?: number }) {
+  const { colors, isDark } = useTheme();
+  const { t } = useLanguage();
+
   const insets = useSafeAreaInsets();
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -106,9 +104,11 @@ export function AiPill({ color, extraBottomOffset = 0 }: { color?: string; extra
   }, []);
 
   const aiPillBottom = useMemo(
-    () => insets.bottom + 66 + extraBottomOffset,
+    () => Math.max(insets.bottom, 12) + 54 + extraBottomOffset,
     [insets.bottom, extraBottomOffset]
   );
+
+  const goldAccent = isDark ? "#ECC46E" : "#C59B27";
 
   return (
     <Animated.View
@@ -122,90 +122,74 @@ export function AiPill({ color, extraBottomOffset = 0 }: { color?: string; extra
       ]}
       pointerEvents="box-none"
     >
-      <View style={styles.aiRow}>
-        {/* Main Pill Button */}
-        <Pressable
-          style={({ pressed }) => [
-            styles.aiPillContainer,
-            {
-              backgroundColor: isDark ? "rgba(24, 28, 38, 0.95)" : "#FFFFFF",
-              borderColor: isDark ? "rgba(229, 169, 60, 0.35)" : "#EAD9C2",
-              shadowColor: isDark ? "#000000" : "#D4A03D",
-            },
-            pressed && styles.aiPillPressed,
-          ]}
-          onPress={() => router.push("/screens/trip-planner" as any)}
-        >
-          {/* Subtle audio waveform in light mode */}
-          {!isDark && (
-            <View style={styles.waveformContainer}>
-              <View style={[styles.waveBar, { height: 10, backgroundColor: "#E5B252" }]} />
-              <View style={[styles.waveBar, { height: 16, backgroundColor: "#D4A03D" }]} />
-              <View style={[styles.waveBar, { height: 12, backgroundColor: "#E5B252" }]} />
-              <View style={[styles.waveBar, { height: 7, backgroundColor: "#FDE68A" }]} />
-            </View>
-          )}
+      <Pressable
+        style={({ pressed }) => [
+          styles.aiPillContainer,
+          {
+            backgroundColor: isDark ? "rgba(22, 22, 26, 0.94)" : "rgba(255, 255, 255, 0.97)",
+            borderColor: isDark ? "rgba(236, 196, 110, 0.35)" : "rgba(197, 155, 39, 0.3)",
+            shadowColor: goldAccent,
+          },
+          pressed && styles.aiPillPressed,
+        ]}
+        onPress={() => {
+          try {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          } catch {}
+          router.push("/screens/trip-planner" as any);
+        }}
+      >
+        {/* Left: Waveform animation / bars */}
+        <View style={styles.waveformWrap}>
+          <View style={[styles.waveBar, { height: 7, backgroundColor: goldAccent }]} />
+          <View style={[styles.waveBar, { height: 13, backgroundColor: goldAccent }]} />
+          <View style={[styles.waveBar, { height: 18, backgroundColor: goldAccent }]} />
+          <View style={[styles.waveBar, { height: 10, backgroundColor: goldAccent }]} />
+          <View style={[styles.waveBar, { height: 15, backgroundColor: goldAccent }]} />
+          <View style={[styles.waveBar, { height: 8, backgroundColor: goldAccent }]} />
+        </View>
 
-          {/* Robot AI Icon */}
-          <View
-            style={[
-              styles.aiRobotBadge,
-              {
-                backgroundColor: isDark ? "rgba(229, 169, 60, 0.2)" : "#FEF3C7",
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="robot"
-              size={16}
-              color={theme.gold}
-            />
+        {/* Center: Stylized Robot face + Text */}
+        <View style={styles.aiCenterRow}>
+          <View style={[styles.robotIconContainer, { backgroundColor: isDark ? "#28251D" : "#F3EBDD" }]}>
+            <View style={styles.robotAntenna} />
+            <View style={styles.robotFace}>
+              <View style={styles.robotEye} />
+              <View style={styles.robotEye} />
+            </View>
           </View>
           <Text
             style={[
               styles.aiText,
-              { color: isDark ? "#F8FAFC" : "#1E293B" },
+              { color: isDark ? "#E5E5E5" : "#1A1A1A" },
             ]}
+            numberOfLines={1}
           >
-            Ask AI or hold to speak
+            {t("nav.askAi", "Ask AI or hold to speak")}
           </Text>
-        </Pressable>
+        </View>
 
-        {/* Circular Gold Microphone Button */}
-        <Pressable
-          style={({ pressed }) => [
-            styles.aiMicBtn,
-            pressed && { transform: [{ scale: 0.94 }], opacity: 0.9 },
-          ]}
-          onPress={() => router.push("/screens/trip-planner" as any)}
-        >
+        {/* Right: Golden Microphone Button */}
+        <View style={styles.micCircle}>
           <LinearGradient
-            colors={theme.goldGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.aiMicGradient}
+            colors={isDark ? ["#ECC46E", "#C59B27"] : ["#E5C369", "#B8860B"]}
+            style={styles.micGradient}
           >
-            <Ionicons name="mic" size={20} color="#18181B" />
+            <Ionicons name="mic" size={17} color="#FFFFFF" />
           </LinearGradient>
-        </Pressable>
-      </View>
+        </View>
+      </Pressable>
     </Animated.View>
   );
 }
 
 // ─── Official Custom Bottom Tab Bar for React Navigation / Expo Router ────────
 export function CustomBottomTabBar(props: BottomTabBarProps) {
-  const { isDesktop } = useResponsive();
   const [isAudioMiniBarVisible, setIsAudioMiniBarVisible] = useState(false);
-  const { theme, isDark } = useTheme();
+  const { colors, isDark } = useTheme();
   const { t } = useLanguage();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const unreadCount = useNotificationStore((s) => s.unreadCount);
-
-  // When on laptop/desktop web, hide the mobile bottom tab bar entirely
-  if (isDesktop) {
-    return null;
-  }
 
   const { state, descriptors, navigation, insets } = props;
   const currentRoute = state.routes[state.index];
@@ -236,31 +220,24 @@ export function CustomBottomTabBar(props: BottomTabBarProps) {
     return null;
   }
 
-  // Visible routes only (ignore routes with href: null)
-  const visibleRoutes = state.routes.filter((route) => {
-    const options = descriptors[route.key]?.options as any;
-    return options?.href !== null;
-  });
-
-  const activeColor = theme.gold;
-  const inactiveColor = theme.navInactive;
+  // Visible tabs only: exactly the 5 primary tabs defined in TABS
+  const visibleRoutes = state.routes.filter((route) =>
+    TABS.some((t) => t.name === route.name)
+  );
 
   return (
     <>
-      <AiPill extraBottomOffset={isAudioMiniBarVisible ? 58 : 0} />
+      <AiPill color={colors.primary} extraBottomOffset={isAudioMiniBarVisible ? 58 : 0} />
       <View
         style={[
           styles.navContainer,
-          { backgroundColor: theme.navBg, borderTopColor: theme.navBorder },
+          { backgroundColor: colors.tabBarBg, borderTopColor: colors.tabBarBorder },
         ]}
       >
         <View
           style={[
             styles.bottomNav,
-            {
-              backgroundColor: theme.navBg,
-              paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
-            },
+            { backgroundColor: colors.tabBarBg, paddingBottom: Math.max(insets.bottom, 8) },
           ]}
         >
           <View style={styles.tabWrapper}>
@@ -274,8 +251,7 @@ export function CustomBottomTabBar(props: BottomTabBarProps) {
                 TABS.find((t) => t.name === route.name) || {
                   label: options?.title ?? route.name,
                   name: route.name,
-                  icon: "ellipse" as const,
-                  outlineIcon: "ellipse-outline" as const,
+                  icon: "ellipse-outline" as const,
                   route: `/(tabs)/${route.name}` as any,
                 };
 
@@ -306,6 +282,13 @@ export function CustomBottomTabBar(props: BottomTabBarProps) {
               };
 
               const isHomeTab = tabConfig.name === "index" || tabConfig.label === "Home";
+              const goldColor = isDark ? "#ECC46E" : "#C59B27";
+              const inactiveColor = isDark ? "#8E8E93" : "#64748B";
+              const activeColor = isHomeTab ? goldColor : (isDark ? "#FFFFFF" : colors.primary);
+              const tabColor = isFocused ? activeColor : inactiveColor;
+              const tabIconName = isFocused && (tabConfig as any).activeIcon
+                ? (tabConfig as any).activeIcon
+                : (isFocused && isHomeTab ? "home" : tabConfig.icon);
 
               return (
                 <Pressable
@@ -321,9 +304,9 @@ export function CustomBottomTabBar(props: BottomTabBarProps) {
                   <View style={styles.tabContentCenter}>
                     <View style={styles.iconContainer}>
                       <Ionicons
-                        name={isFocused ? tabConfig.icon : tabConfig.outlineIcon}
+                        name={tabIconName}
                         size={22}
-                        color={isFocused ? activeColor : inactiveColor}
+                        color={tabColor}
                       />
                       {badge != null && (
                         <View style={styles.badgeContainer}>
@@ -338,10 +321,10 @@ export function CustomBottomTabBar(props: BottomTabBarProps) {
                       style={[
                         styles.bottomLabel,
                         {
-                          color: isFocused ? activeColor : inactiveColor,
+                          color: tabColor,
                           fontWeight: isFocused ? "700" : "500",
                           fontFamily: FONTS.bengali.medium,
-                          fontSize: 12,
+                          fontSize: 11,
                         },
                       ]}
                       numberOfLines={1}
@@ -352,24 +335,27 @@ export function CustomBottomTabBar(props: BottomTabBarProps) {
                       {displayLabel}
                     </Text>
 
-                    {/* Prominent Gold Underline Bar for Active Tab */}
-                    {isFocused ? (
-                      <View style={[styles.activeUnderlineBar, { backgroundColor: activeColor }]} />
-                    ) : (
-                      <View style={styles.activeUnderlinePlaceholder} />
+                    {isHomeTab && isFocused && (
+                      <View
+                        style={[
+                          styles.homeActiveIndicator,
+                          { backgroundColor: goldColor },
+                        ]}
+                      />
                     )}
                   </View>
                 </Pressable>
               );
             })}
           </View>
+          <View style={[styles.homeIndicator, { backgroundColor: isDark ? "#333333" : "#D1D5DB" }]} />
         </View>
       </View>
     </>
   );
 }
 
-// ─── Standalone Bottom Navigation Bar Matching Reference Screenshots ────────
+// ─── Legacy Bottom Navigation Bar for Direct In-Screen Standalone Usage ───────
 export function BottomNav({
   active,
   color,
@@ -381,27 +367,40 @@ export function BottomNav({
   isScrolled?: boolean;
   onScrollToTop?: () => void;
 }) {
-  const { theme, isDark } = useTheme();
+  const { colors } = useTheme();
+  const activeColor = color || colors.primary;
+  const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const activeColor = color || theme.gold;
+  const tabWidth = (width - 16) / TABS.length;
+  const translateX = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const index = TABS.findIndex((tab) =>
+      tab.label === active ||
+      tab.name === active.toLowerCase() ||
+      (tab.name === "account" && (active === "Account" || active === "Sign In"))
+    );
+    if (index !== -1) {
+      Animated.spring(translateX, {
+        toValue: index * tabWidth,
+        useNativeDriver: true,
+        friction: 10,
+        tension: 60,
+      }).start();
+    }
+  }, [active, tabWidth]);
 
   return (
     <View
       style={[
         styles.navContainer,
-        {
-          backgroundColor: theme.navBg,
-          borderTopColor: theme.navBorder,
-        },
+        { backgroundColor: colors.tabBarBg, borderTopColor: colors.tabBarBorder },
       ]}
     >
       <View
         style={[
           styles.bottomNav,
-          {
-            paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
-            backgroundColor: theme.navBg,
-          },
+          { backgroundColor: colors.tabBarBg, paddingBottom: Math.max(insets.bottom, 8) },
         ]}
       >
         <View style={styles.tabWrapper}>
@@ -412,43 +411,45 @@ export function BottomNav({
                 key={tab.label}
                 tab={tab}
                 selected={selected}
-                activeColor={activeColor}
-                inactiveColor={theme.navInactive}
-                isDark={isDark}
+                color={activeColor}
                 isScrolled={isScrolled}
                 onScrollToTop={onScrollToTop}
               />
             );
           })}
         </View>
+        <View
+          style={[
+            styles.homeIndicator,
+            { backgroundColor: colors.borderStrong },
+          ]}
+        />
       </View>
     </View>
   );
 }
 
-// ─── Individual Tab Item with Gold Active Indicator Underneath ───────────────
+// ─── Individual Tab Item with Morphing Back to Top Logic ─────────────────────
 interface TabItemProps {
-  tab: (typeof TABS)[number];
+  key?: React.Key;
+  tab: any;
   selected: boolean;
-  activeColor: string;
-  inactiveColor: string;
-  isDark: boolean;
+  color: string;
   isScrolled?: boolean;
   onScrollToTop?: () => void;
 }
 
-function TabItem({
-  tab,
-  selected,
-  activeColor,
-  inactiveColor,
-  isDark,
-  isScrolled,
-  onScrollToTop,
-}: TabItemProps) {
+function TabItem({ tab, selected, color, isScrolled, onScrollToTop }: TabItemProps) {
+  const { colors } = useTheme();
+  const { t } = useLanguage();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
+
   const isHomeTab = tab.label === "Home";
   const isScrolledActive = selected && isScrolled;
-  const displayLabel = isScrolledActive ? "Back to top" : tab.label;
+  const fallbackLabel = tab.name === "account" ? (isAuthenticated ? "Account" : "Sign In") : tab.label;
+  const rawLabel = isScrolledActive ? "Back to top" : fallbackLabel;
+  const displayLabel = getLocalizedTabLabel(t, rawLabel);
 
   const handlePress = () => {
     if (isScrolledActive && onScrollToTop) {
@@ -459,19 +460,27 @@ function TabItem({
   };
 
   return (
-    <Pressable style={styles.bottomItem} onPress={handlePress} hitSlop={6}>
+    <Pressable style={styles.bottomItem} onPress={handlePress} hitSlop={8}>
       <View style={styles.tabContentCenter}>
         {isScrolledActive ? (
-          <View style={[styles.backToTopCircle, { backgroundColor: activeColor }]}>
-            <Ionicons name="arrow-up" size={16} color="#18181B" />
+          <View style={[styles.backToTopCircle, { backgroundColor: colors.accent }]}>
+            <Ionicons name="arrow-up" size={16} color="#FFFFFF" />
           </View>
         ) : (
           <View style={styles.iconContainer}>
             <Ionicons
-              name={selected ? tab.icon : tab.outlineIcon}
+              name={tab.icon}
               size={22}
-              color={selected ? activeColor : inactiveColor}
+              color={selected ? colors.primary : colors.textMuted}
             />
+            {isHomeTab && selected && (
+              <View
+                style={[
+                  styles.homeYellowRoofDot,
+                  { borderColor: colors.tabBarBg },
+                ]}
+              />
+            )}
           </View>
         )}
 
@@ -479,21 +488,19 @@ function TabItem({
           style={[
             styles.bottomLabel,
             {
-              color: selected ? activeColor : inactiveColor,
-              fontWeight: selected ? "700" : "500",
+              color: isScrolledActive ? colors.primary : selected ? colors.primary : colors.textMuted,
+              fontWeight: selected || isScrolledActive ? "800" : "500",
+              fontFamily: FONTS.bengali.medium,
+              fontSize: 12,
             },
           ]}
           numberOfLines={1}
+          ellipsizeMode="tail"
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
         >
           {displayLabel}
         </Text>
-
-        {/* Prominent Gold Underline Bar for Active Tab (as seen in screenshots) */}
-        {selected && !isScrolledActive ? (
-          <View style={[styles.activeUnderlineBar, { backgroundColor: activeColor }]} />
-        ) : (
-          <View style={styles.activeUnderlinePlaceholder} />
-        )}
       </View>
     </Pressable>
   );
@@ -506,72 +513,92 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     zIndex: 1000,
-    paddingHorizontal: 16,
-  },
-  aiRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    width: "100%",
   },
   aiPillContainer: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 9999,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 10,
-    borderWidth: 1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    justifyContent: "space-between",
+    width: "88%",
+    maxWidth: 360,
+    height: 48,
+    borderRadius: 24,
+    paddingLeft: 12,
+    paddingRight: 6,
+    borderWidth: 1.5,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
     shadowRadius: 10,
-    elevation: 8,
+    elevation: 6,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 3px 12px rgba(184, 134, 11, 0.16)" } : {}),
   },
   aiPillPressed: {
     opacity: 0.88,
     transform: [{ scale: 0.98 }],
   },
-  waveformContainer: {
+  waveformWrap: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 2,
-    marginRight: 2,
+    gap: 2.5,
+    paddingLeft: 2,
+    height: 20,
   },
   waveBar: {
     width: 2.5,
-    borderRadius: 2,
+    borderRadius: 1.5,
   },
-  aiRobotBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+  aiCenterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+  },
+  robotIconContainer: {
+    width: 24,
+    height: 22,
+    borderRadius: 6,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(212, 175, 55, 0.4)",
+  },
+  robotAntenna: {
+    width: 4,
+    height: 2,
+    backgroundColor: "#C59B27",
+    borderRadius: 1,
+    marginBottom: 1,
+  },
+  robotFace: {
+    flexDirection: "row",
+    gap: 4,
+    alignItems: "center",
+  },
+  robotEye: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: "#222222",
   },
   aiText: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "500",
     letterSpacing: 0.1,
-    flex: 1,
   },
-  aiMicBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  micCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     overflow: "hidden",
-    shadowColor: "#E5A93C",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
   },
-  aiMicGradient: {
-    width: "100%",
-    height: "100%",
+  micGradient: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  homeActiveIndicator: {
+    width: 22,
+    height: 2.5,
+    borderRadius: 1.5,
+    marginTop: 2,
   },
   navContainer: {
     left: 0,
@@ -579,20 +606,23 @@ const styles = StyleSheet.create({
     bottom: 0,
     position: "absolute",
     zIndex: 999,
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
   },
   bottomNav: {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#FFFFFF",
   },
   tabWrapper: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-    height: 54,
+    height: 56,
     width: "100%",
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
   },
   bottomItem: {
     flex: 1,
@@ -603,12 +633,23 @@ const styles = StyleSheet.create({
   tabContentCenter: {
     alignItems: "center",
     justifyContent: "center",
-    gap: 3,
-    position: "relative",
+    gap: 2,
   },
   iconContainer: {
+    position: "relative",
     alignItems: "center",
     justifyContent: "center",
+  },
+  homeYellowRoofDot: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: "#FACC15",
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
   },
   badgeContainer: {
     position: "absolute",
@@ -627,29 +668,33 @@ const styles = StyleSheet.create({
   badgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   backToTopCircle: {
     width: 26,
     height: 26,
     borderRadius: 13,
+    backgroundColor: "#EAB308",
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#EAB308",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+    ...(Platform.OS === "web" ? { boxShadow: "0px 2px 4px rgba(15, 23, 42, 0.3)" } : {}),
   },
   bottomLabel: {
-    fontSize: 10,
+    fontSize: 12,
+    lineHeight: 14,
     textAlign: "center",
-    letterSpacing: 0.1,
   },
-  activeUnderlineBar: {
-    width: 24,
-    height: 2.5,
+  homeIndicator: {
+    height: 4,
+    backgroundColor: "#D1D5DB",
+    width: "36%",
+    alignSelf: "center",
+    marginBottom: 4,
     borderRadius: 2,
-    marginTop: 1,
-  },
-  activeUnderlinePlaceholder: {
-    width: 24,
-    height: 2.5,
-    marginTop: 1,
   },
 });

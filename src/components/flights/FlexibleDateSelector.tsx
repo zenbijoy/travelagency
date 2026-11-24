@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   lowestBadgeText: {
     color: "#FFFFFF",
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   dayNameText: {
     fontSize: 11,
@@ -343,13 +343,13 @@ const styles = StyleSheet.create({
   },
   monthDayText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1E293B",
     marginVertical: 2,
   },
   priceText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   textWhite: {
     color: "#FFFFFF",
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   },
   monthlyCalBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0055F2",
   },
 
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSubtitle: {
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
   },
   gridDateNum: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#1E293B",
     marginVertical: 2,
   },
@@ -452,6 +452,6 @@ const styles = StyleSheet.create({
   miniLowestTag: {
     fontSize: 9,
     color: "#059669",
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });

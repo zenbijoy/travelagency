@@ -1439,7 +1439,7 @@ const styles: any = StyleSheet.create({
   grantBtnText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   simDevBtn: {
     paddingVertical: 12,
@@ -1469,7 +1469,7 @@ const styles: any = StyleSheet.create({
   successHeaderTitle: {
     color: "#FFFFFF",
     fontSize: 24,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 6,
   },
   successSubTitle: {
@@ -1512,7 +1512,7 @@ const styles: any = StyleSheet.create({
   telemetryValue: {
     color: "#10B981",
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   telemetrySub: {
     color: "#64748B",
@@ -1536,7 +1536,7 @@ const styles: any = StyleSheet.create({
   keycardHotelName: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   keycardRoomType: {
     color: "#94A3B8",
@@ -1555,7 +1555,7 @@ const styles: any = StyleSheet.create({
   nfcBadgeText: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   roomNumberHero: {
     alignItems: "center",
@@ -1575,7 +1575,7 @@ const styles: any = StyleSheet.create({
   roomHeroNumber: {
     color: "#FFFFFF",
     fontSize: 34,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 1,
   },
   keycardGuestRow: {
@@ -1586,19 +1586,19 @@ const styles: any = StyleSheet.create({
   keycardLabel: {
     color: "#64748B",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.5,
     marginBottom: 3,
   },
   keycardValue: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   keycardValueCode: {
     color: "#38BDF8",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
   },
   qrSection: {
@@ -1642,7 +1642,7 @@ const styles: any = StyleSheet.create({
   doneBtnText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   failureContainer: {
     flex: 1,
@@ -1662,7 +1662,7 @@ const styles: any = StyleSheet.create({
   failureTitle: {
     color: "#FFFFFF",
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 10,
   },
   failureText: {
@@ -1693,12 +1693,12 @@ const styles: any = StyleSheet.create({
   scoreCompareValueRed: {
     color: "#EF4444",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   scoreCompareValueGreen: {
     color: "#10B981",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   tipsBox: {
     width: "100%",

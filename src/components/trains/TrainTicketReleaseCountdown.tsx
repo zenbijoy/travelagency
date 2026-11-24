@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   textPending: {
     color: "#B45309",
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   },
   timeNumber: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#B45309",
     fontVariant: ["tabular-nums"],
   },
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   },
   timeColon: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#D97706",
     marginBottom: 12,
   },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   },
   remindButtonText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0055F2",
   },
   remindButtonTextActive: {

@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     color: "#64748B",
   },
   boldText: {
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   controlsRow: {
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   pageBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
 });

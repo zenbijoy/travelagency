@@ -1221,7 +1221,7 @@ const styles = StyleSheet.create({
   pillBoldText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.5,
     marginHorizontal: 2,
   },
@@ -1233,7 +1233,7 @@ const styles = StyleSheet.create({
   pillHotelName: {
     color: "#F8FAFC",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     maxWidth: 80,
   },
 
@@ -1258,7 +1258,7 @@ const styles = StyleSheet.create({
   pillCountdownText: {
     color: "#F1F5F9",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     fontVariant: ["tabular-nums"],
   },
   pillCenterActivity: {
@@ -1300,7 +1300,7 @@ const styles = StyleSheet.create({
   pillRightBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.3,
   },
   pillWeatherBadge: {
@@ -1316,7 +1316,7 @@ const styles = StyleSheet.create({
   pillWeatherText: {
     color: "#F8FAFC",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   pillKeyBadge: {
     flexDirection: "row",
@@ -1331,7 +1331,7 @@ const styles = StyleSheet.create({
   pillKeyText: {
     color: "#34D399",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Restore Pill when dismissed
@@ -1387,7 +1387,7 @@ const styles = StyleSheet.create({
   modePillText: {
     color: "#E2E8F0",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.5,
   },
   topBarActions: {
@@ -1441,7 +1441,7 @@ const styles = StyleSheet.create({
   cityCodeText: {
     color: "#FFFFFF",
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 1,
   },
   cityNameText: {
@@ -1482,7 +1482,7 @@ const styles = StyleSheet.create({
   flightNumberSub: {
     color: "#CBD5E1",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     marginTop: 4,
   },
 
@@ -1504,7 +1504,7 @@ const styles = StyleSheet.create({
   countdownLabel: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 0.8,
     marginBottom: 4,
   },
@@ -1518,18 +1518,18 @@ const styles = StyleSheet.create({
   digitalUnitNumber: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     fontVariant: ["tabular-nums"],
   },
   digitalUnitSub: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   digitalSeparator: {
     color: "#38BDF8",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     marginHorizontal: 3,
   },
   statusPillLarge: {
@@ -1543,7 +1543,7 @@ const styles = StyleSheet.create({
   statusPillLargeText: {
     color: "#34D399",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.3,
   },
 
@@ -1565,13 +1565,13 @@ const styles = StyleSheet.create({
   gridBoxLabel: {
     color: "#94A3B8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginBottom: 3,
   },
   gridBoxValue: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // QR Boarding Pass
@@ -1621,7 +1621,7 @@ const styles = StyleSheet.create({
   weatherTempText: {
     color: "#FFFFFF",
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   weatherDescText: {
     color: "#94A3B8",
@@ -1663,7 +1663,7 @@ const styles = StyleSheet.create({
   activityCategoryText: {
     color: "#34D399",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.3,
   },
   durationBadgeText: {
@@ -1687,7 +1687,7 @@ const styles = StyleSheet.create({
   activityLocationText: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   notesBox: {
     flexDirection: "row",
@@ -1740,14 +1740,14 @@ const styles = StyleSheet.create({
   callGuideText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Timeline list
   sectionHeaderTitle: {
     color: "#64748B",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.8,
     marginTop: 8,
     marginBottom: 6,
@@ -1773,7 +1773,7 @@ const styles = StyleSheet.create({
   timelineTime: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     width: 44,
   },
   timelineTitle: {
@@ -1821,7 +1821,7 @@ const styles = StyleSheet.create({
   roomStatusTagText: {
     color: "#34D399",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.3,
   },
 
@@ -1838,7 +1838,7 @@ const styles = StyleSheet.create({
   keylessHeroTitle: {
     color: "#FBBF24",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.8,
   },
   keylessHeroSub: {
@@ -1929,7 +1929,7 @@ const styles = StyleSheet.create({
   copyBadgeText: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   amenityDivider: {
     height: 1,
@@ -1955,7 +1955,7 @@ const styles = StyleSheet.create({
   primaryActionText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   secondaryActionBtn: {
     flexDirection: "row",
@@ -1969,6 +1969,6 @@ const styles = StyleSheet.create({
   secondaryActionText: {
     color: "#CBD5E1",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
   },
 });

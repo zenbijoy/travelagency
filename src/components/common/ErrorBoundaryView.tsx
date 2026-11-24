@@ -351,6 +351,7 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    console.error("[ErrorBoundaryView CRASH]", this.props.screenName, error?.message, error?.stack, errorInfo?.componentStack);
     const now = Date.now();
     const timeSinceLastCrash = now - this.state.lastCrashTimestamp;
     const isRapid =
@@ -568,7 +569,7 @@ const styles = StyleSheet.create({
   recoverButtonText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   secondaryButton: {
     flexDirection: "row",
@@ -584,7 +585,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: "#475569",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   buttonPressed: {
     opacity: 0.85,
@@ -658,6 +659,6 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
   boldText: {
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });

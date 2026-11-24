@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "600",
     letterSpacing: 0.5,
     marginBottom: 8,
   },
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
   },
   deviceName: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     flexShrink: 1,
   },
   currentBadge: {
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
   currentBadgeText: {
     fontSize: 10,
     color: "#ffffff",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   deviceMeta: {
     fontSize: 12,
@@ -635,7 +635,7 @@ const styles = StyleSheet.create({
   },
   revokeBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#dc2626",
   },
   emptyBox: {
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
   },
   masterLogoutBtnText: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
   },
   masterLogoutDesc: {

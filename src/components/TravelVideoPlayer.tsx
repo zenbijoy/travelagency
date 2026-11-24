@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
   videoBadgeText: {
     color: "#fff",
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.5,
   },
   dataSaverBadge: {

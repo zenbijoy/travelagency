@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
   serviceTypeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.5,
   },
   statusBadge: {
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 0.3,
   },
   qrContainer: {
@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
   },
   fieldValue: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
     marginTop: 4,
   },

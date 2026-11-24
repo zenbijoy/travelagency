@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#fff",
     marginBottom: 5,
   },
@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
   },
   refundId: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1f2937",
     marginBottom: 4,
   },
@@ -827,7 +827,7 @@ const styles = StyleSheet.create({
   },
   dateValue: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#1f2937",
   },
   cardFooter: {

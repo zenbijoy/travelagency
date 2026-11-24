@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
   },
   headerTitleText: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   headerSubtitleText: {
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
   },
   operatorNameText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   serviceNumberText: {
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "600",
     color: ACCENT_GREEN,
   },
   routeContainer: {
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
   },
   routeAirportCode: {
     fontSize: 26,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#0F172A",
     letterSpacing: 0.5,
   },
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   },
   routeTimeText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
     marginTop: 4,
   },
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
   },
   nonStopText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   metricsGrid: {
@@ -536,19 +536,19 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#94A3B8",
     letterSpacing: 0.5,
     marginBottom: 2,
   },
   metricValueLarge: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   metricValue: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1E293B",
   },
   metricsRow: {
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
   },
   metricValueHighlight: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   seatBoxHighlight: {
@@ -576,12 +576,12 @@ const styles = StyleSheet.create({
   },
   seatBoxLabel: {
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   seatBoxValue: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   perforationWrapper: {
@@ -650,7 +650,7 @@ const styles = StyleSheet.create({
   },
   pnrCodeText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#475569",
     letterSpacing: 1.2,
     marginTop: 6,
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
   },
   securitySealText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#166534",
   },
   actionButtonContainer: {
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
   },
   primaryActionButtonText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   secondaryActionButton: {
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
   },
   secondaryActionButtonText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "400",
     color: TRIP_BLUE,
   },
 });

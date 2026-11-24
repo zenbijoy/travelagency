@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   primaryBtnText: {
     color: "#ffffff",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   secondaryBtn: {
     alignItems: "center",
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   secondaryBtnText: {
     color: "#1d4ed8",
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   btnDisabled: {
     opacity: 0.6,

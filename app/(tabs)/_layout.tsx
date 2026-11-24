@@ -61,7 +61,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="agency"
+          name="agency/index"
           options={{
             href: null,
             title: "Agency",

@@ -744,7 +744,7 @@ const zoomStyles = StyleSheet.create({
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   headerCounter: {
     color: "#9CA3AF",
@@ -784,7 +784,7 @@ const zoomStyles = StyleSheet.create({
   pinchHintText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   quickZoomRow: {
     flexDirection: "row",
@@ -806,7 +806,7 @@ const zoomStyles = StyleSheet.create({
   zoomActionBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   thumbnailStripContainer: {
     backgroundColor: "rgba(0,0,0,0.6)",
@@ -880,8 +880,8 @@ function ImageGalleryCarousel({ images, title, badge, onOpenZoom, isFav, onToggl
       >
         {images.map((img, i) => (
           <Pressable key={`slide-${img}-${i}`} onPress={() => onOpenZoom(i)} style={carouselStyles.slide}>
-            <AppImage source={{ uri: img }} placeholderCategory="package" style={carouselStyles.image} />
-            <LinearGradient colors={["rgba(0,0,0,0.55)", "transparent", "rgba(0,0,0,0.75)"]} style={StyleSheet.absoluteFill} />
+            <Image source={{ uri: img }} style={carouselStyles.image} resizeMode="cover" />
+            <LinearGradient colors={["rgba(0,0,0,0.3)", "transparent", "rgba(0,0,0,0.55)"]} style={StyleSheet.absoluteFill} />
           </Pressable>
         ))}
       </ScrollView>
@@ -954,8 +954,11 @@ const carouselStyles = StyleSheet.create({
     height: "100%",
   },
   slide: {
-    width: "100%",
+    width: SCREEN_WIDTH - 32,
     height: 200,
+    flexShrink: 0,
+    position: "relative",
+    overflow: "hidden",
   },
   image: {
     width: "100%",
@@ -982,7 +985,7 @@ const carouselStyles = StyleSheet.create({
   badgeText: {
     color: "#FACC15",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   zoomTriggerBtn: {
@@ -999,7 +1002,7 @@ const carouselStyles = StyleSheet.create({
   zoomTriggerText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   heartBtn: {
     width: 32,
@@ -1045,7 +1048,7 @@ const carouselStyles = StyleSheet.create({
   counterBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });
 
@@ -2010,7 +2013,7 @@ export function PackageScreen({ screen }: { screen?: UIScreen } = {}) {
                           <Text style={styles.rateUnitText}>/ person</Text>
                         </View>
                         <Text style={styles.groupTotalSummary}>
-                          Total: <Text style={{ fontWeight: "800", color: "#111827" }}>{formatCurrency(finalTotal, pkg.currency)}</Text> for {travelersCount} guests
+                          Total: <Text style={{ fontWeight: "600", color: "#111827" }}>{formatCurrency(finalTotal, pkg.currency)}</Text> for {travelersCount} guests
                           {tierPricing.totalSavings > 0 && (
                             <Text style={{ color: "#059669", fontWeight: "700" }}> (Save {formatCurrency(tierPricing.totalSavings, pkg.currency)})</Text>
                           )}
@@ -2854,7 +2857,7 @@ const styles = StyleSheet.create({
   heroBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   saveBadge: {
@@ -2866,12 +2869,12 @@ const styles = StyleSheet.create({
   saveBadgeText: {
     color: "#1E1B4B",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     letterSpacing: 0.3,
   },
   heroTitle: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#FFFFFF",
     marginBottom: 4,
   },
@@ -2911,13 +2914,13 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#6B7280",
     letterSpacing: 0.5,
   },
   fieldValue: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#111827",
   },
   searchDividerVertical: {
@@ -2949,7 +2952,7 @@ const styles = StyleSheet.create({
   },
   miniStepVal: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#111827",
   },
   miniDurationPill: {
@@ -2963,7 +2966,7 @@ const styles = StyleSheet.create({
   },
   miniDurationText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4B5563",
   },
   miniDurationTextActive: {
@@ -2990,7 +2993,7 @@ const styles = StyleSheet.create({
   },
   categoryTabText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4B5563",
   },
   categoryTabTextActive: {
@@ -3049,7 +3052,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
     marginTop: 6,
   },
@@ -3069,7 +3072,7 @@ const styles = StyleSheet.create({
   resetBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Package Card
@@ -3096,7 +3099,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
     lineHeight: 22,
     marginBottom: 6,
@@ -3118,7 +3121,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#92400E",
   },
   reviewCountText: {
@@ -3155,7 +3158,7 @@ const styles = StyleSheet.create({
   },
   flightPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1D4ED8",
     flex: 1,
   },
@@ -3173,7 +3176,7 @@ const styles = StyleSheet.create({
   },
   hotelPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#6D28D9",
     flex: 1,
   },
@@ -3192,13 +3195,13 @@ const styles = StyleSheet.create({
   },
   inclusionsSectionTitle: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#065F46",
     letterSpacing: 0.5,
   },
   exclusionsSectionTitle: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#991B1B",
     letterSpacing: 0.5,
   },
@@ -3220,7 +3223,7 @@ const styles = StyleSheet.create({
   },
   inclusionHighContrastText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#065F46",
   },
   exclusionsWrap: {
@@ -3241,7 +3244,7 @@ const styles = StyleSheet.create({
   },
   exclusionHighContrastText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#991B1B",
   },
 
@@ -3262,12 +3265,12 @@ const styles = StyleSheet.create({
   },
   itineraryPreviewHeading: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
   },
   seeFullItineraryText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_PURPLE,
   },
   cardItineraryDay: {
@@ -3292,7 +3295,7 @@ const styles = StyleSheet.create({
   },
   dayMiniBadgeText: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: TRIP_PURPLE,
   },
   dayMiniTitle: {
@@ -3322,7 +3325,7 @@ const styles = StyleSheet.create({
   },
   mealIndicatorLabel: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#6B7280",
   },
   mealChip: {
@@ -3343,7 +3346,7 @@ const styles = StyleSheet.create({
   },
   mealChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   mealChipTextActive: {
     color: "#059669",
@@ -3368,7 +3371,7 @@ const styles = StyleSheet.create({
   },
   groupTierTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
   },
   groupTierSubtitle: {
@@ -3390,7 +3393,7 @@ const styles = StyleSheet.create({
   },
   groupTierBadgeText: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#065F46",
   },
   tierProgressionBar: {
@@ -3418,12 +3421,12 @@ const styles = StyleSheet.create({
   },
   tierStepNum: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   tierStepLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#6B7280",
   },
   tierStepLine: {
@@ -3456,12 +3459,12 @@ const styles = StyleSheet.create({
   },
   tierPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4B5563",
   },
   tierPillTextActive: {
     color: TRIP_PURPLE,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   priceBreakdownRow: {
     flexDirection: "row",
@@ -3478,7 +3481,7 @@ const styles = StyleSheet.create({
   },
   discountedRateText: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: TRIP_PURPLE,
   },
   rateUnitText: {
@@ -3503,7 +3506,7 @@ const styles = StyleSheet.create({
   viewDetailBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "400",
   },
 
   // Drawer Modal
@@ -3548,7 +3551,7 @@ const styles = StyleSheet.create({
   },
   drawerHeaderTitle: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
   },
   drawerHeaderSubtitle: {
@@ -3582,12 +3585,12 @@ const styles = StyleSheet.create({
   },
   drawerTabItemText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#6B7280",
   },
   drawerTabItemTextActive: {
     color: TRIP_PURPLE,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   drawerScrollBody: {
     paddingHorizontal: 20,
@@ -3622,7 +3625,7 @@ const styles = StyleSheet.create({
   drawerZoomPillText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   overviewQuickSpecs: {
     flexDirection: "row",
@@ -3639,7 +3642,7 @@ const styles = StyleSheet.create({
   },
   specValue: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#111827",
     marginTop: 4,
     textAlign: "center",
@@ -3651,7 +3654,7 @@ const styles = StyleSheet.create({
   },
   drawerSectionTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
   },
   inclusionsCard: {
@@ -3700,7 +3703,7 @@ const styles = StyleSheet.create({
   },
   addonTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
   },
   addonDesc: {
@@ -3710,7 +3713,7 @@ const styles = StyleSheet.create({
   },
   addonPrice: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: TRIP_PURPLE,
     marginTop: 3,
   },
@@ -3748,7 +3751,7 @@ const styles = StyleSheet.create({
   },
   expandAllBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4B5563",
   },
   itineraryAccordionCard: {
@@ -3772,12 +3775,12 @@ const styles = StyleSheet.create({
   },
   dayBadgeText: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: TRIP_PURPLE,
   },
   dayTitleText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
   },
   itineraryAccordionBody: {
@@ -3818,7 +3821,7 @@ const styles = StyleSheet.create({
   },
   timeTagText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#4B5563",
   },
   eventText: {
@@ -3834,7 +3837,7 @@ const styles = StyleSheet.create({
   },
   drawerMealBarLabel: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#6B7280",
     marginBottom: 6,
   },
@@ -3862,7 +3865,7 @@ const styles = StyleSheet.create({
   },
   drawerMealChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#6B7280",
   },
   drawerMealChipTextYes: {
@@ -3886,7 +3889,7 @@ const styles = StyleSheet.create({
   },
   inclusionsBoxTitle: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#065F46",
   },
   inclusionsTagsGrid: {
@@ -3899,7 +3902,7 @@ const styles = StyleSheet.create({
   },
   inclusionCardTagText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#065F46",
     flex: 1,
   },
@@ -3919,7 +3922,7 @@ const styles = StyleSheet.create({
   },
   exclusionsBoxTitle: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#991B1B",
   },
   exclusionsTagsGrid: {
@@ -3932,7 +3935,7 @@ const styles = StyleSheet.create({
   },
   exclusionCardTagText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#991B1B",
     flex: 1,
   },
@@ -3945,7 +3948,7 @@ const styles = StyleSheet.create({
   },
   policyCardHeading: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#065F46",
   },
   policyCardBody: {
@@ -3975,7 +3978,7 @@ const styles = StyleSheet.create({
   },
   airlineBadgeText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#1E3A8A",
   },
   flightNumberText: {
@@ -3995,7 +3998,7 @@ const styles = StyleSheet.create({
   },
   airportCodeText: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#111827",
   },
   airportCitySub: {
@@ -4019,7 +4022,7 @@ const styles = StyleSheet.create({
   flightDurationLabel: {
     fontSize: 12,
     color: "#2563EB",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   flightSpecsGrid: {
     flexDirection: "row",
@@ -4035,7 +4038,7 @@ const styles = StyleSheet.create({
   },
   specSubVal: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#111827",
     marginTop: 1,
   },
@@ -4054,7 +4057,7 @@ const styles = StyleSheet.create({
   },
   hotelNameTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
     flex: 1,
   },
@@ -4082,7 +4085,7 @@ const styles = StyleSheet.create({
   },
   roomTypePillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#6D28D9",
   },
   amenitiesWrap: {
@@ -4103,7 +4106,7 @@ const styles = StyleSheet.create({
   },
   amenityTagText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#166534",
   },
 
@@ -4123,7 +4126,7 @@ const styles = StyleSheet.create({
   },
   calcStepperLabel: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#111827",
   },
   calcStepperSub: {
@@ -4148,7 +4151,7 @@ const styles = StyleSheet.create({
   },
   calcStepValue: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#111827",
     minWidth: 20,
     textAlign: "center",
@@ -4173,7 +4176,7 @@ const styles = StyleSheet.create({
   },
   tierRowHeading: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#111827",
   },
   tierRowDesc: {
@@ -4182,7 +4185,7 @@ const styles = StyleSheet.create({
   },
   tierRowDiscount: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     color: TRIP_PURPLE,
   },
   calcSummaryBox: {
@@ -4205,7 +4208,7 @@ const styles = StyleSheet.create({
   },
   summaryVal: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#111827",
   },
   calcDivider: {
@@ -4228,7 +4231,7 @@ const styles = StyleSheet.create({
   },
   savingsPillText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#065F46",
   },
 
@@ -4245,12 +4248,12 @@ const styles = StyleSheet.create({
   },
   footerTotalLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#6B7280",
   },
   footerTotalAmount: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: TRIP_PURPLE,
   },
   bookNowBtn: {
@@ -4265,7 +4268,7 @@ const styles = StyleSheet.create({
   bookNowBtnText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "600",
   },
 
   // Modals Shared Styles
@@ -4289,7 +4292,7 @@ const styles = StyleSheet.create({
   },
   pickerModalTitle: {
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
   },
   modalSearchBar: {
@@ -4326,12 +4329,12 @@ const styles = StyleSheet.create({
   },
   airportCodeBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   pickerItemCity: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#111827",
   },
   pickerItemAirport: {

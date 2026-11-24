@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
   },
   modeTabTextSelected: {
     color: "#0055F2",
-    fontWeight: "800",
+    fontWeight: "600",
   },
   cardBody: {
     padding: 16,
@@ -576,13 +576,13 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#94A3B8",
     textTransform: "uppercase",
   },
   fieldValue: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
     marginTop: 1,
   },
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
   },
   metaValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#0F172A",
     marginTop: 1,
   },
@@ -654,7 +654,7 @@ const styles = StyleSheet.create({
   },
   searchBtnText: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   recentSearchesWrap: {
@@ -713,7 +713,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   pickerList: {
@@ -767,7 +767,7 @@ const styles = StyleSheet.create({
   },
   stepValue: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
     minWidth: 24,
     textAlign: "center",
@@ -782,6 +782,6 @@ const styles = StyleSheet.create({
   stepperDoneText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });

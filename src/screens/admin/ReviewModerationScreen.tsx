@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   statusBadge: {
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   },
   targetText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   commentText: {
@@ -249,6 +249,6 @@ const styles = StyleSheet.create({
   btnText: {
     color: "#ffffff",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });

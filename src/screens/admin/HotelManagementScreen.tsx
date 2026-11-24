@@ -1984,7 +1984,7 @@ const styles = StyleSheet.create({
   },
   avatarMiniText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#047857",
   },
   quickActionsBar: {
@@ -2064,7 +2064,7 @@ const styles = StyleSheet.create({
   },
   statusGridLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     marginBottom: 2,
   },
   statusGridValue: {
@@ -2206,7 +2206,7 @@ const styles = StyleSheet.create({
   },
   hotelCardName: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     flex: 1,
     marginEnd: 6,
@@ -2218,7 +2218,7 @@ const styles = StyleSheet.create({
   },
   statusTagText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   ratingInlineRow: {
     flexDirection: "row",
@@ -2227,7 +2227,7 @@ const styles = StyleSheet.create({
   },
   ratingBoldText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   reviewCountText: {
@@ -2254,7 +2254,7 @@ const styles = StyleSheet.create({
   },
   miniMetricValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   screenSubHeader: {
@@ -2336,7 +2336,7 @@ const styles = StyleSheet.create({
   },
   verifiedPartnerText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#047857",
     textTransform: "uppercase",
   },
@@ -2376,7 +2376,7 @@ const styles = StyleSheet.create({
   },
   metricCard6Value: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     marginTop: 2,
   },
@@ -2406,7 +2406,7 @@ const styles = StyleSheet.create({
   },
   infoTableValue: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#0f172a",
   },
   businessStatusCard: {
@@ -2434,7 +2434,7 @@ const styles = StyleSheet.create({
   },
   bizBadgeText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   contactItemRow: {
     flexDirection: "row",
@@ -2483,7 +2483,7 @@ const styles = StyleSheet.create({
   },
   inventoryValue: {
     fontSize: 32,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
     marginTop: 2,
   },
@@ -2527,7 +2527,7 @@ const styles = StyleSheet.create({
   },
   legendVal: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   roomCategoriesList: {
@@ -2557,12 +2557,12 @@ const styles = StyleSheet.create({
   },
   categoryNameText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   categoryPercentText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0f172a",
   },
   categoryRoomsSubtext: {
@@ -2619,7 +2619,7 @@ const styles = StyleSheet.create({
   },
   stepBubbleText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748b",
   },
   stepBubbleTextActive: {
@@ -2675,7 +2675,7 @@ const styles = StyleSheet.create({
   modalSubmitBtnText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   bulkOptionBtn: {
     backgroundColor: "#f8fafc",
@@ -2710,7 +2710,7 @@ const styles = StyleSheet.create({
   bottomFixedBtnText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });
 

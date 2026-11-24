@@ -88,14 +88,14 @@ const styles = StyleSheet.create({
   },
   errorCode: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0055F2",
     letterSpacing: 2,
     marginBottom: 6,
   },
   title: {
     fontSize: 24,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
     marginBottom: 10,
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   secondaryButton: {
     flexDirection: "row",
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: "#0055F2",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   supportLink: {
     flexDirection: "row",

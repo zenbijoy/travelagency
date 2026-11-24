@@ -1,4 +1,4 @@
-﻿import { FocusAwareStatusBar } from "../../components/ui/AppStatusBar";
+import { FocusAwareStatusBar } from "../../components/ui/AppStatusBar";
 import { showLocalizedAlert } from "../../utils/localizedAlert";
 /**
  * Agency Management Screen - Admin Panel
@@ -72,35 +72,174 @@ import { DestructiveConfirmModal } from "./DestructiveConfirmModal";
 import { useResponsive } from "../../hooks/useResponsive";
 import { RTLIcon } from "../../components/ui";
 
-export {
-  SubScreenType,
-  AgencyItem,
-  AgencySecurityModalState,
-  AgencyPayoutItem,
-  AgencyAdCard,
-  BookingRecord,
-  GlobalPaymentItem,
-  INITIAL_AGENCIES,
-  SAMPLE_AGENCY_ADS,
-  GLOBAL_PAYMENTS_DATA,
-  SAMPLE_BOOKINGS,
-  INITIAL_PAYOUT_REQUESTS,
-} from "../../data/agencyManagementData";
-import {
-  SubScreenType,
-  AgencyItem,
-  AgencySecurityModalState,
-  AgencyPayoutItem,
-  AgencyAdCard,
-  BookingRecord,
-  GlobalPaymentItem,
-  INITIAL_AGENCIES,
-  SAMPLE_AGENCY_ADS,
-  GLOBAL_PAYMENTS_DATA,
-  SAMPLE_BOOKINGS,
-  INITIAL_PAYOUT_REQUESTS,
-} from "../../data/agencyManagementData";
-import { styles } from "../../styles/agencyManagementStyles";
+export type SubScreenType =
+  | "dashboard"
+  | "add_agency"
+  | "details"
+  | "agency_ads"
+  | "global_ads"
+  | "verification"
+  | "contracts"
+  | "analytics"
+  | "documents"
+  | "payments"
+  | "agency_payments"
+  | "bookings"
+  | "support_center"
+  | "commission_tiers";
+
+export interface AgencySecurityModalState {
+  visible: boolean;
+  actionType: "suspend" | "revoke_license" | "ban";
+  agency: AgencyItem | null;
+  reason: string;
+  confirmationPhrase: string;
+  acknowledged: boolean;
+  isSubmitting: boolean;
+}
+
+export interface AgencyPayoutItem {
+  id: string;
+  agency_id: string;
+  agency_name: string;
+  license_number: string;
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  routing_number: string;
+  amount: string;
+  currency: string;
+  commission_fee: string;
+  net_amount: string;
+  commission_balance: string;
+  status: "pending" | "paid_out" | "rejected";
+  requested_at: string;
+  reference: string;
+}
+
+export interface AgencyItem {
+  id: string;
+  name: string;
+  avatarText: string;
+  status: "Verified" | "Pending" | "Suspended" | "Inactive";
+  rating: number;
+  reviewsCount: number;
+  location: string;
+  revenue: string;
+  bookings: number;
+  customers: number;
+  responseTime: string;
+  acceptanceRate: string;
+  cancellationRate: string;
+  agencyId: string;
+  ownerName: string;
+  ownerPhone: string;
+  managerName: string;
+  managerPhone: string;
+  supportPhone: string;
+  email?: string;
+  agencyType?: string;
+}
+
+export interface AgencyAdCard {
+  id: string;
+  title: string;
+  adType: "Banner Ad" | "Sponsored Package" | "Video Ad";
+  packageName: string;
+  agencyName: string;
+  status: "Active" | "Paused" | "Pending Approval" | "Expired";
+  dailyBudget: string;
+  impressions: string;
+  clicks: string;
+  ctr: string;
+  totalSpent: string;
+}
+
+export interface BookingRecord {
+  id: string;
+  bookingRef: string;
+  customerName: string;
+  packageName: string;
+  agencyName: string;
+  date: string;
+  amount: string;
+  status: "Confirmed" | "Pending" | "Completed" | "Cancelled";
+}
+
+export interface GlobalPaymentItem {
+  id: string;
+  invoiceRef: string;
+  agencyName: string;
+  date: string;
+  amount: string;
+  status: "Pending" | "Completed" | "On Hold" | "Failed" | "Success";
+  iconName: string;
+}
+
+const INITIAL_AGENCIES: AgencyItem[] = [];
+
+const SAMPLE_AGENCY_ADS: AgencyAdCard[] = [];
+
+const GLOBAL_PAYMENTS_DATA: GlobalPaymentItem[] = [];
+const SAMPLE_BOOKINGS: BookingRecord[] = [];
+
+const INITIAL_PAYOUT_REQUESTS: AgencyPayoutItem[] = [
+  {
+    id: "payout-8941",
+    agency_id: "ag-1",
+    agency_name: "Chalo Shobai Tours Ltd",
+    license_number: "TL-DHK-2024-8921",
+    bank_name: "City Bank PLC",
+    account_name: "Chalo Shobai Tours Ltd",
+    account_number: "•••• •••• •••• 9201",
+    routing_number: "225271890",
+    amount: "৳185,000",
+    currency: "BDT",
+    commission_fee: "10.0%",
+    net_amount: "৳166,500",
+    commission_balance: "৳240,000",
+    status: "pending",
+    requested_at: "Today, 09:30 AM",
+    reference: "PAY-2026-8941",
+  },
+  {
+    id: "payout-8940",
+    agency_id: "ag-2",
+    agency_name: "Bengal Heritage Expeditions",
+    license_number: "TL-CTG-2023-4410",
+    bank_name: "BRAC Bank PLC",
+    account_name: "Bengal Heritage Expeditions",
+    account_number: "•••• •••• •••• 4482",
+    routing_number: "060271420",
+    amount: "৳320,000",
+    currency: "BDT",
+    commission_fee: "8.0%",
+    net_amount: "৳294,400",
+    commission_balance: "৳450,000",
+    status: "pending",
+    requested_at: "Yesterday, 04:15 PM",
+    reference: "PAY-2026-8940",
+  },
+  {
+    id: "payout-8938",
+    agency_id: "ag-3",
+    agency_name: "Skyline Travel & Holiday",
+    license_number: "TL-SYL-2025-1029",
+    bank_name: "Standard Chartered Bank",
+    account_name: "Skyline Holiday BD",
+    account_number: "•••• •••• •••• 1150",
+    routing_number: "010271100",
+    amount: "৳95,000",
+    currency: "BDT",
+    commission_fee: "12.0%",
+    net_amount: "৳83,600",
+    commission_balance: "৳120,000",
+    status: "paid_out",
+    requested_at: new Date(Date.now() - 3 * 86400000).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+    reference: "PAY-2026-8938",
+  },
+];
+
 export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
   admin: propAdmin,
 }) => {
@@ -197,7 +336,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
             rating: Number(a.rating || 4.9),
             reviewsCount: a.total_reviews || 48,
             location: `${a.city || "Dhaka"}, ${a.country || "Bangladesh"}`,
-            revenue: `à§³${((a.total_bookings || 140) * 12500).toLocaleString()}`,
+            revenue: `৳${((a.total_bookings || 140) * 12500).toLocaleString()}`,
             bookings: a.total_bookings || 140,
             customers: (a.total_bookings || 140) * 2,
             responseTime: "< 15 mins",
@@ -691,7 +830,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
   };
 
   const handleCall = (phone: string) => {
-    openLink(`tel:${phone}`, { label: "à¦«à§‹à¦¨ à¦¨à¦®à§à¦¬à¦°", copyValue: phone });
+    openLink(`tel:${phone}`, { label: "ফোন নম্বর", copyValue: phone });
   };
 
   const handleConfirmSuspend = async () => {
@@ -1127,7 +1266,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
 
           <View style={styles.cursorMetaRow}>
             <Text style={styles.cursorMetaText}>
-              25-Item Cursor â€¢ Showing {(agencyPage - 1) * AGENCY_PAGE_SIZE + 1} -{" "}
+              25-Item Cursor • Showing {(agencyPage - 1) * AGENCY_PAGE_SIZE + 1} -{" "}
               {Math.min(agencyPage * AGENCY_PAGE_SIZE, totalAgenciesCount || agenciesList.length)} of{" "}
               {totalAgenciesCount || agenciesList.length}
             </Text>
@@ -1263,7 +1402,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                   </View>
 
                   <Text style={{ fontSize: 12, color: "#7e22ce", fontWeight: "600", marginTop: 2 }}>
-                    Type: {ad.adType} â€¢ Budget: {ad.dailyBudget}
+                    Type: {ad.adType} • Budget: {ad.dailyBudget}
                   </Text>
                   <Text style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
                     Target Package: {ad.packageName}
@@ -1777,7 +1916,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                     </View>
 
                     <Text style={{ fontSize: 12, color: "#7e22ce", fontWeight: "600", marginTop: 2 }}>
-                      Type: {ad.adType} â€¢ Budget: {ad.dailyBudget}
+                      Type: {ad.adType} • Budget: {ad.dailyBudget}
                     </Text>
                     <Text style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
                       Target Package: {ad.packageName}
@@ -2867,7 +3006,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                       {item.agencyName}
                     </Text>
                     <Text style={{ fontSize: 12, color: "#404944", marginTop: 2 }}>
-                      {item.invoiceRef} â€¢ {item.date}
+                      {item.invoiceRef} • {item.date}
                     </Text>
                   </View>
                 </View>
@@ -3021,7 +3160,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                 </View>
                 <View>
                   <Text style={styles.contractName}>
-                    {item.ref} â€¢ {selectedAgency.name}
+                    {item.ref} • {selectedAgency.name}
                   </Text>
                   <Text style={styles.contractExpiry}>{item.date}</Text>
                 </View>
@@ -3143,7 +3282,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                     {b.packageName}
                   </Text>
                   <Text style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                    Customer: {b.customerName} â€¢ Agency: {b.agencyName}
+                    Customer: {b.customerName} • Agency: {b.agencyName}
                   </Text>
                 </View>
 
@@ -3549,7 +3688,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                           </View>
                         </View>
                         <Text style={styles.payoutLicenseText}>
-                          Trade License: #{payout.license_number} â€¢ Ref: {payout.reference}
+                          Trade License: #{payout.license_number} • Ref: {payout.reference}
                         </Text>
                       </View>
                       <Text style={styles.payoutAmountBig}>{payout.amount}</Text>
@@ -3899,7 +4038,7 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                 <Text style={styles.targetAccountLabel}>Target Agency Partner:</Text>
                 <Text style={styles.targetAccountName}>{securityModal.agency?.name}</Text>
                 <Text style={styles.targetAccountDetails}>
-                  Trade License: #{securityModal.agency?.agencyId} â€¢ Status: {securityModal.agency?.status}
+                  Trade License: #{securityModal.agency?.agencyId} • Status: {securityModal.agency?.status}
                 </Text>
               </View>
 
@@ -4083,5 +4222,1071 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
     </SafeAreaView>
   );
 };
+
+const styles: any = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  headerWithBtn: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+    marginBottom: 16,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#0f172a",
+    letterSpacing: -0.3,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: "#64748b",
+    marginTop: 2,
+  },
+  primaryAddBtnHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#114b3d",
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 10,
+    elevation: 2,
+  },
+  primaryAddBtnHeaderText: {
+    color: "#ffffff",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  subHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+    backgroundColor: "#ffffff",
+  },
+  subHeaderTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  backBtn: {
+    padding: 4,
+  },
+  moreBtn: {
+    padding: 4,
+  },
+  statsSection: {
+    marginBottom: 20,
+  },
+  statsGrid: {
+    flexDirection: "row",
+  },
+  mainStatCard: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    borderRadius: 14,
+    padding: 16,
+    marginEnd: 6,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    justifyContent: "space-between",
+  },
+  statLabel: {
+    fontSize: 13,
+    color: "#64748b",
+    fontWeight: "500",
+  },
+  mainStatValue: {
+    fontSize: 28,
+    fontWeight: "600",
+    color: "#0f172a",
+    letterSpacing: -0.5,
+    marginTop: 4,
+  },
+  trendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  trendText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#047857",
+  },
+  smallStatsColumn: {
+    flex: 1,
+    marginStart: 6,
+    justifyContent: "space-between",
+  },
+  smallStatCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  statIconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  smallStatLabel: {
+    fontSize: 12,
+    color: "#64748b",
+    fontWeight: "500",
+    marginStart: 6,
+  },
+  smallStatValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#0f172a",
+    marginBottom: 12,
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  linkText: {
+    fontSize: 13,
+    color: "#2563eb",
+    fontWeight: "500",
+  },
+  quickActionsGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  quickActionBtn: {
+    alignItems: "center",
+    width: "18.5%",
+  },
+  quickActionIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
+  },
+  quickActionLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#334155",
+    textAlign: "center",
+  },
+  priorityCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  priorityItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 14,
+  },
+  priorityLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  priorityIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 10,
+  },
+  priorityBoldCount: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
+    marginEnd: 6,
+  },
+  priorityText: {
+    fontSize: 13,
+    color: "#334155",
+    fontWeight: "500",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#f1f5f9",
+  },
+  searchFilterRow: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 42,
+    marginEnd: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: "#0f172a",
+  },
+  filterBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    height: 42,
+  },
+  filterBtnText: {
+    fontSize: 13,
+    color: "#334155",
+    fontWeight: "500",
+  },
+  activeFilterContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#d1fae5",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  activeFilterText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#047857",
+  },
+  agencyDirectoryCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    marginBottom: 10,
+  },
+  agencyCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  agencyAvatarContainer: {
+    flexDirection: "row",
+  },
+  agencyAvatarBg: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 12,
+  },
+  agencyAvatarChar: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#047857",
+  },
+  nameBadgeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  agencyDirectoryName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0f172a",
+    marginEnd: 6,
+  },
+  statusBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 2,
+  },
+  ratingText: {
+    fontSize: 12,
+    color: "#64748b",
+    fontWeight: "600",
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 2,
+  },
+  locationText: {
+    fontSize: 12,
+    color: "#64748b",
+  },
+  agencyCardMetricsRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#f8fafc",
+  },
+  metricLabel: {
+    fontSize: 12,
+    color: "#64748b",
+    marginBottom: 2,
+  },
+  metricValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  viewAllDarkBtn: {
+    backgroundColor: "#0F3F34",
+    borderRadius: 10,
+    paddingVertical: 13,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  viewAllDarkBtnText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  profileSection: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#ffffff",
+    padding: 16,
+    borderRadius: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  profileAvatarLarge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#d1fae5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 14,
+  },
+  profileAvatarText: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#047857",
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  profileRatingText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#334155",
+  },
+  profileReviewCount: {
+    fontWeight: "400",
+    color: "#64748b",
+  },
+  verifiedBadgeInline: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    alignSelf: "flex-start",
+    marginTop: 6,
+  },
+  verifiedBadgeInlineText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  profileLocation: {
+    fontSize: 12,
+    color: "#64748b",
+    marginTop: 6,
+  },
+  profileIdText: {
+    fontSize: 12,
+    color: "#94a3b8",
+    marginTop: 2,
+  },
+  editBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+  },
+  editBtnText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#334155",
+  },
+  keyMetricsGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  keyMetricCard: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 12,
+    marginHorizontal: 3,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  keyMetricLabel: {
+    fontSize: 12,
+    color: "#64748b",
+  },
+  keyMetricValue: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#0f172a",
+    marginTop: 4,
+  },
+  keyMetricTrend: {
+    fontSize: 12,
+    color: "#047857",
+    fontWeight: "500",
+    marginTop: 4,
+  },
+  performanceRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  performanceCol: {
+    alignItems: "center",
+  },
+  perfLabel: {
+    fontSize: 12,
+    color: "#64748b",
+    marginBottom: 2,
+  },
+  perfVal: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  quickActions4Grid: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  quickAction4Btn: {
+    alignItems: "center",
+  },
+  quickAction4Icon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  quickAction4Text: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#334155",
+  },
+  bizCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  bizRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f8fafc",
+  },
+  bizLabel: {
+    fontSize: 13,
+    color: "#475569",
+  },
+  bizVerifiedText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#047857",
+  },
+  bizValueText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#0f172a",
+  },
+  contactList: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+  },
+  contactRole: {
+    fontSize: 13,
+    color: "#64748b",
+    width: 70,
+  },
+  contactNamePhone: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#0f172a",
+  },
+  callCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#d1fae5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabsHeader: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+    backgroundColor: "#ffffff",
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  tabBtnActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: "#047857",
+  },
+  tabBtnText: {
+    fontSize: 14,
+    color: "#64748b",
+    fontWeight: "500",
+  },
+  tabBtnTextActive: {
+    color: "#047857",
+    fontWeight: "600",
+  },
+  verificationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  verificationLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  verificationIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 12,
+  },
+  verificationTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  verificationCount: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  bottomFixedBtnContainer: {
+    padding: 16,
+    backgroundColor: "#ffffff",
+    borderTopWidth: 1,
+    borderTopColor: "#e2e8f0",
+  },
+  bottomFixedBtn: {
+    backgroundColor: "#0d4f3b",
+    borderRadius: 12,
+    paddingVertical: 13,
+    alignItems: "center",
+  },
+  bottomFixedBtnText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  contractStatusGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  contractStatusCard: {
+    width: "48%",
+    padding: 14,
+    borderRadius: 14,
+    marginBottom: 10,
+  },
+  contractStatusLabel: {
+    fontSize: 13,
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  contractStatusVal: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  contractItemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  contractItemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  contractAvatarCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 12,
+  },
+  contractAvatarText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#047857",
+  },
+  contractName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  contractExpiry: {
+    fontSize: 12,
+    color: "#64748b",
+    marginTop: 2,
+  },
+  contractStatusPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  contractStatusPillText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  filterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 6,
+    backgroundColor: "#f1f5f9",
+    marginEnd: 8,
+  },
+  filterChipText: {
+    fontSize: 12,
+    color: "#475569",
+    fontWeight: "500",
+  },
+  periodSelectorRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 12,
+  },
+  periodSelectorBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+  },
+  periodSelectorText: {
+    fontSize: 13,
+    color: "#475569",
+    fontWeight: "500",
+  },
+  revenueHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: 16,
+  },
+  revenueLabel: {
+    fontSize: 13,
+    color: "#64748b",
+  },
+  revenueBigValue: {
+    fontSize: 26,
+    fontWeight: "600",
+    color: "#0f172a",
+    marginTop: 2,
+  },
+  revenueTrendTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#d1fae5",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  revenueTrendText: {
+    fontSize: 12,
+    color: "#047857",
+    fontWeight: "500",
+  },
+  chartContainer: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  metricsList: {
+    marginTop: 10,
+  },
+  metricListItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  metricListLabel: {
+    fontSize: 14,
+    color: "#334155",
+    fontWeight: "500",
+  },
+  metricListRight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  metricListVal: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
+    marginEnd: 8,
+  },
+  metricTrendBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#d1fae5",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  metricTrendBadgeText: {
+    fontSize: 12,
+    color: "#047857",
+    fontWeight: "600",
+  },
+  docRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
+  docLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  docIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#d1fae5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 12,
+  },
+  docTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  docStatusText: {
+    fontSize: 12,
+    color: "#64748b",
+    marginTop: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalCard: {
+    width: "100%",
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  modalBody: {
+    marginTop: 4,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#475569",
+    marginBottom: 4,
+  },
+  modalInput: {
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: "#0f172a",
+    marginBottom: 12,
+  },
+  modalSubmitBtn: {
+    backgroundColor: "#047857",
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  modalSubmitBtnText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "400",
+  },
+  supportOptionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    marginBottom: 10,
+  },
+  supportOptionIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 12,
+  },
+  supportOptionTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
+  },
+  supportOptionSub: {
+    fontSize: 12,
+    color: "#64748b",
+    marginTop: 2,
+  },
+  securityInputLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#0f172a",
+    marginBottom: 6,
+  },
+  securityInput: {
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 12,
+    color: "#0f172a",
+    backgroundColor: "#ffffff",
+    minHeight: 65,
+    textAlignVertical: "top",
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 14,
+    paddingEnd: 10,
+  },
+  checkboxLabel: {
+    fontSize: 12,
+    color: "#475569",
+    flex: 1,
+    lineHeight: 16,
+  },
+  confirmTextInput: {
+    borderWidth: 1,
+    borderColor: "#ef4444",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 13,
+    color: "#b91c1c",
+    fontWeight: "500",
+    backgroundColor: "#fff5f5",
+  },
+  securityModalFooter: {
+    flexDirection: "row",
+    padding: 16,
+    gap: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+    backgroundColor: "#ffffff",
+  },
+  securityCancelBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+  },
+  securityCancelBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#475569",
+  },
+  securityExecuteBtn: {
+    flex: 1.5,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  securityExecuteBtnText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#ffffff",
+  },
+  securityModalBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  securityModalBannerTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+  securityModalBannerSub: {
+    fontSize: 12,
+    color: "#64748b",
+    marginTop: 2,
+  },
+  targetAccountBox: {
+    backgroundColor: "#f8fafc",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  targetAccountLabel: {
+    fontSize: 11,
+    color: "#64748b",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  targetAccountName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0f172a",
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  targetAccountDetails: {
+    backgroundColor: "#f8fafc",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  consequenceBox: {
+    backgroundColor: "#fff1f2",
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: "#ef4444",
+    marginBottom: 12,
+  },
+  consequenceText: {
+    fontSize: 12,
+    color: "#991b1b",
+    lineHeight: 18,
+  },
+});
 
 export default AgencyManagementScreen;

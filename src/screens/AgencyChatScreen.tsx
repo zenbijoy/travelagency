@@ -1963,11 +1963,11 @@ const s = StyleSheet.create({
   },
   avatarInitialText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: PRIMARY,
   },
   headerLogo: { width: 42, height: 42 },
-  title: { fontSize: 16, fontWeight: "800", color: "#0F172A" },
+  title: { fontSize: 16, fontWeight: "700", color: "#0F172A" },
   onlineRow: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 2 },
   onlineDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: "#10B981" },
   subtitle: { fontSize: 12, color: "#64748B", fontWeight: "600" },
@@ -1987,7 +1987,7 @@ const s = StyleSheet.create({
   },
   pickerLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#94A3B8",
     textTransform: "uppercase",
     paddingHorizontal: 16,
@@ -2020,7 +2020,7 @@ const s = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
   },
-  datePillText: { fontSize: 12, fontWeight: "700", color: "#64748B" },
+  datePillText: { fontSize: 12, fontWeight: "400", color: "#64748B" },
   messageRow: { flexDirection: "row", marginBottom: 14, alignItems: "flex-end", gap: 8 },
   messageRowMe: { justifyContent: "flex-end" },
   messageRowOther: { justifyContent: "flex-start" },
@@ -2059,7 +2059,7 @@ const s = StyleSheet.create({
   },
   senderNameLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: PRIMARY,
     marginBottom: 4,
   },
@@ -2129,7 +2129,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  attachmentName: { fontSize: 13, fontWeight: "700", color: "#0F172A" },
+  attachmentName: { fontSize: 13, fontWeight: "500", color: "#0F172A" },
   attachmentReady: { fontSize: 12, color: "#64748B" },
   removeAttachmentBtn: { padding: 4 },
   uploadProgressBar: {
@@ -2147,7 +2147,7 @@ const s = StyleSheet.create({
     alignSelf: "center",
     fontSize: 12,
     color: "#fff",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   quickPromptsBar: { backgroundColor: "#FFFFFF", paddingVertical: 6, borderTopWidth: 1, borderTopColor: "#F1F5F9" },
   quickPromptsContent: { paddingHorizontal: 14, gap: 8 },
@@ -2242,13 +2242,13 @@ const s = StyleSheet.create({
   },
   locationVerifiedTag: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#D97706",
     letterSpacing: 0.5,
   },
   locationTitleText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     lineHeight: 17,
   },
@@ -2279,7 +2279,7 @@ const s = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 8,
   },
-  openMapBtnText: { color: "#FFFFFF", fontSize: 12, fontWeight: "700" },
+  openMapBtnText: { color: "#FFFFFF", fontSize: 12, fontWeight: "500" },
 
   // Booking Voucher Card Styles
   voucherCard: {
@@ -2301,7 +2301,7 @@ const s = StyleSheet.create({
     borderBottomColor: "#DBEAFE",
   },
   voucherHeaderBadge: { flexDirection: "row", alignItems: "center", gap: 5 },
-  voucherHeaderText: { fontSize: 12, fontWeight: "800", color: "#1D4ED8" },
+  voucherHeaderText: { fontSize: 12, fontWeight: "700", color: "#1D4ED8" },
   replyingPreviewBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -2321,7 +2321,7 @@ const s = StyleSheet.create({
   },
   replyingToName: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: PRIMARY,
   },
   replyingSnippet: {
@@ -2389,10 +2389,10 @@ const s = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
   },
-  voucherStatusText: { fontSize: 12, fontWeight: "800", color: "#15803D" },
+  voucherStatusText: { fontSize: 12, fontWeight: "700", color: "#15803D" },
   voucherTourTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     paddingHorizontal: 12,
     paddingTop: 10,
@@ -2405,7 +2405,7 @@ const s = StyleSheet.create({
     gap: 8,
   },
   voucherGridItem: { width: "47%" },
-  voucherGridLabel: { fontSize: 12, fontWeight: "700", color: "#94A3B8" },
+  voucherGridLabel: { fontSize: 12, fontWeight: "500", color: "#94A3B8" },
   voucherGridValue: { fontSize: 12, fontWeight: "600", color: "#1E293B" },
   voucherDividerRow: {
     flexDirection: "row",
@@ -2444,8 +2444,8 @@ const s = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 10,
   },
-  voucherTotalLabel: { fontSize: 12, fontWeight: "700", color: "#94A3B8" },
-  voucherTotalValue: { fontSize: 14, fontWeight: "900", color: "#0F172A" },
+  voucherTotalLabel: { fontSize: 12, fontWeight: "500", color: "#94A3B8" },
+  voucherTotalValue: { fontSize: 14, fontWeight: "700", color: "#0F172A" },
   viewVoucherBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -2455,7 +2455,7 @@ const s = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
   },
-  viewVoucherBtnText: { color: "#FFFFFF", fontSize: 12, fontWeight: "700" },
+  viewVoucherBtnText: { color: "#FFFFFF", fontSize: 12, fontWeight: "500" },
 
   // Modals Common
   modalBackdrop: {
@@ -2478,7 +2478,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-  pickerSheetTitle: { fontSize: 16, fontWeight: "800", color: "#0F172A" },
+  pickerSheetTitle: { fontSize: 16, fontWeight: "700", color: "#0F172A" },
   pickerCloseBtn: { padding: 4 },
   modeToggleRow: {
     flexDirection: "row",
@@ -2495,9 +2495,9 @@ const s = StyleSheet.create({
   },
   modeToggleBtnActive: { backgroundColor: "#FFFFFF" },
   modeToggleText: { fontSize: 12, fontWeight: "600", color: "#64748B" },
-  modeToggleTextActive: { color: "#0F172A", fontWeight: "800" },
+  modeToggleTextActive: { color: "#0F172A", fontWeight: "600" },
   customInputBox: { paddingVertical: 6 },
-  customInputLabel: { fontSize: 12, fontWeight: "700", color: "#475569", marginBottom: 4, marginTop: 8 },
+  customInputLabel: { fontSize: 12, fontWeight: "500", color: "#475569", marginBottom: 4, marginTop: 8 },
   customTextInput: {
     backgroundColor: "#F8FAFC",
     borderWidth: 1,
@@ -2518,7 +2518,7 @@ const s = StyleSheet.create({
     borderRadius: 12,
     marginTop: 16,
   },
-  createCustomBtnText: { color: "#FFFFFF", fontSize: 13, fontWeight: "800" },
+  createCustomBtnText: { color: "#FFFFFF", fontSize: 13, fontWeight: "600" },
   presetItemRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -2558,8 +2558,8 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  voucherCodeText: { fontSize: 12, fontWeight: "800", color: "#059669" },
-  voucherAmountPill: { fontSize: 13, fontWeight: "800", color: "#0F172A" },
+  voucherCodeText: { fontSize: 12, fontWeight: "600", color: "#059669" },
+  voucherAmountPill: { fontSize: 13, fontWeight: "600", color: "#0F172A" },
   voucherTitlePick: { fontSize: 13, fontWeight: "700", color: "#0F172A", marginTop: 2 },
   voucherMetaPick: { fontSize: 12, color: "#64748B", marginTop: 2 },
 
@@ -2581,7 +2581,7 @@ const s = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E2E8F0",
   },
-  fullVoucherTitle: { fontSize: 15, fontWeight: "800", color: "#0F172A" },
+  fullVoucherTitle: { fontSize: 15, fontWeight: "700", color: "#0F172A" },
   passHeroBox: {
     backgroundColor: "#EFF6FF",
     borderRadius: 14,
@@ -2589,10 +2589,10 @@ const s = StyleSheet.create({
     alignItems: "center",
     marginBottom: 14,
   },
-  passAgencyName: { fontSize: 12, fontWeight: "700", color: "#2563EB" },
+  passAgencyName: { fontSize: 12, fontWeight: "500", color: "#2563EB" },
   passTourName: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
     textAlign: "center",
     marginTop: 4,
@@ -2604,7 +2604,7 @@ const s = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 8,
   },
-  passStatusBadgeText: { fontSize: 12, fontWeight: "800", color: "#166534" },
+  passStatusBadgeText: { fontSize: 12, fontWeight: "600", color: "#166534" },
   passDataGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -2615,8 +2615,8 @@ const s = StyleSheet.create({
     marginBottom: 16,
   },
   passGridCell: { width: "46%" },
-  passCellLabel: { fontSize: 12, fontWeight: "800", color: "#94A3B8" },
-  passCellValue: { fontSize: 12, fontWeight: "700", color: "#0F172A", marginTop: 2 },
+  passCellLabel: { fontSize: 12, fontWeight: "600", color: "#94A3B8" },
+  passCellValue: { fontSize: 12, fontWeight: "500", color: "#0F172A", marginTop: 2 },
   qrSimBox: {
     alignItems: "center",
     padding: 16,
@@ -2652,7 +2652,7 @@ const s = StyleSheet.create({
   },
   retryLinkText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#EF4444",
   },
   agencyResponseCard: {
@@ -2674,7 +2674,7 @@ const s = StyleSheet.create({
   },
   agencyResponseText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0369A1",
   },
   agencyPushNoticeRow: {

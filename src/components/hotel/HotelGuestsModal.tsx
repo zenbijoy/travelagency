@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSubTitle: {
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   },
   stepperTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   stepperSub: {
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     width: 36,
     textAlign: "center",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   childAgesCard: {
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   },
   childSectionTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0055F2",
     marginStart: 6,
     flex: 1,
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   childLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
     marginBottom: 6,
   },
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   },
   ageOptionText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   ageOptionTextActive: {
@@ -435,6 +435,6 @@ const styles = StyleSheet.create({
   confirmBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 });

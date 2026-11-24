@@ -27,10 +27,32 @@ import * as Haptics from "expo-haptics";
 import { useDebounce } from "../hooks/useDebounce";
 import { useTheme } from "../context/ThemeContext";
 import { FONTS } from "../theme/typography";
-import { ListSkeleton, CardSkeleton, ErrorStateCard, EmptyStateView } from "../components/common";
+import { ListSkeleton, CardSkeleton, ErrorStateCard, EmptyStateView, OpenStreetMap, MapMarkerItem } from "../components/common";
 import { WeatherWidget } from "../components/weather/WeatherWidget";
 
 const PRIMARY = "#287dfa";
+
+const DEST_COORDS: Record<string, { lat: number; lng: number }> = {
+  "cox's bazar": { lat: 21.4272, lng: 92.0058 },
+  coxsbazar: { lat: 21.4272, lng: 92.0058 },
+  sajek: { lat: 23.382, lng: 92.2938 },
+  "sajek valley": { lat: 23.382, lng: 92.2938 },
+  sreemangal: { lat: 24.3065, lng: 91.7296 },
+  sundarbans: { lat: 21.9497, lng: 89.1833 },
+  sylhet: { lat: 24.8949, lng: 91.8687 },
+  dhaka: { lat: 23.7806, lng: 90.4193 },
+  chittagong: { lat: 22.3569, lng: 91.7832 },
+  chattogram: { lat: 22.3569, lng: 91.7832 },
+  bandarban: { lat: 22.1953, lng: 92.2184 },
+  kuakata: { lat: 21.8167, lng: 90.1167 },
+  bali: { lat: -8.4095, lng: 115.1889 },
+  singapore: { lat: 1.3521, lng: 103.8198 },
+  bangkok: { lat: 13.7563, lng: 100.5018 },
+  tokyo: { lat: 35.6762, lng: 139.6503 },
+  kyoto: { lat: 35.0116, lng: 135.7681 },
+  shanghai: { lat: 31.2304, lng: 121.4737 },
+  beijing: { lat: 39.9042, lng: 116.4074 },
+};
 
 export function ExploreScreen({ screen }: { screen?: UIScreen } = {}) {
   const { colors, isDark } = useTheme();
@@ -42,6 +64,7 @@ export function ExploreScreen({ screen }: { screen?: UIScreen } = {}) {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [categoryFilter, setCategoryFilter] = useState<"All" | "Top Rated" | "Budget" | "Popular">("All");
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [loading, setLoading] = useState<boolean>(false);
   const [weatherData, setWeatherData] = useState<any>(null);
@@ -108,6 +131,25 @@ export function ExploreScreen({ screen }: { screen?: UIScreen } = {}) {
     }
     return list;
   }, [destinations, debouncedSearchQuery, categoryFilter]);
+
+  const destinationMapMarkers: MapMarkerItem[] = useMemo(() => {
+    return filteredDestinations.map((d) => {
+      const destKey = (d.name || d.city || "").toLowerCase().trim();
+      const fallback = DEST_COORDS[destKey] || { lat: 23.685, lng: 90.3563 };
+      return {
+        id: d.id || d.name,
+        title: d.name,
+        subtitle: `${d.country || "Bangladesh"} • ${d.avgBudget || "$100"}`,
+        latitude: Number(d.latitude) || fallback.lat,
+        longitude: Number(d.longitude) || fallback.lng,
+        badge: `${d.safetyScore}% Safe`,
+        price: d.avgBudget,
+        icon: "📍",
+        category: "attraction" as const,
+        color: "#0055F2",
+      };
+    });
+  }, [filteredDestinations]);
 
   const loadWeather = async (dest: any) => {
     setLoading(true);
@@ -475,7 +517,65 @@ export function ExploreScreen({ screen }: { screen?: UIScreen } = {}) {
           })}
         </View>
 
-        {loadingDestinations ? (
+        {/* View Mode Toggle: List vs OpenStreetMap */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <Text style={{ fontSize: 13, fontWeight: "600", color: colors.textSecondary }}>
+            {filteredDestinations.length}টি গন্তব্য উপলব্ধ
+          </Text>
+          <View style={{ flexDirection: "row", backgroundColor: colors.surface, borderRadius: 8, padding: 2, borderWidth: 1, borderColor: colors.border }}>
+            <Pressable
+              onPress={() => {
+                Haptics.selectionAsync();
+                setViewMode("list");
+              }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 6,
+                backgroundColor: viewMode === "list" ? colors.primary : "transparent",
+              }}
+            >
+              <Ionicons name="list" size={13} color={viewMode === "list" ? "#FFFFFF" : colors.textSecondary} />
+              <Text style={{ fontSize: 11, fontWeight: "600", color: viewMode === "list" ? "#FFFFFF" : colors.textSecondary }}>তালিকা</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                Haptics.selectionAsync();
+                setViewMode("map");
+              }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 6,
+                backgroundColor: viewMode === "map" ? colors.primary : "transparent",
+              }}
+            >
+              <Ionicons name="map" size={13} color={viewMode === "map" ? "#FFFFFF" : colors.textSecondary} />
+              <Text style={{ fontSize: 11, fontWeight: "600", color: viewMode === "map" ? "#FFFFFF" : colors.textSecondary }}>ম্যাপ</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {viewMode === "map" ? (
+          <View style={{ height: 380, borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: colors.border, marginBottom: 20 }}>
+            <OpenStreetMap
+              markers={destinationMapMarkers}
+              initialRegion={{ latitude: 23.685, longitude: 90.3563, zoom: 7 }}
+              interactive={true}
+              theme={isDark ? "dark" : "light"}
+              onSelectMarker={(id) => {
+                const found = destinations.find((d) => (d.id || d.name) === id);
+                if (found) openDest(found);
+              }}
+            />
+          </View>
+        ) : loadingDestinations ? (
           <View style={{ marginTop: 16 }}>
             <ListSkeleton count={3} type="card" />
           </View>
@@ -602,7 +702,7 @@ const s = StyleSheet.create({
     gap: 10,
   },
   backBtn: { padding: 4 },
-  destHeaderTitle: { color: "#fff", fontSize: 18, fontWeight: "900", flex: 1 },
+  destHeaderTitle: { color: "#fff", fontSize: 18, fontWeight: "700", flex: 1 },
   destHero: { width: "100%", height: 200 },
   tabBar: {
     backgroundColor: "#fff",
@@ -612,16 +712,16 @@ const s = StyleSheet.create({
   tabContent: { paddingHorizontal: 12, gap: 4 },
   tab: { paddingVertical: 12, paddingHorizontal: 14 },
   tabActive: { borderBottomWidth: 2, borderBottomColor: PRIMARY },
-  tabText: { fontSize: 13, color: "#667085", fontWeight: "700" },
+  tabText: { fontSize: 13, color: "#667085", fontWeight: "500" },
   tabTextActive: { color: PRIMARY },
   tabBody: { padding: 16, paddingBottom: 100 },
   section: { gap: 12 },
-  h2: { fontSize: 18, fontWeight: "900", color: "#111827" },
+  h2: { fontSize: 18, fontWeight: "600", color: "#111827" },
   metaRow: { fontSize: 13, color: "#667085" },
   block: { marginTop: 8 },
   blockTitle: {
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
     marginBottom: 8,
   },
@@ -632,7 +732,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
-  chipText: { fontSize: 12, fontWeight: "700" },
+  chipText: { fontSize: 12, fontWeight: "500" },
   listRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -652,14 +752,14 @@ const s = StyleSheet.create({
     marginBottom: 8,
   },
   infoLabel: { fontSize: 12, color: "#667085" },
-  infoValue: { fontSize: 15, fontWeight: "900", color: "#111827" },
+  infoValue: { fontSize: 15, fontWeight: "400", color: "#111827" },
   bulletItem: { fontSize: 13, color: "#374151", lineHeight: 20 },
   budgetRow: { marginBottom: 10 },
-  budgetCat: { fontSize: 13, fontWeight: "700", color: "#374151" },
+  budgetCat: { fontSize: 13, fontWeight: "500", color: "#374151" },
   budgetAmt: {
     fontSize: 13,
     color: PRIMARY,
-    fontWeight: "800",
+    fontWeight: "600",
     marginBottom: 4,
   },
   budgetBar: { height: 4, backgroundColor: "#e5e7eb", borderRadius: 2 },
@@ -673,7 +773,7 @@ const s = StyleSheet.create({
   mutedText: { color: "#9ca3af", fontSize: 13 },
   exploreTitle: {
     fontSize: 24,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#111827",
     marginBottom: 4,
   },
@@ -714,7 +814,7 @@ const s = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   filterChipTextActive: {
@@ -732,7 +832,7 @@ const s = StyleSheet.create({
     justifyContent: "flex-end",
     padding: 16,
   },
-  exploreName: { color: "#fff", fontSize: 22, fontWeight: "900" },
+  exploreName: { color: "#fff", fontSize: 22, fontWeight: "600" },
   exploreCountry: {
     color: "rgba(255,255,255,0.8)",
     fontSize: 13,
@@ -745,5 +845,5 @@ const s = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  badgeText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  badgeText: { color: "#fff", fontSize: 12, fontWeight: "500" },
 });

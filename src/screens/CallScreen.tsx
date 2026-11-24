@@ -1363,7 +1363,7 @@ const styles = StyleSheet.create({
   toastBannerText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     flex: 1,
   },
   reconnectBanner: {
@@ -1383,7 +1383,7 @@ const styles = StyleSheet.create({
   reconnectBannerTitle: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   reconnectBannerSubtitle: {
     color: "rgba(255, 255, 255, 0.85)",
@@ -1432,7 +1432,7 @@ const styles = StyleSheet.create({
   avatarPlaceholderText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "400",
   },
   avatarPlaceholderBig: {
     backgroundColor: "#2563EB",
@@ -1442,12 +1442,12 @@ const styles = StyleSheet.create({
   avatarPlaceholderBigText: {
     color: "#FFFFFF",
     fontSize: 32,
-    fontWeight: "800",
+    fontWeight: "400",
   },
   videoNameText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   statusBadgePill: {
     flexDirection: "row",
@@ -1465,7 +1465,7 @@ const styles = StyleSheet.create({
   badgeGatheringText: {
     color: "#F59E0B",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   badgeConnected: {
     backgroundColor: "rgba(16, 185, 129, 0.2)",
@@ -1475,7 +1475,7 @@ const styles = StyleSheet.create({
   badgeConnectedText: {
     color: "#10B981",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   badgeTimeout: {
     backgroundColor: "rgba(239, 68, 68, 0.2)",
@@ -1485,7 +1485,7 @@ const styles = StyleSheet.create({
   badgeTimeoutText: {
     color: "#EF4444",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   badgeRinging: {
     backgroundColor: "rgba(56, 189, 248, 0.2)",
@@ -1495,7 +1495,7 @@ const styles = StyleSheet.create({
   badgeRingingText: {
     color: "#38BDF8",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   badgeCalling: {
     backgroundColor: "rgba(96, 165, 250, 0.2)",
@@ -1505,7 +1505,7 @@ const styles = StyleSheet.create({
   badgeCallingText: {
     color: "#60A5FA",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   greenLiveDot: {
     width: 7,
@@ -1527,7 +1527,7 @@ const styles = StyleSheet.create({
   encryptedText: {
     color: "#10B981",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   headerChatBtn: {
     width: 36,
@@ -1780,7 +1780,7 @@ const styles = StyleSheet.create({
   audioCallerName: {
     color: "#fff",
     fontSize: 24,
-    fontWeight: "800",
+    fontWeight: "600",
     marginBottom: 8,
   },
   audioStatusLabel: {

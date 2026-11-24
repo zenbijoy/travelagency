@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSubtitle: {
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
   },
   categoryTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   resultsCount: {
     fontSize: 12,
@@ -748,7 +748,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   featureSubtitle: {
     fontSize: 12,

@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#fff",
     marginBottom: 4,
   },
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#1f2937",
     marginBottom: 12,
   },
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "500",
     color: "#1f2937",
     marginBottom: 2,
   },

@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
   },
   logoText: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   headerRightSpacer: {
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
   mainTitle: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#1f2937",
     marginBottom: 16,
     textAlign: "center",
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#1f2937",
   },
   modalCloseBtn: {
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     textAlign: "center",
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "500",
     color: "#1f2937",
   },
   inputContainer: {

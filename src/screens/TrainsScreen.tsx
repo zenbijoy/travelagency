@@ -1958,7 +1958,7 @@ export function TrainsScreen() {
                                 <View style={styles.selectedQuotaNoticeBox}>
                                   <Text style={styles.selectedQuotaNoticeText}>
                                     {selectedQuota}:{" "}
-                                    <Text style={{ fontWeight: "800", color: isAvailable ? BD_GREEN : BD_RED }}>
+                                    <Text style={{ fontWeight: "600", color: isAvailable ? BD_GREEN : BD_RED }}>
                                       {isAvailable ? `${quotaSeats} Seats Available` : "Waitlist Only"}
                                     </Text>
                                   </Text>
@@ -2659,7 +2659,7 @@ const styles = StyleSheet.create({
   bdBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   goldBadge: {
@@ -2675,7 +2675,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 24,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#FFFFFF",
     lineHeight: 30,
   },
@@ -2714,7 +2714,7 @@ const styles = StyleSheet.create({
   },
   pastDateNoticeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#92400E",
     flex: 1,
   },
@@ -2748,7 +2748,7 @@ const styles = StyleSheet.create({
   },
   sessionStatusTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#065F46",
   },
   saveCredsBtn: {
@@ -2762,7 +2762,7 @@ const styles = StyleSheet.create({
   },
   saveCredsBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: BD_GREEN,
   },
   stationsBox: {
@@ -2791,7 +2791,7 @@ const styles = StyleSheet.create({
   },
   fieldLabelText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#94A3B8",
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -2804,7 +2804,7 @@ const styles = StyleSheet.create({
   },
   stationCityName: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   stationCodeBadge: {
@@ -2815,7 +2815,7 @@ const styles = StyleSheet.create({
   },
   stationCodeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: BD_GREEN,
   },
   stationFullName: {
@@ -2867,7 +2867,7 @@ const styles = StyleSheet.create({
   },
   paramGridValue: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
     marginTop: 2,
   },
@@ -2889,7 +2889,7 @@ const styles = StyleSheet.create({
   },
   passengerLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   stepperContainer: {
@@ -2912,7 +2912,7 @@ const styles = StyleSheet.create({
   },
   stepperValueText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
     minWidth: 18,
     textAlign: "center",
@@ -2937,7 +2937,7 @@ const styles = StyleSheet.create({
   searchButtonText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
 
@@ -2958,7 +2958,7 @@ const styles = StyleSheet.create({
   },
   quotaSectionTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   quotaHelpBtn: {
@@ -2968,7 +2968,7 @@ const styles = StyleSheet.create({
   },
   quotaHelpText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: BD_GREEN,
   },
   quotaSectionSubtitle: {
@@ -2999,7 +2999,7 @@ const styles = StyleSheet.create({
   },
   quotaTabName: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   quotaTabFull: {
@@ -3015,7 +3015,7 @@ const styles = StyleSheet.create({
   },
   classFilterLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
     textTransform: "uppercase",
     marginBottom: 8,
@@ -3038,7 +3038,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   filterChipTextActive: {
@@ -3074,7 +3074,7 @@ const styles = StyleSheet.create({
   },
   timeFilterPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   timeFilterPillTextActive: {
@@ -3088,7 +3088,7 @@ const styles = StyleSheet.create({
   },
   sortBarLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   sortPill: {
@@ -3105,7 +3105,7 @@ const styles = StyleSheet.create({
   },
   sortPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   sortPillTextActive: {
@@ -3125,12 +3125,12 @@ const styles = StyleSheet.create({
   },
   resultsTitle: {
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   resultsCountBadge: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: BD_GREEN,
   },
   trainCard: {
@@ -3155,7 +3155,7 @@ const styles = StyleSheet.create({
   },
   trainNameText: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#0F172A",
   },
   trainNumBadge: {
@@ -3166,7 +3166,7 @@ const styles = StyleSheet.create({
   },
   trainNumText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: BD_GREEN,
   },
   trainRouteText: {
@@ -3184,7 +3184,7 @@ const styles = StyleSheet.create({
   },
   fareAmountText: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: BD_GREEN,
   },
   scheduleRow: {
@@ -3201,12 +3201,12 @@ const styles = StyleSheet.create({
   },
   depTimeText: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#0F172A",
   },
   arrTimeText: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#0F172A",
   },
   stationLabelText: {
@@ -3225,7 +3225,7 @@ const styles = StyleSheet.create({
   },
   platformBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: BD_GREEN,
   },
   durationCol: {
@@ -3235,7 +3235,7 @@ const styles = StyleSheet.create({
   },
   durationText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#475569",
     marginBottom: 4,
   },
@@ -3276,7 +3276,7 @@ const styles = StyleSheet.create({
   },
   timelineToggleText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: BD_GREEN,
   },
 
@@ -3300,12 +3300,12 @@ const styles = StyleSheet.create({
   },
   timelineCardTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   timelineCardArrivalPlatform: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: BD_RED,
   },
   timelineFlow: {
@@ -3321,7 +3321,7 @@ const styles = StyleSheet.create({
   },
   nodeTimeMain: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   nodeTimeSub: {
@@ -3381,7 +3381,7 @@ const styles = StyleSheet.create({
   },
   nodeStationName: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   nodePlatPill: {
@@ -3392,7 +3392,7 @@ const styles = StyleSheet.create({
   },
   nodePlatText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   layoverPillRow: {
@@ -3419,7 +3419,7 @@ const styles = StyleSheet.create({
   },
   quotaMatrixHeading: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   activeQuotaIndicator: {
@@ -3432,7 +3432,7 @@ const styles = StyleSheet.create({
   },
   activeQuotaValue: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: BD_GREEN,
   },
   classesListStack: {
@@ -3452,7 +3452,7 @@ const styles = StyleSheet.create({
   },
   classNameTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   classCodeTag: {
@@ -3463,7 +3463,7 @@ const styles = StyleSheet.create({
   },
   classCodeTagText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#3730A3",
   },
   classDescText: {
@@ -3494,7 +3494,7 @@ const styles = StyleSheet.create({
   },
   classPriceText: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   classPriceSub: {
@@ -3523,7 +3523,7 @@ const styles = StyleSheet.create({
   },
   quotaPillSeats: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   seatsAvailable: {
     color: BD_GREEN,
@@ -3557,7 +3557,7 @@ const styles = StyleSheet.create({
   bookClassBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
 
   // Modals & Sheets
@@ -3599,7 +3599,7 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   sheetSubtitle: {
@@ -3621,12 +3621,12 @@ const styles = StyleSheet.create({
   },
   dateQuickText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#334155",
   },
   calendarHeading: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#334155",
     marginBottom: 8,
     textTransform: "uppercase",
@@ -3657,18 +3657,18 @@ const styles = StyleSheet.create({
   },
   calendarDayNarrow: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   calendarDayNumber: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
     marginVertical: 1,
   },
   calendarDayTag: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#94A3B8",
   },
   calendarTextPast: {
@@ -3683,7 +3683,7 @@ const styles = StyleSheet.create({
   },
   calendarTagSelected: {
     color: BD_GREEN,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   pastDateSafetyNote: {
     flexDirection: "row",
@@ -3697,7 +3697,7 @@ const styles = StyleSheet.create({
   pastDateSafetyNoteText: {
     fontSize: 12,
     color: "#065F46",
-    fontWeight: "600",
+    fontWeight: "400",
     flex: 1,
   },
 
@@ -3718,7 +3718,7 @@ const styles = StyleSheet.create({
   },
   classItemTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   classItemTitleActive: {
@@ -3732,7 +3732,7 @@ const styles = StyleSheet.create({
   },
   classBadgeTagText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   classItemDesc: {
@@ -3750,7 +3750,7 @@ const styles = StyleSheet.create({
   },
   quotaInfoCardTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   quotaInfoBadge: {
     paddingHorizontal: 6,
@@ -3759,7 +3759,7 @@ const styles = StyleSheet.create({
   },
   quotaInfoBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   quotaInfoCardDesc: {
     fontSize: 12,
@@ -3776,7 +3776,7 @@ const styles = StyleSheet.create({
   closeQuotaInfoBtnText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "400",
   },
 
   // Station Modal Styles
@@ -3803,7 +3803,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   searchBarWrap: {
@@ -3840,7 +3840,7 @@ const styles = StyleSheet.create({
   },
   divisionChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   divisionChipTextActive: {
@@ -3854,7 +3854,7 @@ const styles = StyleSheet.create({
   },
   chipsSectionLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#64748B",
     marginBottom: 8,
     textTransform: "uppercase",
@@ -3874,7 +3874,7 @@ const styles = StyleSheet.create({
   },
   chipBtnText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#334155",
   },
   chipBtnTextActive: {
@@ -3910,7 +3910,7 @@ const styles = StyleSheet.create({
   },
   stationCodeItemText: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#334155",
   },
   stationCodeItemTextActive: {
@@ -3921,7 +3921,7 @@ const styles = StyleSheet.create({
   },
   stationItemName: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   stationItemSub: {
@@ -3956,7 +3956,7 @@ const styles = StyleSheet.create({
   saveCredsSubmitText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "400",
   },
 
   // WebView Modal Styles
@@ -4009,7 +4009,7 @@ const styles = StyleSheet.create({
   },
   urlText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   toolbarRight: {
@@ -4059,7 +4059,7 @@ const styles = StyleSheet.create({
   },
   clearSessionPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: BD_RED,
   },
   progressBarBackground: {

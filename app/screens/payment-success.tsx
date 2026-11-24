@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
 
   successTitle: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
     marginBottom: 4,
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
   offlineCachedText: {
     fontSize: 10,
     color: "#059669",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   ticketBody: {
     padding: 16,
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
   },
   ticketServiceTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 4,
   },
@@ -589,11 +589,11 @@ const styles = StyleSheet.create({
   pnrLabel: {
     fontSize: 9,
     color: "#1E40AF",
-    fontWeight: "800",
+    fontWeight: "600",
   },
   pnrValue: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#1D4ED8",
     fontFamily: "monospace",
   },
@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
   ticketPdfBtnText: {
     color: "#fff",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   ticketViewTabBtn: {
     flex: 1,
@@ -673,12 +673,12 @@ const styles = StyleSheet.create({
   openBoardingPassActionText: {
     color: "#fff",
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   ticketViewTabBtnText: {
     color: PRIMARY,
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Details Card
@@ -712,12 +712,12 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 13,
     color: "#0F172A",
-    fontWeight: "700",
+    fontWeight: "400",
   },
   detailValueTotal: {
     fontSize: 16,
     color: PRIMARY,
-    fontWeight: "800",
+    fontWeight: "400",
   },
   transactionId: {
     fontSize: 12,
@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   secondaryButton: {
     backgroundColor: "#EFF6FF",
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: PRIMARY,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   homeButton: {
     borderWidth: 1,

@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   labelText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     textTransform: "uppercase",
   },
   barsContainer: {

@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
   },
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   columnLabelHighlight: {
     fontSize: 11,
     color: "#0055F2",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   oldPriceText: {
     fontSize: 16,
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   newPriceText: {
     fontSize: 18,
     color: "#0055F2",
-    fontWeight: "900",
+    fontWeight: "700",
     marginVertical: 2,
   },
   columnSub: {
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   columnSubHighlight: {
     fontSize: 10,
     color: "#059669",
-    fontWeight: "700",
+    fontWeight: "400",
   },
   breakdownBox: {
     width: "100%",
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   breakdownVal: {
     fontSize: 12,
     color: "#0F172A",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   discountVal: {
     color: "#059669",
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   },
   rejectBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   acceptBtn: {
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   },
   acceptBtnText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
   },
 });

@@ -327,7 +327,7 @@ export const FlightSeatPickerModal: React.FC<FlightSeatPickerModalProps> = ({
             <Ionicons name="people-circle" size={20} color={TRIP_BLUE} />
             <Text style={styles.quotaText}>
               আসন নির্বাচন:{" "}
-              <Text style={{ fontWeight: "800", color: TRIP_BLUE }}>
+              <Text style={{ fontWeight: "600", color: TRIP_BLUE }}>
                 {selectedSeats.length} / {passengersCount}
               </Text>{" "}
               জন যাত্রী
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
   },
   zoomLevelText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   passengerQuotaBanner: {
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
   },
   autoAssignBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1E40AF",
   },
   legendContainer: {
@@ -739,7 +739,7 @@ const styles = StyleSheet.create({
   },
   cockpitText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   fuselageFrontDoors: {
@@ -760,7 +760,7 @@ const styles = StyleSheet.create({
   },
   exitText: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: "500",
     color: ACCENT_GREEN,
   },
   frontGalley: {
@@ -797,7 +797,7 @@ const styles = StyleSheet.create({
   },
   cabinBadgeText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   columnHeaderRow: {
@@ -826,7 +826,7 @@ const styles = StyleSheet.create({
   },
   aisleText: {
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#94A3B8",
   },
   rowOuterWrapper: {
@@ -872,7 +872,7 @@ const styles = StyleSheet.create({
   },
   wingSpanText: {
     fontSize: 7,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#64748B",
   },
   seatGroupBiz: {
@@ -942,7 +942,7 @@ const styles = StyleSheet.create({
   },
   seatLabelText: {
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "600",
     marginTop: 2,
   },
   rearAirplaneSection: {
@@ -1006,7 +1006,7 @@ const styles = StyleSheet.create({
   },
   selectedSeatChipText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TRIP_BLUE,
   },
   noSeatsPrompt: {
@@ -1021,7 +1021,7 @@ const styles = StyleSheet.create({
   },
   totalPriceValue: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   confirmButton: {
@@ -1038,7 +1038,7 @@ const styles = StyleSheet.create({
   },
   confirmButtonText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
 });

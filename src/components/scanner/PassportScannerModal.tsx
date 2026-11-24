@@ -1226,7 +1226,7 @@ const styles = StyleSheet.create({
   },
   mrzZoneLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#93c5fd",
     letterSpacing: 0.5,
   },
@@ -1347,7 +1347,7 @@ const styles = StyleSheet.create({
   },
   scoreBadgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   resultFieldsScroll: {
     maxHeight: 260,
@@ -1388,7 +1388,7 @@ const styles = StyleSheet.create({
   resultRowValueMonospace: {
     fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#38bdf8",
     letterSpacing: 1,
   },
@@ -1473,7 +1473,7 @@ const styles = StyleSheet.create({
   confirmBtnText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   sheetBackdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -1564,7 +1564,7 @@ const styles = StyleSheet.create({
   manualSubmitBtnText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   liveGuidanceCard: {
     backgroundColor: "rgba(15, 23, 42, 0.85)",
@@ -1604,7 +1604,7 @@ const styles = StyleSheet.create({
   quickTorchBtnText: {
     color: "#f59e0b",
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   quickTorchBtnTextActive: {
     color: "#ffffff",
@@ -1631,6 +1631,6 @@ const styles = StyleSheet.create({
   manualEntryFallbackBtnText: {
     color: "#ffffff",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });

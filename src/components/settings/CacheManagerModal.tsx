@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   },
   totalValue: {
     fontSize: 28,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 4,
   },
   barContainer: {
@@ -493,6 +493,6 @@ const styles = StyleSheet.create({
   clearButtonText: {
     color: "#ffffff",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });

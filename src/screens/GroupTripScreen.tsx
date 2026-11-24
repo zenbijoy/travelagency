@@ -1811,7 +1811,7 @@ const styles = StyleSheet.create({
   },
   refreshLink: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: BRAND_BLUE,
   },
   viewerBadgeRow: {
@@ -1851,7 +1851,7 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     color: BRAND_BLUE,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   contentScroll: {
     flex: 1,
@@ -1922,7 +1922,7 @@ const styles = StyleSheet.create({
   },
   avatarInitial: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: BRAND_BLUE,
   },
   memberDetails: {
@@ -1953,7 +1953,7 @@ const styles = StyleSheet.create({
   },
   roleBadgeText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#374151",
   },
   quickGrid: {
@@ -1972,7 +1972,7 @@ const styles = StyleSheet.create({
   },
   gridBtnLabel: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#1F2937",
     marginTop: 4,
   },
@@ -2001,7 +2001,7 @@ const styles = StyleSheet.create({
   },
   dayPillDayNum: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#374151",
   },
   dayPillDayNumActive: {
@@ -2035,7 +2035,7 @@ const styles = StyleSheet.create({
   },
   actionAddBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   emptyCard: {
@@ -2073,7 +2073,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: BRAND_BLUE,
   },
   timelineDot: {
@@ -2137,7 +2137,7 @@ const styles = StyleSheet.create({
   },
   kindBadgeText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#4B5563",
   },
   countdownBadge: {
@@ -2167,7 +2167,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#374151",
   },
   proposalTitle: {
@@ -2230,7 +2230,7 @@ const styles = StyleSheet.create({
   },
   acceptBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   balanceRow: {
@@ -2305,7 +2305,7 @@ const styles = StyleSheet.create({
   },
   settleUpBtnText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   expenseItemRow: {
@@ -2329,7 +2329,7 @@ const styles = StyleSheet.create({
   },
   expenseDesc: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#1F2937",
   },
   expensePayer: {
@@ -2355,7 +2355,7 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#FFFFFF",
   },
   qrContainer: {
@@ -2390,7 +2390,7 @@ const styles = StyleSheet.create({
   },
   qrBtnSecondaryText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#374151",
   },
   qrBtnPrimary: {
@@ -2466,7 +2466,7 @@ const styles = StyleSheet.create({
   },
   kindSelectTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   payerPill: {
     paddingHorizontal: 12,
@@ -2484,6 +2484,6 @@ const styles = StyleSheet.create({
   },
   payerPillTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });

@@ -2471,12 +2471,12 @@ const styles = StyleSheet.create({
   heroPillText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   heroTitle: {
     fontSize: 28,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#FFFFFF",
     letterSpacing: -0.5,
   },
@@ -2512,7 +2512,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#64748B",
     letterSpacing: 0.5,
   },
@@ -2525,7 +2525,7 @@ const styles = StyleSheet.create({
   },
   pickerText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
     marginTop: 2,
   },
@@ -2546,7 +2546,7 @@ const styles = StyleSheet.create({
   },
   amenityHeaderTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   amenityCountText: {
@@ -2574,7 +2574,7 @@ const styles = StyleSheet.create({
   },
   amenityPillText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   amenityPillTextActive: {
@@ -2611,11 +2611,11 @@ const styles = StyleSheet.create({
   voucherTagText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   benefitsTitle: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   benefitsDesc: {
@@ -2636,7 +2636,7 @@ const styles = StyleSheet.create({
   claimBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   sectionHeaderRow: {
     flexDirection: "row",
@@ -2645,7 +2645,7 @@ const styles = StyleSheet.create({
   },
   sectionHeading: {
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   villaCard: {
@@ -2697,7 +2697,7 @@ const styles = StyleSheet.create({
   superhostBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   ratingBadge: {
@@ -2711,7 +2711,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   ratingReviews: {
@@ -2726,14 +2726,14 @@ const styles = StyleSheet.create({
   },
   imagePropertyType: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#93C5FD",
     letterSpacing: 0.5,
     textTransform: "uppercase",
   },
   imageSpecsText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#FFFFFF",
     marginTop: 2,
   },
@@ -2742,7 +2742,7 @@ const styles = StyleSheet.create({
   },
   villaName: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   locationRow: {
@@ -2781,7 +2781,7 @@ const styles = StyleSheet.create({
   cardAmenityTextMore: {
     fontSize: 12,
     color: "#334155",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   divider: {
     height: 1,
@@ -2825,7 +2825,7 @@ const styles = StyleSheet.create({
   },
   hostName: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   hostMetaText: {
@@ -2846,7 +2846,7 @@ const styles = StyleSheet.create({
   },
   messageHostBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   priceActionRow: {
@@ -2860,7 +2860,7 @@ const styles = StyleSheet.create({
   },
   priceNumber: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   priceUnit: {
@@ -2885,7 +2885,7 @@ const styles = StyleSheet.create({
   reserveBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   sheetOverlay: {
     flex: 1,
@@ -2909,7 +2909,7 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: 17,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   sheetSubtitle: {
@@ -2946,7 +2946,7 @@ const styles = StyleSheet.create({
   },
   sheetSpecValue: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#0F172A",
     marginTop: 4,
   },
@@ -2981,7 +2981,7 @@ const styles = StyleSheet.create({
   },
   sheetHostName: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   superhostMiniPill: {
@@ -2993,7 +2993,7 @@ const styles = StyleSheet.create({
   },
   superhostMiniText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#D97706",
   },
   sheetHostStats: {
@@ -3026,7 +3026,7 @@ const styles = StyleSheet.create({
   },
   sheetMessageHostBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: TRIP_BLUE,
   },
   sheetOpenMessengerBtn: {
@@ -3043,7 +3043,7 @@ const styles = StyleSheet.create({
   },
   sheetOpenMessengerBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   datesConfigBox: {
@@ -3060,7 +3060,7 @@ const styles = StyleSheet.create({
   },
   datesConfigTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#1E3A8A",
   },
   datesNightsBadge: {
@@ -3081,13 +3081,13 @@ const styles = StyleSheet.create({
   dateCol: {},
   dateColLabel: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#0055F2",
     letterSpacing: 0.5,
   },
   dateColValue: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#0F172A",
     marginTop: 2,
   },
@@ -3103,7 +3103,7 @@ const styles = StyleSheet.create({
   },
   priceBreakdownTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   breakdownRow: {
@@ -3117,7 +3117,7 @@ const styles = StyleSheet.create({
   },
   breakdownValue: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#0F172A",
   },
   breakdownDivider: {
@@ -3132,7 +3132,7 @@ const styles = StyleSheet.create({
   },
   breakdownTotalLabel: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   breakdownTotalSub: {
@@ -3142,7 +3142,7 @@ const styles = StyleSheet.create({
   },
   breakdownTotalAmount: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: TRIP_BLUE,
   },
   depositShieldBanner: {
@@ -3173,7 +3173,7 @@ const styles = StyleSheet.create({
   bookVillaBtnText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   guaranteeNote: {
     fontSize: 12,
@@ -3200,7 +3200,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   modalSubTitle: {
@@ -3210,7 +3210,7 @@ const styles = StyleSheet.create({
   },
   modalSectionLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#475569",
     marginBottom: 8,
   },
@@ -3261,7 +3261,7 @@ const styles = StyleSheet.create({
   },
   dateSummaryDate: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "400",
     color: "#0F172A",
     marginTop: 2,
   },
@@ -3274,7 +3274,7 @@ const styles = StyleSheet.create({
   modalApplyBtnText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   stepperRow: {
     flexDirection: "row",
@@ -3309,7 +3309,7 @@ const styles = StyleSheet.create({
   },
   stepValue: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
     minWidth: 20,
     textAlign: "center",
@@ -3328,7 +3328,7 @@ const styles = StyleSheet.create({
   },
   filterGroupTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#64748B",
     marginBottom: 6,
     letterSpacing: 0.5,
@@ -3350,7 +3350,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#475569",
   },
   filterChipTextActive: {
@@ -3375,7 +3375,7 @@ const styles = StyleSheet.create({
   },
   roomAvailTagText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#059669",
   },
   roomUrgentTag: {
@@ -3391,7 +3391,7 @@ const styles = StyleSheet.create({
   },
   roomUrgentTagText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#D97706",
   },
   freeCancelTag: {

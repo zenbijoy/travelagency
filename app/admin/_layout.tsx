@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   deniedBadge: {
     color: "#ef4444",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     letterSpacing: 1.2,
     marginBottom: 8,
   },

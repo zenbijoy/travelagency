@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   callerName: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   callTypeRow: {
     flexDirection: "row",

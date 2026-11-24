@@ -61,6 +61,64 @@ const BORDER_DEFAULT = colors.border.default;
 
 // Fallback guest identifier for unauthenticated feed exploration
 const GUEST_FALLBACK_USER_ID = "5e491c34-50b4-4d2a-8cac-d09fddd7745c";
+
+const MOCK_STORIES = [
+  { id: "story-1", name: "Tania", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150", location: "Sajek" },
+  { id: "story-2", name: "Rahat", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", location: "Cox's Bazar" },
+  { id: "story-3", name: "Nabila", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", location: "Bali" },
+  { id: "story-4", name: "Farhan", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", location: "Sylhet" },
+];
+
+const MOCK_COMMUNITY_POSTS = [
+  {
+    id: "post-1",
+    title: "Chasing Cloud Oceans at Konglak Peak, Sajek",
+    content: "Woke up at 5:00 AM to witness the endless sea of clouds rolling across the Mizoram hills. Absolutely magical morning breeze and indigenous bamboo tea!",
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    location: "Sajek Valley, Rangamati",
+    likes_count: 248,
+    comments_count: 42,
+    shares_count: 18,
+    author: {
+      id: "u-1",
+      display_name: "Tania Sultana",
+      avatar_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+      is_verified: true,
+      bio: "Mountain trekker & landscape photographer",
+    },
+    media: [
+      {
+        id: "m-1",
+        media_url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+        media_type: "image",
+      },
+    ],
+  },
+  {
+    id: "post-2",
+    title: "Sunset Serenade along Inani Beach Marine Drive",
+    content: "Driving along the longest natural sea beach in the world with golden hour waves crashing against the coral rocks. A must-do road trip in Bangladesh!",
+    created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+    location: "Cox's Bazar, Bangladesh",
+    likes_count: 382,
+    comments_count: 59,
+    shares_count: 31,
+    author: {
+      id: "u-2",
+      display_name: "Rahat Chowdhury",
+      avatar_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+      is_verified: true,
+      bio: "Coastal explorer & foodie",
+    },
+    media: [
+      {
+        id: "m-2",
+        media_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+        media_type: "image",
+      },
+    ],
+  },
+];
 const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200";
 const STORY_DURATION = 5000;
 
@@ -241,7 +299,7 @@ export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
   const [followingUserIds, setFollowingUserIds] = useState<Set<string>>(new Set());
   const [viewedStoryIds, setViewedStoryIds] = useState<Set<string>>(new Set());
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // Modals & User Input Form States
   const params = useLocalSearchParams();
@@ -2341,7 +2399,7 @@ const styles = StyleSheet.create({
   headerLeft: { flex: 1 },
   headerTitle: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     color: LUXE_NAVY,
     letterSpacing: -0.3,
   },
@@ -2374,7 +2432,7 @@ const styles = StyleSheet.create({
   },
   createPostBtnText: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 13,
   },
   searchBarWrapper: {
@@ -2426,7 +2484,7 @@ const styles = StyleSheet.create({
   },
   tabSegmentTextActive: {
     color: PRIMARY,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   storiesSection: {
     backgroundColor: "#FFFFFF",
@@ -2518,7 +2576,7 @@ const styles = StyleSheet.create({
   unreadStatusPillText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   storyNameText: {
     fontSize: 12,
@@ -2529,7 +2587,7 @@ const styles = StyleSheet.create({
   },
   storyNameUnread: {
     color: TEXT_PRIMARY,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   feedFiltersRow: {
     flexDirection: "row",
@@ -2556,7 +2614,7 @@ const styles = StyleSheet.create({
   },
   feedFilterPillTextActive: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   emptyFeedBox: {
     alignItems: "center",
@@ -2584,7 +2642,7 @@ const styles = StyleSheet.create({
   emptyCreateBtnText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   influencerHeroCard: {
     backgroundColor: "#FFFFFF",
@@ -2609,7 +2667,7 @@ const styles = StyleSheet.create({
   influencerHeaderInfo: { flex: 1 },
   influencerCardName: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "600",
     color: TEXT_PRIMARY,
   },
   influencerHandle: {
@@ -2628,7 +2686,7 @@ const styles = StyleSheet.create({
   badgePillAmberText: {
     color: colors.status.warning.dark,
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   influencerBio: {
     fontSize: 13,
@@ -2644,7 +2702,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   statBox: { flex: 1, alignItems: "center" },
-  statBoxValue: { fontSize: 15, fontWeight: "800", color: TEXT_PRIMARY },
+  statBoxValue: { fontSize: 15, fontWeight: "700", color: TEXT_PRIMARY },
   statBoxLabel: { fontSize: 12, color: TEXT_MUTED, marginTop: 1 },
   followActionBtn: {
     flexDirection: "row",
@@ -2662,11 +2720,11 @@ const styles = StyleSheet.create({
   },
   followActionBtnText: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 13,
   },
   followActionBtnTextActive: { color: PRIMARY },
-  sectionHeading: { fontSize: 18, fontWeight: "800", color: TEXT_PRIMARY },
+  sectionHeading: { fontSize: 18, fontWeight: "700", color: TEXT_PRIMARY },
   sectionSubtitle: { fontSize: 12, color: TEXT_MUTED, marginTop: 2, marginBottom: 16 },
   groupsHeaderRow: {
     flexDirection: "row",
@@ -2683,7 +2741,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 14,
   },
-  newGroupBtnText: { color: "#FFFFFF", fontSize: 12, fontWeight: "700" },
+  newGroupBtnText: { color: "#FFFFFF", fontSize: 12, fontWeight: "500" },
   groupsChipList: { gap: 10, paddingBottom: 16 },
   groupCardPill: {
     flexDirection: "row",
@@ -2698,7 +2756,7 @@ const styles = StyleSheet.create({
   },
   groupCardPillActive: { borderColor: PRIMARY, backgroundColor: colors.primary[50] },
   groupPillAvatar: { width: 40, height: 40, borderRadius: 10 },
-  groupPillName: { fontSize: 13, fontWeight: "700", color: colors.neutral[800] },
+  groupPillName: { fontSize: 13, fontWeight: "500", color: colors.neutral[800] },
   groupPillNameActive: { color: PRIMARY },
   groupPillSub: { fontSize: 12, color: TEXT_MUTED, marginTop: 2 },
   groupChatContainer: {
@@ -2717,7 +2775,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     marginBottom: 12,
   },
-  groupChatTitle: { fontSize: 16, fontWeight: "800", color: TEXT_PRIMARY },
+  groupChatTitle: { fontSize: 16, fontWeight: "700", color: TEXT_PRIMARY },
   groupChatDesc: { fontSize: 12, color: TEXT_MUTED, marginTop: 2 },
   destinationBadge: {
     flexDirection: "row",
@@ -2728,7 +2786,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 10,
   },
-  destinationBadgeText: { color: PRIMARY, fontSize: 12, fontWeight: "700" },
+  destinationBadgeText: { color: PRIMARY, fontSize: 12, fontWeight: "500" },
   messagesFeed: { minHeight: 180, maxHeight: 280, gap: 10, marginBottom: 12 },
   emptyMessagesText: {
     textAlign: "center",
@@ -2743,7 +2801,7 @@ const styles = StyleSheet.create({
   messageBubble: { maxWidth: "80%", padding: 10, borderRadius: 12 },
   messageBubbleMe: { backgroundColor: PRIMARY, borderBottomRightRadius: 2 },
   messageBubbleOther: { backgroundColor: colors.surface.muted, borderBottomLeftRadius: 2 },
-  chatAuthorName: { fontSize: 12, fontWeight: "700", color: PRIMARY, marginBottom: 2 },
+  chatAuthorName: { fontSize: 12, fontWeight: "500", color: PRIMARY, marginBottom: 2 },
   messageContentText: { fontSize: 13, color: colors.neutral[800] },
   messageContentTextMe: { color: "#FFFFFF" },
   messageTimeText: { fontSize: 12, color: TEXT_MUTED, alignSelf: "flex-end", marginTop: 4 },
@@ -2814,7 +2872,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#FFFFFF",
   },
-  storyViewerAuthorName: { color: "#FFFFFF", fontSize: 14, fontWeight: "800" },
+  storyViewerAuthorName: { color: "#FFFFFF", fontSize: 14, fontWeight: "600" },
   storyViewerLocation: { color: "rgba(255, 255, 255, 0.8)", fontSize: 12 },
   storyCloseBtn: { padding: 6 },
   storyViewerBottomCaption: {
@@ -2825,7 +2883,7 @@ const styles = StyleSheet.create({
   storyViewerCaptionText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "400",
     lineHeight: 22,
   },
   storyReactionRow: {
@@ -2873,7 +2931,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  modalMainTitle: { fontSize: 18, fontWeight: "800", color: TEXT_PRIMARY },
+  modalMainTitle: { fontSize: 18, fontWeight: "700", color: TEXT_PRIMARY },
   postTypeSwitchRow: {
     flexDirection: "row",
     backgroundColor: colors.surface.muted,
@@ -2892,8 +2950,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   postTypeSwitchBtnActive: { backgroundColor: "#FFFFFF" },
-  postTypeSwitchText: { fontSize: 13, fontWeight: "700", color: TEXT_MUTED },
-  postTypeSwitchTextActive: { color: PRIMARY, fontWeight: "800" },
+  postTypeSwitchText: { fontSize: 13, fontWeight: "500", color: TEXT_MUTED },
+  postTypeSwitchTextActive: { color: PRIMARY, fontWeight: "600" },
   uploadOptionsRow: {
     flexDirection: "row",
     gap: 10,
@@ -2914,7 +2972,7 @@ const styles = StyleSheet.create({
   },
   r2UploadBtnText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: PRIMARY,
   },
   modalProgressBarWrap: {
@@ -2931,7 +2989,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     fontSize: 12,
     color: "#fff",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   uploadedPreviewBox: {
     flexDirection: "row",
@@ -2944,11 +3002,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   uploadedThumb: { width: 44, height: 44, borderRadius: 8 },
-  uploadedSuccessText: { fontSize: 13, fontWeight: "700", color: SUCCESS },
+  uploadedSuccessText: { fontSize: 13, fontWeight: "500", color: SUCCESS },
   uploadedUrlText: { fontSize: 12, color: TEXT_MUTED },
   modalInputLabel: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
     color: colors.text.secondary,
     marginTop: 10,
     marginBottom: 4,
@@ -2981,13 +3039,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 18,
   },
-  modalSubmitBtnText: { color: "#FFFFFF", fontSize: 15, fontWeight: "800" },
+  modalSubmitBtnText: { color: "#FFFFFF", fontSize: 15, fontWeight: "400" },
   commentsPostTitle: { fontSize: 12, color: TEXT_MUTED, maxWidth: 240 },
   emptyCommentsText: { textAlign: "center", color: TEXT_MUTED, marginVertical: 20 },
   fullCommentItem: { flexDirection: "row", gap: 10, marginBottom: 12 },
   fullCommentAvatar: { width: 32, height: 32, borderRadius: 16 },
   fullCommentBody: { flex: 1, backgroundColor: BG_SUBTLE, padding: 10, borderRadius: 12 },
-  fullCommentAuthorName: { fontSize: 12, fontWeight: "700", color: TEXT_PRIMARY },
+  fullCommentAuthorName: { fontSize: 12, fontWeight: "500", color: TEXT_PRIMARY },
   fullCommentTime: { fontSize: 12, color: TEXT_MUTED },
   fullCommentText: { fontSize: 13, color: colors.neutral[700], marginTop: 2 },
   addCommentInputRow: {

@@ -270,7 +270,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = React.memo(
 
     return (
       <View
-        style={[styles.container, containerStyle]}
+        style={[styles.container, style, containerStyle]}
         onLayout={handleLayout}
         testID={testID}
         accessible={true}
@@ -293,7 +293,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = React.memo(
             style={[
               style,
               {
-                opacity: fadeAnim,
+                opacity: Platform.OS === "web" ? 1 : fadeAnim,
               },
             ]}
             resizeMode={resizeMode}

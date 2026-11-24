@@ -963,7 +963,7 @@ export function SettingsScreen() {
             </View>
 
             <Text style={[styles.typeToConfirmText, { color: colors.text }]}>
-              Type <Text style={{ fontWeight: "800", color: "#ef4444" }}>DELETE</Text> to confirm:
+              Type <Text style={{ fontWeight: "600", color: "#ef4444" }}>DELETE</Text> to confirm:
             </Text>
 
             <TextInput
@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
   avatarText: {
     color: "#ffffff",
     fontSize: 24,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   profileDetails: {
     flex: 1,
@@ -1110,7 +1110,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: "500",
     marginEnd: 8,
   },
   kycBadge: {
@@ -1122,7 +1122,7 @@ const styles = StyleSheet.create({
   },
   kycText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#10b981",
   },
   userEmail: {
@@ -1231,7 +1231,7 @@ const styles = StyleSheet.create({
   },
   currencyPreview: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "400",
     marginEnd: 6,
   },
 
@@ -1292,7 +1292,7 @@ const styles = StyleSheet.create({
   },
   deleteModalTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     textAlign: "center",
     marginBottom: 8,
   },
@@ -1329,7 +1329,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
     marginBottom: 20,
   },
   modalActionRow: {
@@ -1359,7 +1359,7 @@ const styles = StyleSheet.create({
   confirmDeleteBtnText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });
 

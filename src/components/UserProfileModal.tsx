@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
   },
   navTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   centerLoader: {
@@ -632,7 +632,7 @@ const styles = StyleSheet.create({
   },
   displayName: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "600",
     color: "#0F172A",
   },
   handleText: {
@@ -654,7 +654,7 @@ const styles = StyleSheet.create({
   influencerBadgeText: {
     color: "#D97706",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   bioText: {
     fontSize: 13,
@@ -671,7 +671,7 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 12,
     color: "#64748B",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   mainActionsRow: {
     flexDirection: "row",
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
   primaryActionText: {
     color: "#fff",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   secondaryActionBtn: {
     flex: 1,
@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
   secondaryActionText: {
     color: "#334155",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   messageActionBtn: {
     flex: 1,
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
   messageActionText: {
     color: "#fff",
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   statsBar: {
     flexDirection: "row",
@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
   },
   statNum: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#0F172A",
   },
   statLabel: {
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
   },
   tabBtnText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#64748B",
   },
   tabBtnTextActive: {
@@ -804,7 +804,7 @@ const styles = StyleSheet.create({
   },
   postTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   postLocRow: {
@@ -816,7 +816,7 @@ const styles = StyleSheet.create({
   postLocText: {
     fontSize: 12,
     color: TRIP_BLUE,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   postBodyText: {
     fontSize: 13,
@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
   },
   friendGridName: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0F172A",
   },
   friendGridHandle: {
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
   },
   aboutHeading: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#0F172A",
   },
   aboutBody: {
@@ -898,7 +898,7 @@ const styles = StyleSheet.create({
   aboutInfoText: {
     fontSize: 13,
     color: "#334155",
-    fontWeight: "600",
+    fontWeight: "400",
   },
 });
 

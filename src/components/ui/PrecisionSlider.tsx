@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#334155",
   },
   inputContainer: {
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   prefixText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#2563eb",
     marginEnd: 4,
   },
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   numericInput: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#0f172a",
     padding: 0,
     textAlign: "right",
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   },
   presetTextActive: {
     color: "#ffffff",
-    fontWeight: "700",
+    fontWeight: "500",
   },
 });
 
