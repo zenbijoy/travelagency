@@ -195,7 +195,7 @@ async def _sample_active_routes() -> int:
         repo = PriceAlertRepository(session)
         active_alerts = await repo.get_all_active_alerts()
 
-    target_pairs: Set_Pairs = set()
+    target_pairs: set[Tuple[str, str, str, date]] = set()
     today_dhaka = get_dhaka_now().date()
 
     for alert in active_alerts:
@@ -270,6 +270,7 @@ def sample_prices_hot_routes_task() -> Dict[str, Any]:
 async def _evaluate_alerts_async(
     custom_now: Optional[datetime] = None,
     allow_quiet_hours: bool = False,
+    session: Optional[AsyncSession] = None,
 ) -> Dict[str, Any]:
     """
     Evaluates all active alerts against latest snapshots.
@@ -283,8 +284,9 @@ async def _evaluate_alerts_async(
     suppressed_dedupe_count = 0
     suppressed_quiet_count = 0
 
-    async with AsyncSessionLocal() as session:
-        repo = PriceAlertRepository(session)
+    async def _process_in_session(active_session: AsyncSession) -> int:
+        nonlocal triggered_count, suppressed_dedupe_count, suppressed_quiet_count
+        repo = PriceAlertRepository(active_session)
         alerts = await repo.get_all_active_alerts()
 
         for alert in alerts:
@@ -368,9 +370,39 @@ async def _evaluate_alerts_async(
                 data=push_data,
             )
 
+            # Stage FlightPriceAlertTriggeredEvent into transactional outbox
+            try:
+                from app.notifications.events.travel_product import FlightPriceAlertTriggeredEvent
+                from app.notifications.outbox.publisher import OutboxPublisher
+                target_p = float(alert.target_price_paisa / 100.0) if alert.target_price_paisa else float(cur_price_bdt)
+                current_p = float(cur_price_bdt)
+                drop_p = float(alert.drop_percent) if alert.drop_percent else 0.0
+                outbox_evt = FlightPriceAlertTriggeredEvent(
+                    alert_id=alert.id,
+                    user_id=alert.user_id,
+                    origin=alert.origin,
+                    destination=alert.destination,
+                    target_price=target_p,
+                    current_price=current_p,
+                    price_drop_pct=drop_p,
+                    airline="Biman Bangladesh",
+                    booking_deeplink=search_route,
+                )
+                await OutboxPublisher.publish(active_session, outbox_evt)
+            except Exception as outbox_err:
+                logger.warning(f"Could not stage FlightPriceAlertTriggeredEvent into outbox: {outbox_err}")
+
             # 6. Mark alert as notified
             await repo.mark_alert_notified(alert.id, status="triggered")
+            await active_session.commit()
             triggered_count += 1
+        return triggered_count
+
+    if session is not None:
+        await _process_in_session(session)
+    else:
+        async with AsyncSessionLocal() as db:
+            await _process_in_session(db)
 
     return {
         "triggered_count": triggered_count,
@@ -388,6 +420,14 @@ def evaluate_alerts_task() -> Dict[str, Any]:
     res = run_async(_evaluate_alerts_async())
     logger.info(f"Evaluation complete: {res}")
     return res
+
+
+@celery_app.task(name="evaluate_active_price_alerts_task")
+def evaluate_active_price_alerts_task() -> Dict[str, Any]:
+    """
+    Celery background task to evaluate active alerts and stage FlightPriceAlertTriggeredEvent.
+    """
+    return evaluate_alerts_task()
 
 
 # ============================================================================

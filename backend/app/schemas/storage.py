@@ -31,3 +31,12 @@ class PresignedUploadResponse(BaseModel):
     expires_in: int = Field(..., description="Pre-signed URL validity in seconds")
     http_method: str = "PUT"
     required_headers: Dict[str, str] = Field(default_factory=dict)
+
+
+class PresignedDownloadRequest(BaseModel):
+    key: str = Field(..., min_length=3, max_length=512, description="S3/R2 storage object key")
+
+
+class PresignedDownloadResponse(BaseModel):
+    signed_url: str = Field(..., description="Ephemeral pre-signed GET URL")
+    expires_in: int = Field(default=300, description="Validity in seconds")

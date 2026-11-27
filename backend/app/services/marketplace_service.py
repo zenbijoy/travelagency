@@ -481,6 +481,36 @@ class MarketplaceService:
         )
         self.db.add(session)
 
+        try:
+            from app.notifications.events.marketplace import MarketplaceGuideBookedEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+
+            guide_booked_event = MarketplaceGuideBookedEvent(
+                booking_id=booking_id,
+                booking_reference=booking_ref,
+                user_id=traveler_id,
+                traveler_id=traveler_id,
+                provider_id=request.provider_id,
+                provider_user_id=provider.user_id,
+                service_id=request.service_id,
+                tour_date=str(request.tour_date),
+                number_of_guests=request.number_of_guests,
+                total_price=float(quote.total_price),
+                currency="BDT",
+                deep_link="/(tabs)/marketplace",
+                headers={
+                    "source_service": "marketplace_service",
+                    "causation_id": str(booking_id),
+                },
+            )
+            await OutboxPublisher.publish_idempotent(
+                self.db,
+                guide_booked_event,
+                idempotency_key=f"marketplace_booked:{booking_id}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage MarketplaceGuideBookedEvent into outbox: {outbox_err}")
+
         await self.db.commit()
         await self.db.refresh(booking)
         return model_to_dict(booking)
@@ -664,6 +694,33 @@ class MarketplaceService:
         )
 
         self.db.add(event)
+        try:
+            from app.notifications.events.marketplace import MarketplaceTripSosTriggeredEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+
+            sos_event = MarketplaceTripSosTriggeredEvent(
+                session_id=session_id,
+                sos_event_id=event.id,
+                user_id=user_id,
+                actor_id=user_id,
+                emergency_type=request.event_type,
+                latitude=request.latitude,
+                longitude=request.longitude,
+                address_context=request.address_context,
+                dispatch_target=event.dispatch_target,
+                deep_link="/(tabs)/marketplace",
+                headers={
+                    "source_service": "marketplace_service",
+                    "causation_id": str(event.id),
+                },
+            )
+            await OutboxPublisher.publish_idempotent(
+                self.db,
+                sos_event,
+                idempotency_key=f"marketplace_sos:{event.id}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage MarketplaceTripSosTriggeredEvent into outbox: {outbox_err}")
         await self.db.commit()
         await self.db.refresh(event)
         logger.critical(f"EMERGENCY SOS TRIGGERED for session {session_id} by user {user_id}")
@@ -762,6 +819,36 @@ class MarketplaceService:
         provider.admin_notes = request.admin_notes
         provider.verified_at = now
 
+        try:
+            from app.notifications.events.base import DomainEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+
+            approved_event = DomainEvent(
+                event_type="marketplace.provider.approved",
+                aggregate_type="provider",
+                aggregate_id=str(provider.id),
+                actor_id=provider.user_id,
+                priority=7,
+                user_id=provider.user_id,
+                provider_id=provider.id,
+                display_name=provider.business_name or provider.full_name,
+                badge=provider.badge,
+                reviewed_by=admin_user_id,
+                category="marketplace",
+                deep_link="/(tabs)/marketplace",
+                headers={
+                    "source_service": "marketplace_service",
+                    "causation_id": str(provider.id),
+                },
+            )
+            await OutboxPublisher.publish_idempotent(
+                self.db,
+                approved_event,
+                idempotency_key=f"marketplace_provider_approved:{provider.id}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage marketplace.provider.approved into outbox: {outbox_err}")
+
         await self.db.commit()
         await self.db.refresh(provider)
         return model_to_dict(provider)
@@ -778,6 +865,36 @@ class MarketplaceService:
 
         provider.verification_status = "rejected"
         provider.rejection_reason = request.rejection_reason
+
+        try:
+            from app.notifications.events.base import DomainEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+
+            rejected_event = DomainEvent(
+                event_type="marketplace.provider.rejected",
+                aggregate_type="provider",
+                aggregate_id=str(provider.id),
+                actor_id=provider.user_id,
+                priority=7,
+                user_id=provider.user_id,
+                provider_id=provider.id,
+                display_name=provider.business_name or provider.full_name,
+                rejection_reason=request.rejection_reason,
+                reviewed_by=admin_user_id,
+                category="marketplace",
+                deep_link="/(tabs)/marketplace",
+                headers={
+                    "source_service": "marketplace_service",
+                    "causation_id": str(provider.id),
+                },
+            )
+            await OutboxPublisher.publish_idempotent(
+                self.db,
+                rejected_event,
+                idempotency_key=f"marketplace_provider_rejected:{provider.id}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage marketplace.provider.rejected into outbox: {outbox_err}")
 
         await self.db.commit()
         await self.db.refresh(provider)

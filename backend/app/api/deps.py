@@ -47,37 +47,42 @@ async def get_current_user(
     user_metadata = payload.get("user_metadata", {})
 
     roles = []
-    base_role = app_metadata.get("role") or user_metadata.get("role") or "user"
-    roles.append(base_role)
-
     user_repo = UserRepository(db)
 
-    # 1. Admin Verification
-    is_admin = await user_repo.is_admin(user_uuid)
-    if is_admin:
+    # 1. Authoritative Admin Verification (Database-only: admin_users table)
+    active_admin = await user_repo.get_active_admin(user_uuid)
+    admin_role: Optional[str] = None
+    admin_permissions: dict = {}
+    if active_admin:
         roles.append(UserRole.ADMIN.value)
+        admin_role = active_admin.role
+        raw_perms = active_admin.permissions or {}
+        if isinstance(raw_perms, dict):
+            admin_permissions = {str(k): bool(v) for k, v in raw_perms.items()}
 
-    # 2. Agency Association
+    # 2. Authoritative Agency Association (Database-only)
     agency_id = await user_repo.get_user_agency_id(user_uuid)
     if agency_id:
         roles.append(UserRole.AGENCY.value)
 
-    # 3. Hotel Staff Association
+    # 3. Authoritative Hotel Staff Association (Database-only)
     hotel_id = await user_repo.get_user_hotel_id(user_uuid)
     if hotel_id:
         roles.append(UserRole.HOTEL_STAFF.value)
 
-    # 4. Check user profile for extra role tags
+    # 4. Check user profile for non-privileged informational tags only
     profile = await user_repo.get_user_profile(user_uuid)
     if profile and profile.role:
-        roles.append(profile.role)
+        # Prevent privilege escalation: untrusted profile string cannot grant admin/agency
+        if profile.role in [UserRole.CREATOR.value, UserRole.PARTNER.value, UserRole.USER.value]:
+            roles.append(profile.role)
 
-    # Resolve primary role with strict hierarchy
-    if UserRole.ADMIN.value in roles or is_admin:
+    # Resolve primary role with strict hierarchy (Never grant Admin without active_admin)
+    if active_admin:
         primary_role = UserRole.ADMIN
-    elif UserRole.AGENCY.value in roles or agency_id:
+    elif agency_id:
         primary_role = UserRole.AGENCY
-    elif UserRole.HOTEL_STAFF.value in roles or hotel_id:
+    elif hotel_id:
         primary_role = UserRole.HOTEL_STAFF
     elif UserRole.CREATOR.value in roles:
         primary_role = UserRole.CREATOR
@@ -91,6 +96,8 @@ async def get_current_user(
         email=email,
         role=primary_role,
         roles=list(set(roles)),
+        admin_role=admin_role,
+        admin_permissions=admin_permissions,
         agency_id=agency_id,
         hotel_id=hotel_id,
         is_active=True,
@@ -118,10 +125,25 @@ async def get_optional_user(
 
 # RBAC Role Guards
 def require_admin(current_user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
-    """Enforces that the current authenticated user has Administrator privileges."""
-    if current_user.role != UserRole.ADMIN and UserRole.ADMIN.value not in current_user.roles:
+    """Enforces that the current authenticated user has active Administrator privileges."""
+    if not current_user.is_active_admin:
         raise PermissionDeniedError("Administrator privileges required for this endpoint")
     return current_user
+
+
+def require_admin_permission(permission: str):
+    """Granular RBAC guard enforcing role/per-user admin permission on backend endpoints."""
+
+    def _permission_guard(
+        current_user: CurrentUser = Depends(require_admin),
+    ) -> CurrentUser:
+        if not current_user.has_admin_permission(permission):
+            raise PermissionDeniedError(
+                f"Administrator lacks required permission '{permission}'"
+            )
+        return current_user
+
+    return _permission_guard
 
 
 def require_agency(current_user: CurrentUser = Depends(get_current_user)) -> CurrentUser:

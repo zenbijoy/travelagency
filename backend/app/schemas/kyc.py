@@ -20,6 +20,7 @@ class KYCStatus(str, Enum):
 
 class KYCDocType(str, Enum):
     TRADE_LICENCE = "trade_licence"
+    TRADE_LICENSE = "trade_licence"
     TIN = "tin"
     OWNER_ID = "owner_id"
     ADDRESS_PROOF = "address_proof"

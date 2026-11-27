@@ -122,7 +122,9 @@ class BookingService:
         service_fee = settings.BOOKING_SERVICE_FEE if total_price > 0 else 0.0
         final_price = total_price - discount + tax + service_fee
 
+        booking_id = uuid.uuid4()
         booking = Booking(
+            id=booking_id,
             user_id=user_id,
             agency_id=request.agency_id,
             booking_reference=generate_booking_reference(),
@@ -173,8 +175,6 @@ class BookingService:
                 )
             )
 
-        await booking_repo.add(booking)
-
         # Record booking creation event in the same atomic transaction
         booking.events.append(
             BookingEvent(
@@ -191,6 +191,26 @@ class BookingService:
                 created_at=datetime.now(timezone.utc),
             )
         )
+
+        await booking_repo.add(booking)
+
+        # Stage domain event into transactional outbox
+        try:
+            from app.notifications.events.booking import BookingCreatedEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+            outbox_event = BookingCreatedEvent(
+                booking_id=booking.id,
+                booking_reference=booking.booking_reference,
+                user_id=user_id,
+                product_type=booking.product_type,
+                total_price=float(booking.final_price),
+                currency=booking.currency,
+                destination=booking.destination_city,
+            )
+            await OutboxPublisher.publish(db, outbox_event)
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage BookingCreatedEvent into outbox: {outbox_err}")
+
         await db.commit()
         await db.refresh(booking)
 
@@ -251,7 +271,7 @@ class BookingService:
 
             # Create offline-capable, tamper-proof signed e-tickets inside transaction
             from app.services.ticket_service import TicketService
-            await TicketService.create_tickets_for_booking(db, booking)
+            created_tickets = await TicketService.create_tickets_for_booking(db, booking)
 
             # Enqueue asynchronous Celery tasks for PDF ticket & confirmation email
             ticket_payload = {
@@ -269,6 +289,36 @@ class BookingService:
                 "product_type": booking.product_type,
                 "issue_date": now.strftime("%Y-%m-%d"),
             }
+
+            # Stage domain event into transactional outbox
+            try:
+                from app.notifications.events.booking import BookingConfirmedEvent
+                from app.notifications.outbox.publisher import OutboxPublisher
+                confirmed_event = BookingConfirmedEvent(
+                    booking_id=booking.id,
+                    booking_reference=booking.booking_reference,
+                    user_id=booking.user_id,
+                    customer_name=(
+                        f"{booking.passengers[0].first_name} {booking.passengers[0].last_name}"
+                        if booking.passengers
+                        else "Valued Guest"
+                    ),
+                    customer_email=booking.passengers[0].email if booking.passengers else None,
+                    customer_phone=booking.passengers[0].phone if booking.passengers else None,
+                    product_type=booking.product_type,
+                    total_paid=float(booking.final_price),
+                    currency=booking.currency,
+                    start_date=str(booking.start_date) if booking.start_date else None,
+                    ticket_ids=[t.id for t in created_tickets if hasattr(t, "id")],
+                    headers={"source_service": "booking_service", "causation_id": str(booking.id)},
+                )
+                await OutboxPublisher.publish(
+                    db,
+                    confirmed_event,
+                    idempotency_key=f"booking_confirmed:{booking.id}",
+                )
+            except Exception as outbox_err:
+                logger.warning(f"Could not stage BookingConfirmedEvent into outbox: {outbox_err}")
 
             try:
                 generate_travel_ticket_task.delay(ticket_payload)
@@ -288,6 +338,61 @@ class BookingService:
         elif target_status == BookingStatus.CANCELLED:
             booking.cancelled_at = now
             booking.flow_step = "cancelled"
+
+            # Stage domain event into transactional outbox
+            try:
+                from app.notifications.events.booking import BookingCancelledEvent
+                from app.notifications.outbox.publisher import OutboxPublisher
+                cancelled_event = BookingCancelledEvent(
+                    booking_id=booking.id,
+                    booking_reference=booking.booking_reference,
+                    user_id=booking.user_id,
+                    cancellation_reason=request.cancellation_reason or "Customer requested cancellation",
+                    refund_amount=float(booking.final_price),
+                    cancellation_fee=0.0,
+                    headers={"source_service": "booking_service", "causation_id": str(booking.id)},
+                )
+                await OutboxPublisher.publish(
+                    db,
+                    cancelled_event,
+                    idempotency_key=f"booking_cancelled:{booking.id}",
+                )
+            except Exception as outbox_err:
+                logger.warning(f"Could not stage BookingCancelledEvent into outbox: {outbox_err}")
+
+        elif target_status == BookingStatus.REFUNDED:
+            booking.flow_step = "refunded"
+            try:
+                from app.notifications.events.base import DomainEvent
+                from app.notifications.outbox.publisher import OutboxPublisher
+
+                refunded_event = DomainEvent(
+                    event_type="booking.refunded",
+                    aggregate_type="booking",
+                    aggregate_id=str(booking.id),
+                    actor_id=booking.user_id,
+                    priority=9,
+                    booking_id=booking.id,
+                    booking_reference=booking.booking_reference,
+                    user_id=booking.user_id,
+                    refund_amount=float(booking.final_price),
+                    currency=booking.currency,
+                    destination=booking.destination_city,
+                    product_type=booking.product_type,
+                    category="booking",
+                    deep_link="/(tabs)/trips",
+                    headers={
+                        "source_service": "booking_service",
+                        "causation_id": str(booking.id),
+                    },
+                )
+                await OutboxPublisher.publish_idempotent(
+                    db,
+                    refunded_event,
+                    idempotency_key=f"refund:{booking.id}",
+                )
+            except Exception as outbox_err:
+                logger.warning(f"Could not stage booking.refunded event into outbox: {outbox_err}")
 
         elif target_status == BookingStatus.COMPLETED:
             booking.completed_at = now
@@ -322,8 +427,10 @@ class BookingService:
         )
         db.add(booking_event)
 
+        booking_ref = booking.booking_reference
+        booking_id_val = booking.id
         await db.commit()
-        full_booking = await booking_repo.get_booking_with_details(booking.id)
+        full_booking = await booking_repo.get_booking_with_details(booking_id_val)
 
-        logger.info(f"Transitioned booking {booking.booking_reference} to {target_status.value}")
+        logger.info(f"Transitioned booking {booking_ref} to {target_status.value}")
         return BookingResponse.model_validate(full_booking)

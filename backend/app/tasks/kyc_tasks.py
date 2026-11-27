@@ -257,13 +257,13 @@ def analyze_kyc_document(document_id_str: str, session: Optional[Any] = None) ->
 
 
 async def _run_expiring_documents_check(session: Optional[AsyncSession] = None) -> int:
-    """Finds documents expiring in <= 30 days and logs/alerts."""
+    """Finds documents expiring in <= 30 days, logs, and stages idempotent warning events."""
     async def _execute(db: AsyncSession):
         today = date.today()
         warning_window = today + timedelta(days=settings.KYC_EXPIRY_WARNING_DAYS)
 
         stmt = (
-            select(KYCDocument, Agency.name, Agency.email)
+            select(KYCDocument, Agency.id, Agency.name, Agency.email, Agency.owner_user_id)
             .join(KYCSubmission, KYCDocument.submission_id == KYCSubmission.id)
             .join(Agency, KYCSubmission.agency_id == Agency.id)
             .where(
@@ -276,14 +276,44 @@ async def _run_expiring_documents_check(session: Optional[AsyncSession] = None) 
         res = await db.execute(stmt)
         rows = res.all()
 
+        from app.notifications.events.agency import AgencyKycExpiringWarningEvent
+        from app.notifications.outbox.publisher import OutboxPublisher
+
         reminders_sent = 0
-        for doc, agn_name, agn_email in rows:
+        for doc, agn_id, agn_name, agn_email, owner_user_id in rows:
             days_left = (doc.expires_on - today).days
-            logger.warning(
-                f"[KYC EXPIRY REMINDER] Document '{doc.doc_type}' for agency '{agn_name}' ({agn_email}) "
-                f"expires on {doc.expires_on} ({days_left} days remaining). Renewal notification triggered."
+            bucket = 7 if days_left <= 7 else (15 if days_left <= 15 else 30)
+            warn_event = AgencyKycExpiringWarningEvent(
+                agency_id=agn_id,
+                agency_name=agn_name,
+                agency_email=agn_email,
+                user_id=owner_user_id,
+                actor_id=owner_user_id,
+                document_id=doc.id,
+                document_type=doc.doc_type,
+                expires_on=doc.expires_on.isoformat(),
+                days_remaining=days_left,
+                milestone_days=bucket,
+                deep_link="/agency/kyc",
+                headers={
+                    "source_service": "kyc_tasks",
+                    "causation_id": str(doc.id),
+                },
             )
-            reminders_sent += 1
+            _, created = await OutboxPublisher.publish_idempotent(
+                db,
+                warn_event,
+                idempotency_key=f"kyc_expiring:{doc.id}:{doc.expires_on.isoformat()}:{bucket}d",
+            )
+            if created:
+                logger.warning(
+                    f"[KYC EXPIRY REMINDER] Document '{doc.doc_type}' for agency '{agn_name}' "
+                    f"expires on {doc.expires_on} ({days_left} days remaining, {bucket}d window). Outbox warning staged."
+                )
+                reminders_sent += 1
+
+        if reminders_sent > 0:
+            await db.commit()
 
         return reminders_sent
 

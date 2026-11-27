@@ -24,6 +24,7 @@ from app.core.database import engine
 from app.core.exceptions import create_problem_response, register_exception_handlers
 from app.core.logging import CorrelationIdMiddleware, setup_logging
 from app.core.metrics import PrometheusMetricsMiddleware, metrics_endpoint
+from app.core.bot_defense import BotAndScraperDefenseMiddleware
 from app.core.rate_limit import limiter
 from app.core.redis import close_redis_pool, get_redis, init_redis_pool
 from app.websockets.routes import ws_router
@@ -81,9 +82,9 @@ def create_application() -> FastAPI:
             "SIMD-accelerated ORJSON serialization, L1/L2 hybrid caching, "
             "resilient payment webhook processing, and real-time WebSockets."
         ),
-        docs_url="/docs",
-        redoc_url="/redoc",
-        openapi_url="/openapi.json",
+        docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
+        redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
+        openapi_url="/openapi.json" if settings.ENVIRONMENT != "production" else None,
         lifespan=lifespan,
     )
 
@@ -100,8 +101,9 @@ def create_application() -> FastAPI:
             code="RATE_LIMIT_EXCEEDED",
         )
 
-    # 1. Middlewares (Order: Metrics -> Security -> Logging -> Compression -> CORS)
+    # 1. Middlewares (Order: Metrics -> Bot/Scanner Defense -> Security -> Logging -> Compression -> CORS)
     app.add_middleware(PrometheusMetricsMiddleware)
+    app.add_middleware(BotAndScraperDefenseMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(CorrelationIdMiddleware)
     app.add_middleware(GZipMiddleware, minimum_size=1024)  # Compress payloads > 1KB
@@ -124,9 +126,16 @@ def create_application() -> FastAPI:
     app.include_router(tickets_router)
 
     # 4. Prometheus Metrics Endpoint
-    @app.get("/metrics", tags=["Observability & Telemetry"])
-    async def metrics():
-        """Scrape endpoint for Prometheus / Grafana observability."""
+    @app.get("/metrics", tags=["Observability & Telemetry"], include_in_schema=settings.ENVIRONMENT != "production")
+    async def metrics(request: Request):
+        """Scrape endpoint for Prometheus / Grafana observability. Protected by internal bearer token in production."""
+        import os
+        if settings.ENVIRONMENT == "production":
+            expected = os.environ.get("METRICS_INTERNAL_TOKEN", "")
+            auth_header = request.headers.get("Authorization", "")
+            if not expected or auth_header != f"Bearer {expected}":
+                from fastapi.responses import JSONResponse as _JR
+                return _JR({"detail": "Forbidden"}, status_code=403)
         return metrics_endpoint()
 
     # 5. Health Check Probes

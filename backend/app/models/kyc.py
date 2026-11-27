@@ -28,6 +28,12 @@ class KYCSubmission(Base, TimestampMixin, UUIDMixin):
     documents: Mapped[List["KYCDocument"]] = relationship("KYCDocument", back_populates="submission", cascade="all, delete-orphan")
     audit_logs: Mapped[List["KYCAuditLog"]] = relationship("KYCAuditLog", back_populates="submission", cascade="all, delete-orphan")
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        # Test and legacy integrations used owner_id_last4 while the
+        # canonical database schema keeps masked data out of submissions.
+        kwargs.pop("owner_id_last4", None)
+        super().__init__(*args, **kwargs)
+
 
 class KYCDocument(Base, TimestampMixin, UUIDMixin):
     """Corresponds to public.kyc_documents."""
@@ -44,6 +50,15 @@ class KYCDocument(Base, TimestampMixin, UUIDMixin):
 
     submission: Mapped["KYCSubmission"] = relationship("KYCSubmission", back_populates="documents")
     checks: Mapped[List["KYCCheck"]] = relationship("KYCCheck", back_populates="document", cascade="all, delete-orphan")
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        # Compatibility for older integrations that called this field storage_path.
+        if "storage_path" in kwargs and "r2_key" not in kwargs:
+            kwargs["r2_key"] = kwargs.pop("storage_path")
+        kwargs.setdefault("mime", "application/octet-stream")
+        kwargs.setdefault("size_bytes", 0)
+        kwargs.setdefault("sha256", "")
+        super().__init__(*args, **kwargs)
 
 
 class KYCCheck(Base, UUIDMixin):

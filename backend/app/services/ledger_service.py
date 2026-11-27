@@ -551,6 +551,52 @@ class LedgerService:
         db.add_all(entries)
         await db.flush()
 
+        # Stage booking.refunded idempotently when booking context is available
+        if booking is not None or booking_id is not None:
+            try:
+                from app.notifications.events.base import DomainEvent
+                from app.notifications.outbox.publisher import OutboxPublisher
+
+                refund_user_id = getattr(booking, "user_id", None)
+                booking_reference = getattr(booking, "booking_reference", None)
+                if refund_user_id is None and booking_id is not None:
+                    b_res = await db.execute(
+                        select(Booking.user_id, Booking.booking_reference).where(Booking.id == booking_id).limit(1)
+                    )
+                    b_row = b_res.first()
+                    if b_row:
+                        refund_user_id, booking_reference = b_row
+
+                idem_key = f"refund:{booking_id}" if booking_id else f"refund_tx:{transaction_group}"
+                refund_event = DomainEvent(
+                    event_type="booking.refunded",
+                    aggregate_type="booking",
+                    aggregate_id=str(booking_id or transaction_group),
+                    actor_id=refund_user_id,
+                    priority=9,
+                    booking_id=booking_id,
+                    booking_reference=booking_reference,
+                    payment_id=payment_id,
+                    transaction_group=transaction_group,
+                    user_id=refund_user_id,
+                    refund_amount=float(Decimal(amount_paisa) / Decimal(100)),
+                    refund_amount_paisa=amount_paisa,
+                    currency=currency,
+                    category="booking",
+                    deep_link="/(tabs)/trips",
+                    headers={
+                        "source_service": "ledger_service",
+                        "causation_id": str(booking_id or transaction_group),
+                    },
+                )
+                await OutboxPublisher.publish_idempotent(
+                    db,
+                    refund_event,
+                    idempotency_key=idem_key,
+                )
+            except Exception as outbox_err:
+                logger.warning(f"Could not stage booking.refunded into outbox: {outbox_err}")
+
         logger.info(f"[Ledger] Recorded refund tx_group={transaction_group} amount={amount_paisa} paisa")
         return transaction_group, entries
 
@@ -597,8 +643,12 @@ class LedgerService:
 
         qualifying_payouts: List[Dict[str, Any]] = []
 
+        seen_agency_ids: set[uuid.UUID] = set()
         for acct in agency_accounts:
             agency_id = acct.owner_id
+            if agency_id in seen_agency_ids:
+                continue
+            seen_agency_ids.add(agency_id)
             # Zero-Trust Compliance Gate: Block payouts in the ledger service until verified_at is set
             agency = await db.get(Agency, agency_id)
             if not agency or not agency.verified_at:
@@ -637,10 +687,37 @@ class LedgerService:
                 reference=item["reference"],
                 status="draft",
             )
-            batch.payouts.append(payout)
             db.add(payout)
 
         await db.flush()
+
+        if qualifying_payouts:
+            try:
+                from app.notifications.events.agency import AgencyPayoutBatchProcessedEvent
+                from app.notifications.outbox.publisher import OutboxPublisher
+
+                batch_event = AgencyPayoutBatchProcessedEvent(
+                    batch_id=batch.id,
+                    actor_id=created_by,
+                    payout_count=len(qualifying_payouts),
+                    total_paisa=total_batch_paisa,
+                    total_bdt=float(Decimal(total_batch_paisa) / Decimal(100)),
+                    agency_ids=[str(item["agency_id"]) for item in qualifying_payouts],
+                    category="system",
+                    deep_link="/agency/payouts",
+                    headers={
+                        "source_service": "ledger_service",
+                        "causation_id": str(batch.id),
+                    },
+                )
+                await OutboxPublisher.publish_idempotent(
+                    db,
+                    batch_event,
+                    idempotency_key=f"payout_batch:{batch.id}",
+                )
+            except Exception as outbox_err:
+                logger.warning(f"Could not stage AgencyPayoutBatchProcessedEvent into outbox: {outbox_err}")
+
         logger.info(
             f"[Ledger] Created payout batch {batch.id}: count={len(qualifying_payouts)} "
             f"total={total_batch_paisa} paisa threshold={threshold}"

@@ -10,7 +10,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_db, require_admin, require_agency
+from app.api.deps import get_current_user, get_db, require_admin_permission, require_agency
 from app.core.exceptions import BadRequestError, PermissionDeniedError
 from app.schemas.common import StandardResponse
 from app.schemas.kyc import (
@@ -143,7 +143,7 @@ async def get_my_submission(
 )
 async def get_admin_kyc_queue(
     status_filter: Optional[List[str]] = Query(None, alias="status"),
-    current_user: CurrentUser = Depends(require_admin),
+    current_user: CurrentUser = Depends(require_admin_permission("agencies.view")),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -165,7 +165,7 @@ async def get_admin_kyc_queue(
 )
 async def get_admin_submission_detail(
     submission_id: uuid.UUID,
-    current_user: CurrentUser = Depends(require_admin),
+    current_user: CurrentUser = Depends(require_admin_permission("agencies.view")),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -193,7 +193,7 @@ async def get_admin_submission_detail(
 async def admin_approve_submission(
     submission_id: uuid.UUID,
     request: KYCAdminApproveRequest = KYCAdminApproveRequest(),
-    current_user: CurrentUser = Depends(require_admin),
+    current_user: CurrentUser = Depends(require_admin_permission("agencies.verify")),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -222,7 +222,7 @@ async def admin_approve_submission(
 async def admin_reject_submission(
     submission_id: uuid.UUID,
     request: KYCAdminRejectRequest,
-    current_user: CurrentUser = Depends(require_admin),
+    current_user: CurrentUser = Depends(require_admin_permission("agencies.verify")),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -252,7 +252,7 @@ async def admin_reject_submission(
 async def admin_request_changes_submission(
     submission_id: uuid.UUID,
     request: KYCAdminRequestChangesRequest,
-    current_user: CurrentUser = Depends(require_admin),
+    current_user: CurrentUser = Depends(require_admin_permission("agencies.verify")),
     db: AsyncSession = Depends(get_db),
 ):
     """

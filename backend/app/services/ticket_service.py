@@ -218,6 +218,39 @@ class TicketService:
                 new_tickets.append(ticket)
 
         await db.flush()
+
+        # Stage TicketIssuedEvent atomically once for newly issued tickets
+        if new_tickets:
+            try:
+                from app.notifications.events.booking import TicketIssuedEvent
+                from app.notifications.outbox.publisher import OutboxPublisher
+
+                issued_event = TicketIssuedEvent(
+                    ticket_id=new_tickets[0].id,
+                    booking_id=booking.id,
+                    booking_reference=booking.booking_reference,
+                    user_id=booking.user_id,
+                    actor_id=booking.user_id,
+                    ticket_count=len(new_tickets),
+                    ticket_ids=[str(t.id) for t in new_tickets],
+                    service_type=booking.product_type,
+                    destination=booking.destination_city,
+                    valid_from=valid_from.isoformat(),
+                    valid_to=valid_to.isoformat(),
+                    deep_link="/(tabs)/trips",
+                    headers={
+                        "source_service": "ticket_service",
+                        "causation_id": str(booking.id),
+                    },
+                )
+                await OutboxPublisher.publish_idempotent(
+                    db,
+                    issued_event,
+                    idempotency_key=f"ticket_issued:{booking.id}",
+                )
+            except Exception as outbox_err:
+                logger.warning(f"Could not stage TicketIssuedEvent into outbox: {outbox_err}")
+
         return new_tickets
 
     @staticmethod

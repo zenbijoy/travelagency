@@ -130,6 +130,30 @@ class BookingSagaOrchestrator:
             logger.warning(f"Saga partial failure on trip {booking_ref}. Executing compensation rollback.")
             # Record compensation note
             parent_booking.notes += " | Compensation: Some items failed reservation. Funds held in escrow pending traveler decision."
+            try:
+                from app.notifications.events.booking import BookingCancelledEvent
+                from app.notifications.outbox.publisher import OutboxPublisher
+
+                saga_cancel_event = BookingCancelledEvent(
+                    booking_id=parent_booking.id,
+                    booking_reference=booking_ref,
+                    user_id=user_id,
+                    cancellation_reason="Partial itinerary reservation failure; compensation rollback triggered",
+                    refund_amount=float(total_amount),
+                    cancellation_fee=0.0,
+                    deep_link="/(tabs)/trips",
+                    headers={
+                        "source_service": "booking_saga",
+                        "causation_id": idempotency_key,
+                    },
+                )
+                await OutboxPublisher.publish_idempotent(
+                    session,
+                    saga_cancel_event,
+                    idempotency_key=f"saga_cancelled:{parent_booking.id}",
+                )
+            except Exception as outbox_err:
+                logger.warning(f"Could not stage BookingCancelledEvent for saga failure: {outbox_err}")
             await session.commit()
             return {
                 "booking_reference": booking_ref,
@@ -142,6 +166,32 @@ class BookingSagaOrchestrator:
         # 7. Success: Confirm booking
         parent_booking.status = "confirmed"
         parent_booking.confirmed_at = now
+        try:
+            from app.notifications.events.booking import BookingConfirmedEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+
+            saga_confirmed_event = BookingConfirmedEvent(
+                booking_id=parent_booking.id,
+                booking_reference=booking_ref,
+                user_id=user_id,
+                customer_name="Valued Traveler",
+                product_type="itinerary",
+                destination=parent_booking.destination_city,
+                total_paid=float(total_amount),
+                currency="BDT",
+                deep_link="/(tabs)/trips",
+                headers={
+                    "source_service": "booking_saga",
+                    "causation_id": idempotency_key,
+                },
+            )
+            await OutboxPublisher.publish_idempotent(
+                session,
+                saga_confirmed_event,
+                idempotency_key=f"booking_confirmed:{parent_booking.id}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage BookingConfirmedEvent for saga: {outbox_err}")
         await session.commit()
 
         return {

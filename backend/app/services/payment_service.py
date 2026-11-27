@@ -165,15 +165,18 @@ class PaymentService:
         # Lock booking row for safe state transition
         locked_booking = await booking_repo.lock_booking_for_update(booking.id)
         now = datetime.now(timezone.utc)
+        transitioned_to_confirmed = locked_booking.status != BookingStatus.CONFIRMED.value
+        created_tickets = []
 
         # If already confirmed, ensure idempotent completion
-        if locked_booking.status != BookingStatus.CONFIRMED.value:
+        if transitioned_to_confirmed:
             locked_booking.status = BookingStatus.CONFIRMED.value
             locked_booking.confirmed_at = now
             locked_booking.flow_step = "voucher_issued"
 
             # Create or complete payment record
             payment_record = BookingPayment(
+                id=uuid.uuid4(),
                 booking_id=locked_booking.id,
                 payment_method=provider,
                 payment_status="completed",
@@ -222,7 +225,7 @@ class PaymentService:
 
             # Create offline-capable, tamper-proof signed e-tickets inside transaction
             from app.services.ticket_service import TicketService
-            await TicketService.create_tickets_for_booking(db, locked_booking)
+            created_tickets = await TicketService.create_tickets_for_booking(db, locked_booking)
 
         commission_amount: Optional[float] = None
         # Credit agency commission if booking was booked through a partner agency
@@ -256,6 +259,60 @@ class PaymentService:
             f"Awarded {points_to_award} loyalty points to user {locked_booking.user_id} "
             f"for booking {locked_booking.booking_reference}"
         )
+
+        # Stage PaymentSucceededEvent and BookingConfirmedEvent idempotently into transactional outbox
+        try:
+            from app.notifications.events.booking import BookingConfirmedEvent, PaymentSucceededEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+
+            if transitioned_to_confirmed:
+                loaded_passengers = locked_booking.__dict__.get("passengers") or []
+                customer_name = (
+                    f"{loaded_passengers[0].first_name} {loaded_passengers[0].last_name}"
+                    if loaded_passengers
+                    else "Valued Guest"
+                )
+                confirmed_event = BookingConfirmedEvent(
+                    booking_id=locked_booking.id,
+                    booking_reference=locked_booking.booking_reference,
+                    user_id=locked_booking.user_id,
+                    customer_name=customer_name,
+                    product_type=locked_booking.product_type,
+                    destination=locked_booking.destination_city,
+                    total_paid=float(locked_booking.final_price),
+                    currency=locked_booking.currency,
+                    start_date=str(locked_booking.start_date) if locked_booking.start_date else None,
+                    ticket_ids=[str(t.id) for t in created_tickets if hasattr(t, "id")],
+                    headers={"source_service": "payment_service", "causation_id": transaction_id},
+                )
+                await OutboxPublisher.publish_idempotent(
+                    db,
+                    confirmed_event,
+                    idempotency_key=f"booking_confirmed:{locked_booking.id}",
+                )
+
+            succeeded_event = PaymentSucceededEvent(
+                payment_id=(
+                    payment_record.id
+                    if "payment_record" in locals() and getattr(payment_record, "id", None) is not None
+                    else uuid.uuid4()
+                ),
+                booking_id=locked_booking.id,
+                user_id=locked_booking.user_id,
+                amount=float(locked_booking.final_price),
+                currency=locked_booking.currency,
+                gateway=provider,
+                gateway_transaction_id=transaction_id,
+                invoice_url=f"/invoices/{transaction_id}",
+                headers={"source_service": "payment_service", "causation_id": transaction_id},
+            )
+            await OutboxPublisher.publish_idempotent(
+                db,
+                succeeded_event,
+                idempotency_key=f"payment_succeeded:{locked_booking.id}:{transaction_id}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage PaymentSucceededEvent into outbox: {outbox_err}")
 
         await db.commit()
         await db.refresh(locked_booking)
@@ -311,6 +368,51 @@ class PaymentService:
             logger.warning(f"Background task dispatch non-fatal failure: {task_err}")
 
         return locked_booking, commission_amount, points_to_award
+
+    @staticmethod
+    async def process_payment_confirmation(
+        db: AsyncSession,
+        provider: str,
+        transaction_id: str,
+        booking_reference: Optional[str] = None,
+        amount_paid: Optional[float] = None,
+        gateway_payload: Optional[Dict[str, Any]] = None,
+        is_success: bool = True,
+        failure_reason: Optional[str] = None,
+        user_id: Optional[uuid.UUID] = None,
+        booking_id: Optional[uuid.UUID] = None,
+    ) -> Tuple[Optional[Booking], Optional[float], Optional[float]]:
+        """
+        Processes payment confirmation or failure, staging the appropriate domain event (PaymentSucceededEvent or PaymentFailedEvent)
+        into the transactional outbox table.
+        """
+        payload = gateway_payload or {}
+        if is_success:
+            return await PaymentService._execute_atomic_payment_confirmation(
+                db=db,
+                provider=provider,
+                transaction_id=transaction_id,
+                booking_reference=booking_reference,
+                amount_paid=amount_paid,
+                gateway_payload=payload,
+            )
+        else:
+            # Payment failed: stage PaymentFailedEvent into transactional outbox
+            try:
+                from app.notifications.events.booking import PaymentFailedEvent
+                from app.notifications.outbox.publisher import OutboxPublisher
+                failed_event = PaymentFailedEvent(
+                    payment_id=uuid.uuid4(),
+                    booking_id=booking_id or uuid.uuid4(),
+                    user_id=user_id or uuid.uuid4(),
+                    amount=amount_paid or 0.0,
+                    failure_reason=failure_reason or "Payment failed or declined by gateway",
+                    retry_url=f"/checkout/{booking_reference or ''}",
+                )
+                await OutboxPublisher.publish(db, failed_event)
+            except Exception as outbox_err:
+                logger.warning(f"Could not stage PaymentFailedEvent into outbox: {outbox_err}")
+            return None, None, None
 
     @staticmethod
     async def process_bkash_webhook(

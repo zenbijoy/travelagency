@@ -28,7 +28,9 @@ class BookingRepository(BaseRepository[Booking]):
                 selectinload(Booking.items),
                 selectinload(Booking.passengers),
                 selectinload(Booking.payments),
+                selectinload(Booking.events),
             )
+            .execution_options(populate_existing=True)
         )
         res = await self.db.execute(stmt)
         return res.scalar_one_or_none()
@@ -42,6 +44,7 @@ class BookingRepository(BaseRepository[Booking]):
                 selectinload(Booking.items),
                 selectinload(Booking.passengers),
                 selectinload(Booking.payments),
+                selectinload(Booking.events),
             )
         )
         res = await self.db.execute(stmt)
@@ -60,6 +63,7 @@ class BookingRepository(BaseRepository[Booking]):
                 selectinload(Booking.items),
                 selectinload(Booking.passengers),
                 selectinload(Booking.payments),
+                selectinload(Booking.events),
             )
         )
         res = await self.db.execute(stmt)

@@ -217,6 +217,13 @@ async def approve_payout_batch(
     if batch.status != "draft":
         raise BadRequestError(f"Cannot approve batch in '{batch.status}' status (must be 'draft')")
 
+    # Maker-Checker: batch creator cannot approve their own batch
+    if batch.created_by and batch.created_by == current_user.id:
+        raise BadRequestError(
+            "Maker-checker violation: the admin who created this payout batch cannot approve it. "
+            "A different admin must approve."
+        )
+
     # Zero-Trust KYC Gate: Verify every agency in the payout batch has verified_at set
     for p in batch.payouts:
         agency = await db.get(Agency, p.agency_id)
@@ -311,9 +318,14 @@ async def export_batch_csv(
         for p in batch.payouts:
             agency = agencies_map.get(p.agency_id)
             bank_acct = bank_map.get(p.agency_id)
-            acct_num = bank_acct.account_number if bank_acct else "0000000000"
-            bank_name = bank_acct.bank_name if bank_acct else "City Bank Limited"
-            routing = bank_acct.routing_number if bank_acct and bank_acct.routing_number else "225271891"
+            if not bank_acct:
+                raise BadRequestError(
+                    f"Agency '{agency.name if agency else p.agency_id}' has no primary bank account on file. "
+                    "Export is blocked until all agencies in this batch have verified bank details."
+                )
+            acct_num = bank_acct.account_number
+            bank_name = bank_acct.bank_name
+            routing = bank_acct.routing_number if bank_acct.routing_number else "225271891"
             agency_name = agency.name if agency else "Partner Agency"
             amount_bdt = f"{p.amount_paisa // 100}.{p.amount_paisa % 100:02d}"
             ref = p.reference or f"PAY-{p.id.hex[:8].upper()}"

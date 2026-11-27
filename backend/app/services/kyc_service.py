@@ -210,6 +210,24 @@ class KYCService:
         # 6. Update agency verification_status to pending
         agency.verification_status = "pending"
         await db.flush()
+
+        # Stage AgencyKycSubmittedEvent into transactional outbox
+        try:
+            from app.notifications.events.agency import AgencyKycSubmittedEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+            doc_urls = [d.r2_key for d in created_or_updated_docs if hasattr(d, "r2_key") and d.r2_key]
+            trade_licence = getattr(agency, "trade_licence_number", None) or "PENDING"
+            kyc_event = AgencyKycSubmittedEvent(
+                agency_id=agency.id,
+                agency_name=agency.name,
+                trade_license_number=trade_licence,
+                submitted_by=user_id,
+                document_urls=doc_urls,
+            )
+            await OutboxPublisher.publish(db, kyc_event)
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage AgencyKycSubmittedEvent into outbox: {outbox_err}")
+
         await db.commit()
 
         # 7. Asynchronously trigger Celery vision analysis tasks
@@ -442,11 +460,49 @@ class KYCService:
         )
         db.add(audit_entry)
 
+        # Stage AgencyKycApprovedEvent into transactional outbox
+        try:
+            from app.notifications.events.agency import AgencyKycApprovedEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+            approved_event = AgencyKycApprovedEvent(
+                agency_id=agency.id,
+                agency_name=agency.name,
+                user_id=getattr(agency, "owner_user_id", None),
+                actor_id=getattr(agency, "owner_user_id", None),
+                reviewed_by=admin_user.id,
+                tier=getattr(agency, "tier", "Gold"),
+                credit_limit=getattr(agency, "credit_limit", 500000.00),
+                headers={"source_service": "kyc_service", "causation_id": str(submission.id)},
+            )
+            await OutboxPublisher.publish_idempotent(
+                db,
+                approved_event,
+                idempotency_key=f"kyc_approved:{submission.id}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage AgencyKycApprovedEvent into outbox: {outbox_err}")
+
         await db.commit()
         logger.info(
             f"KYC submission {submission_id} approved for agency '{agency.name}' by admin {admin_user.id}"
         )
         return await KYCService.get_submission_detail_by_id(db, submission_id)
+
+    @staticmethod
+    async def review_kyc(
+        db: AsyncSession,
+        submission_id: uuid.UUID,
+        admin_user: Any,
+        request: Any,
+        approved: bool = True,
+    ) -> KYCSubmissionResponse:
+        """
+        Human reviewer action: review KYC submission and stage AgencyKycApprovedEvent into outbox if approved.
+        """
+        if approved:
+            return await KYCService.admin_approve(db, submission_id, admin_user, request)
+        else:
+            return await KYCService.admin_reject(db, submission_id, admin_user, request)
 
     @staticmethod
     async def admin_reject(
@@ -500,6 +556,37 @@ class KYCService:
         )
         db.add(audit_entry)
 
+        try:
+            from app.notifications.events.base import DomainEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+
+            rejected_event = DomainEvent(
+                event_type="agency.kyc.rejected",
+                aggregate_type="agency",
+                aggregate_id=str(agency.id),
+                actor_id=getattr(agency, "owner_user_id", None) or admin_user.id,
+                priority=8,
+                agency_id=agency.id,
+                agency_name=agency.name,
+                user_id=getattr(agency, "owner_user_id", None),
+                submission_id=submission.id,
+                reviewed_by=admin_user.id,
+                reason=reason,
+                category="system",
+                deep_link="/agency/kyc",
+                headers={
+                    "source_service": "kyc_service",
+                    "causation_id": str(submission.id),
+                },
+            )
+            await OutboxPublisher.publish_idempotent(
+                db,
+                rejected_event,
+                idempotency_key=f"kyc_rejected:{submission.id}:{now.isoformat()}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage agency.kyc.rejected into outbox: {outbox_err}")
+
         await db.commit()
         logger.info(
             f"KYC submission {submission_id} rejected for agency '{agency.name}' by admin {admin_user.id}: {reason}"
@@ -549,6 +636,39 @@ class KYCService:
             note=f"Changes requested: {reason}",
         )
         db.add(audit_entry)
+
+        try:
+            from app.notifications.events.base import DomainEvent
+            from app.notifications.outbox.publisher import OutboxPublisher
+
+            agency = await db.get(Agency, submission.agency_id)
+            owner_user_id = getattr(agency, "owner_user_id", None) if agency else None
+            changes_event = DomainEvent(
+                event_type="agency.kyc.changes_requested",
+                aggregate_type="agency",
+                aggregate_id=str(submission.agency_id),
+                actor_id=owner_user_id or admin_user.id,
+                priority=7,
+                agency_id=submission.agency_id,
+                agency_name=getattr(agency, "name", None),
+                user_id=owner_user_id,
+                submission_id=submission.id,
+                reviewed_by=admin_user.id,
+                instructions=reason,
+                category="system",
+                deep_link="/agency/kyc",
+                headers={
+                    "source_service": "kyc_service",
+                    "causation_id": str(submission.id),
+                },
+            )
+            await OutboxPublisher.publish_idempotent(
+                db,
+                changes_event,
+                idempotency_key=f"kyc_changes:{submission.id}:{now.isoformat()}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage agency.kyc.changes_requested into outbox: {outbox_err}")
 
         await db.commit()
         logger.info(

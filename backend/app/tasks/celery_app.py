@@ -19,6 +19,7 @@ celery_app = Celery(
         "app.tasks.price_alert_tasks",
         "app.tasks.ledger_tasks",
         "app.tasks.kyc_tasks",
+        "app.tasks.travel_automation_tasks",
     ],
 )
 
@@ -77,6 +78,30 @@ celery_app.conf.update(
         "daily-check-expiring-kyc-documents": {
             "task": "check_expiring_kyc_documents_task",
             "schedule": crontab(hour=3, minute=0),
+            "options": {"queue": "default"},
+        },
+        # 8. Trip preparation reminders (7d/3d/1d before departure, daily at 02:30 UTC)
+        "daily-trip-preparation-reminders": {
+            "task": "detect_trip_preparation_reminders_task",
+            "schedule": crontab(hour=2, minute=30),
+            "options": {"queue": "default"},
+        },
+        # 9. Hotel check-in and check-out reminders (daily at 03:30 UTC)
+        "daily-hotel-checkin-checkout-reminders": {
+            "task": "detect_hotel_checkin_checkout_reminders_task",
+            "schedule": crontab(hour=3, minute=30),
+            "options": {"queue": "default"},
+        },
+        # 10. Incomplete booking recovery scan with cooldown & suppression (hourly)
+        "hourly-incomplete-booking-recovery": {
+            "task": "detect_incomplete_booking_recovery_task",
+            "schedule": crontab(minute=45),
+            "options": {"queue": "default"},
+        },
+        # 11. Disruption monitoring & refund state-change sweep (every 15 minutes)
+        "periodic-disruption-and-refund-alerts": {
+            "task": "detect_disruption_and_refund_alerts_task",
+            "schedule": crontab(minute="*/15"),
             "options": {"queue": "default"},
         },
     },

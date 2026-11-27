@@ -116,6 +116,33 @@ def nightly_ledger_integrity_check_task() -> Dict[str, Any]:
                     f"[ALERT: LEDGER IMBALANCE DETECTED] Discrepancies found: "
                     f"{audit_result['imbalances']}"
                 )
+                try:
+                    from datetime import datetime, timezone
+                    from app.notifications.events.base import DomainEvent
+                    from app.notifications.outbox.publisher import OutboxPublisher
+
+                    today_str = datetime.now(timezone.utc).date().isoformat()
+                    alert_event = DomainEvent(
+                        event_type="system.ledger.imbalance_detected",
+                        aggregate_type="ledger",
+                        aggregate_id=today_str,
+                        priority=10,
+                        imbalance_count=len(audit_result.get("imbalances", [])),
+                        category="system",
+                        headers={
+                            "source_service": "ledger_tasks",
+                            "causation_id": today_str,
+                        },
+                    )
+                    _, created = await OutboxPublisher.publish_idempotent(
+                        session,
+                        alert_event,
+                        idempotency_key=f"ledger_imbalance:{today_str}:{len(audit_result.get('imbalances', []))}",
+                    )
+                    if created:
+                        await session.commit()
+                except Exception as outbox_err:
+                    logger.warning(f"Could not stage ledger imbalance event: {outbox_err}")
             else:
                 logger.info("[AUDIT PASSED] All ledger transaction groups balanced perfectly at zero.")
             return audit_result

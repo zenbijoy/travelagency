@@ -11,7 +11,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_db, require_admin
+from app.api.deps import get_current_user, get_db, require_admin_permission
 from app.core.exceptions import BadRequestError, NotFoundError, PermissionDeniedError
 from app.schemas.common import PaginatedResponse, StandardResponse
 from app.schemas.marketplace import (
@@ -411,7 +411,7 @@ async def submit_verified_review(
     status_code=status.HTTP_200_OK,
 )
 async def list_pending_providers(
-    current_user: CurrentUser = Depends(require_admin),
+    current_user: CurrentUser = Depends(require_admin_permission("marketplace.view")),
     db: AsyncSession = Depends(get_db),
 ):
     """List all provider applications pending admin document verification."""
@@ -428,7 +428,7 @@ async def list_pending_providers(
 async def admin_approve_provider(
     provider_id: uuid.UUID,
     request: AdminProviderApproveRequest,
-    current_user: CurrentUser = Depends(require_admin),
+    current_user: CurrentUser = Depends(require_admin_permission("marketplace.verify")),
     db: AsyncSession = Depends(get_db),
 ):
     """Approve provider verification and grant verified badge."""
@@ -450,7 +450,7 @@ async def admin_approve_provider(
 async def admin_reject_provider(
     provider_id: uuid.UUID,
     request: AdminProviderRejectRequest,
-    current_user: CurrentUser = Depends(require_admin),
+    current_user: CurrentUser = Depends(require_admin_permission("marketplace.verify")),
     db: AsyncSession = Depends(get_db),
 ):
     """Reject provider verification with documented reason."""

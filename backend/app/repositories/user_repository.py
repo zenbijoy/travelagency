@@ -30,11 +30,15 @@ class UserRepository(BaseRepository[UserProfile]):
         res = await self.db.execute(stmt)
         return res.scalar_one_or_none()
 
+    async def get_active_admin(self, user_id: uuid.UUID) -> Optional[AdminUser]:
+        """Retrieve active admin_users record including granular role and permissions."""
+        stmt = select(AdminUser).where(AdminUser.user_id == user_id, AdminUser.status == "active")
+        res = await self.db.execute(stmt)
+        return res.scalar_one_or_none()
+
     async def is_admin(self, user_id: uuid.UUID) -> bool:
         """Check if user exists in admin_users with active status."""
-        stmt = select(AdminUser.id).where(AdminUser.user_id == user_id, AdminUser.status == "active")
-        res = await self.db.execute(stmt)
-        return res.scalar_one_or_none() is not None
+        return (await self.get_active_admin(user_id)) is not None
 
     async def get_user_agency_id(self, user_id: uuid.UUID) -> Optional[uuid.UUID]:
         """Determine if user is an agency owner or active team member."""

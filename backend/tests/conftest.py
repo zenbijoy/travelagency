@@ -10,6 +10,7 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 # Set testing environment variables before importing app
 os.environ["ENVIRONMENT"] = "testing"
@@ -32,10 +33,11 @@ from app.tasks.celery_app import celery_app
 # Enable eager task execution during tests so tasks run synchronously without connecting to an external Redis broker
 celery_app.conf.update(task_always_eager=True, task_eager_propagates=True)
 
-# Test Async SQLite Engine
+# Test Async SQLite Engine with StaticPool to retain single in-memory database
 test_engine = create_async_engine(
     "sqlite+aiosqlite:///:memory:",
     connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 
 TestSessionLocal = async_sessionmaker(
@@ -47,7 +49,7 @@ TestSessionLocal = async_sessionmaker(
 )
 
 
-@pytest_asyncio.fixture(scope="function", autouse=True)
+@pytest_asyncio.fixture(scope="function")
 async def init_test_db():
     """Create all database tables in memory for testing."""
     async with test_engine.begin() as conn:
@@ -58,7 +60,7 @@ async def init_test_db():
 
 
 @pytest_asyncio.fixture
-async def db_session() -> AsyncGenerator[AsyncSession, None]:
+async def db_session(init_test_db) -> AsyncGenerator[AsyncSession, None]:
     """Provide isolated async session per test."""
     async with TestSessionLocal() as session:
         yield session

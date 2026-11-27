@@ -93,7 +93,7 @@ async def get_booking_by_id(
 
     # Authorization Check
     is_owner = booking.user_id == current_user.id
-    is_admin = current_user.role == UserRole.ADMIN or UserRole.ADMIN.value in current_user.roles
+    is_admin = current_user.has_admin_permission("bookings.view")
     is_assigned_agency = booking.agency_id and booking.agency_id == current_user.agency_id
 
     if not (is_owner or is_admin or is_assigned_agency):
@@ -123,7 +123,7 @@ async def download_booking_ticket(
         raise NotFoundError("Booking", booking_id)
 
     is_owner = booking.user_id == current_user.id
-    is_admin = current_user.role == UserRole.ADMIN or UserRole.ADMIN.value in current_user.roles
+    is_admin = current_user.has_admin_permission("bookings.view")
     is_assigned_agency = booking.agency_id and booking.agency_id == current_user.agency_id
 
     if not (is_owner or is_admin or is_assigned_agency):
@@ -175,12 +175,12 @@ async def update_booking_status(
         raise NotFoundError("Booking", booking_id)
 
     is_owner = booking.user_id == current_user.id
-    is_admin = current_user.role == UserRole.ADMIN or UserRole.ADMIN.value in current_user.roles
+    is_admin = current_user.has_admin_permission("bookings.modify")
 
     if not (is_owner or is_admin):
         raise PermissionDeniedError("Only the booking owner or an administrator can update booking status")
 
-    # Only admin can request administrative override
+    # Only admin with bookings.modify permission can request administrative override
     if request.admin_override and not is_admin:
         request.admin_override = False
 
@@ -229,7 +229,7 @@ async def scan_booking_ticket(
     if not booking:
         raise NotFoundError("Booking", booking_id)
 
-    is_admin = current_user.role == UserRole.ADMIN or UserRole.ADMIN.value in current_user.roles
+    is_admin = current_user.has_admin_permission("bookings.modify")
     is_agency = booking.agency_id and (booking.agency_id == current_user.agency_id or current_user.role == UserRole.AGENCY)
     is_staff = current_user.role == UserRole.HOTEL_STAFF or UserRole.HOTEL_STAFF.value in current_user.roles
     if not (is_admin or is_agency or is_staff):

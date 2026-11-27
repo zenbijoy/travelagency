@@ -22,6 +22,7 @@ from app.models.booking import Booking, BookingPayment
 from app.models.ledger import LedgerAccount, LedgerEntry, Payout, PayoutBatch
 from app.models.payment import Payment
 from app.models.user import AccountProfile, AdminUser, Agency, UserProfile
+from app.models.agency import AgencyBankAccount
 from app.services.ledger_service import (
     LedgerService,
     format_paisa_to_bdt,
@@ -477,6 +478,16 @@ async def test_admin_payout_batch_lifecycle_and_csv_export(
     )
     db_session.add(agency)
 
+    # Add primary bank account for the agency (required for CSV export)
+    bank_account = AgencyBankAccount(
+        agency_id=agency.id,
+        bank_name="Dutch Bangla Bank",
+        account_number="1041213456789",
+        routing_number="090270019",
+        is_primary=True,
+    )
+    db_session.add(bank_account)
+
     # Give agency 200,000 paisa available
     acct = await LedgerService.get_or_create_account(
         db_session, owner_type="agency", owner_id=agency.id
@@ -506,10 +517,26 @@ async def test_admin_payout_batch_lifecycle_and_csv_export(
     assert batch_data["status"] == "draft"
     assert batch_data["total_paisa"] == 200000
 
-    # 2. Approve batch
+    # 2. Approve batch — maker-checker: a *different* admin must approve
+    approver_id = uuid.uuid4()
+    approver_profile = AccountProfile(
+        id=approver_id,
+        display_name="Finance Approver",
+        role="admin",
+        status="active",
+    )
+    approver_user = AdminUser(
+        user_id=approver_id,
+        role="finance_admin",
+        status="active",
+    )
+    db_session.add_all([approver_profile, approver_user])
+    await db_session.commit()
+    jwt_approver = make_test_jwt(approver_id, email="approver@shopnojatra.com", role="admin")
+
     approve_resp = await client.post(
         f"/api/v1/admin/payouts/batches/{batch_id}/approve",
-        headers={"Authorization": f"Bearer {jwt_admin}"},
+        headers={"Authorization": f"Bearer {jwt_approver}"},
     )
     assert approve_resp.status_code == 200
     assert approve_resp.json()["data"]["status"] == "approved"

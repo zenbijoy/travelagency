@@ -196,5 +196,50 @@ class DisruptionEngineService:
         )
         session.add(timeline_entry)
 
+        # 9. Stage verified disruption event atomically into transactional outbox
+        try:
+            from app.notifications.events.travel_product import (
+                FlightScheduleChangedEvent,
+                TravelDisruptionDetectedEvent,
+            )
+            from app.notifications.outbox.publisher import OutboxPublisher
+
+            event_kwargs = dict(
+                disruption_id=new_event.id,
+                monitor_id=monitor.id,
+                booking_id=monitor.booking_id,
+                user_id=monitor.user_id,
+                actor_id=monitor.user_id,
+                service_type=service_type,
+                service_number=monitor.service_number,
+                origin=monitor.origin,
+                destination=monitor.destination,
+                delay_minutes=delay_minutes,
+                severity=severity,
+                status=current_status,
+                impact_summary=impact_analysis.summary,
+                dedup_hash=dedup_hash,
+                deep_link="/(tabs)/trips",
+                headers={
+                    "source_service": "disruption_engine",
+                    "causation_id": dedup_hash,
+                },
+            )
+            if service_type == "flight":
+                outbox_event = FlightScheduleChangedEvent(
+                    flight_id=monitor.service_number,
+                    **event_kwargs,
+                )
+            else:
+                outbox_event = TravelDisruptionDetectedEvent(**event_kwargs)
+
+            await OutboxPublisher.publish_idempotent(
+                session,
+                outbox_event,
+                idempotency_key=f"disruption:{dedup_hash}",
+            )
+        except Exception as outbox_err:
+            logger.warning(f"Could not stage disruption event into outbox: {outbox_err}")
+
         await session.commit()
         return new_event

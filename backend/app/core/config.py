@@ -239,9 +239,23 @@ class Settings(BaseSettings):
                 ("STRIPE_WEBHOOK_SECRET", self.STRIPE_WEBHOOK_SECRET),
                 ("CARD_WEBHOOK_SECRET", self.CARD_WEBHOOK_SECRET),
             ]
+            configured_webhook_secrets = []
             for name, secret in webhook_secrets:
-                if not secret or secret in insecure_secrets:
-                    violations.append(f"{name} must be set to a private HMAC secret in production (predictable defaults expose HMAC validation to forgery).")
+                normalized_secret = (secret or "").strip()
+                if len(normalized_secret) < 32 or normalized_secret in insecure_secrets:
+                    violations.append(
+                        f"{name} must be a private HMAC secret of at least 32 characters in production."
+                    )
+                elif normalized_secret:
+                    configured_webhook_secrets.append((name, normalized_secret))
+
+            seen_webhook_secrets = set()
+            for name, secret in configured_webhook_secrets:
+                if secret in seen_webhook_secrets:
+                    violations.append(
+                        f"{name} must use a distinct secret from the other payment providers."
+                    )
+                seen_webhook_secrets.add(secret)
 
             if "*" in self.ALLOWED_ORIGINS:
                 violations.append("ALLOWED_ORIGINS cannot contain wildcard '*' in production.")
