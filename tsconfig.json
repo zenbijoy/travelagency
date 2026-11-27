@@ -12,6 +12,36 @@
       ],
       "@shopnojatra/shared/*": [
         "packages/shared/src/*"
+      ],
+      "@shopnojatra/design-tokens": [
+        "packages/design-tokens/src/index.ts"
+      ],
+      "@shopnojatra/design-tokens/*": [
+        "packages/design-tokens/src/*"
+      ],
+      "@shopnojatra/web-config": [
+        "packages/web-config/src/index.ts"
+      ],
+      "@shopnojatra/web-config/*": [
+        "packages/web-config/*"
+      ],
+      "@shopnojatra/validation": [
+        "packages/validation/src/index.ts"
+      ],
+      "@shopnojatra/validation/*": [
+        "packages/validation/src/*"
+      ],
+      "@shopnojatra/api-client": [
+        "packages/api-client/src/index.ts"
+      ],
+      "@shopnojatra/api-client/*": [
+        "packages/api-client/src/*"
+      ],
+      "@shopnojatra/design-system": [
+        "packages/design-system/src/index.ts"
+      ],
+      "@shopnojatra/design-system/*": [
+        "packages/design-system/src/*"
       ]
     }
   },

@@ -10,7 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.exceptions import AuthenticationError, PermissionDeniedError
+from app.core.exceptions import AuthenticationError, BadRequestError, PermissionDeniedError
 from app.core.redis import get_redis
 from app.core.security import decode_supabase_jwt
 from app.repositories.user_repository import UserRepository

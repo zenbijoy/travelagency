@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.flight import Airline, Airport, Flight, FlightSeat
 from app.models.hotel import Hotel, HotelRoom
+from app.models.tenant import Tenant, TenantMembership
 from tests.conftest import make_test_jwt
 
 
@@ -21,6 +22,21 @@ async def test_atomic_booking_creation_and_state_transition(
     """Create atomic booking with hotel room and transition through state machine."""
     user_id = uuid.uuid4()
     token = make_test_jwt(user_id)
+
+    tenant = Tenant(
+        id=uuid.uuid4(),
+        name="Test Agency",
+        slug=f"test-agency-{uuid.uuid4().hex[:8]}",
+        status="active",
+    )
+    membership = TenantMembership(
+        id=uuid.uuid4(),
+        tenant_id=tenant.id,
+        user_id=user_id,
+        role="owner",
+        status="active",
+    )
+    db_session.add_all([tenant, membership])
 
     hotel = Hotel(
         id=uuid.uuid4(),
@@ -104,6 +120,28 @@ async def test_flight_seat_double_booking_prevention(
     user2 = uuid.uuid4()
     token1 = make_test_jwt(user1)
     token2 = make_test_jwt(user2)
+
+    tenant = Tenant(
+        id=uuid.uuid4(),
+        name="Flight Agency",
+        slug=f"flight-agency-{uuid.uuid4().hex[:8]}",
+        status="active",
+    )
+    m1 = TenantMembership(
+        id=uuid.uuid4(),
+        tenant_id=tenant.id,
+        user_id=user1,
+        role="owner",
+        status="active",
+    )
+    m2 = TenantMembership(
+        id=uuid.uuid4(),
+        tenant_id=tenant.id,
+        user_id=user2,
+        role="member",
+        status="active",
+    )
+    db_session.add_all([tenant, m1, m2])
 
     airline = Airline(id=uuid.uuid4(), code="VQ", name="Novoair")
     origin = Airport(id=uuid.uuid4(), code="DAC", name="Dhaka", city="Dhaka")

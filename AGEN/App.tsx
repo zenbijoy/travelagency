@@ -330,11 +330,23 @@ function DashboardTabNavigator() {
           }
 
           return (
-            <Ionicons
-              name={(focused ? iconName : `${iconName}-outline`) as any}
-              size={size}
-              color={color}
-            />
+            <View
+              style={{
+                minWidth: 48,
+                minHeight: 30,
+                paddingHorizontal: 10,
+                borderRadius: 15,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: focused ? `${COLORS.primary}26` : "transparent",
+              }}
+            >
+              <Ionicons
+                name={(focused ? iconName : `${iconName}-outline`) as any}
+                size={size}
+                color={color}
+              />
+            </View>
           );
         },
         tabBarActiveTintColor: COLORS.primary,

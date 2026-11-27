@@ -3,10 +3,12 @@ packages:
   - "AGEN"
   - "hotel"
   - "rider"
-  - "packages/shared"
+  - "packages/*"
+  - "apps/*"
 allowBuilds:
   '@firebase/util': true
   protobufjs: true
+  esbuild: true
 permissions:
   dotenv:
     skills: true

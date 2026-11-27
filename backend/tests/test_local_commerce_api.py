@@ -406,6 +406,17 @@ async def test_fulfillment_delivery_escrow_release_and_verified_review(client: A
         headers=rider_headers,
     )
     rider_id = res_rp.json()["id"]
+    res_veh = await client.post(
+        "/api/v1/rides/riders/vehicles",
+        json={
+            "vehicle_mode": "bike",
+            "make_model": "Yamaha FZ-S V3",
+            "color": "Matte Black",
+            "plate_number": "DHAKA METRO-HA-11-2233",
+        },
+        headers=rider_headers,
+    )
+    assert res_veh.status_code == 201
     await client.post(
         f"/api/v1/rides/admin/riders/{rider_id}/verify",
         json={"kyc_status": "verified", "brta_verified": True},

@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   TextInput,
   Animated,
-  Image,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -53,6 +53,8 @@ export default function BookingsScreen({ navigation }: Props) {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -157,6 +159,7 @@ export default function BookingsScreen({ navigation }: Props) {
 
   const loadBookings = useCallback(async () => {
     try {
+      setError(null);
       let targetAgencyId = user?.agency?.id;
       if (!targetAgencyId) {
         const { data: defaultAgency } = await supabase
@@ -200,19 +203,17 @@ export default function BookingsScreen({ navigation }: Props) {
       );
     } catch (err) {
       console.warn("Failed to load agency bookings:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load bookings.",
+      );
+    } finally {
+      setLoading(false);
     }
   }, [user?.agency?.id]);
 
   useEffect(() => {
     loadBookings();
   }, [loadBookings]);
-
-  const stats = {
-    revenue: bookings.reduce((acc, curr) => acc + curr.amount, 0),
-    count: bookings.length,
-    pending: bookings.filter((b) => b.status === "pending").length,
-    new: bookings.filter((b) => b.status === "confirmed").length,
-  };
 
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 80],
@@ -333,34 +334,6 @@ export default function BookingsScreen({ navigation }: Props) {
               </Text>
             </TouchableOpacity>
           ))}
-          {/* Floating Bulk Actions Bar */}
-        {selectedIds.length > 0 && (
-          <View style={styles.floatingBulkBar}>
-            <View style={styles.bulkInfo}>
-              <Text style={styles.bulkCountText}>{selectedIds.length} Selected</Text>
-            </View>
-            <TouchableOpacity
-              style={[styles.bulkActionBtn, { backgroundColor: "#10B981" }]}
-              onPress={() => handleBulkStatusChange("confirmed")}
-            >
-              <MaterialCommunityIcons name="check-all" size={16} color="#FFFFFF" />
-              <Text style={styles.bulkActionBtnText}>Confirm</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.bulkActionBtn, { backgroundColor: "#EF4444" }]}
-              onPress={() => handleBulkStatusChange("cancelled")}
-            >
-              <MaterialCommunityIcons name="close" size={16} color="#FFFFFF" />
-              <Text style={styles.bulkActionBtnText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.bulkCloseBtn}
-              onPress={() => setSelectedIds([])}
-            >
-              <MaterialCommunityIcons name="close-circle-outline" size={20} color="#94A3B8" />
-            </TouchableOpacity>
-          </View>
-        )}
       </Animated.ScrollView>
 
         <View
@@ -484,7 +457,7 @@ export default function BookingsScreen({ navigation }: Props) {
 
                     <View style={styles.bookingFooter}>
                       <Text style={styles.bookingAmount}>
-                        ${booking.amount.toLocaleString()}
+                        ৳ {booking.amount.toLocaleString("en-IN")}
                       </Text>
                       <View style={styles.actions}>
                         <TouchableOpacity style={styles.actionBtn}>
@@ -574,7 +547,7 @@ export default function BookingsScreen({ navigation }: Props) {
                         </View>
                         <Text style={[styles.tableCellText, { width: 60 }]}>{b.guests}</Text>
                         <Text style={[styles.tableCellText, styles.tableAmountText, { width: 80 }]}>
-                          ${b.amount.toLocaleString()}
+                          ৳ {b.amount.toLocaleString("en-IN")}
                         </Text>
                       </TouchableOpacity>
                     );
@@ -627,6 +600,22 @@ export default function BookingsScreen({ navigation }: Props) {
           </View>
         )}
       </Animated.ScrollView>
+
+      {loading && (
+        <View style={styles.stateOverlay}>
+          <ActivityIndicator size="large" color={UI_COLORS.brandPrimary} />
+          <Text style={styles.stateOverlayText}>Loading bookings…</Text>
+        </View>
+      )}
+      {!loading && error ? (
+        <View style={styles.stateOverlay}>
+          <MaterialCommunityIcons name="alert-circle-outline" size={40} color={UI_COLORS.brandTextMuted} />
+          <Text style={styles.stateOverlayText}>{error}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={loadBookings}>
+            <Text style={styles.retryBtnText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -1031,5 +1020,31 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 13,
     fontWeight: "600",
-  }
+  },
+  stateOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: UI_COLORS.brandDark,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    gap: 12,
+    zIndex: 50,
+  },
+  stateOverlayText: {
+    color: UI_COLORS.brandTextMuted,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  retryBtn: {
+    marginTop: 8,
+    backgroundColor: UI_COLORS.brandPrimary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  retryBtnText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "700",
+  },
 });

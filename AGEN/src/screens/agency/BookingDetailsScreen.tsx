@@ -1,4 +1,9 @@
-import React, { useState } from "react";
+/**
+ * Booking Details Screen — real data, light SaaS design system.
+ * Loads a single booking via the agency service layer and persists status /
+ * notes changes. No fabricated demo data.
+ */
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,19 +12,28 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { COLORS, TYPOGRAPHY } from "../../App";
-import { Card, Button, Badge, ListItem } from "../ui/UIComponents";
-import { agencyBookingsService } from "../../services/agencyService";
+
 import { useAuth } from "../../hooks/useAuth";
+import {
+  agencyBookingsService,
+  type AgencyBooking,
+} from "../../services/agencyService";
+import {
+  Icon,
+  Button,
+  Badge,
+  Card,
+  StateView,
+  Skeleton,
+} from "../../components/ui/DashboardUI";
+import { palette, spacing, radius, typography } from "../../theme/tokens";
+import type { Tone } from "../../theme/tokens";
 import PdfExportModal from "./PdfExportModal";
 import { useScreenCollaboration } from "../../hooks/useScreenCollaboration";
 import { APP_EVENTS } from "../../services/events/appEventBus";
-import { useTranslation } from "react-i18next";
 
 type BookingsStackParamList = {
   BookingsList: undefined;
@@ -28,456 +42,375 @@ type BookingsStackParamList = {
 
 type Props = NativeStackScreenProps<BookingsStackParamList, "BookingDetails">;
 
+type Status = "confirmed" | "pending" | "completed" | "cancelled";
+
 interface BookingDetail {
   id: string;
-  tourName: string;
+  reference: string;
+  service: string;
   customer: string;
   email: string;
   phone: string;
   date: string;
   location: string;
-  status: "confirmed" | "pending" | "completed" | "cancelled";
+  status: Status;
   guests: number;
   amount: number;
-  specialRequests: string;
   notes: string;
 }
+
+const formatBDT = (value: number): string =>
+  `৳ ${Math.round(value || 0).toLocaleString("en-IN")}`;
+
+const normalizeStatus = (status: string): Status => {
+  if (status === "confirmed" || status === "completed" || status === "cancelled") {
+    return status;
+  }
+  return "pending";
+};
+
+const statusTone = (status: string): Tone => {
+  switch (status.toLowerCase()) {
+    case "confirmed":
+      return "success";
+    case "completed":
+      return "cyan";
+    case "pending":
+      return "warning";
+    case "cancelled":
+      return "danger";
+    default:
+      return "neutral";
+  }
+};
+
+const mapBooking = (b: AgencyBooking): BookingDetail => {
+  const traveler = b.traveler_details;
+  return {
+    id: b.id,
+    reference: b.booking_reference || `#${b.id.slice(0, 8).toUpperCase()}`,
+    service: b.product_type || "Service",
+    customer: traveler
+      ? `${traveler.first_name} ${traveler.last_name}`.trim()
+      : `Customer ${b.user_id?.slice(0, 6) ?? ""}`,
+    email: traveler?.email || "",
+    phone: "",
+    date: b.start_date || "TBD",
+    location: b.destination_city || "Destination pending",
+    status: normalizeStatus(b.status),
+    guests: b.number_of_guests ?? 1,
+    amount: Number(b.final_price || 0),
+    notes: b.notes || "",
+  };
+};
 
 export default function BookingDetailsScreen({ route, navigation }: Props) {
   const { user } = useAuth();
   const { bookingId } = route.params;
-  const [loading, setLoading] = useState(false);
+  const agencyId = user?.agency?.id || "";
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
-  const [booking, setBooking] = useState<BookingDetail>({
-    id: bookingId,
-    tourName: "Bali Explorer Package",
-    customer: "John Smith",
-    email: "john@example.com",
-    phone: "+1234567890",
-    date: "2024-07-15",
-    location: "Bali, Indonesia",
-    status: "confirmed",
-    guests: 4,
-    amount: 2400,
-    specialRequests: "Window seat preferred, vegetarian meals",
-    notes: "VIP customer, frequent traveler",
-  });
-
-  const [editData, setEditData] = useState(booking);
-  const { t } = useTranslation();
+  const [booking, setBooking] = useState<BookingDetail | null>(null);
+  const [editNotes, setEditNotes] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const showToast = React.useCallback((msg: string) => {
+  const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
-    const timer = setTimeout(() => {
-      setToastMessage((cur) => (cur === msg ? null : cur));
-    }, 3000);
-    return () => clearTimeout(timer);
+    setTimeout(() => setToastMessage((cur) => (cur === msg ? null : cur)), 3000);
   }, []);
+
+  const loadBookingDetails = useCallback(async () => {
+    if (!agencyId) {
+      setError("No agency is linked to this account.");
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const details = await agencyBookingsService.getBookingDetail(agencyId, bookingId);
+      if (!details) {
+        setError("Booking not found.");
+        setBooking(null);
+      } else {
+        setBooking(mapBooking(details));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load booking.");
+    } finally {
+      setLoading(false);
+    }
+  }, [agencyId, bookingId]);
+
+  useEffect(() => {
+    loadBookingDetails();
+  }, [loadBookingDetails]);
 
   useScreenCollaboration(
     APP_EVENTS.BOOKING_STATUS_CHANGED,
     React.useCallback(
       (payload) => {
-        if (!payload?.bookingId) return;
-        if (payload.bookingId === bookingId) {
-          const mappedStatus: "confirmed" | "pending" | "completed" | "cancelled" =
-            payload.currentStatus === "confirmed" ||
-            payload.currentStatus === "completed" ||
-            payload.currentStatus === "cancelled"
-              ? payload.currentStatus
-              : "pending";
-          setBooking((prev) => ({ ...prev, status: mappedStatus }));
-          setEditData((prev) => ({ ...prev, status: mappedStatus }));
-          const statusLabel = t(payload.currentStatus, {
-            defaultValue: payload.currentStatus,
-          });
-          showToast(t("bookingStatusUpdated", { status: statusLabel }));
-        }
+        if (!payload?.bookingId || payload.bookingId !== bookingId) return;
+        const mapped = normalizeStatus(payload.currentStatus);
+        setBooking((prev) => (prev ? { ...prev, status: mapped } : prev));
+        showToast(`Status updated to ${mapped.toUpperCase()}`);
       },
-      [bookingId, t, showToast]
+      [bookingId, showToast],
     ),
-    { replayLast: true, screenId: "AgencyBookingDetailsScreen" }
+    { replayLast: true, screenId: "AgencyBookingDetailsScreen" },
   );
 
-  React.useEffect(() => {
-    loadBookingDetails();
-  }, [bookingId]);
-
-  const loadBookingDetails = async () => {
-    if (!user?.agency?.id) return;
-    setLoading(true);
-    try {
-      // In production, fetch from Supabase
-      // const details = await agencyBookingsService.getBookingDetails(user.agency.id, bookingId);
-      // setBooking(details);
-    } catch (error) {
-      console.error("Error loading booking:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    if (!user?.agency?.id) return;
+  const handleStatusChange = async (newStatus: Status) => {
+    if (!agencyId || !booking) return;
     setSaving(true);
     try {
-      // In production, update in Supabase
-      // await agencyBookingsService.updateBooking(user.agency.id, bookingId, editData);
-      setBooking(editData);
-      setEditMode(false);
-      setEditModalVisible(false);
-    } catch (error) {
-      console.error("Error saving booking:", error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleStatusChange = async (newStatus: BookingDetail["status"]) => {
-    if (!user?.agency?.id) return;
-    setSaving(true);
-    try {
-      // In production, update in Supabase
-      // await agencyBookingsService.updateBooking(user.agency.id, bookingId, { status: newStatus });
+      await agencyBookingsService.updateBookingStatus(agencyId, bookingId, newStatus);
       setBooking({ ...booking, status: newStatus });
-    } catch (error) {
-      console.error("Error updating status:", error);
+      showToast(`Booking is now ${newStatus.toUpperCase()}`);
+    } catch (err) {
+      Alert.alert(
+        "Update Failed",
+        err instanceof Error ? err.message : "Could not update status.",
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-      {toastMessage && (
-        <View style={styles.floatingToast}>
-          <MaterialCommunityIcons name="information" size={18} color="#6366F1" />
-          <Text style={styles.floatingToastText}>{toastMessage}</Text>
-        </View>
-      )}
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
-  }
+  const handleSaveNotes = async () => {
+    if (!agencyId || !booking) return;
+    setSaving(true);
+    try {
+      await agencyBookingsService.updateBookingStatus(
+        agencyId,
+        bookingId,
+        booking.status,
+        editNotes,
+      );
+      setBooking({ ...booking, notes: editNotes });
+      setEditModalVisible(false);
+      showToast("Notes saved");
+    } catch (err) {
+      Alert.alert(
+        "Save Failed",
+        err instanceof Error ? err.message : "Could not save notes.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (!agencyId || !booking) return;
+    Alert.alert("Cancel Booking", "Are you sure you want to cancel this booking?", [
+      { text: "Keep", style: "cancel" },
+      {
+        text: "Cancel Booking",
+        style: "destructive",
+        onPress: async () => {
+          setSaving(true);
+          try {
+            await agencyBookingsService.cancelBooking(
+              agencyId,
+              bookingId,
+              "Cancelled by agency",
+            );
+            setBooking({ ...booking, status: "cancelled" });
+            showToast("Booking cancelled");
+          } catch (err) {
+            Alert.alert(
+              "Failed",
+              err instanceof Error ? err.message : "Could not cancel booking.",
+            );
+          } finally {
+            setSaving(false);
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <View style={styles.container}>
-      {toastMessage && (
-        <View style={styles.floatingToast}>
-          <MaterialCommunityIcons name="information" size={18} color="#6366F1" />
-          <Text style={styles.floatingToastText}>{toastMessage}</Text>
+      {toastMessage ? (
+        <View style={styles.toast}>
+          <Icon name="check-circle" size={16} color={palette.primary} />
+          <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
-      )}
+      ) : null}
+
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.secondary]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
+      <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={styles.backButton}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="chevron-back" size={24} color={COLORS.text} />
+          <Icon name="chevron-left" size={24} color={palette.text} />
         </TouchableOpacity>
-        <View style={styles.headerContent}>
+        <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Booking Details</Text>
-          <Text style={styles.headerSubtitle}>{booking.id}</Text>
+          <Text style={styles.headerSubtitle}>{booking?.reference ?? bookingId}</Text>
         </View>
-        <TouchableOpacity
-          onPress={() => {
-            setEditData(booking);
-            setEditModalVisible(true);
-          }}
-          style={styles.editButton}
-        >
-          <MaterialCommunityIcons name="pencil" size={20} color={COLORS.text} />
-        </TouchableOpacity>
-      </LinearGradient>
+        {booking ? (
+          <TouchableOpacity
+            onPress={() => {
+              setEditNotes(booking.notes);
+              setEditModalVisible(true);
+            }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Icon name="edit-2" size={20} color={palette.primary} />
+          </TouchableOpacity>
+        ) : null}
+      </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Status Card */}
-        <Card style={styles.statusCard}>
-          <View style={styles.statusHeader}>
-            <Text style={styles.statusLabel}>Current Status</Text>
-            <Badge
-              label={booking.status}
-              status={booking.status}
-              size="large"
+      {loading ? (
+        <View style={styles.body}>
+          <Skeleton style={{ height: 120, marginBottom: spacing.md }} />
+          <Skeleton style={{ height: 160, marginBottom: spacing.md }} />
+          <Skeleton style={{ height: 120 }} />
+        </View>
+      ) : error || !booking ? (
+        <StateView
+          variant="error"
+          title="Couldn't load booking"
+          message={error ?? "Booking not found."}
+          actionLabel="Retry"
+          onActionPress={loadBookingDetails}
+        />
+      ) : (
+        <ScrollView
+          style={styles.body}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Status */}
+          <Card style={{ marginBottom: spacing.md }}>
+            <View style={styles.statusHeader}>
+              <Text style={styles.statusLabel}>Current Status</Text>
+              <Badge label={booking.status.toUpperCase()} tone={statusTone(booking.status)} />
+            </View>
+            <View style={styles.statusActions}>
+              {(["confirmed", "pending", "completed", "cancelled"] as Status[]).map((s) => (
+                <Button
+                  key={s}
+                  label={s.charAt(0).toUpperCase() + s.slice(1)}
+                  variant={booking.status === s ? "primary" : "outline"}
+                  size="sm"
+                  disabled={saving}
+                  onPress={() => handleStatusChange(s)}
+                />
+              ))}
+            </View>
+          </Card>
+
+          {/* Service & itinerary */}
+          <Card style={{ marginBottom: spacing.md }}>
+            <Text style={styles.cardTitle}>Service & Itinerary</Text>
+            <DetailRow icon="tag" label="Service" value={booking.service} />
+            <Divider />
+            <DetailRow icon="map-pin" label="Destination" value={booking.location} />
+            <Divider />
+            <DetailRow icon="calendar" label="Travel Date" value={booking.date} />
+          </Card>
+
+          {/* Customer */}
+          <Card style={{ marginBottom: spacing.md }}>
+            <Text style={styles.cardTitle}>Customer</Text>
+            <DetailRow icon="user" label="Name" value={booking.customer} />
+            {booking.email ? (
+              <>
+                <Divider />
+                <DetailRow icon="mail" label="Email" value={booking.email} />
+              </>
+            ) : null}
+            <Divider />
+            <DetailRow icon="users" label="Guests" value={String(booking.guests)} />
+          </Card>
+
+          {/* Financial */}
+          <Card style={{ marginBottom: spacing.md }}>
+            <Text style={styles.cardTitle}>Financial Summary</Text>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Total Amount</Text>
+              <Text style={styles.detailValue}>{formatBDT(booking.amount)}</Text>
+            </View>
+            <Divider />
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Per Person</Text>
+              <Text style={styles.detailValue}>
+                {formatBDT(booking.amount / (booking.guests || 1))}
+              </Text>
+            </View>
+          </Card>
+
+          {/* Notes */}
+          {booking.notes ? (
+            <Card style={{ marginBottom: spacing.md }}>
+              <Text style={styles.cardTitle}>Internal Notes</Text>
+              <Text style={styles.notes}>{booking.notes}</Text>
+            </Card>
+          ) : null}
+
+          {/* Actions */}
+          <View style={styles.actionButtons}>
+            <Button
+              label="Export Branded PDF"
+              variant="primary"
+              icon="download"
+              onPress={() => setPdfModalVisible(true)}
+            />
+            <Button
+              label="Cancel Booking"
+              variant="danger"
+              icon="slash"
+              disabled={saving || booking.status === "cancelled"}
+              onPress={handleDelete}
             />
           </View>
-          <View style={styles.statusActions}>
-            {["confirmed", "pending", "completed", "cancelled"].map(
-              (status) => (
-                <Button
-                  key={status}
-                  title={status.charAt(0).toUpperCase() + status.slice(1)}
-                  variant={booking.status === status ? "primary" : "outline"}
-                  size="small"
-                  onPress={() =>
-                    handleStatusChange(status as BookingDetail["status"])
-                  }
-                  disabled={saving}
-                />
-              ),
-            )}
-          </View>
-        </Card>
 
-        {/* Tour Information */}
-        <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Tour Information</Text>
-          <ListItem
-            title="Tour Name"
-            subtitle={booking.tourName}
-            icon="map"
-            rightIcon={false}
-          />
-          <View style={styles.divider} />
-          <ListItem
-            title="Location"
-            subtitle={booking.location}
-            icon="location"
-            rightIcon={false}
-          />
-          <View style={styles.divider} />
-          <ListItem
-            title="Date"
-            subtitle={new Date(booking.date).toLocaleDateString()}
-            icon="calendar"
-            rightIcon={false}
-          />
-        </Card>
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      )}
 
-        {/* Customer Information */}
-        <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Customer Information</Text>
-          <ListItem
-            title="Name"
-            subtitle={booking.customer}
-            icon="person"
-            rightIcon={false}
-          />
-          <View style={styles.divider} />
-          <ListItem
-            title="Email"
-            subtitle={booking.email}
-            icon="mail"
-            rightIcon={false}
-          />
-          <View style={styles.divider} />
-          <ListItem
-            title="Phone"
-            subtitle={booking.phone}
-            icon="call"
-            rightIcon={false}
-          />
-          <View style={styles.divider} />
-          <ListItem
-            title="Guests"
-            subtitle={`${booking.guests} people`}
-            icon="people"
-            rightIcon={false}
-          />
-        </Card>
-
-        {/* Booking Details */}
-        <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Booking Details</Text>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Total Amount</Text>
-            <Text style={styles.detailValue}>${booking.amount.toFixed(2)}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Per Person</Text>
-            <Text style={styles.detailValue}>
-              ${(booking.amount / booking.guests).toFixed(2)}
-            </Text>
-          </View>
-        </Card>
-
-        {/* Special Requests */}
-        {booking.specialRequests && (
-          <Card style={styles.card}>
-            <Text style={styles.cardTitle}>Special Requests</Text>
-            <Text style={styles.specialRequests}>
-              {booking.specialRequests}
-            </Text>
-          </Card>
-        )}
-
-        {/* Notes */}
-        {booking.notes && (
-          <Card style={styles.card}>
-            <Text style={styles.cardTitle}>Internal Notes</Text>
-            <Text style={styles.notes}>{booking.notes}</Text>
-          </Card>
-        )}
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <Button
-            title="Export Branded PDF"
-            variant="primary"
-            onPress={() => setPdfModalVisible(true)}
-            icon="document-text-outline"
-          />
-          <Button
-            title="Send Confirmation"
-            variant="outline"
-            onPress={() => {}}
-            icon="mail"
-          />
-          <Button
-            title="Delete Booking"
-            variant="danger"
-            onPress={() => {}}
-            icon="trash-outline"
-          />
-        </View>
-      </ScrollView>
-
-      {/* Edit Modal */}
+      {/* Edit Notes Modal */}
       <Modal
         visible={editModalVisible}
         animationType="slide"
         onRequestClose={() => setEditModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <LinearGradient
-            colors={[COLORS.primary, COLORS.secondary]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.modalHeader}
-          >
+          <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setEditModalVisible(false)}>
-              <Ionicons name="close" size={24} color={COLORS.text} />
+              <Icon name="x" size={22} color={palette.text} />
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Edit Booking</Text>
-            <View style={{ width: 24 }} />
-          </LinearGradient>
-
+            <Text style={styles.modalTitle}>Edit Notes</Text>
+            <View style={{ width: 22 }} />
+          </View>
           <ScrollView style={styles.modalContent}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Tour Name</Text>
-              <TextInput
-                style={styles.input}
-                value={editData.tourName}
-                onChangeText={(text) =>
-                  setEditData({ ...editData, tourName: text })
-                }
-                placeholderTextColor={COLORS.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Customer Name</Text>
-              <TextInput
-                style={styles.input}
-                value={editData.customer}
-                onChangeText={(text) =>
-                  setEditData({ ...editData, customer: text })
-                }
-                placeholderTextColor={COLORS.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <TextInput
-                style={styles.input}
-                value={editData.email}
-                onChangeText={(text) =>
-                  setEditData({ ...editData, email: text })
-                }
-                keyboardType="email-address"
-                placeholderTextColor={COLORS.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Phone</Text>
-              <TextInput
-                style={styles.input}
-                value={editData.phone}
-                onChangeText={(text) =>
-                  setEditData({ ...editData, phone: text })
-                }
-                keyboardType="phone-pad"
-                placeholderTextColor={COLORS.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Number of Guests</Text>
-              <TextInput
-                style={styles.input}
-                value={editData.guests.toString()}
-                onChangeText={(text) =>
-                  setEditData({ ...editData, guests: parseInt(text) || 0 })
-                }
-                keyboardType="number-pad"
-                placeholderTextColor={COLORS.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Amount ($)</Text>
-              <TextInput
-                style={styles.input}
-                value={editData.amount.toString()}
-                onChangeText={(text) =>
-                  setEditData({ ...editData, amount: parseFloat(text) || 0 })
-                }
-                keyboardType="decimal-pad"
-                placeholderTextColor={COLORS.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Special Requests</Text>
-              <TextInput
-                style={[styles.input, styles.multilineInput]}
-                value={editData.specialRequests}
-                onChangeText={(text) =>
-                  setEditData({ ...editData, specialRequests: text })
-                }
-                multiline
-                numberOfLines={4}
-                placeholderTextColor={COLORS.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Internal Notes</Text>
-              <TextInput
-                style={[styles.input, styles.multilineInput]}
-                value={editData.notes}
-                onChangeText={(text) =>
-                  setEditData({ ...editData, notes: text })
-                }
-                multiline
-                numberOfLines={4}
-                placeholderTextColor={COLORS.textTertiary}
-              />
-            </View>
-
+            <Text style={styles.inputLabel}>Internal Notes</Text>
+            <TextInput
+              style={[styles.input, styles.multilineInput]}
+              value={editNotes}
+              onChangeText={setEditNotes}
+              placeholder="Add internal notes about this booking"
+              placeholderTextColor={palette.textMuted}
+              multiline
+              numberOfLines={5}
+            />
             <View style={styles.modalActions}>
               <Button
-                title="Save Changes"
+                label="Save Changes"
                 variant="primary"
-                onPress={handleSaveChanges}
                 loading={saving}
+                onPress={handleSaveNotes}
               />
               <Button
-                title="Cancel"
+                label="Cancel"
                 variant="outline"
                 onPress={() => setEditModalVisible(false)}
               />
@@ -486,236 +419,150 @@ export default function BookingDetailsScreen({ route, navigation }: Props) {
         </View>
       </Modal>
 
-      {/* Branded PDF Export Studio */}
-      <PdfExportModal
-        visible={pdfModalVisible}
-        onClose={() => setPdfModalVisible(false)}
-        bookingData={{
-          bookingReference: booking.id,
-          tripTitle: booking.tourName,
-          destination: booking.location,
-          traveler: {
-            leadPassengerName: booking.customer,
-            contactEmail: booking.email,
-            contactPhone: booking.phone,
-            numberOfGuests: booking.guests,
-            specialRequests: booking.specialRequests,
-          },
-          paymentReceipt: {
-            receiptNumber: `RCPT-${booking.id}`,
-            invoiceDate: booking.date,
-            paymentMethod: "Bank Wire & Online Gateway",
-            transactionId: `TXN-${booking.id}`,
-            paymentStatus:
-              booking.status === "confirmed" ? "Paid in Full" : "Due",
-            currency: "USD",
-            currencySymbol: "$",
-            items: [
-              {
-                description: `${booking.tourName} (Booking for ${booking.guests} Guests)`,
-                quantity: booking.guests,
-                unitPrice: booking.amount / (booking.guests || 1),
-                total: booking.amount,
-              },
-            ],
-            subtotal: booking.amount,
-            taxesAndFees: Math.round(booking.amount * 0.05),
-            totalAmount: booking.amount + Math.round(booking.amount * 0.05),
-            amountPaid:
-              booking.status === "confirmed"
-                ? booking.amount + Math.round(booking.amount * 0.05)
-                : 0,
-            balanceDue:
-              booking.status === "confirmed"
-                ? 0
-                : booking.amount + Math.round(booking.amount * 0.05),
-            notes: booking.notes,
-          },
-        }}
-      />
+      {booking ? (
+        <PdfExportModal
+          visible={pdfModalVisible}
+          onClose={() => setPdfModalVisible(false)}
+          bookingData={{
+            bookingReference: booking.reference,
+            tripTitle: booking.service,
+            destination: booking.location,
+            traveler: {
+              leadPassengerName: booking.customer,
+              contactEmail: booking.email,
+              contactPhone: booking.phone,
+              numberOfGuests: booking.guests,
+              specialRequests: "",
+            },
+            paymentReceipt: {
+              receiptNumber: `RCPT-${booking.id.slice(0, 8)}`,
+              invoiceDate: booking.date,
+              paymentMethod: "Online Gateway",
+              transactionId: `TXN-${booking.id.slice(0, 8)}`,
+              paymentStatus: booking.status === "confirmed" ? "Paid in Full" : "Due",
+              currency: "BDT",
+              currencySymbol: "৳",
+              items: [
+                {
+                  description: `${booking.service} (${booking.guests} guests)`,
+                  quantity: booking.guests,
+                  unitPrice: booking.amount / (booking.guests || 1),
+                  total: booking.amount,
+                },
+              ],
+              subtotal: booking.amount,
+              taxesAndFees: 0,
+              totalAmount: booking.amount,
+              amountPaid: booking.status === "confirmed" ? booking.amount : 0,
+              balanceDue: booking.status === "confirmed" ? 0 : booking.amount,
+              notes: booking.notes,
+            },
+          }}
+        />
+      ) : null}
     </View>
   );
 }
 
+const DetailRow: React.FC<{
+  icon: React.ComponentProps<typeof Icon>["name"];
+  label: string;
+  value: string;
+}> = ({ icon, label, value }) => (
+  <View style={styles.detailRow}>
+    <View style={styles.detailLabelRow}>
+      <Icon name={icon} size={16} color={palette.textMuted} />
+      <Text style={styles.detailLabel}>{label}</Text>
+    </View>
+    <Text style={styles.detailValue} numberOfLines={1}>
+      {value}
+    </Text>
+  </View>
+);
+
+const Divider: React.FC = () => <View style={styles.divider} />;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
+  container: { flex: 1, backgroundColor: palette.background },
   header: {
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: palette.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.border,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerContent: {
-    flex: 1,
-    marginHorizontal: 12,
-  },
-  headerTitle: {
-    fontSize: TYPOGRAPHY.h2.fontSize,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-  headerSubtitle: {
-    fontSize: TYPOGRAPHY.caption.fontSize,
-    color: "rgba(255,255,255,0.8)",
-    marginTop: 4,
-  },
-  editButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  statusCard: {
-    marginBottom: 16,
-  },
+  headerTitle: { ...typography.h3, color: palette.text },
+  headerSubtitle: { ...typography.caption, color: palette.textMuted, marginTop: 2 },
+  body: { flex: 1 },
+  scrollContent: { padding: spacing.lg },
   statusHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
-  statusLabel: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  statusActions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  card: {
-    marginBottom: 16,
-  },
-  cardTitle: {
-    fontSize: TYPOGRAPHY.h3.fontSize,
-    fontWeight: "700",
-    color: COLORS.text,
-    marginBottom: 12,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: 12,
-  },
+  statusLabel: { ...typography.body, color: palette.text, fontWeight: "700" },
+  statusActions: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
+  cardTitle: { ...typography.h3, color: palette.text, marginBottom: spacing.md },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: spacing.xs,
   },
-  detailLabel: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    color: COLORS.textSecondary,
+  detailLabelRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, flex: 1 },
+  detailLabel: { ...typography.body, color: palette.textSecondary },
+  detailValue: { ...typography.body, color: palette.text, fontWeight: "700", maxWidth: "55%", textAlign: "right" },
+  divider: { height: 1, backgroundColor: palette.border, marginVertical: spacing.sm },
+  notes: { ...typography.body, color: palette.textSecondary, lineHeight: 22 },
+  actionButtons: { gap: spacing.md, marginTop: spacing.md },
+  toast: {
+    position: "absolute",
+    top: 50,
+    alignSelf: "center",
+    backgroundColor: palette.surface,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.pill,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: palette.border,
+    zIndex: 9999,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  detailValue: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  specialRequests: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    color: COLORS.textSecondary,
-    lineHeight: 24,
-  },
-  notes: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    color: COLORS.textSecondary,
-    lineHeight: 24,
-  },
-  actionButtons: {
-    gap: 12,
-    marginBottom: 32,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
+  toastText: { ...typography.label, color: palette.text },
+  modalContainer: { flex: 1, backgroundColor: palette.background },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.border,
   },
-  modalTitle: {
-    fontSize: TYPOGRAPHY.h2.fontSize,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-  modalContent: {
-    flex: 1,
-    padding: 16,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 8,
-  },
+  modalTitle: { ...typography.h3, color: palette.text },
+  modalContent: { flex: 1, padding: spacing.lg },
+  inputLabel: { ...typography.label, color: palette.textSecondary, marginBottom: spacing.sm },
   input: {
-    backgroundColor: COLORS.surface,
-    borderColor: COLORS.border,
+    backgroundColor: palette.surface,
+    borderColor: palette.border,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: COLORS.text,
-    fontSize: TYPOGRAPHY.body.fontSize,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    color: palette.text,
+    fontSize: typography.body.fontSize,
   },
-  multilineInput: {
-    textAlignVertical: "top",
-  },
-  floatingToast: {
-    position: "absolute",
-    top: 50,
-    alignSelf: "center",
-    backgroundColor: "#1E293B",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "#6366F1",
-    zIndex: 9999,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
-  },
-  floatingToastText: {
-    color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  modalActions: {
-    gap: 12,
-    marginTop: 24,
-    marginBottom: 32,
-  },
+  multilineInput: { textAlignVertical: "top" },
+  modalActions: { gap: spacing.md, marginTop: spacing.xl, marginBottom: spacing["2xl"] },
 });
