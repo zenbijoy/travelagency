@@ -14,7 +14,10 @@ from app.core.exceptions import AuthenticationError, PermissionDeniedError
 from app.core.redis import get_redis
 from app.core.security import decode_supabase_jwt
 from app.repositories.user_repository import UserRepository
+from app.schemas.tenant import TenantContext
 from app.schemas.user import CurrentUser, UserRole
+from app.services.authorization_service import AuthorizationService
+from app.services.tenant_service import TenantService
 
 # HTTP Bearer scheme
 security_bearer = HTTPBearer(auto_error=False)
@@ -169,3 +172,69 @@ def require_hotel_staff(current_user: CurrentUser = Depends(get_current_user)) -
     if not is_staff:
         raise PermissionDeniedError("Hotel staff or management access required")
     return current_user
+
+
+# ---------------------------------------------------------------------------
+# Tenant context dependency (Item 1: tenant context + isolation)
+# ---------------------------------------------------------------------------
+
+async def get_tenant_context(
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
+) -> TenantContext:
+    """Resolve server-side tenant isolation context for the current request.
+
+    The X-Tenant-Id header, if supplied, is validated against the user's active
+    tenant memberships and never trusted blindly. If omitted and the user belongs
+    to exactly one tenant, that tenant is used. If the user belongs to multiple
+    tenants and none is specified, a 400 is raised.
+    """
+    requested_tenant_id: Optional[uuid.UUID] = None
+    if x_tenant_id:
+        try:
+            requested_tenant_id = uuid.UUID(x_tenant_id)
+        except ValueError:
+            raise BadRequestError("X-Tenant-Id header is not a valid UUID")
+
+    context = await TenantService.resolve_tenant_context(
+        db, current_user.id, requested_tenant_id
+    )
+
+    return TenantContext(
+        tenant_id=context["tenant_id"],
+        tenant=context["tenant"],
+        membership=context["membership"],
+        memberships=context["memberships"],
+        is_admin=context["is_admin"],
+    )
+
+
+def require_tenant(
+    tenant_context: TenantContext = Depends(get_tenant_context),
+) -> TenantContext:
+    """Enforces that a tenant context has been resolved for the request."""
+    if tenant_context.tenant_id is None:
+        raise BadRequestError(
+            "No tenant context could be resolved. Please specify a tenant via "
+            "the X-Tenant-Id header, or ensure you are a member of a tenant."
+        )
+    return tenant_context
+
+
+def require_tenant_member(
+    tenant_context: TenantContext = Depends(require_tenant),
+) -> TenantContext:
+    """Enforces that the caller is an active member of the resolved tenant."""
+    if tenant_context.membership is None:
+        raise PermissionDeniedError("You are not an active member of this tenant.")
+    return tenant_context
+
+
+def require_tenant_admin(
+    tenant_context: TenantContext = Depends(require_tenant_member),
+) -> TenantContext:
+    """Enforces that the caller is an owner or admin of the resolved tenant."""
+    if not tenant_context.is_admin:
+        raise PermissionDeniedError("Tenant admin privileges required.")
+    return tenant_context

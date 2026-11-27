@@ -132,7 +132,7 @@ async def cancel_ride_request(
     summary="Discover open ride requests and marketplace delivery jobs",
 )
 async def get_available_dispatch(
-    vehicle_mode: Optional[str] = Query(None, description="Optional vehicle mode filter or 'all'"),
+    vehicle_mode: Optional[str] = Query(None, description="Optional filter matching the rider's selected vehicle mode"),
     current_user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:

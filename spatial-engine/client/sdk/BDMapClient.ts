@@ -24,13 +24,18 @@ export interface RouteManeuver {
   time_seconds: number;
 }
 
+export interface GeoJSONLineString {
+  type: string;
+  coordinates: number[][];
+}
+
 export interface DirectionsResult {
   status: string;
   summary: {
     distance_km: number;
     duration_seconds: number;
   };
-  geometry_geojson?: GeoJSON.LineString;
+  geometry_geojson?: GeoJSONLineString;
   legs?: Array<{
     maneuvers: RouteManeuver[];
   }>;

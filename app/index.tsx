@@ -12,10 +12,28 @@ export default function IndexScreen() {
   const { colors } = useTheme();
 
   useEffect(() => {
-    if (!loading) {
-      router.replace("/(tabs)");
+    if (loading) return;
+    let isMounted = true;
+
+    async function resolveEntryRoute() {
+      try {
+        const hasSeen = await AsyncStorage.getItem("@app:has_seen_onboarding");
+        if (!isMounted) return;
+        if (hasSeen === "true" || isAuthenticated) {
+          router.replace("/(tabs)");
+        } else {
+          router.replace("/onboarding");
+        }
+      } catch {
+        if (isMounted) router.replace("/(tabs)");
+      }
     }
-  }, [loading]);
+
+    resolveEntryRoute();
+    return () => {
+      isMounted = false;
+    };
+  }, [loading, isAuthenticated]);
 
   return (
     <SafeAreaView

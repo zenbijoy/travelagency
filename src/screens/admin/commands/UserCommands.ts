@@ -18,18 +18,21 @@ export class SuspendUserCommand implements AdminCommand<{ id: string; is_suspend
 
   async execute(admin: AdminUser) {
     const timestamp = new Date().toISOString();
-    try {
-      await supabase
-        .from("user_admin_details")
-        .upsert({
+    const { error } = await supabase
+      .from("user_admin_details")
+      .upsert(
+        {
           user_id: this.entityId,
           is_suspended: this.isSuspended,
           suspension_reason: this.reason,
           suspension_date: this.isSuspended ? timestamp : null,
+          approved_by: admin.id,
           updated_at: timestamp,
-        });
-    } catch (e) {
-      console.warn("Supabase user suspend update (handled):", e);
+        },
+        { onConflict: "user_id" }
+      );
+    if (error) {
+      throw new Error(error.message || "Failed to update user suspension status.");
     }
 
     return { id: this.entityId, is_suspended: this.isSuspended };
@@ -61,18 +64,21 @@ export class BanUserCommand implements AdminCommand<{ id: string; is_banned: boo
 
   async execute(admin: AdminUser) {
     const timestamp = new Date().toISOString();
-    try {
-      await supabase
-        .from("user_admin_details")
-        .upsert({
+    const { error } = await supabase
+      .from("user_admin_details")
+      .upsert(
+        {
           user_id: this.entityId,
           is_banned: this.isBanned,
           ban_reason: this.reason,
           ban_date: this.isBanned ? timestamp : null,
+          approved_by: admin.id,
           updated_at: timestamp,
-        });
-    } catch (e) {
-      console.warn("Supabase user ban update (handled):", e);
+        },
+        { onConflict: "user_id" }
+      );
+    if (error) {
+      throw new Error(error.message || "Failed to update user ban status.");
     }
 
     return { id: this.entityId, is_banned: this.isBanned };
@@ -106,18 +112,35 @@ export class VerifyUserKYCCommand implements AdminCommand<{ id: string; status: 
     const timestamp = new Date().toISOString();
     const status = this.approved ? UserVerificationStatus.VERIFIED : UserVerificationStatus.REJECTED;
 
-    try {
-      await supabase
-        .from("kyc_documents")
-        .update({
-          is_verified: this.approved,
-          verified_by: admin.id,
-          verified_at: timestamp,
-          verification_notes: this.notes,
-        })
-        .eq("id", this.entityId);
-    } catch (e) {
-      console.warn("Supabase kyc update error (handled):", e);
+    const { error } = await supabase
+      .from("kyc_documents")
+      .update({
+        is_verified: this.approved,
+        verified_by: admin.id,
+        verified_at: timestamp,
+        verification_notes: this.notes,
+      })
+      .eq("user_id", this.entityId);
+
+    if (error) {
+      throw new Error(error.message || "Failed to update KYC verification status.");
+    }
+
+    const { error: detailsErr } = await supabase
+      .from("user_admin_details")
+      .upsert(
+        {
+          user_id: this.entityId,
+          verification_status: status,
+          kyc_status: status,
+          approved_by: admin.id,
+          approved_date: this.approved ? timestamp : null,
+          updated_at: timestamp,
+        },
+        { onConflict: "user_id" }
+      );
+    if (detailsErr) {
+      throw new Error(detailsErr.message || "Failed to update user verification status.");
     }
 
     return { id: this.entityId, status };
@@ -125,7 +148,7 @@ export class VerifyUserKYCCommand implements AdminCommand<{ id: string; status: 
 
   toAuditDetails(admin: AdminUser, result: any) {
     return {
-      document_id: this.entityId,
+      user_id: this.entityId,
       status: this.approved ? "APPROVED" : "REJECTED",
       notes: this.notes,
       operator: admin.name || admin.user_id,

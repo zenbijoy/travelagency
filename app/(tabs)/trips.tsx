@@ -12,12 +12,13 @@ import { Platform,
   TouchableOpacity,
   View,
 } from "react-native";
-import { formatPrice } from "../../src/utils/currency";
+import { formatPrice, formatSourcePrice } from "../../src/utils/currency";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Href } from "expo-router";
 
 import { useAuth } from "../../src/hooks/useAuth";
+import { useTheme } from "../../src/context/ThemeContext";
 import { AddWidgetModal } from "../../src/components/AddWidgetModal";
 import { supabase } from "../../src/utils/supabase";
 import { TripPlannerScreen } from "../../src/screens/TripPlannerScreen";
@@ -41,6 +42,7 @@ const ACCENT_YELLOW = "#FACC15";
 
 export default function TripsTab() {
   const { isDesktop } = useResponsive();
+  const { colors, isDark } = useTheme();
   const { user } = useAuth();
   const { t } = useTranslation();
   const [showWidgetModal, setShowWidgetModal] = useState(false);
@@ -278,17 +280,17 @@ export default function TripsTab() {
 
   if (activeSegment === "planner") {
     return (
-      <SafeAreaView style={styles.shell} edges={["top"]}>
-        <View style={styles.headerBar}>
+      <SafeAreaView style={[styles.shell, { backgroundColor: colors.background }]} edges={["top"]}>
+        <View style={[styles.headerBar, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Pressable
-              style={styles.backToBookingsPill}
+              style={[styles.backToBookingsPill, isDark && { backgroundColor: "#1E293B" }]}
               onPress={() => setActiveSegment("bookings")}
             >
               <Ionicons name="arrow-back" size={16} color={TRIP_BLUE} />
               <Text style={styles.backToBookingsText}>Bookings</Text>
             </Pressable>
-            <Text style={styles.headerTitle}>AI Trip Planner</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>AI Trip Planner</Text>
           </View>
         </View>
         <View style={{ flex: 1 }}>
@@ -299,113 +301,146 @@ export default function TripsTab() {
   }
 
   return (
-    <SafeAreaView style={styles.shell} edges={["top"]}>
+    <SafeAreaView style={[styles.shell, { backgroundColor: colors.background }]} edges={["top"]}>
       <View style={isDesktop ? { maxWidth: 1200, width: "100%", alignSelf: "center", flex: 1 } : { flex: 1 }}>
         {/* Header Bar */}
-      <View style={styles.headerBar}>
-        <Text style={styles.headerTitle}>My Trips</Text>
+      <View style={[styles.headerBar, { backgroundColor: colors.card }]}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>My Trips</Text>
 
         <Pressable
-          style={styles.widgetBtn}
+          style={[
+            styles.widgetBtn,
+            isDark && { backgroundColor: "#1E293B", borderColor: colors.border },
+          ]}
           onPress={() => setShowWidgetModal(true)}
         >
-          <Ionicons name="grid-outline" size={18} color="#111827" />
-          <Text style={styles.widgetBtnText}>Widget</Text>
+          <Ionicons name="grid-outline" size={18} color={colors.text} />
+          <Text style={[styles.widgetBtnText, { color: colors.text }]}>Widget</Text>
         </Pressable>
       </View>
 
-      {/* Segmented Switcher for Trips, My Tickets & AI Planner */}
-      <View style={styles.segmentContainer}>
-        <Pressable
-          style={[
-            styles.segmentButton,
-            activeSegment === "bookings" && styles.segmentButtonActive,
+      {/* Horizontally Scrollable Segmented Switcher (no wrapping/clipping) */}
+      <View style={{ backgroundColor: colors.background }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.segmentContainer,
+            {
+              backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
+              marginVertical: 10,
+              paddingHorizontal: 4,
+              alignItems: "center",
+            },
           ]}
-          onPress={() => setActiveSegment("bookings")}
         >
-          <Ionicons
-            name="briefcase-outline"
-            size={15}
-            color={activeSegment === "bookings" ? TRIP_BLUE : "#64748B"}
-          />
-          <Text
+          <Pressable
             style={[
-              styles.segmentText,
-              activeSegment === "bookings" && styles.segmentTextActive,
+              styles.segmentButton,
+              { flex: 0, paddingHorizontal: 12 },
+              activeSegment === "bookings" && [
+                styles.segmentButtonActive,
+                isDark && { backgroundColor: colors.card },
+              ],
             ]}
+            onPress={() => setActiveSegment("bookings")}
           >
-            বুকিং
-          </Text>
-        </Pressable>
+            <Ionicons
+              name="briefcase-outline"
+              size={15}
+              color={activeSegment === "bookings" ? TRIP_BLUE : colors.textSecondary}
+            />
+            <Text
+              style={[
+                styles.segmentText,
+                { color: colors.textSecondary },
+                activeSegment === "bookings" && styles.segmentTextActive,
+              ]}
+            >
+              Bookings
+            </Text>
+          </Pressable>
 
-        <Pressable
-          style={[
-            styles.segmentButton,
-            activeSegment === "tickets" && styles.segmentButtonActive,
-          ]}
-          onPress={() => setActiveSegment("tickets")}
-        >
-          <Ionicons
-            name="ticket-outline"
-            size={15}
-            color={activeSegment === "tickets" ? TRIP_BLUE : "#64748B"}
-          />
-          <Text
+          <Pressable
             style={[
-              styles.segmentText,
-              activeSegment === "tickets" && styles.segmentTextActive,
+              styles.segmentButton,
+              { flex: 0, paddingHorizontal: 12 },
+              activeSegment === "tickets" && [
+                styles.segmentButtonActive,
+                isDark && { backgroundColor: colors.card },
+              ],
             ]}
+            onPress={() => setActiveSegment("tickets")}
           >
-            আমার টিকিট
-          </Text>
-        </Pressable>
+            <Ionicons
+              name="ticket-outline"
+              size={15}
+              color={activeSegment === "tickets" ? TRIP_BLUE : colors.textSecondary}
+            />
+            <Text
+              style={[
+                styles.segmentText,
+                { color: colors.textSecondary },
+                activeSegment === "tickets" && styles.segmentTextActive,
+              ]}
+            >
+              My Tickets
+            </Text>
+          </Pressable>
 
-        <Pressable
-          style={[
-            styles.segmentButton,
-            (activeSegment as string) === "planner" && styles.segmentButtonActive,
-          ]}
-          onPress={() => setActiveSegment("planner")}
-        >
-          <Ionicons
-            name="sparkles"
-            size={15}
-            color={(activeSegment as string) === "planner" ? TRIP_BLUE : "#64748B"}
-          />
-          <Text
+          <Pressable
             style={[
-              styles.segmentText,
-              (activeSegment as string) === "planner" && styles.segmentTextActive,
+              styles.segmentButton,
+              { flex: 0, paddingHorizontal: 12 },
+              (activeSegment as string) === "planner" && [
+                styles.segmentButtonActive,
+                isDark && { backgroundColor: colors.card },
+              ],
             ]}
+            onPress={() => setActiveSegment("planner")}
           >
-            AI প্ল্যানার
-          </Text>
-        </Pressable>
+            <Ionicons
+              name="sparkles"
+              size={15}
+              color={(activeSegment as string) === "planner" ? TRIP_BLUE : colors.textSecondary}
+            />
+            <Text
+              style={[
+                styles.segmentText,
+                { color: colors.textSecondary },
+                (activeSegment as string) === "planner" && styles.segmentTextActive,
+              ]}
+            >
+              AI Planner
+            </Text>
+          </Pressable>
 
-        <Pressable
-          style={styles.segmentButton}
-          onPress={() => router.push("/screens/group-trip" as Href)}
-        >
-          <Ionicons
-            name="people"
-            size={15}
-            color="#0055F2"
-          />
-          <Text
-            style={[
-              styles.segmentText,
-              { color: "#0055F2", fontWeight: "700" }
-            ]}
+          <Pressable
+            style={[styles.segmentButton, { flex: 0, paddingHorizontal: 12 }]}
+            onPress={() => router.push("/screens/group-trip" as Href)}
           >
-            গ্রুপ ট্রিপ
-          </Text>
-        </Pressable>
+            <Ionicons name="people" size={15} color="#0055F2" />
+            <Text style={[styles.segmentText, { color: "#0055F2", fontWeight: "700" }]}>
+              Group Trip
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.segmentButton, { flex: 0, paddingHorizontal: 12 }]}
+            onPress={() => router.push("/screens/off-grid-mesh" as Href)}
+          >
+            <Ionicons name="radio" size={15} color="#10B981" />
+            <Text style={[styles.segmentText, { color: "#10B981", fontWeight: "700" }]}>
+              Off-Grid
+            </Text>
+          </Pressable>
+        </ScrollView>
       </View>
 
       <Animated.ScrollView
         ref={scrollRef}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 140 }]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -659,8 +694,40 @@ export default function TripsTab() {
           </Pressable>
         </ScrollView>
 
-        {/* Live Bookings from Supabase */}
-        {loading ? (
+        {/* Live Bookings or Itineraries Switcher */}
+        {activeFilter === "itineraries" ? (
+          <View
+            style={[
+              styles.emptyBookingsCard,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
+            <Ionicons name="map-outline" size={44} color={TRIP_BLUE} />
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>My Planned Itineraries</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+              Create custom day-by-day travel plans with AI Planner or clone community itineraries from Marketplace.
+            </Text>
+            <View style={styles.emptyButtonsRow}>
+              <Pressable
+                style={styles.emptyStaysBtn}
+                onPress={() => setActiveSegment("planner")}
+              >
+                <Text style={styles.emptyStaysBtnText}>Open AI Planner</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.emptyFlightsBtn,
+                  isDark && { backgroundColor: "#1E293B", borderColor: colors.border },
+                ]}
+                onPress={() => router.push(ROUTES.SCREENS.EXPLORE_TRIPS)}
+              >
+                <Text style={[styles.emptyFlightsBtnText, isDark && { color: colors.text }]}>
+                  Explore Trips
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : loading ? (
           <View style={styles.loadingWrapper}>
             <ActivityIndicator size="small" color={TRIP_BLUE} />
           </View>
@@ -681,11 +748,12 @@ export default function TripsTab() {
               const image = hotel?.image_url || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500";
               const status = booking.status || "Confirmed";
               const price = booking.total_price || booking.amount || hotel?.base_price || 120;
+              const sourceCurrency = booking.currency || (hotel ? "USD" : "BDT");
 
               return (
                 <Pressable
                   key={booking.id}
-                  style={styles.hotelCard}
+                  style={[styles.hotelCard, { backgroundColor: colors.card, borderColor: colors.border }]}
                   onPress={() => {
                     setManageBooking(booking);
                     setShowManageModal(true);
@@ -696,7 +764,7 @@ export default function TripsTab() {
                   <View style={styles.hotelCardContent}>
                     <View style={styles.statusBadgeRow}>
                       <View style={[styles.statusIndicator, { backgroundColor: status === "cancelled" ? "#EF4444" : "#10B981" }]} />
-                      <Text style={styles.statusBadgeText}>{status.toUpperCase()}</Text>
+                      <Text style={[styles.statusBadgeText, { color: colors.textSecondary }]}>{status.toUpperCase()}</Text>
                       <Pressable
                         style={styles.topManageBtn}
                         onPress={() => {
@@ -705,29 +773,35 @@ export default function TripsTab() {
                         }}
                       >
                         <Ionicons name="swap-horizontal" size={11} color="#DC2626" />
-                        <Text style={styles.topManageBtnText}>পরিবর্তন / বাতিল</Text>
+                        <Text style={styles.topManageBtnText}>Manage</Text>
                       </Pressable>
                     </View>
 
-                    <Text style={styles.hotelName} numberOfLines={2}>
+                    <Text style={[styles.hotelName, { color: colors.text }]} numberOfLines={2}>
                       {title}
                     </Text>
 
-                    <Text style={styles.bookingDatesText}>
+                    <Text style={[styles.bookingDatesText, { color: colors.textSecondary }]}>
                       {booking.check_in_date ? `Check-in: ${booking.check_in_date}` : (booking.travel_date ? `Date: ${booking.travel_date}` : `Ref: ${booking.id?.slice(0, 8)}`)}
                     </Text>
 
                     <View style={styles.priceRow}>
-                      <Text style={styles.priceText}>{formatPrice(price)}</Text>
-                      <View style={styles.pinkDiscountBadge}>
-                        <Text style={styles.pinkDiscountText} onPress={() => {
+                      <Text style={[styles.priceText, { color: colors.text }]}>
+                        {formatSourcePrice(price, sourceCurrency)}
+                      </Text>
+                      <Pressable
+                        style={styles.pinkDiscountBadge}
+                        onPress={(e) => {
+                          e?.stopPropagation?.();
                           calendarService.addToCalendar({
                             title: `ভ্রমণ: ${title}`,
                             description: `বুকিং #${booking.booking_reference || booking.id?.slice(0, 8)}`,
                             startDate: new Date(booking.travel_date || booking.check_in_date || Date.now() + 86400000),
                           });
-                        }}>+ ক্যালেন্ডার</Text>
-                      </View>
+                        }}
+                      >
+                        <Text style={styles.pinkDiscountText}>+ Calendar</Text>
+                      </Pressable>
                     </View>
                   </View>
                 </Pressable>
@@ -735,10 +809,10 @@ export default function TripsTab() {
             }}
           />
         ) : (
-          <View style={styles.emptyBookingsCard}>
+          <View style={[styles.emptyBookingsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Ionicons name="calendar-outline" size={44} color="#94A3B8" />
-            <Text style={styles.emptyTitle}>No Trips Yet</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>No Trips Yet</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
               You don't have any active bookings. Explore verified hotels, flights, and trains to begin your journey.
             </Text>
             <View style={styles.emptyButtonsRow}>
@@ -779,10 +853,10 @@ export default function TripsTab() {
 
         {/* "Travelers' favorites" Section from Live Supabase Posts */}
         <View style={styles.favoritesSectionHeader}>
-          <Text style={styles.favoritesTitle}>Travelers' favorites</Text>
+          <Text style={[styles.favoritesTitle, { color: colors.text }]}>Travelers' favorites</Text>
           <Pressable
             style={styles.momentsLinkRow}
-            onPress={() => router.push("/screens/community" as Href)}
+            onPress={() => router.push("/(tabs)/community" as Href)}
           >
             <Text style={styles.momentsLinkText}>Moments</Text>
             <Ionicons name="chevron-forward" size={14} color={TRIP_BLUE} />
@@ -802,7 +876,12 @@ export default function TripsTab() {
               <Pressable
                 key={post.id}
                 style={styles.favoriteCard}
-                onPress={() => router.push("/screens/community" as Href)}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(tabs)/community" as any,
+                    params: { postId: post.id },
+                  })
+                }
               >
                 <Image source={{ uri: image }} style={styles.favoriteCardImage} />
 

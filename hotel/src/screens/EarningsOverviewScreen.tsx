@@ -1,144 +1,225 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { hotelService, HotelTelemetry } from '../services/hotelService';
 
-export function EarningsOverviewScreen() {
+export function EarningsOverviewScreen({ navigation }: any) {
+  const [telemetry, setTelemetry] = useState<HotelTelemetry | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [payoutModalVisible, setPayoutModalVisible] = useState(false);
+  const [payoutAmount, setPayoutAmount] = useState('');
+  const [payoutMethod, setPayoutMethod] = useState<'bkash' | 'nagad' | 'bank_transfer'>('bkash');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const loadData = async () => {
+    try {
+      const data = await hotelService.getTelemetry();
+      setTelemetry(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleRequestPayout = async () => {
+    const amount = parseFloat(payoutAmount);
+    if (!amount || amount < 1000) {
+      Alert.alert('Invalid Amount', 'Minimum withdrawal request is BDT 1,000.');
+      return;
+    }
+    if (!accountNumber.trim()) {
+      Alert.alert('Required Account', 'Please enter your destination account number.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await hotelService.requestPayout({
+        amountBdt: amount,
+        channel: payoutMethod,
+        accountNumber: accountNumber.trim(),
+      });
+      if (res.success) {
+        setPayoutModalVisible(false);
+        setPayoutAmount('');
+        setAccountNumber('');
+        Alert.alert(
+          'Payout Request Submitted',
+          `Withdrawal request for ৳${amount.toLocaleString()} via ${payoutMethod.toUpperCase()} has been submitted. Payout Ref: ${res.payoutId}`
+        );
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to submit withdrawal request.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading || !telemetry) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#0f111a] justify-center items-center">
+        <ActivityIndicator size="large" color="#6366f1" />
+      </SafeAreaView>
+    );
+  }
+
+  const { gm } = telemetry;
+  const netEarnings = Math.round(gm.monthlyRevenue * 0.88); // Net after platform service fee
+
   return (
     <SafeAreaView className="flex-1 bg-[#0f111a]">
       <StatusBar barStyle="light-content" />
 
       {/* Header */}
-      <View className="p-4 flex-row items-center justify-between">
+      <View className="p-4 flex-row items-center justify-between border-b border-white/5">
         <View className="flex-row items-center space-x-4">
-          <TouchableOpacity className="p-2 bg-white/5 rounded-full">
-            <MaterialIcons name="arrow-back" size={24} color="white" />
+          <TouchableOpacity className="p-2 bg-white/5 rounded-full" onPress={() => navigation?.goBack?.()}>
+            <MaterialIcons name="arrow-back" size={22} color="white" />
           </TouchableOpacity>
-          <Text className="text-xl font-semibold text-white">Earnings Overview</Text>
+          <Text className="text-lg font-bold text-white ms-2">Revenue & Earnings</Text>
         </View>
-        <TouchableOpacity className="p-2 bg-white/5 rounded-full">
-          <MaterialIcons name="calendar-today" size={22} color="#94a3b8" />
+        <TouchableOpacity
+          className="bg-emerald-600 px-3 py-1.5 rounded-xl flex-row items-center"
+          onPress={() => setPayoutModalVisible(true)}
+        >
+          <MaterialIcons name="account-balance-wallet" size={16} color="white" />
+          <Text className="text-white text-xs font-bold ms-1">Withdraw</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-        {/* Time Selector */}
-        <TouchableOpacity className="mb-6 bg-[#1a1c2e] p-3 rounded-xl border border-white/5 flex-row justify-between items-center">
-          <Text className="text-sm font-medium text-white">This Month</Text>
-          <MaterialIcons name="keyboard-arrow-down" size={20} color="#94a3b8" />
-        </TouchableOpacity>
+        {/* Total Net Balance Card */}
+        <LinearGradient
+          colors={['#1e1b4b', '#312e81']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="p-6 rounded-[28px] mt-4 mb-4 border border-indigo-500/20 shadow-xl"
+        >
+          <Text className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">Available Hotel Balance</Text>
+          <Text className="text-3xl font-extrabold text-white mt-1">৳{netEarnings.toLocaleString()}</Text>
+          <Text className="text-[11px] text-indigo-200 mt-1">
+            Total Gross Revenue: ৳{gm.monthlyRevenue.toLocaleString()} (+{gm.revenueGrowth}% MoM)
+          </Text>
 
-        {/* Total Earnings Card */}
-        <View className="bg-[#1a1c2e] p-5 rounded-[32px] mb-6 border border-white/5">
-          <View className="flex-row justify-between items-start mb-4">
+          <View className="flex-row justify-between items-center mt-5 pt-4 border-t border-indigo-400/20">
             <View>
-              <Text className="text-sm text-[#94a3b8] mb-1">Total Earnings</Text>
-              <Text className="text-3xl font-bold text-white">$24,850</Text>
-              <View className="flex-row items-center mt-1">
-                <MaterialIcons name="trending-up" size={14} color="#22c55e" />
-                <Text className="text-xs text-[#22c55e] font-bold ms-1">24.5% </Text>
-                <Text className="text-[#94a3b8] text-[10px]">vs last month</Text>
-              </View>
+              <Text className="text-[10px] text-indigo-300">Avg Daily Rate (ADR)</Text>
+              <Text className="text-sm font-bold text-white mt-0.5">৳{gm.adr.toLocaleString()}</Text>
             </View>
-            <TouchableOpacity className="px-3 py-1 bg-white/10 rounded-lg">
-              <Text className="text-white text-xs font-medium">Details</Text>
-            </TouchableOpacity>
+            <View>
+              <Text className="text-[10px] text-indigo-300">RevPAR</Text>
+              <Text className="text-sm font-bold text-white mt-0.5">৳{gm.revPar.toLocaleString()}</Text>
+            </View>
+            <View>
+              <Text className="text-[10px] text-indigo-300">Occupancy</Text>
+              <Text className="text-sm font-bold text-emerald-400 mt-0.5">{gm.occupancyRate}%</Text>
+            </View>
           </View>
+        </LinearGradient>
 
-          {/* Simple Chart Visualization */}
-          <View className="h-32 w-full mt-4 justify-end">
-             <View className="flex-row items-end justify-between h-24">
-                {[30, 45, 35, 60, 50, 80, 70, 90, 85].map((h, i) => (
-                   <View key={i} className="w-1.5 bg-[#7c3aed]/20 rounded-full h-full justify-end">
-                      <View className="w-full bg-[#7c3aed] rounded-full" style={{ height: `${h}%` }} />
-                   </View>
-                ))}
-             </View>
-             <View className="flex-row justify-between mt-2">
-                <Text className="text-[10px] text-gray-500 font-medium">1 May</Text>
-                <Text className="text-[10px] text-gray-500 font-medium">15 May</Text>
-                <Text className="text-[10px] text-gray-500 font-medium">29 May</Text>
-             </View>
-          </View>
-        </View>
-
-        {/* Earnings Breakdown */}
-        <View className="mb-8">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="font-semibold text-white">Earnings Breakdown</Text>
-            <TouchableOpacity>
-              <Text className="text-indigo-400 text-sm">View All</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="space-y-4">
-            <BreakdownItem icon="king-bed" label="Room Revenue" value="$18,250" trend="+18.6%" color="#818cf8" iconBg="bg-indigo-500/20" />
-            <BreakdownItem icon="restaurant" label="Restaurant Revenue" value="$4,850" trend="+12.4%" color="#fb923c" iconBg="bg-orange-500/20" />
-            <BreakdownItem icon="spa" label="Other Services" value="$1,750" trend="+8.7%" color="#2dd4bf" iconBg="bg-teal-500/20" />
-          </View>
-        </View>
-
-        {/* Recent Transactions */}
-        <View className="mb-24">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="font-semibold text-white">Recent Transactions</Text>
-            <TouchableOpacity>
-              <Text className="text-indigo-400 text-sm">View All</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="space-y-4">
-            <TransactionItem id="#R-88211" title="Booking #R-88211" date="26 May 2024, 10:30 AM" amount="+ $240.00" status="Completed" />
-            <TransactionItem id="Bill-12" title="Restaurant Bill" date="26 May 2024, 01:15 PM" amount="+ $85.00" status="Completed" />
+        {/* Revenue Breakdown */}
+        <View className="bg-[#1a1c2e] p-5 rounded-2xl border border-white/5 mb-4">
+          <Text className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Live Yield Indicators</Text>
+          <View className="space-y-3">
+            <View className="flex-row justify-between py-2 border-b border-slate-800">
+              <Text className="text-xs text-slate-400">Total Operational Rooms</Text>
+              <Text className="text-xs font-semibold text-white">12 Premium Units</Text>
+            </View>
+            <View className="flex-row justify-between py-2 border-b border-slate-800">
+              <Text className="text-xs text-slate-400">Platform Commission</Text>
+              <Text className="text-xs font-semibold text-amber-400">12%</Text>
+            </View>
+            <View className="flex-row justify-between py-2 border-b border-slate-800">
+              <Text className="text-xs text-slate-400">VAT & City Tax Included</Text>
+              <Text className="text-xs font-semibold text-emerald-400">5% Gov VAT / 10% Service</Text>
+            </View>
+            <View className="flex-row justify-between py-2">
+              <Text className="text-xs text-slate-400">Payout Settlement Frequency</Text>
+              <Text className="text-xs font-semibold text-indigo-300">Instant bKash / T+1 Bank</Text>
+            </View>
           </View>
         </View>
       </ScrollView>
+
+      {/* Payout Withdrawal Modal */}
+      <Modal visible={payoutModalVisible} transparent animationType="fade">
+        <View className="flex-1 bg-black/75 justify-center items-center p-6">
+          <View className="bg-[#1a1c2e] w-full rounded-3xl p-6 border border-white/10">
+            <Text className="text-base font-bold text-white mb-2">Request Payout Withdrawal</Text>
+            <Text className="text-xs text-slate-400 mb-4">
+              Withdraw earnings to your designated Bangladesh business account:
+            </Text>
+
+            <TextInput
+              placeholder="Withdrawal Amount (BDT, min 1000)"
+              placeholderTextColor="#64748b"
+              keyboardType="numeric"
+              value={payoutAmount}
+              onChangeText={setPayoutAmount}
+              className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs mb-3"
+            />
+
+            <View className="flex-row space-x-2 mb-3">
+              {(['bkash', 'nagad', 'bank_transfer'] as const).map((method) => (
+                <TouchableOpacity
+                  key={method}
+                  className={`flex-1 py-2 rounded-xl items-center border ${
+                    payoutMethod === method ? 'bg-indigo-600 border-indigo-400' : 'bg-slate-800 border-slate-700'
+                  }`}
+                  onPress={() => setPayoutMethod(method)}
+                >
+                  <Text className="text-[10px] font-bold text-white uppercase">{method.replace('_', ' ')}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TextInput
+              placeholder="bKash / Nagad / Account Number"
+              placeholderTextColor="#64748b"
+              keyboardType="phone-pad"
+              value={accountNumber}
+              onChangeText={setAccountNumber}
+              className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs mb-4"
+            />
+
+            <View className="flex-row space-x-3">
+              <TouchableOpacity
+                className="flex-1 py-3 bg-slate-800 rounded-xl items-center"
+                onPress={() => setPayoutModalVisible(false)}
+              >
+                <Text className="text-slate-300 font-semibold text-xs">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 py-3 bg-emerald-600 rounded-xl items-center"
+                onPress={handleRequestPayout}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text className="text-white font-bold text-xs">Submit Request</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
-  );
-}
-
-function BreakdownItem({ icon, label, value, trend, color, iconBg }: any) {
-  return (
-    <View className="flex-row items-center justify-between">
-      <View className="flex-row items-center space-x-3">
-        <View className={`w-10 h-10 rounded-xl ${iconBg} items-center justify-center`}>
-          <MaterialIcons name={icon} size={20} color={color} />
-        </View>
-        <Text className="text-sm font-medium text-white">{label}</Text>
-      </View>
-      <View className="items-end">
-        <Text className="text-sm font-bold text-white">{value}</Text>
-        <Text className="text-[10px] text-green-500">↑ {trend}</Text>
-      </View>
-    </View>
-  );
-}
-
-function TransactionItem({ title, date, amount, status }: any) {
-  return (
-    <View className="flex-row items-center justify-between">
-      <View className="flex-row items-center space-x-3">
-        <View className="w-10 h-10 rounded-xl bg-indigo-500/20 items-center justify-center">
-          <MaterialIcons name="receipt-long" size={20} color="#818cf8" />
-        </View>
-        <View>
-          <Text className="text-sm font-medium text-white">{title}</Text>
-          <Text className="text-[10px] text-[#94a3b8]">{date}</Text>
-        </View>
-      </View>
-      <View className="items-end">
-        <Text className="text-sm font-bold text-white">{amount}</Text>
-        <View className="px-2 py-0.5 bg-green-500/20 rounded-full mt-1">
-          <Text className="text-[10px] text-green-400">{status}</Text>
-        </View>
-      </View>
-    </View>
   );
 }

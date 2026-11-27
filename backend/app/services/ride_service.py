@@ -289,6 +289,25 @@ class RideService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def _require_active_vehicle(self, rider: RiderProfile) -> RiderVehicle:
+        """Return the rider's selected active vehicle, rejecting stale or mismatched profiles."""
+        if rider.active_vehicle_id is None:
+            raise BadRequestError("Register and select an active vehicle before viewing or claiming jobs")
+        vehicle = (
+            await self.db.execute(
+                select(RiderVehicle).where(
+                    RiderVehicle.id == rider.active_vehicle_id,
+                    RiderVehicle.rider_id == rider.id,
+                    RiderVehicle.is_active.is_(True),
+                )
+            )
+        ).scalar_one_or_none()
+        if not vehicle:
+            raise BadRequestError("Selected vehicle is unavailable; choose an active registered vehicle")
+        if vehicle.vehicle_mode != rider.active_vehicle_mode:
+            raise BadRequestError("Selected vehicle mode does not match the registered vehicle")
+        return vehicle
+
     # -------------------------------------------------------------------------
     # 1. RIDER PROFILE, VEHICLES & DUTY STATUS
     # -------------------------------------------------------------------------
@@ -340,8 +359,6 @@ class RideService:
             profile.full_name = request.full_name
         if request.phone is not None:
             profile.phone = request.phone
-        if request.active_vehicle_mode is not None:
-            profile.active_vehicle_mode = request.active_vehicle_mode.value
         if request.active_vehicle_id is not None:
             vehicle = (
                 await self.db.execute(
@@ -355,6 +372,22 @@ class RideService:
                 raise NotFoundError("RiderVehicle", request.active_vehicle_id)
             profile.active_vehicle_id = vehicle.id
             profile.active_vehicle_mode = vehicle.vehicle_mode
+        elif request.active_vehicle_mode is not None:
+            if profile.active_vehicle_id is not None:
+                vehicle = (
+                    await self.db.execute(
+                        select(RiderVehicle).where(
+                            RiderVehicle.id == profile.active_vehicle_id,
+                            RiderVehicle.rider_id == profile.id,
+                            RiderVehicle.is_active.is_(True),
+                        )
+                    )
+                ).scalar_one_or_none()
+                if not vehicle or vehicle.vehicle_mode != request.active_vehicle_mode.value:
+                    raise BadRequestError(
+                        "Active vehicle mode must match the selected registered vehicle; select another vehicle instead"
+                    )
+            profile.active_vehicle_mode = request.active_vehicle_mode.value
         if request.home_city is not None:
             profile.home_city = request.home_city
         if request.service_zones is not None:
@@ -657,9 +690,12 @@ class RideService:
             raise PermissionDeniedError("Rider must be active and KYC verified to view dispatch jobs")
         if rider.duty_status != "online":
             raise BadRequestError("Rider must be online and available to view dispatch jobs")
+        active_vehicle = await self._require_active_vehicle(rider)
+        if vehicle_mode not in (None, "all", active_vehicle.vehicle_mode):
+            raise BadRequestError("Rider can only view rides matching the selected vehicle")
         now = datetime.now(timezone.utc)
 
-        effective_mode = vehicle_mode or rider.active_vehicle_mode
+        effective_mode = active_vehicle.vehicle_mode
         ride_stmt = select(RideRequest).where(
             RideRequest.status == "searching",
             RideRequest.expires_at > now,
@@ -688,6 +724,7 @@ class RideService:
             raise PermissionDeniedError("Rider must be active and KYC verified to claim jobs")
         if rider.duty_status != "online":
             raise BadRequestError(f"Rider must be online and available to claim jobs (current: {rider.duty_status})")
+        active_vehicle = await self._require_active_vehicle(rider)
 
         now = datetime.now(timezone.utc)
 
@@ -702,7 +739,7 @@ class RideService:
                     raise NotFoundError("RideRequest", request.target_id)
                 if ride_req.status != "searching" or _as_utc(ride_req.expires_at) <= now:
                     raise ConflictError("Ride request unavailable or already claimed")
-                if ride_req.vehicle_mode != rider.active_vehicle_mode:
+                if ride_req.vehicle_mode != active_vehicle.vehicle_mode:
                     raise ConflictError("Ride request requires a different vehicle mode")
             else:
                 ride_req = (

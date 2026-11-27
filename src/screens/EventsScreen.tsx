@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Platform,
   ActivityIndicator,
+  Alert,
   Image,
   Modal,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -17,6 +19,8 @@ import { router } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { supabase } from "../utils/supabase";
 import { RTLIcon } from "../components/ui";
+import { useTheme } from "../context/ThemeContext";
+import { formatSourcePrice } from "../utils/currency";
 
 // Event Data Interface
 interface EventItem {
@@ -26,6 +30,9 @@ interface EventItem {
   date: string;
   location: string;
   price: string;
+  rawPrice: number;
+  currency: string;
+  category: string;
   status: "Upcoming" | "On Sale" | "Sold Out" | "Featured";
   badgeColor: string;
   poster: string;
@@ -48,6 +55,7 @@ const LOCATIONS = ["Global", "Bangkok", "Taipei", "Tokyo", "Seoul", "Singapore",
 
 export function EventsScreen() {
   const insets = useSafeAreaInsets();
+  const { colors, isDark } = useTheme();
 
   // State
   const [popularEvents, setPopularEvents] = useState<EventItem[]>([]);
@@ -69,21 +77,38 @@ export function EventsScreen() {
     async function loadLiveExperiences() {
       setLoading(true);
       try {
-        const { data, error } = await supabase.from("tours").select("*");
+        const { data } = await supabase.from("tours").select("*");
         if (data && data.length > 0) {
-          const mapped: EventItem[] = data.map((t: any) => ({
-            id: t.id,
-            title: t.title,
-            artist: t.destination_city || "Live Event",
-            date: t.duration_text || "Flexible Dates",
-            location: t.destination_city || "Global",
-            price: `USD${t.price}.00`,
-            status: t.is_featured ? "Featured" : "On Sale",
-            badgeColor: t.is_featured ? "#FFF1F2" : "#F3E8FF",
-            poster: (t.image_urls && t.image_urls[0]) || "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=600&q=80",
-            venue: `${t.destination_city || "City"} Experience Center`,
-            description: t.description || "Live immersive cultural and entertainment experience.",
-          }));
+          const mapped: EventItem[] = data.map((t: any) => {
+            const rawPrice = Number(t.price) || 45;
+            const currency = t.currency || "USD";
+            const rawCat = String(t.category || t.tour_type || "").toLowerCase();
+            const inferredCat = rawCat.includes("concert") || rawCat.includes("music")
+              ? "concerts"
+              : rawCat.includes("exhibit") || rawCat.includes("museum") || rawCat.includes("art")
+              ? "exhibitions"
+              : rawCat.includes("sport") || rawCat.includes("adventure")
+              ? "sports"
+              : rawCat.includes("show") || rawCat.includes("musical") || rawCat.includes("cultural")
+              ? "musicals"
+              : "concerts";
+            return {
+              id: t.id,
+              title: t.title,
+              artist: t.destination_city || "Live Event",
+              date: t.duration_text || "Flexible Dates",
+              location: t.destination_city || "Global",
+              price: formatSourcePrice(rawPrice, currency),
+              rawPrice,
+              currency,
+              category: inferredCat,
+              status: t.is_featured ? "Featured" : "On Sale",
+              badgeColor: t.is_featured ? "#FFF1F2" : "#F3E8FF",
+              poster: (t.image_urls && t.image_urls[0]) || "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=600&q=80",
+              venue: `${t.destination_city || "City"} Experience Center`,
+              description: t.description || "Live immersive cultural and entertainment experience.",
+            };
+          });
           setPopularEvents(mapped.slice(0, 3));
           setAvailableSoonEvents(mapped.slice(3));
         } else {
@@ -101,17 +126,48 @@ export function EventsScreen() {
     loadLiveExperiences();
   }, []);
 
-  // Search filter logic
-  const filteredPopular = popularEvents.filter((evt) =>
-    evt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    evt.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    evt.location.toLowerCase().includes(searchQuery.toLowerCase())
+  const matchesFilters = (evt: EventItem) => {
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      evt.title.toLowerCase().includes(q) ||
+      evt.artist.toLowerCase().includes(q) ||
+      evt.location.toLowerCase().includes(q);
+    const matchesLoc =
+      selectedLocation === "Global" ||
+      evt.location.toLowerCase().includes(selectedLocation.toLowerCase());
+    const matchesTag =
+      selectedTag === "all" ||
+      evt.category === selectedTag ||
+      evt.title.toLowerCase().includes(selectedTag) ||
+      evt.description.toLowerCase().includes(selectedTag);
+    return matchesSearch && matchesLoc && matchesTag;
+  };
+
+  const filteredPopular = useMemo(
+    () => popularEvents.filter(matchesFilters),
+    [popularEvents, searchQuery, selectedLocation, selectedTag]
   );
 
+  const filteredSoon = useMemo(
+    () => availableSoonEvents.filter(matchesFilters),
+    [availableSoonEvents, searchQuery, selectedLocation, selectedTag]
+  );
+
+  const handleShareEvent = async (evt?: EventItem | null) => {
+    try {
+      await Share.share({
+        message: evt
+          ? `Check out ${evt.title} (${evt.location}) starting at ${evt.price} on Shopno Jatra!`
+          : `Discover live concerts, exhibitions & tours on Shopno Jatra!`,
+      });
+    } catch {}
+  };
+
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top", "left", "right"]}>
       {/* ─── Top Navigation & Search Bar Header ────────────────────────────── */}
-      <View style={styles.headerRow}>
+      <View style={[styles.headerRow, { backgroundColor: colors.background }]}>
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => {
@@ -123,15 +179,20 @@ export function EventsScreen() {
           }}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <RTLIcon name="arrow-back" size={24} color="#0F172A" />
+          <RTLIcon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
 
-        <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={18} color="#64748B" />
+        <View
+          style={[
+            styles.searchBar,
+            { backgroundColor: colors.card, borderColor: colors.border },
+          ]}
+        >
+          <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Search an artist or show"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -139,10 +200,10 @@ export function EventsScreen() {
 
         <TouchableOpacity
           style={styles.shareBtn}
-          onPress={() => setShowClaimModal(true)}
+          onPress={() => handleShareEvent(null)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="share-social-outline" size={22} color="#0F172A" />
+          <Ionicons name="share-social-outline" size={22} color={colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -153,7 +214,7 @@ export function EventsScreen() {
         {/* ─── Title Section ("Events. Global ∨") ─────────────────────────── */}
         <View style={styles.titleRow}>
           <View style={styles.titleLeft}>
-            <Text style={styles.titleText}>Events</Text>
+            <Text style={[styles.titleText, { color: colors.text }]}>Events</Text>
             <View style={styles.yellowDot} />
           </View>
 
@@ -162,8 +223,8 @@ export function EventsScreen() {
             onPress={() => setShowLocationModal(true)}
             activeOpacity={0.7}
           >
-            <Text style={styles.locationText}>{selectedLocation}</Text>
-            <Ionicons name="chevron-down" size={18} color="#1E293B" />
+            <Text style={[styles.locationText, { color: colors.text }]}>{selectedLocation}</Text>
+            <Ionicons name="chevron-down" size={18} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -510,7 +571,9 @@ export function EventsScreen() {
                 <Ionicons name="close" size={24} color="#0F172A" />
               </TouchableOpacity>
               <Text style={styles.eventModalTitle}>Event Details</Text>
-              <Ionicons name="share-outline" size={22} color="#0F172A" />
+              <TouchableOpacity onPress={() => handleShareEvent(selectedEvent)}>
+                <Ionicons name="share-outline" size={22} color="#0F172A" />
+              </TouchableOpacity>
             </View>
 
             <ScrollView style={{ padding: 16 }}>
@@ -535,8 +598,18 @@ export function EventsScreen() {
               <TouchableOpacity
                 style={styles.bookTicketBtn}
                 onPress={() => {
-                  alert(`Tickets reserved for ${selectedEvent.title}!`);
+                  const ev = selectedEvent;
                   setSelectedEvent(null);
+                  router.push({
+                    pathname: "/screens/payments" as any,
+                    params: {
+                      amount: String(ev.rawPrice || 500),
+                      currency: ev.currency || "BDT",
+                      title: ev.title,
+                      subtitle: `${ev.venue} • ${ev.date}`,
+                      bookingType: "event",
+                    },
+                  });
                 }}
               >
                 <Text style={styles.bookTicketText}>Buy Tickets</Text>

@@ -17,14 +17,21 @@ export class UpdateCommissionSplitCommand implements AdminCommand<{ splits: Reco
   ) {}
 
   async execute(admin: AdminUser) {
-    try {
-      await supabase.from("system_settings").upsert({
-        setting_key: "commission_splits",
-        setting_value: JSON.stringify(this.splits),
-        updated_at: new Date().toISOString(),
-      });
-    } catch (e) {
-      console.warn("Supabase commission setting error (handled):", e);
+    const { error } = await supabase
+      .from("system_settings")
+      .upsert(
+        {
+          setting_key: "commission_splits",
+          setting_value: JSON.stringify(this.splits),
+          setting_type: "json",
+          updated_by: admin.id,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "setting_key" }
+      );
+
+    if (error) {
+      throw new Error(error.message || "Failed to persist commission splits.");
     }
 
     return { splits: this.splits };
@@ -54,7 +61,17 @@ export class ApprovePartnerPayoutCommand implements AdminCommand<{ payoutId: str
   ) {}
 
   async execute(admin: AdminUser) {
-    return { payoutId: this.entityId, status: "processed" };
+    const { error } = await supabase
+      .from("payouts")
+      .update({
+        status: "approved",
+      })
+      .eq("id", this.entityId)
+      .eq("status", "draft");
+    if (error) {
+      throw new Error(error.message || "Failed to approve partner payout.");
+    }
+    return { payoutId: this.entityId, status: "approved" };
   }
 
   toAuditDetails(admin: AdminUser, result: any) {
@@ -62,7 +79,7 @@ export class ApprovePartnerPayoutCommand implements AdminCommand<{ payoutId: str
       payout_id: this.entityId,
       agency_name: this.agencyName,
       settlement_amount: this.amount,
-      status: "Disbursed to settlement banking node",
+      status: "Approved for disbursement",
       operator: admin.name || admin.user_id,
       timestamp: new Date().toISOString(),
     };

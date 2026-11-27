@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { Tabs, useRouter, usePathname } from "expo-router";
+import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { useResponsive } from "@/hooks/useResponsive";
 
@@ -57,6 +58,13 @@ function DesktopSidebar() {
 
 export default function ProviderLayout() {
   const { isDesktop } = useResponsive();
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) router.replace("/login" as any);
+    });
+  }, [router]);
   if (isDesktop) {
     return (
       <View style={styles.desktopContainer}>

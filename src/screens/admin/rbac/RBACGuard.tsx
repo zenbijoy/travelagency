@@ -40,7 +40,7 @@ export const RBACGuard: React.FC<RBACGuardProps> = ({
         <View style={styles.bannerTextContainer}>
           <Text style={styles.bannerTitle}>Administrative Permission Required</Text>
           <Text style={styles.bannerDescription}>
-            Your active role ({role}) does not hold the required privilege:{" "}
+            Your active role ({role ?? "guest"}) does not hold the required privilege:{" "}
             <Text style={{ fontWeight: "700" }}>{permission}</Text>. Contact a Super Admin for access.
           </Text>
         </View>
@@ -72,7 +72,7 @@ export const AccessDeniedScreen: React.FC<{
         Module: <Text style={{ fontWeight: "700" }}>{tabName || "Restricted Section"}</Text>
       </Text>
       <Text style={styles.deniedMessage}>
-        Your current administrative credential ({role.toUpperCase()}) does not possess the
+        Your current administrative credential ({(role ?? "guest").toUpperCase()}) does not possess the
         authorization matrix required to inspect or execute operations on this module.
         {requiredRole ? ` Requires role: ${requiredRole}.` : ""}
       </Text>

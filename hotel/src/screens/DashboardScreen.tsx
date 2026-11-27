@@ -14,7 +14,8 @@ import { MaterialIcons, MaterialCommunityIcons, Ionicons } from '@expo/vector-ic
 import { LinearGradient } from 'expo-linear-gradient';
 import { useHotelRBAC, HOTEL_ROLES_META } from '../context/HotelRBACContext';
 import { hotelService, HotelTelemetry } from '../services/hotelService';
-import { subscribeToHotelRealtime } from '../services/hotelRealtimeBridge';
+import { initHotelRealtimeBridge, subscribeToHotelRealtime } from '../services/hotelRealtimeBridge';
+import { supabase } from '../lib/supabase';
 
 export function DashboardScreen({ navigation }: any) {
   const { role, switchRole, roleMeta } = useHotelRBAC();
@@ -23,6 +24,9 @@ export function DashboardScreen({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
   const [telemetry, setTelemetry] = useState<HotelTelemetry | null>(null);
   const [roomStats, setRoomStats] = useState({ total: 70, available: 18, occupied: 35, maintenance: 5 });
+  const [activeHotelId, setActiveHotelId] = useState<string>('');
+  const [alertsModalVisible, setAlertsModalVisible] = useState(false);
+  const [hotelAlerts, setHotelAlerts] = useState<Array<{ id: string; title: string; body: string; hotelId: string; isRead: boolean; createdAt: string }>>([]);
 
   const loadData = async () => {
     try {
@@ -31,6 +35,31 @@ export function DashboardScreen({ navigation }: any) {
         hotelService.getRoomCategories(),
       ]);
       setTelemetry(tData);
+      const userRes = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+      const scopedHotelId = String(
+        userRes?.data?.user?.user_metadata?.hotel_id || userRes?.data?.user?.id || ''
+      );
+      if (scopedHotelId) {
+        setActiveHotelId(scopedHotelId);
+        const { data: scopedRows } = await supabase
+          .from('bookings')
+          .select('id, booking_reference, status, created_at')
+          .eq('hotel_id', scopedHotelId)
+          .order('created_at', { ascending: false })
+          .limit(8);
+        if (scopedRows) {
+          setHotelAlerts(
+            scopedRows.map((row: any) => ({
+              id: `htl-bk-${row.id}`,
+              title: `Reservation ${row.booking_reference || row.id}`,
+              body: `Status: ${String(row.status || 'pending').toUpperCase()}`,
+              hotelId: scopedHotelId,
+              isRead: false,
+              createdAt: row.created_at || new Date().toISOString(),
+            }))
+          );
+        }
+      }
       setRoomStats({
         total: rData.stats.total,
         available: rData.stats.available,
@@ -46,10 +75,29 @@ export function DashboardScreen({ navigation }: any) {
 
   useEffect(() => {
     loadData();
-    const unsub = subscribeToHotelRealtime(() => {
+    const stopBridge = initHotelRealtimeBridge(activeHotelId || undefined);
+    const unsub = subscribeToHotelRealtime((table, payload) => {
+      const rec = (payload?.new || payload?.old) as Record<string, any> | undefined;
+      if (activeHotelId && rec?.hotel_id && String(rec.hotel_id) !== activeHotelId) return;
+      if (rec) {
+        setHotelAlerts((prev) => [
+          {
+            id: `htl-rt-${table}-${rec.id || Date.now()}`,
+            title: `${table === 'hotel_rooms' ? 'Room Status' : 'Reservation'} Updated`,
+            body: `Ref: ${rec.booking_reference || rec.room_number || rec.id || 'Update'}`,
+            hotelId: activeHotelId || String(rec.hotel_id || ''),
+            isRead: false,
+            createdAt: new Date().toISOString(),
+          },
+          ...prev.slice(0, 19),
+        ]);
+      }
       loadData();
     });
-    return () => unsub();
+    return () => {
+      unsub();
+      stopBridge();
+    };
   }, []);
 
   const onRefresh = async () => {
@@ -119,7 +167,7 @@ export function DashboardScreen({ navigation }: any) {
             <Ionicons name="chevron-down" size={12} color={roleMeta.color} />
           </TouchableOpacity>
 
-          <TouchableOpacity className="w-9 h-9 bg-white/10 rounded-xl items-center justify-center">
+          <TouchableOpacity className="w-9 h-9 bg-white/10 rounded-xl items-center justify-center" onPress={() => setAlertsModalVisible(true)} accessibilityLabel="Open Hotel Scoped Alerts">
             <MaterialIcons name="notifications-none" size={20} color="white" />
             <View className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[#0b1326]" />
           </TouchableOpacity>
@@ -353,6 +401,62 @@ export function DashboardScreen({ navigation }: any) {
                 </TouchableOpacity>
               );
             })}
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        visible={alertsModalVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setAlertsModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.72)', justifyContent: 'center', padding: 16 }}>
+          <View style={{ backgroundColor: '#111827', borderRadius: 18, padding: 16, maxHeight: '75%', borderWidth: 1, borderColor: '#334155' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <View>
+                <Text style={{ fontSize: 16, fontWeight: '700', color: '#ffffff' }}>Hotel Alerts</Text>
+                <Text style={{ fontSize: 11, color: '#94a3b8' }}>Property Scope: {activeHotelId || 'unassigned'}</Text>
+              </View>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <TouchableOpacity onPress={() => setHotelAlerts((prev) => prev.map((a) => ({ ...a, isRead: true })))}>
+                  <Text style={{ color: '#a78bfa', fontSize: 12, fontWeight: '700' }}>Mark all read</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setAlertsModalVisible(false)}>
+                  <Ionicons name="close" size={20} color="#94a3b8" />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <ScrollView>
+              {hotelAlerts.filter((a) => !activeHotelId || a.hotelId === activeHotelId).length === 0 ? (
+                <Text style={{ color: '#94a3b8', textAlign: 'center', paddingVertical: 20 }}>
+                  No operational alerts for this hotel property.
+                </Text>
+              ) : (
+                hotelAlerts
+                  .filter((a) => !activeHotelId || a.hotelId === activeHotelId)
+                  .map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={{
+                        backgroundColor: item.isRead ? '#1f2937' : 'rgba(124, 58, 237, 0.18)',
+                        borderRadius: 10,
+                        padding: 12,
+                        marginBottom: 8,
+                        borderWidth: 1,
+                        borderColor: item.isRead ? '#374151' : '#7c3aed',
+                      }}
+                      onPress={() =>
+                        setHotelAlerts((prev) =>
+                          prev.map((a) => (a.id === item.id ? { ...a, isRead: true } : a))
+                        )
+                      }
+                    >
+                      <Text style={{ color: '#ffffff', fontWeight: '700', fontSize: 13 }}>{item.title}</Text>
+                      <Text style={{ color: '#cbd5e1', fontSize: 12, marginTop: 2 }}>{item.body}</Text>
+                    </TouchableOpacity>
+                  ))
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>

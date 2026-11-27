@@ -500,6 +500,28 @@ export const EmergencyScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
+      {/* ── OFF-GRID MESH COMPANION BANNER ─────────────────────────────── */}
+      <TouchableOpacity
+        style={styles.offGridMeshBanner}
+        onPress={() => router.push("/screens/off-grid-mesh")}
+      >
+        <View style={styles.offGridIconWrap}>
+          <Ionicons name="radio" size={18} color="#FFFFFF" />
+        </View>
+        <View style={{ flex: 1, marginLeft: 10 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Text style={styles.offGridTitle}>Off-Grid Mesh Radio</Text>
+            <View style={styles.offGridBadge}>
+              <Text style={styles.offGridBadgeText}>ZERO CELL SERVICE</Text>
+            </View>
+          </View>
+          <Text style={styles.offGridSub}>
+            Trekking in dead zones? P2P BLE radar, safe offline chat & multi-hop distress beacon.
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="#10b981" />
+      </TouchableOpacity>
+
       {/* ── FOUR TAB SELECTOR ────────────────────────────────────────────── */}
       <View style={styles.tabsRow}>
         <TouchableOpacity
@@ -514,7 +536,7 @@ export const EmergencyScreen: React.FC = () => {
             size={18}
             color={activeTab === "sos" ? "#ffffff" : "#64748b"}
           />
-          <Text style={[styles.tabBtnText, activeTab === "sos" && styles.tabBtnTextActive]}>
+          <Text style={[styles.tabBtnText, activeTab === "sos" && styles.tabBtnTextActive]} numberOfLines={1}>
             One-Tap SOS
           </Text>
         </TouchableOpacity>
@@ -531,7 +553,7 @@ export const EmergencyScreen: React.FC = () => {
             size={18}
             color={activeTab === "nearby" ? "#ffffff" : "#64748b"}
           />
-          <Text style={[styles.tabBtnText, activeTab === "nearby" && styles.tabBtnTextActive]}>
+          <Text style={[styles.tabBtnText, activeTab === "nearby" && styles.tabBtnTextActive]} numberOfLines={1}>
             Nearby 15km
           </Text>
         </TouchableOpacity>
@@ -548,7 +570,7 @@ export const EmergencyScreen: React.FC = () => {
             size={18}
             color={activeTab === "phrases" ? "#ffffff" : "#64748b"}
           />
-          <Text style={[styles.tabBtnText, activeTab === "phrases" && styles.tabBtnTextActive]}>
+          <Text style={[styles.tabBtnText, activeTab === "phrases" && styles.tabBtnTextActive]} numberOfLines={1}>
             Phrasebook
           </Text>
         </TouchableOpacity>
@@ -565,7 +587,7 @@ export const EmergencyScreen: React.FC = () => {
             size={18}
             color={activeTab === "embassies" ? "#ffffff" : "#64748b"}
           />
-          <Text style={[styles.tabBtnText, activeTab === "embassies" && styles.tabBtnTextActive]}>
+          <Text style={[styles.tabBtnText, activeTab === "embassies" && styles.tabBtnTextActive]} numberOfLines={1}>
             Embassies
           </Text>
         </TouchableOpacity>
@@ -1850,15 +1872,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
+    gap: 3,
     paddingVertical: 8,
+    paddingHorizontal: 2,
     borderRadius: 8,
   },
   tabBtnActive: {
     backgroundColor: "#0f172a",
   },
   tabBtnText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
     color: "#64748b",
   },
@@ -3521,6 +3544,48 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 14,
     fontWeight: "600",
+  },
+  offGridMeshBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ecfdf5",
+    borderWidth: 1,
+    borderColor: "#a7f3d0",
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 4,
+    padding: 12,
+    borderRadius: 14,
+  },
+  offGridIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#10b981",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  offGridTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#065f46",
+  },
+  offGridBadge: {
+    backgroundColor: "#10b981",
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+  },
+  offGridBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 8.5,
+    fontWeight: "800",
+  },
+  offGridSub: {
+    fontSize: 10.5,
+    color: "#047857",
+    marginTop: 2,
+    lineHeight: 14,
   },
 });
 

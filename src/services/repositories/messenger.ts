@@ -1,5 +1,5 @@
 import { supabase } from "../../utils/supabase";
-import { DEMO_USER_ID, FriendProfile } from "./friends";
+import { FriendProfile } from "./friends";
 
 export interface DirectMessage {
   id: string;
@@ -30,7 +30,8 @@ export const messengerRepository = {
   /**
    * Fetch all conversations for the user
    */
-  async getConversations(userId: string = DEMO_USER_ID): Promise<ConversationItem[]> {
+  async getConversations(userId: string): Promise<ConversationItem[]> {
+    if (!userId) throw new Error("Authenticated user is required");
     try {
       // 1. Get conversation IDs the user participates in
       const { data: participations, error: partErr } = await supabase
@@ -43,14 +44,14 @@ export const messengerRepository = {
           {
             id: "convo-1",
             type: "direct",
-            title: "Trip.com VIP Concierge",
+            title: "Shopno Jatra VIP Concierge",
             avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
             last_message_text: "Your flight DAC ➔ DPS is on schedule. Gate B3.",
             last_message_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
             unread_count: 1,
             other_participant: {
               id: "support-1",
-              display_name: "Trip.com Concierge",
+              display_name: "Shopno Jatra Concierge",
               username: "concierge",
               avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
             },
@@ -124,9 +125,10 @@ export const messengerRepository = {
    * Find existing or create a direct conversation between two users
    */
   async getOrCreateDirectConversation(
-    userId: string = DEMO_USER_ID,
+    userId: string,
     targetUserId: string
   ): Promise<ConversationItem> {
+    if (!userId) throw new Error("Authenticated user is required");
     // 1. Check if both participate in the same direct conversation
     const { data: myConvos } = await supabase
       .from("conversation_participants")
@@ -227,11 +229,12 @@ export const messengerRepository = {
    */
   async sendMessage(
     conversationId: string,
-    senderId: string = DEMO_USER_ID,
+    senderId: string,
     content: string,
     mediaUrl?: string,
     mediaType?: "image" | "video" | "audio" | "file"
   ): Promise<DirectMessage> {
+    if (!senderId) throw new Error("Authenticated user is required");
     const { data, error } = await supabase
       .from("direct_messages")
       .insert({

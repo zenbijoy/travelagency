@@ -118,8 +118,8 @@ const buildDestinations = (): CountryDestination[] => {
     {
       id: "uk",
       name: "United Kingdom",
-      bengaliName: "à¦¯à§à¦•à§à¦¤à¦°à¦¾à¦œà§à¦¯ (UK)",
-      flag: "ðŸ‡¬ðŸ‡§",
+      bengaliName: "যুক্তরাজ্য (UK)",
+      flag: "🇬🇧",
       avgProcessingTime: "3 - 5 Weeks",
       visaSuccessRate: 98,
       languageTests: {
@@ -136,13 +136,13 @@ const buildDestinations = (): CountryDestination[] => {
         "Direct CAS issuance without standard embassy interview",
         "Part-time work permitted up to 20 hours/week in semester",
       ],
-      docRequirementTips: "CAS (Confirmation of Acceptance for Studies) à¦“ IOM TB à¦Ÿà§‡à¦¸à§à¦Ÿ à¦°à¦¿à¦ªà§‹à¦°à§à¦Ÿ à¦¬à¦¾à¦§à§à¦¯à¦¤à¦¾à¦®à§‚à¦²à¦•à¥¤",
+      docRequirementTips: "CAS (Confirmation of Acceptance for Studies) ও IOM TB টেস্ট রিপোর্ট বাধ্যতামূলক।",
     },
     {
       id: "usa",
       name: "United States",
-      bengaliName: "à¦¯à§à¦•à§à¦¤à¦°à¦¾à¦·à§à¦Ÿà§à¦° (USA)",
-      flag: "ðŸ‡ºðŸ‡¸",
+      bengaliName: "যুক্তরাষ্ট্র (USA)",
+      flag: "🇺🇸",
       avgProcessingTime: "6 - 10 Weeks",
       visaSuccessRate: 89,
       languageTests: {
@@ -159,13 +159,13 @@ const buildDestinations = (): CountryDestination[] => {
         "Prestigious Silicon Valley & Fortune 500 employer networks",
         "F-1 student visa stamping at US Embassy Dhaka",
       ],
-      docRequirementTips: "I-20 à¦«à¦°à§à¦®, SEVIS à¦«à¦¿ à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦•à¦¨à¦«à¦¾à¦°à§à¦®à§‡à¦¶à¦¨ à¦“ DS-160 à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¸à§à¦²à¦¿à¦ª à¦†à¦¬à¦¶à§à¦¯à¦•à¥¤",
+      docRequirementTips: "I-20 ফর্ম, SEVIS ফি পেমেন্ট কনফার্মেশন ও DS-160 অ্যাপয়েন্টমেন্ট স্লিপ আবশ্যক।",
     },
     {
       id: "canada",
       name: "Canada",
-      bengaliName: "à¦•à¦¾à¦¨à¦¾à¦¡à¦¾ (Canada)",
-      flag: "ðŸ‡¨ðŸ‡¦",
+      bengaliName: "কানাডা (Canada)",
+      flag: "🇨🇦",
       avgProcessingTime: "8 - 12 Weeks",
       visaSuccessRate: 94,
       languageTests: {
@@ -182,13 +182,13 @@ const buildDestinations = (): CountryDestination[] => {
         "Legal off-campus work allowed 24 hours per week",
         "Provincial Attestation Letter (PAL) integration",
       ],
-      docRequirementTips: "Provincial Attestation Letter (PAL) à¦“ GIC (CAD $20,635) à¦¬à§à¦¯à¦¾à¦‚à¦• à¦—à§à¦¯à¦¾à¦°à¦¾à¦¨à§à¦Ÿà¦¿ à¦°à¦¸à¦¿à¦¦à¥¤",
+      docRequirementTips: "Provincial Attestation Letter (PAL) ও GIC (CAD $20,635) ব্যাংক গ্যারান্টি রসিদ।",
     },
     {
       id: "australia",
       name: "Australia",
-      bengaliName: "à¦…à¦¸à§à¦Ÿà§à¦°à§‡à¦²à¦¿à¦¯à¦¼à¦¾ (Australia)",
-      flag: "ðŸ‡¦ðŸ‡º",
+      bengaliName: "অস্ট্রেলিয়া (Australia)",
+      flag: "🇦🇺",
       avgProcessingTime: "4 - 8 Weeks",
       visaSuccessRate: 93,
       languageTests: {
@@ -205,13 +205,13 @@ const buildDestinations = (): CountryDestination[] => {
         "48 hours work permission per fortnight during study terms",
         "World-renowned Group of Eight (Go8) research universities",
       ],
-      docRequirementTips: "CoE (Confirmation of Enrolment), OSHC à¦¹à§‡à¦²à¦¥ à¦‡à¦¨à§à¦¸à§à¦¯à§à¦°à§‡à¦¨à§à¦¸ à¦“ à¦¬à§à¦¯à¦¾à¦‚à¦• à¦¸à¦²à¦­à§‡à¦¨à§à¦¸à¦¿ à¦†à¦¬à¦¶à§à¦¯à¦•à¥¤",
+      docRequirementTips: "CoE (Confirmation of Enrolment), OSHC হেলথ ইন্স্যুরেন্স ও ব্যাংক সলভেন্সি আবশ্যক।",
     },
     {
       id: "germany",
       name: "Germany",
-      bengaliName: "à¦œà¦¾à¦°à§à¦®à¦¾à¦¨à¦¿ (Germany)",
-      flag: "ðŸ‡©ðŸ‡ª",
+      bengaliName: "জার্মানি (Germany)",
+      flag: "🇩🇪",
       avgProcessingTime: "8 - 14 Weeks",
       visaSuccessRate: 91,
       languageTests: {
@@ -228,13 +228,13 @@ const buildDestinations = (): CountryDestination[] => {
         "Europe's strongest engineering, automotive, and IT innovation hub",
         "140 full days or 280 half days annual working rights",
       ],
-      docRequirementTips: "Blocked Account (Sperrkonto â‚¬11,904) à¦“ APS à¦¸à¦¾à¦°à§à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦Ÿ à¦¬à¦¾à¦§à§à¦¯à¦¤à¦¾à¦®à§‚à¦²à¦•à¥¤",
+      docRequirementTips: "Blocked Account (Sperrkonto €11,904) ও APS সার্টিফিকেট বাধ্যতামূলক।",
     },
     {
       id: "japan",
       name: "Japan",
-      bengaliName: "à¦œà¦¾à¦ªà¦¾à¦¨ (Japan)",
-      flag: "ðŸ‡¯ðŸ‡µ",
+      bengaliName: "জাপান (Japan)",
+      flag: "🇯🇵",
       avgProcessingTime: "6 - 12 Weeks",
       visaSuccessRate: 95,
       languageTests: {
@@ -251,13 +251,13 @@ const buildDestinations = (): CountryDestination[] => {
         "Very high post-graduation career absorption in tech and manufacturing",
         "MEXT government scholarships and institutional tuition waivers",
       ],
-      docRequirementTips: "Certificate of Eligibility (COE) à¦“ à¦œà¦¾à¦ªà¦¾à¦¨à¦¿à¦œ à¦­à¦¾à¦·à¦¾ à¦¶à¦¿à¦•à§à¦·à¦¾à¦° à¦¨à§à¦¯à§‚à¦¨à¦¤à¦® à§§à§«à§¦ à¦˜à¦£à§à¦Ÿà¦¾à¦° à¦¸à¦¨à¦¦à¥¤",
+      docRequirementTips: "Certificate of Eligibility (COE) ও জাপানিজ ভাষা শিক্ষার ন্যূনতম ১৫০ ঘণ্টার সনদ।",
     },
     {
       id: "malaysia",
       name: "Malaysia",
-      bengaliName: "à¦®à¦¾à¦²à¦¯à¦¼à§‡à¦¶à¦¿à¦¯à¦¼à¦¾ (Malaysia)",
-      flag: "ðŸ‡²ðŸ‡¾",
+      bengaliName: "মালয়েশিয়া (Malaysia)",
+      flag: "🇲🇾",
       avgProcessingTime: "2 - 4 Weeks",
       visaSuccessRate: 97,
       languageTests: {
@@ -274,7 +274,7 @@ const buildDestinations = (): CountryDestination[] => {
         "Fast online EMGS electronic Visa Approval Letter (eVAL)",
         "Affordable tuition & low cost of living with halal environment",
       ],
-      docRequirementTips: "EMGS à¦®à§‡à¦¡à¦¿à¦•à§‡à¦² à¦Ÿà§‡à¦¸à§à¦Ÿ à¦“ à¦¬à¦¿à¦¶à§à¦¬à¦¬à¦¿à¦¦à§à¦¯à¦¾à¦²à§Ÿ à¦…à¦«à¦¾à¦° à¦²à§‡à¦Ÿà¦¾à¦° à¦…à¦¨à§à¦®à§‹à¦¦à¦¨à¥¤",
+      docRequirementTips: "EMGS মেডিকেল টেস্ট ও বিশ্ববিদ্যালয় অফার লেটার অনুমোদন।",
     },
   ];
 };
@@ -283,83 +283,83 @@ const BASE_CHECKLIST: ChecklistItem[] = [
   {
     id: "doc-passport",
     title: "International Passport",
-    bengaliTitle: "à¦†à¦¨à§à¦¤à¦°à§à¦œà¦¾à¦¤à¦¿à¦• à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ (à¦®à§‚à¦² à¦“ à¦¸à¦•à¦² à¦ªà§‡à¦œà§‡à¦° à¦•à¦ªà¦¿)",
+    bengaliTitle: "আন্তর্জাতিক পাসপোর্ট (মূল ও সকল পেজের কপি)",
     category: "Legal & ID",
-    description: "à¦®à§‡à¦¶à¦¿à¦¨ à¦°à¦¿à¦¡à§‡à¦¬à¦² à¦¬à¦¾ à¦‡-à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦¯à¦¾à¦° à¦®à§‡à§Ÿà¦¾à¦¦ à¦•à¦¾à¦™à§à¦•à§à¦·à¦¿à¦¤ à¦—à¦¨à§à¦¤à¦¬à§à¦¯à§‡ à¦ªà§Œà¦à¦›à¦¾à¦¨à§‹à¦° à¦¦à¦¿à¦¨ à¦¥à§‡à¦•à§‡ à¦•à¦®à¦ªà¦•à§à¦·à§‡ à§¬ à¦®à¦¾à¦¸ à¦¥à¦¾à¦•à¦¤à§‡ à¦¹à¦¬à§‡ à¦à¦¬à¦‚ à¦¨à§à¦¯à§‚à¦¨à¦¤à¦® à§©-à§ªà¦Ÿà¦¿ à¦«à¦¾à¦à¦•à¦¾ à¦ªà§ƒà¦·à§à¦ à¦¾ à¦¥à¦¾à¦•à¦¤à§‡ à¦¹à¦¬à§‡à¥¤",
+    description: "মেশিন রিডেবল বা ই-পাসপোর্ট যার মেয়াদ কাঙ্ক্ষিত গন্তব্যে পৌঁছানোর দিন থেকে কমপক্ষে ৬ মাস থাকতে হবে এবং ন্যূনতম ৩-৪টি ফাঁকা পৃষ্ঠা থাকতে হবে।",
     isMandatory: true,
-    howToObtainBD: "à¦†à¦žà§à¦šà¦²à¦¿à¦• à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦…à¦«à¦¿à¦¸ à¦¬à¦¾ à¦…à¦¨à¦²à¦¾à¦‡à¦¨à§‡ epassport.gov.bd à¦à¦° à¦®à¦¾à¦§à§à¦¯à¦®à§‡ à¦†à¦¬à§‡à¦¦à¦¨ à¦•à¦°à§à¦¨à¥¤ à¦¶à¦¿à¦•à§à¦·à¦¾à¦—à¦¤ à¦¸à¦¨à¦¦à§‡à¦° à¦¨à¦¾à¦®à§‡à¦° à¦¸à¦¾à¦¥à§‡ à¦¬à¦¾à¦¨à¦¾à¦¨à§‡à¦° à¦¹à§à¦¬à¦¹à§ à¦®à¦¿à¦² à¦¬à¦œà¦¾à§Ÿ à¦°à¦¾à¦–à§à¦¨à¥¤",
+    howToObtainBD: "আঞ্চলিক পাসপোর্ট অফিস বা অনলাইনে epassport.gov.bd এর মাধ্যমে আবেদন করুন। শিক্ষাগত সনদের নামের সাথে বানানের হুবহু মিল বজায় রাখুন।",
   },
   {
     id: "doc-transcripts",
     title: "Academic Transcripts & Certificates",
-    bengaliTitle: "à¦à¦•à¦¾à¦¡à§‡à¦®à¦¿à¦• à¦¸à¦¨à¦¦ à¦“ à¦®à¦¾à¦°à§à¦•à¦¶à¦¿à¦Ÿ (à¦¬à§‹à¦°à§à¦¡ à¦“ à¦®à¦¨à§à¦¤à§à¦°à¦£à¦¾à¦²à§Ÿ à¦¸à¦¤à§à¦¯à¦¾à§Ÿà¦¿à¦¤)",
+    bengaliTitle: "একাডেমিক সনদ ও মার্কশিট (বোর্ড ও মন্ত্রণালয় সত্যায়িত)",
     category: "Academic",
-    description: "à¦à¦¸à¦à¦¸à¦¸à¦¿, à¦à¦‡à¦šà¦à¦¸à¦¸à¦¿, à¦¬à§à¦¯à¦¾à¦šà§‡à¦²à¦° à¦¡à¦¿à¦—à§à¦°à¦¿à¦° à¦®à§‚à¦² à¦¸à¦¾à¦°à§à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦Ÿ, à¦¸à¦¾à¦®à§Ÿà¦¿à¦• à¦¸à¦¨à¦¦ à¦à¦¬à¦‚ à¦ªà§‚à¦°à§à¦£à¦¾à¦™à§à¦— à¦¨à¦®à§à¦¬à¦°à¦ªà¦¤à§à¦°/à¦Ÿà§à¦°à¦¾à¦¨à§à¦¸à¦•à§à¦°à¦¿à¦ªà§à¦Ÿà¥¤",
+    description: "এসএসসি, এইচএসসি, ব্যাচেলর ডিগ্রির মূল সার্টিফিকেট, সাময়িক সনদ এবং পূর্ণাঙ্গ নম্বরপত্র/ট্রান্সক্রিপ্ট।",
     isMandatory: true,
-    howToObtainBD: "à¦ªà§à¦°à¦¥à¦®à§‡ à¦¸à¦‚à¦¶à§à¦²à¦¿à¦·à§à¦Ÿ à¦¶à¦¿à¦•à§à¦·à¦¾à¦¬à§‹à¦°à§à¦¡/à¦¬à¦¿à¦¶à§à¦¬à¦¬à¦¿à¦¦à§à¦¯à¦¾à¦²à§Ÿ, à¦…à¦¤à¦ƒà¦ªà¦° à¦¶à¦¿à¦•à§à¦·à¦¾ à¦®à¦¨à§à¦¤à§à¦°à¦£à¦¾à¦²à§Ÿ à¦“ à¦¸à§‡à¦—à§à¦¨à¦¬à¦¾à¦—à¦¿à¦šà¦¾ à¦ªà¦°à¦°à¦¾à¦·à§à¦Ÿà§à¦° à¦®à¦¨à§à¦¤à§à¦°à¦£à¦¾à¦²à§Ÿ (MoFA) à¦¥à§‡à¦•à§‡ à¦¸à¦¤à§à¦¯à¦¾à§Ÿà¦¨ à¦•à¦°à§à¦¨à¥¤",
+    howToObtainBD: "প্রথমে সংশ্লিষ্ট শিক্ষাবোর্ড/বিশ্ববিদ্যালয়, অতঃপর শিক্ষা মন্ত্রণালয় ও সেগুনবাগিচা পররাষ্ট্র মন্ত্রণালয় (MoFA) থেকে সত্যায়ন করুন।",
   },
   {
     id: "doc-financials",
     title: "Financial Statements & Solvency",
-    bengaliTitle: "à¦¬à§à¦¯à¦¾à¦‚à¦• à¦¸à§à¦Ÿà§‡à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦“ à¦¸à¦²à¦­à§‡à¦¨à§à¦¸à¦¿ à¦¸à¦¾à¦°à§à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦Ÿ",
+    bengaliTitle: "ব্যাংক স্টেটমেন্ট ও সলভেন্সি সার্টিফিকেট",
     category: "Financial",
-    description: "à¦—à¦¤ à§¬ à¦®à¦¾à¦¸à§‡à¦° à¦¨à¦¿à¦°à¦¬à¦šà§à¦›à¦¿à¦¨à§à¦¨ à¦²à§‡à¦¨à¦¦à§‡à¦¨à§‡à¦° à¦¬à§à¦¯à¦¾à¦‚à¦• à¦¸à§à¦Ÿà§‡à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ, à¦¬à§à¦¯à¦¾à¦‚à¦• à¦¸à¦²à¦­à§‡à¦¨à§à¦¸à¦¿ à¦¸à¦¨à¦¦, à§©à§¦à§¦ à¦Ÿà¦¾à¦•à¦¾à¦° à¦¨à¦¨-à¦œà§à¦¡à¦¿à¦¶à¦¿à§Ÿà¦¾à¦² à¦¸à§à¦Ÿà§à¦¯à¦¾à¦®à§à¦ªà§‡ à¦¸à§à¦ªà¦¨à§à¦¸à¦° à¦à¦«à¦¿à¦¡à§‡à¦­à¦¿à¦Ÿ à¦à¦¬à¦‚ à¦†à§Ÿà§‡à¦° à¦‰à§Žà¦¸ à¦ªà§à¦°à¦®à¦¾à¦£à¥¤",
+    description: "গত ৬ মাসের নিরবচ্ছিন্ন লেনদেনের ব্যাংক স্টেটমেন্ট, ব্যাংক সলভেন্সি সনদ, ৩০০ টাকার নন-জুডিশিয়াল স্ট্যাম্পে স্পন্সর এফিডেভিট এবং আয়ের উৎস প্রমাণ।",
     isMandatory: true,
-    howToObtainBD: "à¦…à¦¨à§à¦®à§‹à¦¦à¦¿à¦¤ à¦¤à¦«à¦¸à¦¿à¦²à¦¿ à¦¬à§à¦¯à¦¾à¦‚à¦•à§‡à¦° à¦¸à¦¿à¦²à¦¯à§à¦•à§à¦¤ à¦¸à§à¦Ÿà§‡à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦à¦¬à¦‚ à¦Ÿà§à¦¯à¦¾à¦•à§à¦¸ à¦°à¦¿à¦Ÿà¦¾à¦°à§à¦¨ à¦œà¦®à¦¾à¦° à¦•à¦ªà¦¿ (ITR Acknowledgment) à¦¸à¦‚à¦—à§à¦°à¦¹ à¦•à¦°à§à¦¨à¥¤",
+    howToObtainBD: "অনুমোদিত তফসিলি ব্যাংকের সিলযুক্ত স্টেটমেন্ট এবং ট্যাক্স রিটার্ন জমার কপি (ITR Acknowledgment) সংগ্রহ করুন।",
   },
   {
     id: "doc-police",
     title: "Police Clearance Certificate (PCC)",
-    bengaliTitle: "à¦ªà§à¦²à¦¿à¦¶ à¦•à§à¦²à¦¿à§Ÿà¦¾à¦°à§‡à¦¨à§à¦¸ à¦¸à¦¾à¦°à§à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦Ÿ (à¦¡à¦¿à¦à¦®à¦ªà¦¿ / à¦ªà§à¦²à¦¿à¦¶ à¦¹à§‡à¦¡à¦•à§‹à§Ÿà¦¾à¦°à§à¦Ÿà¦¾à¦°)",
+    bengaliTitle: "পুলিশ ক্লিয়ারেন্স সার্টিফিকেট (ডিএমপি / পুলিশ হেডকোয়ার্টার)",
     category: "Legal & ID",
-    description: "à¦¬à¦¾à¦‚à¦²à¦¾à¦¦à§‡à¦¶ à¦ªà§à¦²à¦¿à¦¶ à¦•à¦°à§à¦¤à§ƒà¦• à¦ªà§à¦°à¦¦à¦¤à§à¦¤ à¦¡à¦¿à¦œà¦¿à¦Ÿà¦¾à¦² à¦­à§‡à¦°à¦¿à¦«à¦¾à¦‡à¦¡ à¦šà¦°à¦¿à¦¤à§à¦° à¦¸à¦¨à¦¦ à¦¯à¦¾ à¦‡à¦¸à§à¦¯à§à¦° à¦¤à¦¾à¦°à¦¿à¦– à¦¥à§‡à¦•à§‡ à§¬ à¦®à¦¾à¦¸ à¦ªà¦°à§à¦¯à¦¨à§à¦¤ à¦•à¦¾à¦°à§à¦¯à¦•à¦° à¦¥à¦¾à¦•à§‡à¥¤",
+    description: "বাংলাদেশ পুলিশ কর্তৃক প্রদত্ত ডিজিটাল ভেরিফাইড চরিত্র সনদ যা ইস্যুর তারিখ থেকে ৬ মাস পর্যন্ত কার্যকর থাকে।",
     isMandatory: true,
-    howToObtainBD: "à¦¡à¦¿à¦à¦®à¦ªà¦¿ à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦ªà§‹à¦°à§à¦Ÿà¦¾à¦² pcc.police.gov.bd à¦¤à§‡ à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦¨à¦®à§à¦¬à¦° à¦“ à¦šà¦¾à¦²à¦¾à¦¨à§‡à¦° à¦®à¦¾à¦§à§à¦¯à¦®à§‡ à¦†à¦¬à§‡à¦¦à¦¨ à¦•à¦°à§à¦¨à¥¤ à§«-à§­ à¦•à¦¾à¦°à§à¦¯à¦¦à¦¿à¦¬à¦¸à§‡ à¦•à¦¿à¦‰à¦†à¦° à¦•à§‹à¦¡à¦¸à¦¹ à¦¡à¦¾à¦‰à¦¨à¦²à§‹à¦¡ à¦•à¦°à¦¾ à¦¯à¦¾à§Ÿà¥¤",
+    howToObtainBD: "ডিএমপি অনলাইন পোর্টাল pcc.police.gov.bd তে পাসপোর্ট নম্বর ও চালানের মাধ্যমে আবেদন করুন। ৫-৭ কার্যদিবসে কিউআর কোডসহ ডাউনলোড করা যায়।",
   },
   {
     id: "doc-language",
     title: "Language Proficiency Scorecard (IELTS / TOEFL / PTE)",
-    bengaliTitle: "à¦­à¦¾à¦·à¦¾ à¦¦à¦•à§à¦·à¦¤à¦¾à¦° à¦¸à§à¦•à§‹à¦°à¦•à¦¾à¦°à§à¦¡ (IELTS / TOEFL / PTE)",
+    bengaliTitle: "ভাষা দক্ষতার স্কোরকার্ড (IELTS / TOEFL / PTE)",
     category: "Language",
-    description: "à¦…à¦«à¦¿à¦¸à¦¿à§Ÿà¦¾à¦² à¦Ÿà§‡à¦¸à§à¦Ÿ à¦°à¦¿à¦ªà§‹à¦°à§à¦Ÿ à¦«à¦°à§à¦® (TRF) à¦¯à¦¾ à¦…à¦¨à¦²à¦¾à¦‡à¦¨à§‡ à¦­à§‡à¦°à¦¿à¦«à¦¿à¦•à§‡à¦¶à¦¨ à¦•à§‹à¦¡à¦¸à¦¹ à¦¨à§à¦¯à§‚à¦¨à¦¤à¦® à¦ªà§à¦°à§Ÿà§‹à¦œà¦¨à§€à§Ÿ à¦¸à§à¦•à§‹à¦° à¦ªà§‚à¦°à¦£ à¦•à¦°à§‡ (à¦®à§‡à§Ÿà¦¾à¦¦ à§¨ à¦¬à¦›à¦°)à¥¤",
+    description: "অফিসিয়াল টেস্ট রিপোর্ট ফর্ম (TRF) যা অনলাইনে ভেরিফিকেশন কোডসহ ন্যূনতম প্রয়োজনীয় স্কোর পূরণ করে (মেয়াদ ২ বছর)।",
     isMandatory: true,
-    howToObtainBD: "à¦¬à§à¦°à¦¿à¦Ÿà¦¿à¦¶ à¦•à¦¾à¦‰à¦¨à§à¦¸à¦¿à¦², à¦†à¦‡à¦¡à¦¿à¦ªà¦¿ à¦¬à¦¾à¦‚à¦²à¦¾à¦¦à§‡à¦¶ à¦¬à¦¾ à¦ªà¦¿à§Ÿà¦¾à¦°à¦¸à¦¨ à¦…à¦¨à§à¦®à§‹à¦¦à¦¿à¦¤ à¦à¦•à§à¦¸à¦¾à¦® à¦¸à§‡à¦¨à§à¦Ÿà¦¾à¦° à¦¥à§‡à¦•à§‡ à¦ªà¦°à§€à¦•à§à¦·à¦¾ à¦¦à¦¿à§Ÿà§‡ à¦…à¦«à¦¿à¦¸à¦¿à§Ÿà¦¾à¦² à¦¸à§à¦•à§‹à¦°à¦•à¦¾à¦°à§à¦¡ à¦¸à¦‚à¦—à§à¦°à¦¹ à¦•à¦°à§à¦¨à¥¤",
+    howToObtainBD: "ব্রিটিশ কাউন্সিল, আইডিপি বাংলাদেশ বা পিয়ারসন অনুমোদিত এক্সাম সেন্টার থেকে পরীক্ষা দিয়ে অফিসিয়াল স্কোরকার্ড সংগ্রহ করুন।",
   },
   {
     id: "doc-sop",
     title: "Statement of Purpose (SOP) / Study Plan",
-    bengaliTitle: "à¦¸à§à¦Ÿà§‡à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦…à¦¬ à¦ªà¦¾à¦°à¦ªà¦¾à¦¸ (SOP) à¦“ à¦¸à§à¦Ÿà¦¾à¦¡à¦¿ à¦ªà§à¦²à§à¦¯à¦¾à¦¨",
+    bengaliTitle: "স্টেটমেন্ট অব পারপাস (SOP) ও স্টাডি প্ল্যান",
     category: "Admissions",
-    description: "à¦•à§‡à¦¨ à¦à¦‡ à¦•à§‹à¦°à§à¦¸ à¦“ à¦¬à¦¿à¦¶à§à¦¬à¦¬à¦¿à¦¦à§à¦¯à¦¾à¦²à§Ÿ à¦ªà¦›à¦¨à§à¦¦ à¦•à¦°à§‡à¦›à§‡à¦¨, à¦†à¦ªà¦¨à¦¾à¦° à¦­à¦¬à¦¿à¦·à§à¦¯à§Ž à¦•à§à¦¯à¦¾à¦°à¦¿à§Ÿà¦¾à¦° à¦ªà¦°à¦¿à¦•à¦²à§à¦ªà¦¨à¦¾ à¦à¦¬à¦‚ à¦ªà§œà¦¾à¦¶à§‹à¦¨à¦¾ à¦¶à§‡à¦·à§‡ à¦¦à§‡à¦¶à§‡ à¦«à¦¿à¦°à§‡ à¦†à¦¸à¦¾à¦° à¦¦à§ƒà§ à¦…à¦™à§à¦—à§€à¦•à¦¾à¦°à¦¨à¦¾à¦®à¦¾à¥¤",
+    description: "কেন এই কোর্স ও বিশ্ববিদ্যালয় পছন্দ করেছেন, আপনার ভবিষ্যৎ ক্যারিয়ার পরিকল্পনা এবং পড়াশোনা শেষে দেশে ফিরে আসার দৃঢ় অঙ্গীকারনামা।",
     isMandatory: true,
-    howToObtainBD: "à¦¨à¦¿à¦œà¦¸à§à¦¬ à¦šà¦¿à¦¨à§à¦¤à¦¾à§Ÿ à§®à§¦à§¦-à§§à§¨à§¦à§¦ à¦¶à¦¬à§à¦¦à§‡à¦° à¦®à§Œà¦²à¦¿à¦• à¦à¦¸à¦“à¦ªà¦¿ à¦²à¦¿à¦–à§à¦¨à¥¤ à¦•à§‹à¦¨à§‹ à¦à¦†à¦‡ à¦Ÿà§à¦² à¦¬à¦¾ à¦¨à¦•à¦² à¦­à¦¾à¦·à¦¾ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦ªà¦°à¦¿à¦¹à¦¾à¦° à¦•à¦°à§à¦¨à¥¤",
+    howToObtainBD: "নিজস্ব চিন্তায় ৮০০-১২০০ শব্দের মৌলিক এসওপি লিখুন। কোনো এআই টুল বা নকল ভাষা ব্যবহার পরিহার করুন।",
   },
   {
     id: "doc-lor",
     title: "Letters of Recommendation (Academic & Professional LOR)",
-    bengaliTitle: "à¦¸à§à¦ªà¦¾à¦°à¦¿à¦¶à¦ªà¦¤à§à¦° (à§¨à¦Ÿà¦¿ à¦à¦•à¦¾à¦¡à§‡à¦®à¦¿à¦• à¦¬à¦¾ à¦ªà§‡à¦¶à¦¾à¦—à¦¤ LOR)",
+    bengaliTitle: "সুপারিশপত্র (২টি একাডেমিক বা পেশাগত LOR)",
     category: "Academic",
-    description: "à¦†à¦ªà¦¨à¦¾à¦° à¦¬à¦¿à¦¶à§à¦¬à¦¬à¦¿à¦¦à§à¦¯à¦¾à¦²à§Ÿ à¦¶à¦¿à¦•à§à¦·à¦• à¦¬à¦¾ à¦¬à¦¿à¦­à¦¾à¦—à§€à§Ÿ à¦ªà§à¦°à¦§à¦¾à¦¨à§‡à¦° à¦…à¦«à¦¿à¦¸à¦¿à§Ÿà¦¾à¦² à¦ªà§à¦¯à¦¾à¦¡à§‡ à¦¸à¦¿à¦²à¦¯à§à¦•à§à¦¤ à¦²à¦¿à¦–à¦¿à¦¤ à¦¸à§à¦ªà¦¾à¦°à¦¿à¦¶à¦ªà¦¤à§à¦°à¥¤",
+    description: "আপনার বিশ্ববিদ্যালয় শিক্ষক বা বিভাগীয় প্রধানের অফিসিয়াল প্যাডে সিলযুক্ত লিখিত সুপারিশপত্র।",
     isMandatory: false,
-    howToObtainBD: "à¦†à¦ªà¦¨à¦¾à¦° à¦ªà§à¦°à¦¾à¦•à§à¦¤à¦¨ à¦ªà§à¦°à¦«à§‡à¦¸à¦°à§‡à¦° à¦¸à¦¾à¦¥à§‡ à¦¯à§‹à¦—à¦¾à¦¯à§‹à¦— à¦•à¦°à§‡ à¦…à¦«à¦¿à¦¶à¦¿à§Ÿà¦¾à¦² à¦‡à¦®à§‡à¦‡à¦² à¦“ à¦¬à¦¿à¦¶à§à¦¬à¦¬à¦¿à¦¦à§à¦¯à¦¾à¦²à§Ÿà§‡à¦° à¦ªà§à¦¯à¦¾à¦¡à§‡ à¦¸à§à¦ªà¦¾à¦°à¦¿à¦¶à¦ªà¦¤à§à¦° à¦ªà§à¦°à¦¸à§à¦¤à§à¦¤ à¦•à¦°à§à¦¨à¥¤",
+    howToObtainBD: "আপনার প্রাক্তন প্রফেসরের সাথে যোগাযোগ করে অফিশিয়াল ইমেইল ও বিশ্ববিদ্যালয়ের প্যাডে সুপারিশপত্র প্রস্তুত করুন।",
   },
   {
     id: "doc-medical",
     title: "Medical Fitness & TB Screening Certificate",
-    bengaliTitle: "à¦Ÿà¦¿à¦¬à¦¿ à¦“ à¦®à§‡à¦¡à¦¿à¦•à§‡à¦² à¦•à§à¦²à¦¿à§Ÿà¦¾à¦°à§‡à¦¨à§à¦¸ à¦¸à¦¨à¦¦ (IOM à¦…à¦¨à§à¦®à§‹à¦¦à¦¿à¦¤)",
+    bengaliTitle: "টিবি ও মেডিকেল ক্লিয়ারেন্স সনদ (IOM অনুমোদিত)",
     category: "Health",
-    description: "à¦‡à¦‰à¦•à§‡, à¦•à¦¾à¦¨à¦¾à¦¡à¦¾ à¦¬à¦¾ à¦…à¦¸à§à¦Ÿà§à¦°à§‡à¦²à¦¿à§Ÿà¦¾à¦° à¦œà¦¨à§à¦¯ à¦…à¦¨à§à¦®à§‹à¦¦à¦¿à¦¤ à¦ªà§à¦¯à¦¾à¦¨à§‡à¦² à¦«à¦¿à¦œà¦¿à¦¶à¦¿à§Ÿà¦¾à¦¨ à¦¥à§‡à¦•à§‡ à¦Ÿà¦¿à¦‰à¦¬à¦¾à¦°à¦•à¦¿à¦‰à¦²à§‹à¦¸à¦¿à¦¸ (à¦¯à¦•à§à¦·à§à¦®à¦¾) à¦“ à¦¬à§à¦•à§‡à¦° à¦à¦•à§à¦¸-à¦°à§‡ à¦Ÿà§‡à¦¸à§à¦Ÿ à¦°à¦¿à¦ªà§‹à¦°à§à¦Ÿà¥¤",
+    description: "ইউকে, কানাডা বা অস্ট্রেলিয়ার জন্য অনুমোদিত প্যানেল ফিজিশিয়ান থেকে টিউবারকিউলোসিস (যক্ষ্মা) ও বুকের এক্স-রে টেস্ট রিপোর্ট।",
     isMandatory: true,
-    howToObtainBD: "à¦†à¦‡à¦“à¦à¦® à¦¬à¦¾à¦‚à¦²à¦¾à¦¦à§‡à¦¶ (IOM Migration Health Assessment Center Dhaka/Sylhet) à¦ à¦…à¦¨à¦²à¦¾à¦‡à¦¨à§‡ à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¨à¦¿à§Ÿà§‡ à¦Ÿà§‡à¦¸à§à¦Ÿ à¦•à¦°à¦¾à¦¨à¥¤",
+    howToObtainBD: "আইওএম বাংলাদেশ (IOM Migration Health Assessment Center Dhaka/Sylhet) এ অনলাইনে অ্যাপয়েন্টমেন্ট নিয়ে টেস্ট করান।",
   },
   {
     id: "doc-offer",
     title: "University Acceptance / CAS / I-20 / Work Permit",
-    bengaliTitle: "à¦…à¦«à¦¾à¦° à¦²à§‡à¦Ÿà¦¾à¦° / à¦¸à¦¿à¦à¦à¦¸ (CAS) / à¦†à¦‡-à§¨à§¦ / à¦­à¦¿à¦¸à¦¾ à¦‡à¦¨à¦­à¦¾à¦‡à¦Ÿà§‡à¦¶à¦¨",
+    bengaliTitle: "অফার লেটার / সিএএস (CAS) / আই-২০ / ভিসা ইনভাইটেশন",
     category: "Admissions",
-    description: "à¦•à¦¾à¦™à§à¦•à§à¦·à¦¿à¦¤ à¦¬à¦¿à¦¦à§‡à¦¶à¦¿ à¦¬à¦¿à¦¶à§à¦¬à¦¬à¦¿à¦¦à§à¦¯à¦¾à¦²à§Ÿ à¦¬à¦¾ à¦à¦®à¦ªà§à¦²à§Ÿà¦¾à¦° à¦•à¦°à§à¦¤à§ƒà¦• à¦‡à¦¸à§à¦¯à§à¦•à§ƒà¦¤ à¦®à§‚à¦² à¦­à¦°à§à¦¤à¦¿ à¦¬à¦¾ à¦•à¦°à§à¦®à¦¸à¦‚à¦¸à§à¦¥à¦¾à¦¨ à¦…à¦¨à§à¦®à§‹à¦¦à¦¨ à¦ªà¦¤à§à¦°à¥¤",
+    description: "কাঙ্ক্ষিত বিদেশি বিশ্ববিদ্যালয় বা এমপ্লয়ার কর্তৃক ইস্যুকৃত মূল ভর্তি বা কর্মসংস্থান অনুমোদন পত্র।",
     isMandatory: true,
-    howToObtainBD: "à¦à¦œà§‡à¦¨à§à¦¸à¦¿à¦° à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦°à§‡à¦° à¦®à¦¾à¦§à§à¦¯à¦®à§‡ à¦ªà§à¦°à§Ÿà§‹à¦œà¦¨à§€à§Ÿ à¦«à¦¿ à¦ªà¦°à¦¿à¦¶à§‹à¦§ à¦•à¦°à§‡ à¦¸à¦‚à¦¶à§à¦²à¦¿à¦·à§à¦Ÿ à¦ªà§à¦°à¦¤à¦¿à¦·à§à¦ à¦¾à¦¨ à¦¥à§‡à¦•à§‡ à¦¸à¦°à¦¾à¦¸à¦°à¦¿ à¦…à¦«à¦¿à¦¶à¦¿à§Ÿà¦¾à¦² à¦ªà§‹à¦°à§à¦Ÿà¦¾à¦²à§‡ à¦—à§à¦°à¦¹à¦£ à¦•à¦°à§à¦¨à¥¤",
+    howToObtainBD: "এজেন্সির কাউন্সেলরের মাধ্যমে প্রয়োজনীয় ফি পরিশোধ করে সংশ্লিষ্ট প্রতিষ্ঠান থেকে সরাসরি অফিশিয়াল পোর্টালে গ্রহণ করুন।",
   },
 ];
 
@@ -368,74 +368,74 @@ const STUDENT_TESTIMONIALS: StudentTestimonial[] = [
     id: "test-1",
     studentName: "Mahfuzur Rahman",
     destination: "United Kingdom",
-    flag: "ðŸ‡¬ðŸ‡§",
+    flag: "🇬🇧",
     institution: "University of Manchester",
     program: "MSc in Data Science",
     agencyName: "Global EduPathway Bangladesh",
     rating: 5.0,
     visaTimeAgo: "Approved 2 weeks ago",
-    quote: "à¦—à§à¦²à§‹à¦¬à¦¾à¦² à¦à¦¡à§à¦ªà¦¾à¦¥à¦“à¦¯à¦¼à§‡à¦° à¦®à¦¾à¦§à§à¦¯à¦®à§‡ à¦®à¦¾à¦¤à§à¦° à§§à§¨ à¦•à¦¾à¦°à§à¦¯à¦¦à¦¿à¦¬à¦¸à§‡ à¦‡à¦‰à¦•à§‡ à¦¸à§à¦Ÿà§à¦¡à§‡à¦¨à§à¦Ÿ à¦­à¦¿à¦¸à¦¾ à¦¹à¦¾à¦¤à§‡ à¦ªà§‡à§Ÿà§‡à¦›à¦¿à¥¤ à¦¤à¦¾à¦¦à§‡à¦° à¦à¦¸à¦“à¦ªà¦¿ à¦—à¦¾à¦‡à¦¡à§‡à¦¨à§à¦¸ à¦à¦¬à¦‚ à¦¬à§à¦¯à¦¾à¦‚à¦• à¦¸à§à¦Ÿà§‡à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦…à¦¡à¦¿à¦Ÿ à¦›à¦¿à¦² à¦…à¦¸à¦¾à¦§à¦¾à¦°à¦£!",
+    quote: "গ্লোবাল এডুপাথওয়ের মাধ্যমে মাত্র ১২ কার্যদিবসে ইউকে স্টুডেন্ট ভিসা হাতে পেয়েছি। তাদের এসওপি গাইডেন্স এবং ব্যাংক স্টেটমেন্ট অডিট ছিল অসাধারণ!",
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
   },
   {
     id: "test-2",
     studentName: "Sadia Afrin",
     destination: "Canada",
-    flag: "ðŸ‡¨ðŸ‡¦",
+    flag: "🇨🇦",
     institution: "University of Windsor",
     program: "MEng in Electrical & Computer Eng",
     agencyName: "Global EduPathway Bangladesh",
     rating: 5.0,
     visaTimeAgo: "Approved 1 month ago",
-    quote: "à¦•à¦¾à¦¨à¦¾à¦¡à¦¾ à¦à¦¸à¦¡à¦¿à¦à¦¸ (SDS) à¦Ÿà§à¦°à§à¦¯à¦¾à¦•à§‡ à¦œà¦¿à¦†à¦‡à¦¸à¦¿ à¦“ à¦ªà¦¿à¦à¦à¦² à¦ªà§à¦°à¦¸à§‡à¦¸à¦¿à¦‚ à¦¨à¦¿à§Ÿà§‡ à¦–à§à¦¬ à¦¦à§à¦¶à§à¦šà¦¿à¦¨à§à¦¤à¦¾à§Ÿ à¦›à¦¿à¦²à¦¾à¦®à¥¤ à¦¸à¦¿à¦¨à¦¿à§Ÿà¦° à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦° à¦­à¦¾à¦‡ à¦†à¦®à¦¾à¦•à§‡ à¦§à¦¾à¦ªà§‡ à¦§à¦¾à¦ªà§‡ à¦¸à¦¬ à¦¸à¦¹à¦¾à§Ÿà¦¤à¦¾ à¦•à¦°à§‡à¦›à§‡à¦¨à¥¤",
+    quote: "কানাডা এসডিএস (SDS) ট্র্যাকে জিআইসি ও পিএএল প্রসেসিং নিয়ে খুব দুশ্চিন্তায় ছিলাম। সিনিয়র কাউন্সেলর ভাই আমাকে ধাপে ধাপে সব সহায়তা করেছেন।",
     avatarUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200",
   },
   {
     id: "test-3",
     studentName: "Tariqul Islam",
     destination: "Romania",
-    flag: "ðŸ‡·ðŸ‡´",
+    flag: "🇷🇴",
     institution: "Continental Logistics Bucharest",
     program: "Warehouse Operations Work Permit",
     agencyName: "Euro Bangla Overseas & Careers",
     rating: 4.9,
     visaTimeAgo: "Approved 3 weeks ago",
-    quote: "à¦‡à¦‰à¦°à§‹ à¦¬à¦¾à¦‚à¦²à¦¾ à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦¸à¦°à¦•à¦¾à¦°à¦¿ à¦¨à¦¿à§Ÿà¦® à¦®à§‡à¦¨à§‡ à¦†à¦®à¦¾à¦° à¦‡à¦‰à¦°à§‹à¦ªà§€à§Ÿ à¦“à§Ÿà¦¾à¦°à§à¦• à¦ªà¦¾à¦°à¦®à¦¿à¦Ÿ à¦“ à¦¬à¦¿à¦à¦®à¦‡à¦Ÿà¦¿ à¦¸à§à¦®à¦¾à¦°à§à¦Ÿ à¦•à¦¾à¦°à§à¦¡ à¦à¦¨à§‡ à¦¦à¦¿à§Ÿà§‡à¦›à§‡à¥¤ à¦•à§‹à¦¨à§‹ à¦…à¦¤à¦¿à¦°à¦¿à¦•à§à¦¤ à¦¹à¦¿à¦¡à§‡à¦¨ à¦šà¦¾à¦°à§à¦œ à¦›à¦¿à¦² à¦¨à¦¾à¥¤",
+    quote: "ইউরো বাংলা সম্পূর্ণ সরকারি নিয়ম মেনে আমার ইউরোপীয় ওয়ার্ক পারমিট ও বিএমইটি স্মার্ট কার্ড এনে দিয়েছে। কোনো অতিরিক্ত হিডেন চার্জ ছিল না।",
     avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
   },
   {
     id: "test-4",
     studentName: "Farhana Yeasmin",
     destination: "Germany",
-    flag: "ðŸ‡©ðŸ‡ª",
+    flag: "🇩🇪",
     institution: "Technical University of Munich (TUM)",
     program: "MSc in Informatics (Tuition-Free)",
     agencyName: "Global EduPathway Bangladesh",
     rating: 5.0,
     visaTimeAgo: "Approved recently",
-    quote: "à¦œà¦¾à¦°à§à¦®à¦¾à¦¨à¦¿à¦° à¦¬à§à¦²à¦•à¦¡ à¦…à§à¦¯à¦¾à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦à¦•à§à¦¸à¦ªà§à¦¯à¦¾à¦Ÿà§à¦°à¦¿à¦“ (Expatrio) à¦“ à¦­à¦¿à¦ªà¦¿à¦¡à¦¿ à¦ªà§à¦°à¦¸à§‡à¦¸à¦¿à¦‚ à¦…à¦¤à§à¦¯à¦¨à§à¦¤ à¦¨à¦¿à¦–à§à¦à¦¤à¦­à¦¾à¦¬à§‡ à¦¶à§‡à¦· à¦•à¦°à¦¤à§‡ à¦ªà§‡à¦°à§‡à¦›à¦¿à¥¤ à¦œà¦¾à¦°à§à¦®à¦¾à¦¨à¦¿à¦¤à§‡ à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦«à§à¦°à¦¿à¦¤à§‡ à¦ªà§œà¦¾à¦° à¦¸à§à¦¬à¦ªà§à¦¨ à¦ªà§‚à¦°à¦£ à¦¹à¦²à§‹!",
+    quote: "জার্মানির ব্লকড অ্যাকাউন্ট এক্সপ্যাট্রিও (Expatrio) ও ভিপিডি প্রসেসিং অত্যন্ত নিখুঁতভাবে শেষ করতে পেরেছি। জার্মানিতে সম্পূর্ণ ফ্রিতে পড়ার স্বপ্ন পূরণ হলো!",
     avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200",
   },
   {
     id: "test-5",
     studentName: "Sifat Hasan",
     destination: "Australia",
-    flag: "ðŸ‡¦ðŸ‡º",
+    flag: "🇦🇺",
     institution: "Deakin University, Melbourne",
     program: "Master of Cyber Security",
     agencyName: "Global EduPathway Bangladesh",
     rating: 4.8,
     visaTimeAgo: "Approved 1 month ago",
-    quote: "à¦…à¦¸à§à¦Ÿà§à¦°à§‡à¦²à¦¿à§Ÿà¦¾à¦° à¦¨à¦¤à§à¦¨ à¦œà§‡à¦¨à§à¦‡à¦¨ à¦¸à§à¦Ÿà§à¦¡à§‡à¦¨à§à¦Ÿ (GS) à¦Ÿà§‡à¦¸à§à¦Ÿ à¦¨à¦¿à§Ÿà§‡ à¦…à¦¨à§‡à¦• à¦•à¦¨à¦«à¦¿à¦‰à¦¶à¦¨ à¦›à¦¿à¦²à¥¤ à¦—à§à¦²à§‹à¦¬à¦¾à¦² à¦à¦¡à§à¦ªà¦¾à¦¥à¦“à§Ÿà§‡ à¦®à¦• à¦‡à¦¨à§à¦Ÿà¦¾à¦°à¦­à¦¿à¦‰ à¦¨à¦¿à§Ÿà§‡ à¦†à¦®à¦¾à¦•à§‡ à¦ªà§à¦°à§‹à¦ªà§à¦°à¦¿ à¦†à¦¤à§à¦®à¦¬à¦¿à¦¶à§à¦¬à¦¾à¦¸à§€ à¦•à¦°à§‡à¦›à¦¿à¦²à¥¤",
+    quote: "অস্ট্রেলিয়ার নতুন জেনুইন স্টুডেন্ট (GS) টেস্ট নিয়ে অনেক কনফিউশন ছিল। গ্লোবাল এডুপাথওয়ে মক ইন্টারভিউ নিয়ে আমাকে পুরোপুরি আত্মবিশ্বাসী করেছিল।",
     avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200",
   },
 ];
 
 const GOAL_TABS: { id: AbroadGoal; label: string; icon: any }[] = [
-  { id: "study", label: "à¦‰à¦šà§à¦šà¦¶à¦¿à¦•à§à¦·à¦¾ (Study)", icon: "school-outline" },
-  { id: "work", label: "à¦•à¦¾à¦œà§‡à¦° à¦­à¦¿à¦¸à¦¾ (Work)", icon: "briefcase-outline" },
-  { id: "medical", label: "à¦šà¦¿à¦•à¦¿à§Žà¦¸à¦¾ (Medical)", icon: "medkit-outline" },
-  { id: "visit", label: "à¦­à§à¦°à¦®à¦£ (Visit)", icon: "airplane-outline" },
+  { id: "study", label: "উচ্চশিক্ষা (Study)", icon: "school-outline" },
+  { id: "work", label: "কাজের ভিসা (Work)", icon: "briefcase-outline" },
+  { id: "medical", label: "চিকিৎসা (Medical)", icon: "medkit-outline" },
+  { id: "visit", label: "ভ্রমণ (Visit)", icon: "airplane-outline" },
 ];
 
 export default function AbroadAgencyScreen() {
@@ -611,7 +611,7 @@ export default function AbroadAgencyScreen() {
 
   const handleAddCustomDoc = () => {
     if (!customDocTitle.trim()) {
-      Alert.alert("à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿà§‡à¦° à¦¨à¦¾à¦®", "à¦¦à§Ÿà¦¾ à¦•à¦°à§‡ à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿà§‡à¦° à¦¨à¦¾à¦® à¦²à¦¿à¦–à§à¦¨à¥¤");
+      Alert.alert("ডকুমেন্টের নাম", "দয়া করে ডকুমেন্টের নাম লিখুন।");
       return;
     }
     const newDoc: ChecklistItem = {
@@ -619,9 +619,9 @@ export default function AbroadAgencyScreen() {
       title: customDocTitle.trim(),
       bengaliTitle: customDocTitle.trim(),
       category: customDocCategory,
-      description: "à¦•à§à¦¯à¦¾à¦¨à§à¦¡à¦¿à¦¡à§‡à¦Ÿ à¦•à¦°à§à¦¤à§ƒà¦• à¦®à§à¦¯à¦¾à¦¨à§à§Ÿà¦¾à¦²à¦¿ à¦¸à¦‚à¦¯à§à¦•à§à¦¤ à¦¬à¦¿à¦¶à§‡à¦· à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿà¥¤",
+      description: "ক্যান্ডিডেট কর্তৃক ম্যানুয়ালি সংযুক্ত বিশেষ ডকুমেন্ট।",
       isMandatory: false,
-      howToObtainBD: "à¦¸à¦‚à¦¶à§à¦²à¦¿à¦·à§à¦Ÿ à¦ªà§à¦°à¦¤à¦¿à¦·à§à¦ à¦¾à¦¨ à¦¬à¦¾ à¦¦à§‚à¦¤à¦¾à¦¬à¦¾à¦¸ à¦ªà§‹à¦°à§à¦Ÿà¦¾à¦² à¦¹à¦¤à§‡ à¦¸à¦‚à¦—à§à¦°à¦¹ à¦•à¦°à§à¦¨à¥¤",
+      howToObtainBD: "সংশ্লিষ্ট প্রতিষ্ঠান বা দূতাবাস পোর্টাল হতে সংগ্রহ করুন।",
     };
     setChecklistItems((prev) => [...prev, newDoc]);
     setCustomDocTitle("");
@@ -666,11 +666,11 @@ export default function AbroadAgencyScreen() {
   // Submit Booking via abroadAgencyService.bookAppointment()
   const handleBookingSubmit = async () => {
     if (!bookingAgency) {
-      Alert.alert("à¦à¦œà§‡à¦¨à§à¦¸à¦¿ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨", "à¦¦à§Ÿà¦¾ à¦•à¦°à§‡ à¦¯à§‡ à¦•à§‹à¦¨à§‹ à¦à¦•à¦Ÿà¦¿ à¦à¦œà§‡à¦¨à§à¦¸à¦¿à¦° à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦° à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨à¥¤");
+      Alert.alert("এজেন্সি নির্বাচন করুন", "দয়া করে যে কোনো একটি এজেন্সির কাউন্সেলর নির্বাচন করুন।");
       return;
     }
     if (!candidateName.trim() || !candidatePhone.trim()) {
-      Alert.alert("à¦ªà§à¦°à§Ÿà§‹à¦œà¦¨à§€à§Ÿ à¦¤à¦¥à§à¦¯", "à¦¦à§Ÿà¦¾ à¦•à¦°à§‡ à¦†à¦ªà¦¨à¦¾à¦° à¦¨à¦¾à¦® à¦à¦¬à¦‚ à¦®à§‹à¦¬à¦¾à¦‡à¦² à¦¨à¦®à§à¦¬à¦° à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦•à¦°à§à¦¨à¥¤");
+      Alert.alert("প্রয়োজনীয় তথ্য", "দয়া করে আপনার নাম এবং মোবাইল নম্বর প্রদান করুন।");
       return;
     }
 
@@ -714,7 +714,7 @@ export default function AbroadAgencyScreen() {
       loadMyConsultations();
     } catch (e) {
       console.error("Booking error:", e);
-      Alert.alert("à¦¤à§à¦°à§à¦Ÿà¦¿", "à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¬à§à¦•à¦¿à¦‚ à¦¸à¦®à§à¦ªà¦¨à§à¦¨ à¦•à¦°à¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿à¥¤ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦ªà§à¦¨à¦°à¦¾à§Ÿ à¦šà§‡à¦·à§à¦Ÿà¦¾ à¦•à¦°à§à¦¨à¥¤");
+      Alert.alert("ত্রুটি", "অ্যাপয়েন্টমেন্ট বুকিং সম্পন্ন করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।");
     } finally {
       setSubmittingBooking(false);
     }
@@ -777,11 +777,11 @@ export default function AbroadAgencyScreen() {
       return [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//ShopnoTravel//AbroadConsultancyPortal//EN",
+        "PRODID:-//ShopnoJatra//AbroadConsultancyPortal//EN",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
         "BEGIN:VEVENT",
-        `UID:${booking.id || Date.now()}@shopnotravel.com`,
+        `UID:${booking.id || Date.now()}@shopnojatra.com`,
         `DTSTAMP:${formatUtc(new Date())}`,
         `DTSTART:${formatUtc(startDate)}`,
         `DTEND:${formatUtc(endDate)}`,
@@ -819,7 +819,7 @@ export default function AbroadAgencyScreen() {
     try {
       await Share.share({
         title: `Appointment_${booking.id}.ics`,
-        message: `ðŸ“… à¦­à¦¿à¦¸à¦¾ à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚ à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¶à¦¿à¦¡à¦¿à¦‰à¦²:\n\nà¦à¦œà§‡à¦¨à§à¦¸à¦¿: ${booking.agency_name}\nà¦¤à¦¾à¦°à¦¿à¦–: ${booking.appointment_date}\nà¦¸à¦®à¦¯à¦¼: ${booking.appointment_time}\nà¦—à¦¨à§à¦¤à¦¬à§à¦¯: ${booking.target_country}\nà¦®à§‹à¦¡: ${booking.consultation_type === "in_person" ? "à¦…à¦«à¦¿à¦¸ à¦®à¦¿à¦Ÿà¦¿à¦‚" : "à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦­à¦¿à¦¡à¦¿à¦“ à¦•à¦²"}\nà¦°à§‡à¦«à¦¾à¦°à§‡à¦¨à§à¦¸: ${booking.id}\n\niCalendar (.ics) à¦¡à§‡à¦Ÿà¦¾:\n${icsContent}`,
+        message: `📅 ভিসা কাউন্সেলিং অ্যাপয়েন্টমেন্ট শিডিউল:\n\nএজেন্সি: ${booking.agency_name}\nতারিখ: ${booking.appointment_date}\nসময়: ${booking.appointment_time}\nগন্তব্য: ${booking.target_country}\nমোড: ${booking.consultation_type === "in_person" ? "অফিস মিটিং" : "অনলাইন ভিডিও কল"}\nরেফারেন্স: ${booking.id}\n\niCalendar (.ics) ডেটা:\n${icsContent}`,
       });
     } catch (e) {
       console.warn("Share error:", e);
@@ -831,14 +831,14 @@ export default function AbroadAgencyScreen() {
     const unchecked = checklistItems.filter((item) => !checklistState[item.id]);
 
     const msg = [
-      "ðŸ“‹ à¦¬à¦¿à¦¦à§‡à¦¶ à¦‰à¦šà§à¦šà¦¶à¦¿à¦•à§à¦·à¦¾ à¦“ à¦­à¦¿à¦¸à¦¾ à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿ à¦šà§‡à¦•à¦²à¦¿à¦¸à§à¦Ÿ:",
-      `à¦ªà§à¦°à¦¸à§à¦¤à§à¦¤à¦¿ à¦¸à¦®à§à¦ªà¦¨à§à¦¨: ${checklistStats.completed}/${checklistStats.total} (${checklistStats.percent}%)`,
+      "📋 বিদেশ উচ্চশিক্ষা ও ভিসা ডকুমেন্ট চেকলিস্ট:",
+      `প্রস্তুতি সম্পন্ন: ${checklistStats.completed}/${checklistStats.total} (${checklistStats.percent}%)`,
       "",
-      "âœ… à¦ªà§à¦°à¦¸à§à¦¤à§à¦¤à¦•à§ƒà¦¤ à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿà¦¸:",
-      ...checked.map((i) => ` â€¢ ${i.bengaliTitle}`),
+      "✅ প্রস্তুতকৃত ডকুমেন্টস:",
+      ...checked.map((i) => ` • ${i.bengaliTitle}`),
       "",
-      "â³ à¦¬à¦¾à¦•à¦¿ à¦¥à¦¾à¦•à¦¾ à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿà¦¸:",
-      ...unchecked.map((i) => ` â€¢ ${i.bengaliTitle}`),
+      "⏳ বাকি থাকা ডকুমেন্টস:",
+      ...unchecked.map((i) => ` • ${i.bengaliTitle}`),
       "",
       "Shopno Abroad Services Portal",
     ].join("\n");
@@ -876,12 +876,12 @@ export default function AbroadAgencyScreen() {
   }, []);
 
   const timeSlotOptions = [
-    { label: "10:00 AM", period: "à¦¸à¦•à¦¾à¦²" },
-    { label: "11:30 AM", period: "à¦¸à¦•à¦¾à¦²" },
-    { label: "02:30 PM", period: "à¦¦à§à¦ªà§à¦°" },
-    { label: "04:00 PM", period: "à¦¬à¦¿à¦•à¦¾à¦²" },
-    { label: "05:30 PM", period: "à¦¸à¦¨à§à¦§à§à¦¯à¦¾" },
-    { label: "07:00 PM", period: "à¦°à¦¾à¦¤" },
+    { label: "10:00 AM", period: "সকাল" },
+    { label: "11:30 AM", period: "সকাল" },
+    { label: "02:30 PM", period: "দুপুর" },
+    { label: "04:00 PM", period: "বিকাল" },
+    { label: "05:30 PM", period: "সন্ধ্যা" },
+    { label: "07:00 PM", period: "রাত" },
   ];
 
   return (
@@ -901,7 +901,7 @@ export default function AbroadAgencyScreen() {
           <View style={{ flex: 1, marginStart: 12 }}>
             <Text style={styles.headerTitle}>Abroad Consultancy Portal</Text>
             <Text style={styles.headerSubtitle}>
-              à¦‰à¦šà§à¦šà¦¶à¦¿à¦•à§à¦·à¦¾, à¦¸à§à¦Ÿà§à¦¡à§‡à¦¨à§à¦Ÿ à¦­à¦¿à¦¸à¦¾ à¦“ à¦“à¦¯à¦¼à¦¾à¦°à§à¦• à¦ªà¦¾à¦°à¦®à¦¿à¦Ÿ à¦¹à¦¾à¦¬
+              উচ্চশিক্ষা, স্টুডেন্ট ভিসা ও ওয়ার্ক পারমিট হাব
             </Text>
           </View>
           <TouchableOpacity
@@ -913,7 +913,7 @@ export default function AbroadAgencyScreen() {
             activeOpacity={0.85}
           >
             <Ionicons name="sparkles" size={14} color="#FBBF24" />
-            <Text style={styles.headerAssessPillText}>à¦«à§à¦°à¦¿ à¦…à§à¦¯à¦¾à¦¸à§‡à¦¸à¦®à§‡à¦¨à§à¦Ÿ</Text>
+            <Text style={styles.headerAssessPillText}>ফ্রি অ্যাসেসমেন্ট</Text>
           </TouchableOpacity>
         </View>
 
@@ -962,7 +962,7 @@ export default function AbroadAgencyScreen() {
                 activePortalTab === "destinations" && styles.portalTabBtnTextActive,
               ]}
             >
-              à¦—à¦¨à§à¦¤à¦¬à§à¦¯ à¦¹à¦¾à¦¬
+              গন্তব্য হাব
             </Text>
           </TouchableOpacity>
 
@@ -981,7 +981,7 @@ export default function AbroadAgencyScreen() {
                 activePortalTab === "checklist" && styles.portalTabBtnTextActive,
               ]}
             >
-              à¦šà§‡à¦•à¦²à¦¿à¦¸à§à¦Ÿ ({checklistStats.completed}/{checklistStats.total})
+              চেকলিস্ট ({checklistStats.completed}/{checklistStats.total})
             </Text>
           </TouchableOpacity>
 
@@ -1000,7 +1000,7 @@ export default function AbroadAgencyScreen() {
                 activePortalTab === "agencies" && styles.portalTabBtnTextActive,
               ]}
             >
-              à¦à¦œà§‡à¦¨à§à¦¸à¦¿ à¦“ à¦°à¦¿à¦­à¦¿à¦‰
+              এজেন্সি ও রিভিউ
             </Text>
           </TouchableOpacity>
 
@@ -1019,7 +1019,7 @@ export default function AbroadAgencyScreen() {
                 activePortalTab === "booking" && styles.portalTabBtnTextActive,
               ]}
             >
-              à¦¬à§à¦•à¦¿à¦‚ à¦‰à¦‡à¦œà¦¾à¦°à§à¦¡
+              বুকিং উইজার্ড
             </Text>
           </TouchableOpacity>
 
@@ -1038,7 +1038,7 @@ export default function AbroadAgencyScreen() {
                 activePortalTab === "my_bookings" && styles.portalTabBtnTextActive,
               ]}
             >
-              à¦¬à§à¦•à¦¿à¦‚ ({myConsultations.length})
+              বুকিং ({myConsultations.length})
             </Text>
           </TouchableOpacity>
         </View>
@@ -1060,14 +1060,14 @@ export default function AbroadAgencyScreen() {
           <View>
             <View style={styles.sectionHeaderRow}>
               <View>
-                <Text style={styles.sectionTitle}>à¦¦à§‡à¦¶à¦­à¦¿à¦¤à§à¦¤à¦¿à¦• à¦—à¦¨à§à¦¤à¦¬à§à¦¯ à¦¹à¦¾à¦¬ (Destinations)</Text>
+                <Text style={styles.sectionTitle}>দেশভিত্তিক গন্তব্য হাব (Destinations)</Text>
                 <Text style={styles.sectionSubtitle}>
-                  à¦ªà§à¦°à¦¸à§‡à¦¸à¦¿à¦‚ à¦¸à¦®à§Ÿ, à¦­à¦¿à¦¸à¦¾ à¦¸à¦¾à¦•à¦¸à§‡à¦¸ à¦°à§‡à¦Ÿ à¦“ à¦²à§à¦¯à¦¾à¦™à§à¦—à§à§Ÿà§‡à¦œ à¦Ÿà§‡à¦¸à§à¦Ÿ à¦°à¦¿à¦•à§‹à§Ÿà¦¾à¦°à¦®à§‡à¦¨à§à¦Ÿ
+                  প্রসেসিং সময়, ভিসা সাকসেস রেট ও ল্যাঙ্গুয়েজ টেস্ট রিকোয়ারমেন্ট
                 </Text>
               </View>
               <View style={styles.destinationCountBadge}>
                 <Text style={styles.destinationCountText}>
-                  {popularDestinations.length} à¦Ÿà¦¿ à¦¶à§€à¦°à§à¦· à¦¦à§‡à¦¶
+                  {popularDestinations.length} টি শীর্ষ দেশ
                 </Text>
               </View>
             </View>
@@ -1084,7 +1084,7 @@ export default function AbroadAgencyScreen() {
                       <View style={styles.successRateBadge}>
                         <Ionicons name="trending-up" size={13} color="#059669" />
                         <Text style={styles.successRateText}>
-                          {dest.visaSuccessRate}% à¦¸à¦¾à¦•à¦¸à§‡à¦¸ à¦°à§‡à¦Ÿ
+                          {dest.visaSuccessRate}% সাকসেস রেট
                         </Text>
                       </View>
                     </View>
@@ -1099,7 +1099,7 @@ export default function AbroadAgencyScreen() {
                       <Ionicons name="time-outline" size={14} color="#0284C7" />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.metricLabel}>à¦—à§œ à¦ªà§à¦°à¦¸à§‡à¦¸à¦¿à¦‚ à¦¸à¦®à§Ÿ</Text>
+                      <Text style={styles.metricLabel}>গড় প্রসেসিং সময়</Text>
                       <Text style={styles.metricVal}>{dest.avgProcessingTime}</Text>
                     </View>
                   </View>
@@ -1109,7 +1109,7 @@ export default function AbroadAgencyScreen() {
                       <Ionicons name="briefcase-outline" size={14} color="#8B5CF6" />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.metricLabel}>à¦ªà§‹à¦¸à§à¦Ÿ-à¦¸à§à¦Ÿà¦¾à¦¡à¦¿ à¦“à§Ÿà¦¾à¦°à§à¦•</Text>
+                      <Text style={styles.metricLabel}>পোস্ট-স্টাডি ওয়ার্ক</Text>
                       <Text style={styles.metricVal} numberOfLines={1}>
                         {dest.postStudyWork}
                       </Text>
@@ -1122,7 +1122,7 @@ export default function AbroadAgencyScreen() {
                   <View style={styles.langTestsHeader}>
                     <Ionicons name="ribbon-outline" size={15} color="#0369A1" />
                     <Text style={styles.langTestsTitle}>
-                      à¦ªà§à¦°à§Ÿà§‹à¦œà¦¨à§€à§Ÿ à¦­à¦¾à¦·à¦¾ à¦ªà¦°à§€à¦•à§à¦·à¦¾ (Language Tests)
+                      প্রয়োজনীয় ভাষা পরীক্ষা (Language Tests)
                     </Text>
                   </View>
 
@@ -1143,7 +1143,7 @@ export default function AbroadAgencyScreen() {
 
                   {dest.languageTests.otherNote && (
                     <Text style={styles.langNoteText}>
-                      ðŸ’¡ {dest.languageTests.otherNote}
+                      💡 {dest.languageTests.otherNote}
                     </Text>
                   )}
                 </View>
@@ -1151,11 +1151,11 @@ export default function AbroadAgencyScreen() {
                 {/* Intakes & Tuition Guide */}
                 <View style={styles.intakeTuitionRow}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.subItemLabel}>à¦‡à¦¨à¦Ÿà§‡à¦• à¦¸à§‡à¦¶à¦¨:</Text>
+                    <Text style={styles.subItemLabel}>ইনটেক সেশন:</Text>
                     <Text style={styles.subItemVal}>{dest.keyIntakes.join(", ")}</Text>
                   </View>
                   <View style={{ flex: 1, alignItems: "flex-end" }}>
-                    <Text style={styles.subItemLabel}>à¦†à¦¨à§à¦®à¦¾à¦¨à¦¿à¦• à¦Ÿà¦¿à¦‰à¦¶à¦¨ à¦«à¦¿:</Text>
+                    <Text style={styles.subItemLabel}>আনুমানিক টিউশন ফি:</Text>
                     <Text style={styles.subItemValAccent}>{dest.approxTuition}</Text>
                   </View>
                 </View>
@@ -1171,7 +1171,7 @@ export default function AbroadAgencyScreen() {
                     activeOpacity={0.8}
                   >
                     <Ionicons name="information-circle-outline" size={15} color="#475569" />
-                    <Text style={styles.destDetailBtnText}>à¦­à¦¿à¦¸à¦¾ à¦—à¦¾à¦‡à¦¡</Text>
+                    <Text style={styles.destDetailBtnText}>ভিসা গাইড</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1179,14 +1179,14 @@ export default function AbroadAgencyScreen() {
                     onPress={() => {
                       setActivePortalTab("checklist");
                       Alert.alert(
-                        `ðŸ“‹ ${dest.name} à¦¬à¦¿à¦¶à§‡à¦· à¦°à¦¿à¦•à§‹à§Ÿà¦¾à¦°à¦®à§‡à¦¨à§à¦Ÿ`,
+                        `📋 ${dest.name} বিশেষ রিকোয়ারমেন্ট`,
                         dest.docRequirementTips
                       );
                     }}
                     activeOpacity={0.8}
                   >
                     <Ionicons name="checkbox-outline" size={15} color="#0369A1" />
-                    <Text style={styles.destChecklistBtnText}>à¦šà§‡à¦•à¦²à¦¿à¦¸à§à¦Ÿ</Text>
+                    <Text style={styles.destChecklistBtnText}>চেকলিস্ট</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1199,7 +1199,7 @@ export default function AbroadAgencyScreen() {
                       style={styles.destBookGradient}
                     >
                       <Ionicons name="calendar" size={14} color="#FFFFFF" />
-                      <Text style={styles.destBookBtnText}>à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚ à¦¬à§à¦• à¦•à¦°à§à¦¨</Text>
+                      <Text style={styles.destBookBtnText}>কাউন্সেলিং বুক করুন</Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 </View>
@@ -1221,14 +1221,14 @@ export default function AbroadAgencyScreen() {
               >
                 <View style={styles.summaryTopRow}>
                   <View style={{ flex: 1, paddingEnd: 10 }}>
-                    <Text style={styles.summaryTitle}>à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿ à¦šà§‡à¦•à¦²à¦¿à¦¸à§à¦Ÿ à¦œà§‡à¦¨à¦¾à¦°à§‡à¦Ÿà¦°</Text>
+                    <Text style={styles.summaryTitle}>ডকুমেন্ট চেকলিস্ট জেনারেটর</Text>
                     <Text style={styles.summarySubtitle}>
-                      à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ, à¦à¦•à¦¾à¦¡à§‡à¦®à¦¿à¦• à¦¸à¦¨à¦¦, à¦¬à§à¦¯à¦¾à¦‚à¦• à¦¸à§à¦Ÿà§‡à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦“ à¦ªà§à¦²à¦¿à¦¶ à¦•à§à¦²à¦¿à§Ÿà¦¾à¦°à§‡à¦¨à§à¦¸
+                      পাসপোর্ট, একাডেমিক সনদ, ব্যাংক স্টেটমেন্ট ও পুলিশ ক্লিয়ারেন্স
                     </Text>
                   </View>
                   <View style={styles.progressCircleBadge}>
                     <Text style={styles.progressPercentText}>{checklistStats.percent}%</Text>
-                    <Text style={styles.progressLabelSmall}>à¦¸à¦®à§à¦ªà¦¨à§à¦¨</Text>
+                    <Text style={styles.progressLabelSmall}>সম্পন্ন</Text>
                   </View>
                 </View>
 
@@ -1244,7 +1244,7 @@ export default function AbroadAgencyScreen() {
 
                 <View style={styles.summaryStatsRow}>
                   <Text style={styles.summaryStatsText}>
-                    âœ“ {checklistStats.completed} à¦Ÿà¦¿ à¦ªà§à¦°à¦¸à§à¦¤à§à¦¤ (à¦®à§‹à¦Ÿ {checklistStats.total} à¦Ÿà¦¿à¦° à¦®à¦§à§à¦¯à§‡)
+                    ✓ {checklistStats.completed} টি প্রস্তুত (মোট {checklistStats.total} টির মধ্যে)
                   </Text>
                   <View style={{ flexDirection: "row", gap: 8 }}>
                     <TouchableOpacity
@@ -1253,7 +1253,7 @@ export default function AbroadAgencyScreen() {
                       activeOpacity={0.8}
                     >
                       <Ionicons name="add" size={14} color="#FFFFFF" />
-                      <Text style={styles.addCustomDocBtnText}>à¦¨à¦¤à§à¦¨ à¦¯à§‹à¦— à¦•à¦°à§à¦¨</Text>
+                      <Text style={styles.addCustomDocBtnText}>নতুন যোগ করুন</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.shareChecklistBtn}
@@ -1261,7 +1261,7 @@ export default function AbroadAgencyScreen() {
                       activeOpacity={0.8}
                     >
                       <Ionicons name="share-social-outline" size={14} color="#93C5FD" />
-                      <Text style={styles.shareChecklistBtnText}>à¦¶à§‡à§Ÿà¦¾à¦°</Text>
+                      <Text style={styles.shareChecklistBtnText}>শেয়ার</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -1293,7 +1293,7 @@ export default function AbroadAgencyScreen() {
                           active && styles.catFilterPillTextActive,
                         ]}
                       >
-                        {cat === "All" ? "à¦¸à¦•à¦² à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿà¦¸" : cat}
+                        {cat === "All" ? "সকল ডকুমেন্টস" : cat}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -1349,11 +1349,11 @@ export default function AbroadAgencyScreen() {
                           </Text>
                           {item.isMandatory ? (
                             <View style={styles.mandatoryBadge}>
-                              <Text style={styles.mandatoryBadgeText}>à¦¬à¦¾à¦§à§à¦¯à¦¤à¦¾à¦®à§‚à¦²à¦•</Text>
+                              <Text style={styles.mandatoryBadgeText}>বাধ্যতামূলক</Text>
                             </View>
                           ) : (
                             <View style={styles.optionalBadge}>
-                              <Text style={styles.optionalBadgeText}>à¦¶à¦°à§à¦¤à¦¸à¦¾à¦ªà§‡à¦•à§à¦·</Text>
+                              <Text style={styles.optionalBadgeText}>শর্তসাপেক্ষ</Text>
                             </View>
                           )}
                         </View>
@@ -1382,7 +1382,7 @@ export default function AbroadAgencyScreen() {
                           <View style={styles.howToHeader}>
                             <Ionicons name="navigate-outline" size={14} color="#0284C7" />
                             <Text style={styles.howToTitle}>
-                              à¦¬à¦¾à¦‚à¦²à¦¾à¦¦à§‡à¦¶à§‡ à¦à¦Ÿà¦¿ à¦•à§€à¦­à¦¾à¦¬à§‡ à¦¸à¦‚à¦—à§à¦°à¦¹ à¦•à¦°à¦¬à§‡à¦¨:
+                              বাংলাদেশে এটি কীভাবে সংগ্রহ করবেন:
                             </Text>
                           </View>
                           <Text style={styles.howToBodyText}>{item.howToObtainBD}</Text>
@@ -1405,7 +1405,7 @@ export default function AbroadAgencyScreen() {
                 }}
               >
                 <Ionicons name="refresh-outline" size={15} color="#EF4444" />
-                <Text style={styles.checklistResetBtnText}>à¦¸à¦¬ à¦†à¦¨à¦šà§‡à¦• à¦•à¦°à§à¦¨</Text>
+                <Text style={styles.checklistResetBtnText}>সব আনচেক করুন</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -1418,7 +1418,7 @@ export default function AbroadAgencyScreen() {
                 }}
               >
                 <Ionicons name="checkmark-done" size={15} color="#059669" />
-                <Text style={styles.checklistCheckAllBtnText}>à¦¸à¦¬ à¦¸à¦¿à¦²à§‡à¦•à§à¦Ÿ à¦•à¦°à§à¦¨</Text>
+                <Text style={styles.checklistCheckAllBtnText}>সব সিলেক্ট করুন</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1432,13 +1432,13 @@ export default function AbroadAgencyScreen() {
             <View style={styles.sectionHeaderRow}>
               <View>
                 <Text style={styles.sectionTitle}>
-                  à¦…à¦¨à§à¦®à§‹à¦¦à¦¿à¦¤ à¦•à¦¨à¦¸à¦¾à¦²à¦Ÿà§‡à¦¨à§à¦¸à¦¿ à¦à¦œà§‡à¦¨à§à¦¸à¦¿ ({agencies.length})
+                  অনুমোদিত কনসালটেন্সি এজেন্সি ({agencies.length})
                 </Text>
                 <Text style={styles.sectionSubtitle}>
-                  à¦¸à¦°à¦•à¦¾à¦°à¦¿ à¦†à¦°à¦à¦² (RL) à¦²à¦¾à¦‡à¦¸à§‡à¦¨à§à¦¸ à¦“ à¦¬à§à¦°à¦¿à¦Ÿà¦¿à¦¶ à¦•à¦¾à¦‰à¦¨à§à¦¸à¦¿à¦² à¦¸à¦¨à¦¦à¦ªà§à¦°à¦¾à¦ªà§à¦¤
+                  সরকারি আরএল (RL) লাইসেন্স ও ব্রিটিশ কাউন্সিল সনদপ্রাপ্ত
                 </Text>
               </View>
-              <Text style={styles.govTag}>âœ“ {t("verifiedBadge", "à§§à§¦à§¦% à¦­à§‡à¦°à¦¿à¦«à¦¾à¦‡à¦¡")}</Text>
+              <Text style={styles.govTag}>✓ {t("verifiedBadge", "১০০% ভেরিফাইড")}</Text>
             </View>
 
             {/* Search Agencies Input */}
@@ -1446,7 +1446,7 @@ export default function AbroadAgencyScreen() {
               <Ionicons name="search" size={17} color="#94A3B8" />
               <TextInput
                 style={styles.searchInput}
-                placeholder="à¦à¦œà§‡à¦¨à§à¦¸à¦¿à¦° à¦¨à¦¾à¦® à¦¬à¦¾ à¦¦à§‡à¦¶ à¦¦à¦¿à§Ÿà§‡ à¦–à§à¦à¦œà§à¦¨..."
+                placeholder="এজেন্সির নাম বা দেশ দিয়ে খুঁজুন..."
                 placeholderTextColor="#94A3B8"
                 value={searchAgencyQuery}
                 onChangeText={setSearchAgencyQuery}
@@ -1482,7 +1482,7 @@ export default function AbroadAgencyScreen() {
                           active && styles.agencyCountryPillTextActive,
                         ]}
                       >
-                        {c === "All" ? "à¦¸à¦•à¦² à¦¦à§‡à¦¶" : c}
+                        {c === "All" ? "সকল দেশ" : c}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -1494,7 +1494,7 @@ export default function AbroadAgencyScreen() {
             {loading ? (
               <View style={styles.loadingBox}>
                 <ActivityIndicator size="large" color={PRIMARY_BLUE} />
-                <Text style={styles.loadingText}>à¦à¦œà§‡à¦¨à§à¦¸à¦¿ à¦¤à¦¾à¦²à¦¿à¦•à¦¾ à¦²à§‹à¦¡ à¦¹à¦šà§à¦›à§‡...</Text>
+                <Text style={styles.loadingText}>এজেন্সি তালিকা লোড হচ্ছে...</Text>
               </View>
             ) : (
               agencies
@@ -1524,14 +1524,14 @@ export default function AbroadAgencyScreen() {
                           )}
                         </View>
                         <Text style={styles.licenseText}>
-                          ðŸ“œ {agency.license_number}
+                          📜 {agency.license_number}
                         </Text>
 
                         <View style={styles.statsPillRow}>
                           <View style={styles.successPill}>
                             <Ionicons name="trophy" size={12} color="#059669" />
                             <Text style={styles.successText}>
-                              {agency.success_rate}% à¦¸à¦«à¦²à¦¤à¦¾
+                              {agency.success_rate}% সফলতা
                             </Text>
                           </View>
                           <View style={styles.ratingBox}>
@@ -1540,7 +1540,7 @@ export default function AbroadAgencyScreen() {
                               {agency.rating.toFixed(1)}
                             </Text>
                             <Text style={styles.reviewsCount}>
-                              ({agency.reviews_count} à¦°à¦¿à¦­à¦¿à¦‰)
+                              ({agency.reviews_count} রিভিউ)
                             </Text>
                           </View>
                         </View>
@@ -1554,10 +1554,10 @@ export default function AbroadAgencyScreen() {
 
                     {/* Destination Countries */}
                     <View style={styles.destListWrap}>
-                      <Text style={styles.destLabel}>à¦ªà§à¦°à¦§à¦¾à¦¨ à¦¦à§‡à¦¶à¦¸à¦®à§‚à¦¹:</Text>
+                      <Text style={styles.destLabel}>প্রধান দেশসমূহ:</Text>
                       {agency.destinations.map((d, i) => (
                         <View key={`dest-${agency.id}-${d}`} style={styles.destPill}>
-                          <Text style={styles.destPillText}>ðŸŒ {d}</Text>
+                          <Text style={styles.destPillText}>🌐 {d}</Text>
                         </View>
                       ))}
                     </View>
@@ -1582,11 +1582,11 @@ export default function AbroadAgencyScreen() {
                     {/* Footer with Direct Booking Scheduling */}
                     <View style={styles.agencyFooter}>
                       <View>
-                        <Text style={styles.feeLabel}>à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚ à¦«à¦¿</Text>
+                        <Text style={styles.feeLabel}>কাউন্সেলিং ফি</Text>
                         <Text style={styles.feeVal}>
                           {agency.consultation_fee === 0
-                            ? "à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦«à§à¦°à¦¿"
-                            : `à§³${agency.consultation_fee}`}
+                            ? "সম্পূর্ণ ফ্রি"
+                            : `৳${agency.consultation_fee}`}
                         </Text>
                       </View>
 
@@ -1601,7 +1601,7 @@ export default function AbroadAgencyScreen() {
                         >
                           <Ionicons name="calendar" size={14} color="#FFFFFF" />
                           <Text style={styles.bookConsultBtnText}>
-                            à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¨à¦¿à¦¨
+                            অ্যাপয়েন্টমেন্ট নিন
                           </Text>
                         </LinearGradient>
                       </TouchableOpacity>
@@ -1614,9 +1614,9 @@ export default function AbroadAgencyScreen() {
             <View style={styles.testimonialsSection}>
               <View style={styles.sectionHeaderRow}>
                 <View>
-                  <Text style={styles.sectionTitle}>à¦¸à¦«à¦² à¦¶à¦¿à¦•à§à¦·à¦¾à¦°à§à¦¥à§€à¦¦à§‡à¦° à¦…à¦­à¦¿à¦œà§à¦žà¦¤à¦¾ (Testimonials)</Text>
+                  <Text style={styles.sectionTitle}>সফল শিক্ষার্থীদের অভিজ্ঞতা (Testimonials)</Text>
                   <Text style={styles.sectionSubtitle}>
-                    à¦­à§‡à¦°à¦¿à¦«à¦¾à¦‡à¦¡ à¦­à¦¿à¦¸à¦¾ à¦ªà§à¦°à¦¾à¦ªà§à¦¤ à¦¶à¦¿à¦•à§à¦·à¦¾à¦°à§à¦¥à§€à¦¦à§‡à¦° à¦®à¦¤à¦¾à¦®à¦¤ à¦“ à¦°à¦¿à¦­à¦¿à¦‰
+                    ভেরিফাইড ভিসা প্রাপ্ত শিক্ষার্থীদের মতামত ও রিভিউ
                   </Text>
                 </View>
               </View>
@@ -1635,7 +1635,7 @@ export default function AbroadAgencyScreen() {
                     </View>
                   </View>
 
-                  <Text style={styles.testQuote}>â€œ{test.quote}â€</Text>
+                  <Text style={styles.testQuote}>“{test.quote}”</Text>
 
                   <View style={styles.testFooterRow}>
                     <View style={styles.testStarsRow}>
@@ -1669,17 +1669,17 @@ export default function AbroadAgencyScreen() {
                 </View>
                 <View style={{ flex: 1, marginStart: 12 }}>
                   <Text style={styles.wizardHeaderTitle}>
-                    à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¬à§à¦•à¦¿à¦‚ à¦‰à¦‡à¦œà¦¾à¦°à§à¦¡
+                    অ্যাপয়েন্টমেন্ট বুকিং উইজার্ড
                   </Text>
                   <Text style={styles.wizardHeaderSubtitle}>
-                    à¦‡à¦¨-à¦ªà¦¾à¦°à¦¸à¦¨ à¦¬à¦¾ à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦­à¦¿à¦¡à¦¿à¦“ à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚ à¦¸à§à¦²à¦Ÿ à¦¬à§à¦• à¦•à¦°à§à¦¨
+                    ইন-পারসন বা অনলাইন ভিডিও কাউন্সেলিং স্লট বুক করুন
                   </Text>
                 </View>
               </LinearGradient>
             </View>
 
             {/* Step 1: Select Agency */}
-            <Text style={styles.wizardStepLabel}>{t("stepSelectAgency", "à§§. à¦à¦œà§‡à¦¨à§à¦¸à¦¿ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨ *")}</Text>
+            <Text style={styles.wizardStepLabel}>{t("stepSelectAgency", "১. এজেন্সি নির্বাচন করুন *")}</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -1722,7 +1722,7 @@ export default function AbroadAgencyScreen() {
             </ScrollView>
 
             {/* Step 2: Target Country Selection */}
-            <Text style={styles.wizardStepLabel}>{t("stepTargetCountry", "à§¨. à¦•à¦¾à¦™à§à¦•à§à¦·à¦¿à¦¤ à¦—à¦¨à§à¦¤à¦¬à§à¦¯ à¦¦à§‡à¦¶ *")}</Text>
+            <Text style={styles.wizardStepLabel}>{t("stepTargetCountry", "২. কাঙ্ক্ষিত গন্তব্য দেশ *")}</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -1762,7 +1762,7 @@ export default function AbroadAgencyScreen() {
             </ScrollView>
 
             {/* Step 3: Consultation Mode Picker */}
-            <Text style={styles.wizardStepLabel}>{t("stepCounselingMode", "à§©. à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚ à¦®à§‹à¦¡ *")}</Text>
+            <Text style={styles.wizardStepLabel}>{t("stepCounselingMode", "৩. কাউন্সেলিং মোড *")}</Text>
             <View style={styles.consultModeRow}>
               <TouchableOpacity
                 style={[
@@ -1790,10 +1790,10 @@ export default function AbroadAgencyScreen() {
                     consultationType === "in_person" && styles.modeCardTitleActive,
                   ]}
                 >
-                  à¦‡à¦¨-à¦ªà¦¾à¦°à¦¸à¦¨ à¦…à¦«à¦¿à¦¸ à¦­à¦¿à¦œà¦¿à¦Ÿ
+                  ইন-পারসন অফিস ভিজিট
                 </Text>
                 <Text style={styles.modeCardSubtitle}>
-                  à¦à¦œà§‡à¦¨à§à¦¸à¦¿à¦° à¦—à§à¦²à¦¶à¦¾à¦¨/à¦¬à¦¨à¦¾à¦¨à§€ à¦¹à§‡à¦¡ à¦…à¦«à¦¿à¦¸à§‡ à¦¸à¦°à¦¾à¦¸à¦°à¦¿ à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦°à§‡à¦° à¦¸à¦¾à¦¥à§‡ à¦†à¦²à§‹à¦šà¦¨à¦¾
+                  এজেন্সির গুলশান/বনানী হেড অফিসে সরাসরি কাউন্সেলরের সাথে আলোচনা
                 </Text>
               </TouchableOpacity>
 
@@ -1823,16 +1823,16 @@ export default function AbroadAgencyScreen() {
                     consultationType === "online_video" && styles.modeCardTitleActive,
                   ]}
                 >
-                  à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦­à¦¿à¦¡à¦¿à¦“ à¦®à¦¿à¦Ÿà¦¿à¦‚
+                  অনলাইন ভিডিও মিটিং
                 </Text>
                 <Text style={styles.modeCardSubtitle}>
-                  Zoom / Google Meet-à¦ à¦¬à¦¾à¦¸à¦¾ à¦¥à§‡à¦•à§‡ à¦²à¦¾à¦‡à¦­ à¦¸à§à¦•à§à¦°à¦¿à¦¨-à¦¶à§‡à§Ÿà¦¾à¦° à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚
+                  Zoom / Google Meet-এ বাসা থেকে লাইভ স্ক্রিন-শেয়ার কাউন্সেলিং
                 </Text>
               </TouchableOpacity>
             </View>
 
             {/* Step 4: Dynamic Date Picker */}
-            <Text style={styles.wizardStepLabel}>à§ª. à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¤à¦¾à¦°à¦¿à¦– à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨ *</Text>
+            <Text style={styles.wizardStepLabel}>৪. অ্যাপয়েন্টমেন্ট তারিখ নির্বাচন করুন *</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -1859,7 +1859,7 @@ export default function AbroadAgencyScreen() {
             </ScrollView>
 
             {/* Step 5: Time Slot Picker */}
-            <Text style={styles.wizardStepLabel}>à§«. à¦¸à¦®à¦¯à¦¼ à¦¸à§à¦²à¦Ÿ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨ *</Text>
+            <Text style={styles.wizardStepLabel}>৫. সময় স্লট নির্বাচন করুন *</Text>
             <View style={styles.timeSlotsGrid}>
               {timeSlotOptions.map((slot) => {
                 const active = appointmentTime === slot.label;
@@ -1890,41 +1890,41 @@ export default function AbroadAgencyScreen() {
 
             {/* Step 6: Candidate Contact Information */}
             <View style={styles.candidateFormCard}>
-              <Text style={styles.wizardStepLabel}>à§¬. à¦•à§à¦¯à¦¾à¦¨à§à¦¡à¦¿à¦¡à§‡à¦Ÿà§‡à¦° à¦¯à§‹à¦—à¦¾à¦¯à§‹à¦—à§‡à¦° à¦¤à¦¥à§à¦¯ *</Text>
+              <Text style={styles.wizardStepLabel}>৬. ক্যান্ডিডেটের যোগাযোগের তথ্য *</Text>
 
-              <Text style={styles.inputLabel}>à¦†à¦ªà¦¨à¦¾à¦° à¦ªà§à¦°à§‹ à¦¨à¦¾à¦® (à¦ªà¦¾à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦…à¦¨à§à¦¯à¦¾à§Ÿà§€) *</Text>
+              <Text style={styles.inputLabel}>আপনার পুরো নাম (পাসপোর্ট অনুযায়ী) *</Text>
               <TextInput
                 style={styles.textInput}
-                placeholder="à¦¯à§‡à¦®à¦¨: à¦®à§‹à¦ƒ à¦¸à¦¾à¦•à¦¿à¦¬ à¦†à¦² à¦¹à¦¾à¦¸à¦¾à¦¨"
+                placeholder="যেমন: মোঃ সাকিব আল হাসান"
                 placeholderTextColor="#94A3B8"
                 value={candidateName}
                 onChangeText={setCandidateName}
               />
 
-              <Text style={styles.inputLabel}>à¦®à§‹à¦¬à¦¾à¦‡à¦² à¦¨à¦®à§à¦¬à¦° (à¦¹à§‹à§Ÿà¦¾à¦Ÿà¦¸à¦…à§à¦¯à¦¾à¦ª à¦¯à§à¦•à§à¦¤) *</Text>
+              <Text style={styles.inputLabel}>মোবাইল নম্বর (হোয়াটসঅ্যাপ যুক্ত) *</Text>
               <TextInput
                 style={styles.textInput}
-                placeholder="à¦¯à§‡à¦®à¦¨: 017XXXXXXXX à¦¬à¦¾ +88017XXXXXXXX"
+                placeholder="যেমন: 017XXXXXXXX বা +88017XXXXXXXX"
                 placeholderTextColor="#94A3B8"
                 keyboardType="phone-pad"
                 value={candidatePhone}
                 onChangeText={setCandidatePhone}
               />
 
-              <Text style={styles.inputLabel}>à¦‡à¦®à§‡à¦‡à¦² à¦ à¦¿à¦•à¦¾à¦¨à¦¾ (à¦à¦šà§à¦›à¦¿à¦•)</Text>
+              <Text style={styles.inputLabel}>ইমেইল ঠিকানা (ঐচ্ছিক)</Text>
               <TextInput
                 style={styles.textInput}
-                placeholder="à¦¯à§‡à¦®à¦¨: candidate@example.com"
+                placeholder="যেমন: candidate@example.com"
                 placeholderTextColor="#94A3B8"
                 keyboardType="email-address"
                 value={candidateEmail}
                 onChangeText={setCandidateEmail}
               />
 
-              <Text style={styles.inputLabel}>à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦°à§‡à¦° à¦œà¦¨à§à¦¯ à¦†à¦ªà¦¨à¦¾à¦° à¦ªà§à¦°à¦¶à§à¦¨ à¦¬à¦¾ à¦®à¦¨à§à¦¤à¦¬à§à¦¯ (à¦à¦šà§à¦›à¦¿à¦•)</Text>
+              <Text style={styles.inputLabel}>কাউন্সেলরের জন্য আপনার প্রশ্ন বা মন্তব্য (ঐচ্ছিক)</Text>
               <TextInput
                 style={[styles.textInput, { height: 75, textAlignVertical: "top" }]}
-                placeholder="à¦¯à§‡à¦®à¦¨: à¦†à¦‡à¦‡à¦à¦²à¦Ÿà¦¿à¦à¦¸ à§¬.à§¦ à¦¦à¦¿à§Ÿà§‡ à¦¸à§à¦•à¦²à¦¾à¦°à¦¶à¦¿à¦ª à¦¬à¦¾ à¦¸à§à¦ªà¦¾à¦‰à¦¸ à¦­à¦¿à¦¸à¦¾ à¦¸à§à¦¯à§‹à¦— à¦œà¦¾à¦¨à¦¤à§‡ à¦šà¦¾à¦‡..."
+                placeholder="যেমন: আইইএলটিএস ৬.০ দিয়ে স্কলারশিপ বা স্পাউস ভিসা সুযোগ জানতে চাই..."
                 placeholderTextColor="#94A3B8"
                 multiline
                 numberOfLines={3}
@@ -1950,7 +1950,7 @@ export default function AbroadAgencyScreen() {
                   <>
                     <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
                     <Text style={styles.submitWizardBtnText}>
-                      à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¬à§à¦•à¦¿à¦‚ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤ à¦•à¦°à§à¦¨
+                      অ্যাপয়েন্টমেন্ট বুকিং নিশ্চিত করুন
                     </Text>
                   </>
                 )}
@@ -1960,7 +1960,7 @@ export default function AbroadAgencyScreen() {
             <View style={styles.guaranteeNoteBox}>
               <Ionicons name="shield-checkmark" size={16} color="#059669" />
               <Text style={styles.guaranteeNoteText}>
-                à§§à§¦à§¦% à¦¬à¦¿à¦¨à¦¾à¦®à§‚à¦²à§à¦¯à§‡ à¦ªà§à¦°à¦¾à¦¥à¦®à¦¿à¦• à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚ à¦“ à¦¸à¦¿à¦•à¦¿à¦‰à¦° à¦¡à¦¾à¦Ÿà¦¾ à¦—à§‹à¦ªà¦¨à§€à§Ÿà¦¤à¦¾ à¦¸à§à¦°à¦•à§à¦·à¦¾à¥¤
+                ১০০% বিনামূল্যে প্রাথমিক কাউন্সেলিং ও সিকিউর ডাটা গোপনীয়তা সুরক্ষা।
               </Text>
             </View>
           </View>
@@ -1973,9 +1973,9 @@ export default function AbroadAgencyScreen() {
           <View>
             <View style={styles.sectionHeaderRow}>
               <View>
-                <Text style={styles.sectionTitle}>à¦†à¦®à¦¾à¦° à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¶à¦¿à¦¡à¦¿à¦‰à¦²</Text>
+                <Text style={styles.sectionTitle}>আমার অ্যাপয়েন্টমেন্ট শিডিউল</Text>
                 <Text style={styles.sectionSubtitle}>
-                  à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚ à¦¸à§à¦²à¦Ÿ à¦“ à¦•à§à¦¯à¦¾à¦²à§‡à¦¨à§à¦¡à¦¾à¦° à¦à¦•à§à¦¸à¦ªà§‹à¦°à§à¦Ÿ
+                  সংরক্ষিত কাউন্সেলিং স্লট ও ক্যালেন্ডার এক্সপোর্ট
                 </Text>
               </View>
               <TouchableOpacity
@@ -1990,16 +1990,16 @@ export default function AbroadAgencyScreen() {
               <View style={styles.emptyBookingsBox}>
                 <Ionicons name="calendar-outline" size={50} color="#CBD5E1" />
                 <Text style={styles.emptyBookingsTitle}>
-                  à¦•à§‹à¦¨à§‹ à¦¸à¦•à§à¦°à¦¿à§Ÿ à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦ªà¦¾à¦“à§Ÿà¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿
+                  কোনো সক্রিয় অ্যাপয়েন্টমেন্ট পাওয়া যায়নি
                 </Text>
                 <Text style={styles.emptyBookingsSubtitle}>
-                  à¦†à¦ªà¦¨à¦¾à¦° à¦•à¦¾à¦™à§à¦•à§à¦·à¦¿à¦¤ à¦¦à§‡à¦¶à§‡à¦° à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚à§Ÿà§‡à¦° à¦œà¦¨à§à¦¯ à¦¬à§à¦•à¦¿à¦‚ à¦‰à¦‡à¦œà¦¾à¦°à§à¦¡ à¦¥à§‡à¦•à§‡ à¦¸à§à¦²à¦Ÿ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨à¥¤
+                  আপনার কাঙ্ক্ষিত দেশের কাউন্সেলিংয়ের জন্য বুকিং উইজার্ড থেকে স্লট নির্বাচন করুন।
                 </Text>
                 <TouchableOpacity
                   style={styles.emptyActionBtn}
                   onPress={() => setActivePortalTab("booking")}
                 >
-                  <Text style={styles.emptyActionBtnText}>à¦¨à¦¤à§à¦¨ à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¬à§à¦• à¦•à¦°à§à¦¨</Text>
+                  <Text style={styles.emptyActionBtnText}>নতুন অ্যাপয়েন্টমেন্ট বুক করুন</Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -2008,7 +2008,7 @@ export default function AbroadAgencyScreen() {
                   <View style={styles.myBookingHeader}>
                     <View style={styles.bookingStatusPill}>
                       <Ionicons name="checkmark-circle" size={12} color="#059669" />
-                      <Text style={styles.bookingStatusText}>à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤ (Confirmed)</Text>
+                      <Text style={styles.bookingStatusText}>নিশ্চিত (Confirmed)</Text>
                     </View>
                     <Text style={styles.bookingRefText}>#{item.id}</Text>
                   </View>
@@ -2036,8 +2036,8 @@ export default function AbroadAgencyScreen() {
                       />
                       <Text style={styles.bookingDetailVal}>
                         {item.consultation_type === "in_person"
-                          ? "à¦‡à¦¨-à¦ªà¦¾à¦°à¦¸à¦¨ à¦…à¦«à¦¿à¦¸"
-                          : "à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦­à¦¿à¦¡à¦¿à¦“"}
+                          ? "ইন-পারসন অফিস"
+                          : "অনলাইন ভিডিও"}
                       </Text>
                     </View>
                     <View style={styles.bookingDetailItem}>
@@ -2048,7 +2048,7 @@ export default function AbroadAgencyScreen() {
 
                   <View style={styles.myBookingCandidateRow}>
                     <Text style={styles.bookingCandidateText}>
-                      à¦•à§à¦¯à¦¾à¦¨à§à¦¡à¦¿à¦¡à§‡à¦Ÿ: {item.candidate_name} ({item.candidate_phone})
+                      ক্যান্ডিডেট: {item.candidate_name} ({item.candidate_phone})
                     </Text>
                   </View>
 
@@ -2069,7 +2069,7 @@ export default function AbroadAgencyScreen() {
                       activeOpacity={0.8}
                     >
                       <Ionicons name="share-outline" size={14} color="#0284C7" />
-                      <Text style={styles.exportIcsBtnText}>.ICS à¦à¦•à§à¦¸à¦ªà§‹à¦°à§à¦Ÿ</Text>
+                      <Text style={styles.exportIcsBtnText}>.ICS এক্সপোর্ট</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -2099,10 +2099,10 @@ export default function AbroadAgencyScreen() {
                     <Ionicons name="checkmark-circle" size={44} color="#10B981" />
                   </View>
                   <Text style={styles.confirmModalTitle}>
-                    ðŸŽ‰ à¦…à§à¦¯à¦¾à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿà¦®à§‡à¦¨à§à¦Ÿ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤ à¦¹à§Ÿà§‡à¦›à§‡!
+                    🎉 অ্যাপয়েন্টমেন্ট সফলভাবে নিশ্চিত হয়েছে!
                   </Text>
                   <Text style={styles.confirmModalSub}>
-                    à¦†à¦ªà¦¨à¦¾à¦° à¦­à¦¿à¦¸à¦¾ à¦•à¦¨à¦¸à¦¾à¦²à¦Ÿà§‡à¦¶à¦¨ à¦¶à¦¿à¦¡à¦¿à¦‰à¦² à¦¤à§ˆà¦°à¦¿ à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡à¥¤
+                    আপনার ভিসা কনসালটেশন শিডিউল তৈরি করা হয়েছে।
                   </Text>
                 </View>
 
@@ -2115,7 +2115,7 @@ export default function AbroadAgencyScreen() {
                           {confirmedBookingData.agency_name}
                         </Text>
                         <Text style={styles.ticketRefNum}>
-                          à¦°à§‡à¦«à¦¾à¦°à§‡à¦¨à§à¦¸ à¦†à¦‡à¦¡à¦¿: {confirmedBookingData.id}
+                          রেফারেন্স আইডি: {confirmedBookingData.id}
                         </Text>
                       </View>
                       <View style={styles.verifiedTicketBadge}>
@@ -2127,27 +2127,27 @@ export default function AbroadAgencyScreen() {
 
                     <View style={styles.ticketGrid}>
                       <View style={styles.ticketGridItem}>
-                        <Text style={styles.ticketFieldLabel}>à¦¤à¦¾à¦°à¦¿à¦– (Date)</Text>
+                        <Text style={styles.ticketFieldLabel}>তারিখ (Date)</Text>
                         <Text style={styles.ticketFieldVal}>
                           {confirmedBookingData.appointment_date}
                         </Text>
                       </View>
                       <View style={styles.ticketGridItem}>
-                        <Text style={styles.ticketFieldLabel}>à¦¸à¦®à§Ÿ (Time)</Text>
+                        <Text style={styles.ticketFieldLabel}>সময় (Time)</Text>
                         <Text style={styles.ticketFieldVal}>
                           {confirmedBookingData.appointment_time}
                         </Text>
                       </View>
                       <View style={styles.ticketGridItem}>
-                        <Text style={styles.ticketFieldLabel}>à¦•à¦¨à¦¸à¦¾à¦²à¦Ÿà§‡à¦¶à¦¨ à¦®à§‹à¦¡</Text>
+                        <Text style={styles.ticketFieldLabel}>কনসালটেশন মোড</Text>
                         <Text style={styles.ticketFieldVal}>
                           {confirmedBookingData.consultation_type === "in_person"
-                            ? "à¦‡à¦¨-à¦ªà¦¾à¦°à¦¸à¦¨ à¦…à¦«à¦¿à¦¸"
-                            : "à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦­à¦¿à¦¡à¦¿à¦“"}
+                            ? "ইন-পারসন অফিস"
+                            : "অনলাইন ভিডিও"}
                         </Text>
                       </View>
                       <View style={styles.ticketGridItem}>
-                        <Text style={styles.ticketFieldLabel}>à¦•à¦¾à¦™à§à¦•à§à¦·à¦¿à¦¤ à¦¦à§‡à¦¶</Text>
+                        <Text style={styles.ticketFieldLabel}>কাঙ্ক্ষিত দেশ</Text>
                         <Text style={styles.ticketFieldVal}>
                           {confirmedBookingData.target_country}
                         </Text>
@@ -2158,15 +2158,15 @@ export default function AbroadAgencyScreen() {
                       <Ionicons name="information-circle" size={14} color="#0284C7" />
                       <Text style={styles.ticketFooterNoteText}>
                         {confirmedBookingData.consultation_type === "in_person"
-                          ? `à¦…à¦«à¦¿à¦¸ à¦ à¦¿à¦•à¦¾à¦¨à¦¾: ${bookingAgency?.office_address || "Dhaka Head Office"}`
-                          : "à¦­à¦¿à¦¡à¦¿à¦“ à¦®à¦¿à¦Ÿà¦¿à¦‚ à¦²à¦¿à¦‚à¦• à¦“ à¦ªà¦¾à¦¸à¦•à§‹à¦¡ SMS à¦“ à¦‡à¦®à§‡à¦‡à¦²à§‡ à¦ªà¦¾à¦ à¦¿à§Ÿà§‡ à¦¦à§‡à¦“à§Ÿà¦¾ à¦¹à§Ÿà§‡à¦›à§‡à¥¤"}
+                          ? `অফিস ঠিকানা: ${bookingAgency?.office_address || "Dhaka Head Office"}`
+                          : "ভিডিও মিটিং লিংক ও পাসকোড SMS ও ইমেইলে পাঠিয়ে দেওয়া হয়েছে।"}
                       </Text>
                     </View>
                   </View>
 
                   {/* CALENDAR EXPORT ACTIONS */}
                   <Text style={styles.exportSectionHeading}>
-                    ðŸ“… à¦•à§à¦¯à¦¾à¦²à§‡à¦¨à§à¦¡à¦¾à¦°à§‡ à¦¯à§à¦•à§à¦¤ à¦“ à¦à¦•à§à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦•à¦°à§à¦¨:
+                    📅 ক্যালেন্ডারে যুক্ত ও এক্সপোর্ট করুন:
                   </Text>
 
                   <TouchableOpacity
@@ -2176,7 +2176,7 @@ export default function AbroadAgencyScreen() {
                   >
                     <Ionicons name="logo-google" size={18} color="#FFFFFF" />
                     <Text style={styles.googleCalActionBtnText}>
-                      Google Calendar à¦ à¦¯à§à¦•à§à¦¤ à¦•à¦°à§à¦¨
+                      Google Calendar এ যুক্ত করুন
                     </Text>
                   </TouchableOpacity>
 
@@ -2187,7 +2187,7 @@ export default function AbroadAgencyScreen() {
                   >
                     <Ionicons name="calendar-outline" size={18} color="#0284C7" />
                     <Text style={styles.icsCalActionBtnText}>
-                      Apple / Outlook .ICS à¦à¦•à§à¦¸à¦ªà§‹à¦°à§à¦Ÿ à¦“ à¦¶à§‡à§Ÿà¦¾à¦°
+                      Apple / Outlook .ICS এক্সপোর্ট ও শেয়ার
                     </Text>
                   </TouchableOpacity>
 
@@ -2200,7 +2200,7 @@ export default function AbroadAgencyScreen() {
                     activeOpacity={0.85}
                   >
                     <Text style={styles.dismissConfirmBtnText}>
-                      à¦ à¦¿à¦• à¦†à¦›à§‡, à¦†à¦®à¦¾à¦° à¦¬à§à¦•à¦¿à¦‚ à¦¤à¦¾à¦²à¦¿à¦•à¦¾ à¦¦à§‡à¦–à§à¦¨
+                      ঠিক আছে, আমার বুকিং তালিকা দেখুন
                     </Text>
                   </TouchableOpacity>
 
@@ -2247,7 +2247,7 @@ export default function AbroadAgencyScreen() {
 
                 <ScrollView showsVerticalScrollIndicator={false}>
                   {/* Highlights */}
-                  <Text style={styles.destModalSubTitle}>à¦ªà§à¦°à¦§à¦¾à¦¨ à¦¸à§à¦¬à¦¿à¦§à¦¾à¦¸à¦®à§‚à¦¹:</Text>
+                  <Text style={styles.destModalSubTitle}>প্রধান সুবিধাসমূহ:</Text>
                   {selectedDestination.highlights.map((h, i) => (
                     <View key={`hl-${selectedDestination.id}-${h}`} style={styles.destHighlightItem}>
                       <Ionicons name="checkmark-circle" size={16} color="#059669" />
@@ -2258,13 +2258,13 @@ export default function AbroadAgencyScreen() {
                   {/* Processing & Success Rate */}
                   <View style={styles.destModalStatRow}>
                     <View style={styles.destModalStatBox}>
-                      <Text style={styles.destModalStatLabel}>à¦—à§œ à¦ªà§à¦°à¦¸à§‡à¦¸à¦¿à¦‚ à¦¸à¦®à§Ÿ</Text>
+                      <Text style={styles.destModalStatLabel}>গড় প্রসেসিং সময়</Text>
                       <Text style={styles.destModalStatVal}>
                         {selectedDestination.avgProcessingTime}
                       </Text>
                     </View>
                     <View style={styles.destModalStatBox}>
-                      <Text style={styles.destModalStatLabel}>à¦­à¦¿à¦¸à¦¾ à¦¸à¦¾à¦•à¦¸à§‡à¦¸ à¦°à§‡à¦Ÿ</Text>
+                      <Text style={styles.destModalStatLabel}>ভিসা সাকসেস রেট</Text>
                       <Text style={styles.destModalStatValGreen}>
                         {selectedDestination.visaSuccessRate}%
                       </Text>
@@ -2273,7 +2273,7 @@ export default function AbroadAgencyScreen() {
 
                   {/* Language Test Requirements */}
                   <Text style={styles.destModalSubTitle}>
-                    à¦­à¦¾à¦·à¦¾ à¦ªà¦°à§€à¦•à§à¦·à¦¾à¦° à¦¸à¦°à§à¦¬à¦¨à¦¿à¦®à§à¦¨ à¦¸à§à¦•à§‹à¦°:
+                    ভাষা পরীক্ষার সর্বনিম্ন স্কোর:
                   </Text>
                   <View style={styles.langScoresTable}>
                     <View style={styles.scoreTableRow}>
@@ -2315,7 +2315,7 @@ export default function AbroadAgencyScreen() {
                     >
                       <Ionicons name="checkbox-outline" size={16} color="#0284C7" />
                       <Text style={styles.modalChecklistTriggerText}>
-                        à¦šà§‡à¦•à¦²à¦¿à¦¸à§à¦Ÿ à¦šà§‡à¦• à¦•à¦°à§à¦¨
+                        চেকলিস্ট চেক করুন
                       </Text>
                     </TouchableOpacity>
 
@@ -2332,7 +2332,7 @@ export default function AbroadAgencyScreen() {
                       >
                         <Ionicons name="calendar" size={16} color="#FFFFFF" />
                         <Text style={styles.modalBookTriggerText}>
-                          à¦•à¦¾à¦‰à¦¨à§à¦¸à§‡à¦²à¦¿à¦‚ à¦¬à§à¦• à¦•à¦°à§à¦¨
+                          কাউন্সেলিং বুক করুন
                         </Text>
                       </LinearGradient>
                     </TouchableOpacity>
@@ -2359,9 +2359,9 @@ export default function AbroadAgencyScreen() {
           <View style={styles.modalContentLarge}>
             <View style={styles.modalHeader}>
               <View>
-                <Text style={styles.modalTitle}>à¦«à§à¦°à¦¿ à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦®à§‚à¦²à§à¦¯à¦¾à§Ÿà¦¨ (AI Assessment)</Text>
+                <Text style={styles.modalTitle}>ফ্রি প্রোফাইল মূল্যায়ন (AI Assessment)</Text>
                 <Text style={styles.modalSubHeader}>
-                  à¦†à¦ªà¦¨à¦¾à¦° à¦¬à§à¦¯à¦¾à¦•à¦—à§à¦°à¦¾à¦‰à¦¨à§à¦¡ à¦…à¦¨à§à¦¯à¦¾à§Ÿà§€ à¦­à¦¿à¦¸à¦¾ à¦¯à§‹à¦—à§à¦¯à¦¤à¦¾ à¦¯à¦¾à¦šà¦¾à¦‡ à¦•à¦°à§à¦¨
+                  আপনার ব্যাকগ্রাউন্ড অনুযায়ী ভিসা যোগ্যতা যাচাই করুন
                 </Text>
               </View>
               <TouchableOpacity
@@ -2373,16 +2373,16 @@ export default function AbroadAgencyScreen() {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={styles.inputLabel}>à¦•à¦¾à¦™à§à¦•à§à¦·à¦¿à¦¤ à¦¦à§‡à¦¶</Text>
+              <Text style={styles.inputLabel}>কাঙ্ক্ষিত দেশ</Text>
               <TextInput
                 style={styles.textInput}
                 value={assessCountry}
                 onChangeText={setAssessCountry}
-                placeholder="à¦¯à§‡à¦®à¦¨: United Kingdom, Canada, Australia"
+                placeholder="যেমন: United Kingdom, Canada, Australia"
                 placeholderTextColor="#94A3B8"
               />
 
-              <Text style={styles.inputLabel}>à¦¸à¦°à§à¦¬à¦¶à§‡à¦· à¦¶à¦¿à¦•à§à¦·à¦¾à¦—à¦¤ à¦¯à§‹à¦—à§à¦¯à¦¤à¦¾</Text>
+              <Text style={styles.inputLabel}>সর্বশেষ শিক্ষাগত যোগ্যতা</Text>
               <View style={styles.selectOptionsRow}>
                 {["HSC", "Bachelor", "Masters", "Diploma"].map((lvl) => (
                   <TouchableOpacity
@@ -2407,36 +2407,36 @@ export default function AbroadAgencyScreen() {
 
               <View style={styles.rowTwoCols}>
                 <View style={{ flex: 1, marginEnd: 8 }}>
-                  <Text style={styles.inputLabel}>IELTS / à¦­à¦¾à¦·à¦¾ à¦¸à§à¦•à§‹à¦°</Text>
+                  <Text style={styles.inputLabel}>IELTS / ভাষা স্কোর</Text>
                   <TextInput
                     style={styles.textInput}
                     value={assessIelts}
                     onChangeText={setAssessIelts}
-                    placeholder="à¦¯à§‡à¦®à¦¨: 6.5 à¦¬à¦¾ No IELTS"
+                    placeholder="যেমন: 6.5 বা No IELTS"
                     placeholderTextColor="#94A3B8"
                   />
                 </View>
 
                 <View style={{ flex: 1, marginStart: 8 }}>
-                  <Text style={styles.inputLabel}>à¦•à¦¾à¦œà§‡à¦° à¦…à¦­à¦¿à¦œà§à¦žà¦¤à¦¾ (à¦¬à¦›à¦°)</Text>
+                  <Text style={styles.inputLabel}>কাজের অভিজ্ঞতা (বছর)</Text>
                   <TextInput
                     style={styles.textInput}
                     value={assessExp}
                     onChangeText={setAssessExp}
                     keyboardType="numeric"
-                    placeholder="à¦¯à§‡à¦®à¦¨: 2"
+                    placeholder="যেমন: 2"
                     placeholderTextColor="#94A3B8"
                   />
                 </View>
               </View>
 
-              <Text style={styles.inputLabel}>à¦†à¦¨à§à¦®à¦¾à¦¨à¦¿à¦• à¦¬à¦¾à¦œà§‡à¦Ÿ (BDT à§³)</Text>
+              <Text style={styles.inputLabel}>আনুমানিক বাজেট (BDT ৳)</Text>
               <TextInput
                 style={styles.textInput}
                 value={assessBudgetBdt}
                 onChangeText={setAssessBudgetBdt}
                 keyboardType="numeric"
-                placeholder="à¦¯à§‡à¦®à¦¨: 1500000"
+                placeholder="যেমন: 1500000"
                 placeholderTextColor="#94A3B8"
               />
 
@@ -2450,7 +2450,7 @@ export default function AbroadAgencyScreen() {
                   style={styles.calcGradient}
                 >
                   <Ionicons name="calculator-outline" size={18} color="#FFFFFF" />
-                  <Text style={styles.calcActionBtnText}>à¦¸à¦®à§à¦­à¦¾à¦¬à¦¨à¦¾ à¦¹à¦¿à¦¸à¦¾à¦¬ à¦•à¦°à§à¦¨</Text>
+                  <Text style={styles.calcActionBtnText}>সম্ভাবনা হিসাব করুন</Text>
                 </LinearGradient>
               </TouchableOpacity>
 
@@ -2459,7 +2459,7 @@ export default function AbroadAgencyScreen() {
                 <View style={styles.resultBox}>
                   <View style={styles.resultScoreHeader}>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.resultScoreLabel}>à¦­à¦¿à¦¸à¦¾ à¦ªà¦¾à¦“à§Ÿà¦¾à¦° à¦¸à¦®à§à¦­à¦¾à¦¬à¦¨à¦¾</Text>
+                      <Text style={styles.resultScoreLabel}>ভিসা পাওয়ার সম্ভাবনা</Text>
                       <Text style={styles.resultSummary}>
                         {assessmentResult.summary}
                       </Text>
@@ -2471,7 +2471,7 @@ export default function AbroadAgencyScreen() {
                     </View>
                   </View>
 
-                  <Text style={styles.resultSubHead}>à¦¸à§à¦ªà¦¾à¦°à¦¿à¦¶à¦•à§ƒà¦¤ à¦¦à§‡à¦¶à¦¸à¦®à§‚à¦¹:</Text>
+                  <Text style={styles.resultSubHead}>সুপারিশকৃত দেশসমূহ:</Text>
                   <View style={styles.resultTagsWrap}>
                     {assessmentResult.recommended_countries.map((c, i) => (
                       <View key={`recom-${c}`} style={styles.recomPill}>
@@ -2480,10 +2480,10 @@ export default function AbroadAgencyScreen() {
                     ))}
                   </View>
 
-                  <Text style={styles.resultSubHead}>à¦ªà¦°à¦¬à¦°à§à¦¤à§€ à¦•à¦°à¦£à§€à¦¯à¦¼ à¦ªà¦¦à¦•à§à¦·à§‡à¦ª:</Text>
+                  <Text style={styles.resultSubHead}>পরবর্তী করণীয় পদক্ষেপ:</Text>
                   {assessmentResult.next_steps.map((step, i) => (
                     <Text key={`step-${i}-${step.slice(0, 15)}`} style={styles.stepItem}>
-                      â€¢ {step}
+                      • {step}
                     </Text>
                   ))}
                 </View>
@@ -2508,9 +2508,9 @@ export default function AbroadAgencyScreen() {
           <View style={styles.modalContentLarge}>
             <View style={styles.modalHeader}>
               <View>
-                <Text style={styles.modalTitle}>à¦¨à¦¤à§à¦¨ à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿ à¦¯à§‹à¦— à¦•à¦°à§à¦¨</Text>
+                <Text style={styles.modalTitle}>নতুন ডকুমেন্ট যোগ করুন</Text>
                 <Text style={styles.modalSubHeader}>
-                  à¦†à¦ªà¦¨à¦¾à¦° à¦¬à¦¿à¦¶à§à¦¬à¦¬à¦¿à¦¦à§à¦¯à¦¾à¦²à§Ÿà§‡à¦° à¦¬à¦¿à¦¶à§‡à¦· à¦•à§‹à¦¨à§‹ à¦¸à¦¾à¦°à§à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦Ÿ à¦¬à¦¾ à¦°à¦¿à¦•à§‹à§Ÿà¦¾à¦°à¦®à§‡à¦¨à§à¦Ÿ
+                  আপনার বিশ্ববিদ্যালয়ের বিশেষ কোনো সার্টিফিকেট বা রিকোয়ারমেন্ট
                 </Text>
               </View>
               <TouchableOpacity
@@ -2521,16 +2521,16 @@ export default function AbroadAgencyScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.inputLabel}>à¦¡à¦•à§à¦®à§‡à¦¨à§à¦Ÿà§‡à¦° à¦¨à¦¾à¦® *</Text>
+            <Text style={styles.inputLabel}>ডকুমেন্টের নাম *</Text>
             <TextInput
               style={styles.textInput}
               value={customDocTitle}
               onChangeText={setCustomDocTitle}
-              placeholder="à¦¯à§‡à¦®à¦¨: APS à¦¸à¦¾à¦°à§à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦Ÿ à¦¬à¦¾ WES à¦‡à¦­à§à¦¯à¦¾à¦²à§à§Ÿà§‡à¦¶à¦¨"
+              placeholder="যেমন: APS সার্টিফিকেট বা WES ইভ্যালুয়েশন"
               placeholderTextColor="#94A3B8"
             />
 
-            <Text style={styles.inputLabel}>à¦•à§à¦¯à¦¾à¦Ÿà¦¾à¦—à¦°à¦¿</Text>
+            <Text style={styles.inputLabel}>ক্যাটাগরি</Text>
             <View style={styles.customCatRow}>
               {(["Academic", "Financial", "Legal & ID", "Custom"] as ChecklistItem["category"][]).map(
                 (c) => (
@@ -2565,7 +2565,7 @@ export default function AbroadAgencyScreen() {
                 style={styles.calcGradient}
               >
                 <Ionicons name="add-circle-outline" size={18} color="#FFFFFF" />
-                <Text style={styles.calcActionBtnText}>à¦šà§‡à¦•à¦²à¦¿à¦¸à§à¦Ÿà§‡ à¦¯à§à¦•à§à¦¤ à¦•à¦°à§à¦¨</Text>
+                <Text style={styles.calcActionBtnText}>চেকলিস্টে যুক্ত করুন</Text>
               </LinearGradient>
             </TouchableOpacity>
 

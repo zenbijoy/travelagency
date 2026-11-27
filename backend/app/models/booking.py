@@ -43,6 +43,13 @@ class Booking(Base, TimestampMixin, UUIDMixin):
     cancelled_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
+    # Multi-tenancy isolation boundary (resolved server-side, never from client).
+    tenant_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("tenants.id", ondelete="SET NULL"), index=True, nullable=True
+    )
+    # Client nonce for idempotent booking creation (server-validated).
+    idempotency_key: Mapped[Optional[str]] = mapped_column(Text, index=True, nullable=True)
+
     items: Mapped[List["BookingItem"]] = relationship("BookingItem", back_populates="booking", cascade="all, delete-orphan")
     passengers: Mapped[List["BookingPassenger"]] = relationship("BookingPassenger", back_populates="booking", cascade="all, delete-orphan")
     payments: Mapped[List["BookingPayment"]] = relationship("BookingPayment", back_populates="booking", cascade="all, delete-orphan")

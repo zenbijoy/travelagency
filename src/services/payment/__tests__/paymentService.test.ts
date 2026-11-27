@@ -25,6 +25,23 @@ jest.mock("../../../utils/supabase", () => ({
 describe("Payment Service (paymentService)", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    global.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.includes("/token/grant")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ id_token: "mock-token-xyz" }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            statusCode: "0000",
+            paymentID: "bk-pay-123",
+            bkashURL: "https://pay.bkash.com/mock",
+          }),
+      });
+    }) as any;
   });
 
   describe("Provider Dispatching & Validation", () => {

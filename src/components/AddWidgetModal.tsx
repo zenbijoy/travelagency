@@ -127,7 +127,7 @@ export function AddWidgetModal({ visible, onClose, onAddWidget }: AddWidgetModal
           </View>
 
           {/* Title & Subtitle */}
-          <Text style={styles.mainHeadline}>Add Trip.com Widget</Text>
+          <Text style={styles.mainHeadline}>Add Shopno Jatra Widget</Text>
           <Text style={styles.subTitleText}>
             Effortless travel with smart tools and AI
           </Text>

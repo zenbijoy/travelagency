@@ -41,6 +41,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { GlassView } from '../components/ui/GlassView';
 import { captureRef } from "react-native-view-shot";
 import { router } from "expo-router";
+import { useAuth } from "../hooks/useAuth";
 
 import {
   BANGLADESH_DISTRICTS,
@@ -66,6 +67,9 @@ type TabType = "map" | "stamps" | "milestones";
 
 export default function DigitalPassportScreen() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Traveler";
+  const userId = user?.id || "guest_traveler";
 
   // State
   const [loading, setLoading] = useState<boolean>(true);
@@ -183,7 +187,7 @@ export default function DigitalPassportScreen() {
   const loadPassport = async () => {
     try {
       setLoading(true);
-      const data = await getPassportProfile("user_traveler", "Sadman Sakib");
+      const data = await getPassportProfile(userId, userName);
       setPassport(data);
     } catch (err) {
       console.warn("Error loading passport:", err);
@@ -740,7 +744,7 @@ export default function DigitalPassportScreen() {
           <View style={styles.tabContentContainer}>
             {/* Quick Stats & Scratch All Action */}
             <View style={styles.scratchActionBar}>
-              <View>
+              <View style={{ flex: 1, marginRight: 8 }}>
                 <Text style={styles.scratchStatsText}>
                   <Text style={styles.scratchStatsAccent}>
                     {passport.scratchedCount}
@@ -748,7 +752,7 @@ export default function DigitalPassportScreen() {
                   / 64 Districts Scratched (
                   {Math.round((passport.scratchedCount / 64) * 100)}%)
                 </Text>
-                <Text style={styles.scratchStatsSub}>
+                <Text style={styles.scratchStatsSub} numberOfLines={1}>
                   Unvisited districts appear grayscale • Visited glow with art!
                 </Text>
               </View>
@@ -2224,6 +2228,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 12,
+    flexShrink: 0,
   },
   scratchAllBtnText: {
     color: "#FFFFFF",

@@ -55,8 +55,8 @@ export function ConvertedScreen({ screen }: { screen: UIScreen }) {
     const rawPrice = item.price || item.final_price || item.base_price;
     return {
       title: item.name || item.title || item.hotel_name || (item.flight_number ? `Flight ${item.flight_number}` : "Featured Option"),
-      subtitle: item.description || item.destination_city || (item.departure_airport && item.arrival_airport ? `${item.departure_airport.code || 'DEP'} âž” ${item.arrival_airport.code || 'ARR'}` : item.bio || ""),
-      meta: item.city || item.category || (item.rating ? `â­ ${item.rating}` : "") || (item.cabin_class ? `Class: ${item.cabin_class}` : ""),
+      subtitle: item.description || item.destination_city || (item.departure_airport && item.arrival_airport ? `${item.departure_airport.code || 'DEP'} ➔ ${item.arrival_airport.code || 'ARR'}` : item.bio || ""),
+      meta: item.city || item.category || (item.rating ? `⭐ ${item.rating}` : "") || (item.cabin_class ? `Class: ${item.cabin_class}` : ""),
       price: rawPrice ? formatPrice(rawPrice) : "",
       route: "/screens/booking-system",
     };
@@ -186,10 +186,10 @@ function Hero({ screen }: { screen: UIScreen }) {
               { color: isAssistant ? "#fed65b" : theme.primary },
             ]}
           >
-            {screen.theme === "luxe" ? "LuxeStay" : "Trip.com"}
+            {screen.theme === "luxe" ? "LuxeStay" : "Shopno Jatra"}
           </Text>
           <View style={[styles.avatar, { backgroundColor: theme.accent }]}>
-            <Text style={styles.avatarText}>T</Text>
+            <Text style={styles.avatarText}>S</Text>
           </View>
         </View>
         <Text

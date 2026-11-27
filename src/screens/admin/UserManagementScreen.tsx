@@ -41,6 +41,7 @@ import {
   AdminUser,
 } from "@/types/admin";
 import { supabase } from "@/utils/supabase";
+import { userManagementService } from "@/services/adminService";
 import {
   executeAdminCommand,
   SuspendUserCommand,
@@ -51,6 +52,8 @@ import { useRBAC } from "./rbac";
 
 import { useResponsive } from "../../hooks/useResponsive";
 import { RTLIcon } from "../../components/ui";
+import { AdminProfileRowSkeleton } from "@/components/ui/AdminSkeletons";
+import { BlinkingText } from "@/components/ui/BlinkingText";
 const PAGE_SIZE = 25;
 
 export type UserSubScreen =
@@ -93,59 +96,53 @@ export interface SecurityModalState {
   isSubmitting: boolean;
 }
 
-const mapProfileToExtendedUser = (p: any, idx: number = 0): ExtendedUserItem => {
+const mapProfileToExtendedUser = (
+  p: any,
+  adminDetail?: any,
+  kycDoc?: any
+): ExtendedUserItem => {
   const metadata = p.metadata || {};
-  const isVerified = !!metadata.verified;
-  const isRejected = metadata.kyc_status === "rejected";
+  const isVerified =
+    adminDetail?.kyc_status === UserVerificationStatus.VERIFIED ||
+    !!metadata.verified ||
+    !!kycDoc?.is_verified;
+  const isRejected =
+    adminDetail?.kyc_status === UserVerificationStatus.REJECTED ||
+    metadata.kyc_status === "rejected";
   const kycStatus = isVerified
     ? UserVerificationStatus.VERIFIED
     : isRejected
     ? UserVerificationStatus.REJECTED
     : UserVerificationStatus.PENDING;
 
-  const docTypes: ("passport" | "national_id" | "driving_license")[] = [
-    "passport",
-    "national_id",
-    "driving_license",
-  ];
-  const assignedDocType = docTypes[idx % 3];
-
   return {
     id: p.id,
     user_id: p.id,
     name: p.display_name || p.username || "Traveler Member",
-    email: p.email || `${(p.username || "user").toLowerCase().replace(/\s+/g, "")}@travelapp.com`,
-    role: p.is_influencer ? "Influencer Creator" : "Verified Traveler",
+    email: p.email || "",
+    role: p.is_influencer ? "Influencer Creator" : "Traveler",
     roleCategory: "travelers",
-    verification_status: kycStatus,
+    verification_status: (adminDetail?.verification_status || kycStatus) as UserVerificationStatus,
     kyc_status: kycStatus,
-    is_suspended: !!p.is_suspended,
-    is_banned: !!p.is_banned,
-    location: p.location || "Dhaka, Bangladesh",
-    last_active: "Active recently",
-    avatar_url:
-      p.avatar_url ||
-      `https://images.unsplash.com/photo-${1535713875002 + (idx % 10)}?w=150&auto=format&fit=crop&q=80`,
-    phone: p.phone || "+880 1700 000000",
-    total_bookings: p.posts_count || (idx * 3) % 20,
-    total_spent: `৳${((idx + 1) * 12500).toLocaleString()}`,
-    mfa_enabled: idx % 2 === 0,
+    is_suspended: Boolean(adminDetail?.is_suspended),
+    is_banned: Boolean(adminDetail?.is_banned),
+    location: p.location || "Bangladesh",
+    last_active: p.updated_at ? new Date(p.updated_at).toLocaleDateString() : "N/A",
+    avatar_url: p.avatar_url || "",
+    phone: p.phone || "",
+    total_bookings: Number(p.bookings_count ?? 0),
+    total_spent: p.total_spent ? `৳${Number(p.total_spent).toLocaleString()}` : "৳0",
+    mfa_enabled: Boolean(metadata.mfa_enabled),
     created_at: p.created_at || new Date().toISOString(),
-    updated_at: p.updated_at || new Date().toISOString(),
-    document_type: assignedDocType,
-    document_number:
-      assignedDocType === "passport"
-        ? `A${18290000 + (idx * 431)}`
-        : `NID-${19857291000 + (idx * 179)}`,
-    document_url:
-      assignedDocType === "passport"
-        ? "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80"
-        : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
-    document_expiry: "2032-10-18",
-    face_match_score: 98.4 - (idx % 5) * 1.2,
-    dob: "1994-06-15",
-    nationality: "Bangladeshi",
-    kyc_submitted_at: p.created_at || new Date().toISOString(),
+    updated_at: adminDetail?.updated_at || p.updated_at || new Date().toISOString(),
+    document_type: kycDoc?.document_type,
+    document_number: kycDoc?.document_number,
+    document_url: kycDoc?.file_url || kycDoc?.file_path,
+    document_expiry: kycDoc?.expiry_date,
+    face_match_score: kycDoc?.face_match_score ? Number(kycDoc.face_match_score) : undefined,
+    dob: metadata.dob,
+    nationality: metadata.nationality || "Bangladeshi",
+    kyc_submitted_at: kycDoc?.created_at || p.created_at || new Date().toISOString(),
   };
 };
 
@@ -153,7 +150,7 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
   admin: propAdmin,
 }) => {
   const { width, isTablet, isDesktop } = useResponsive();
-  const { admin: rbacAdmin } = useRBAC();
+  const { admin: rbacAdmin, hasPermission } = useRBAC();
   const admin = propAdmin || rbacAdmin;
 
   // Navigation State
@@ -176,6 +173,38 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
   const [kycTab, setKycTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [kycReviewNotes, setKycReviewNotes] = useState<string>("");
   const [activeDocSide, setActiveDocSide] = useState<"front" | "back">("front");
+  const [signedKycDocUrl, setSignedKycDocUrl] = useState<string | null>(null);
+  const [loadingKycDoc, setLoadingKycDoc] = useState<boolean>(false);
+
+  useEffect(() => {
+    let active = true;
+    const rawDocPath = selectedUser?.document_url;
+    if (currentScreen !== "kyc_split_viewer" || !rawDocPath) {
+      setSignedKycDocUrl(null);
+      setLoadingKycDoc(false);
+      return;
+    }
+    if (/^https?:\/\//i.test(rawDocPath)) {
+      setSignedKycDocUrl(rawDocPath);
+      setLoadingKycDoc(false);
+      return;
+    }
+    setLoadingKycDoc(true);
+    userManagementService
+      .getSecureKycSignedUrl(rawDocPath)
+      .then((url) => {
+        if (active) setSignedKycDocUrl(url);
+      })
+      .catch(() => {
+        if (active) setSignedKycDocUrl(null);
+      })
+      .finally(() => {
+        if (active) setLoadingKycDoc(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [currentScreen, selectedUser?.id, selectedUser?.document_url]);
 
   // Double-Confirmation Security Modal State
   const [securityModal, setSecurityModal] = useState<SecurityModalState>({
@@ -244,8 +273,22 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
         }
 
         if (data && data.length > 0) {
-          const mapped = data.map((item: any, idx: number) =>
-            mapProfileToExtendedUser(item, from + idx)
+          const userIds = data.map((u: any) => u.id).filter(Boolean);
+          const [detailsRes, kycRes] = await Promise.all([
+            supabase.from("user_admin_details").select("*").in("user_id", userIds),
+            supabase.from("kyc_documents").select("*").in("user_id", userIds),
+          ]);
+          const detailsMap: Record<string, any> = {};
+          (detailsRes.data || []).forEach((d: any) => {
+            detailsMap[d.user_id] = d;
+          });
+          const kycMap: Record<string, any> = {};
+          (kycRes.data || []).forEach((k: any) => {
+            if (!kycMap[k.user_id]) kycMap[k.user_id] = k;
+          });
+
+          const mapped = data.map((item: any) =>
+            mapProfileToExtendedUser(item, detailsMap[item.id], kycMap[item.id])
           );
           setUsersList(mapped);
           setTotalCount(count ?? mapped.length);
@@ -334,37 +377,27 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
       showLocalizedAlert("Governance Block", "No authorized administrator session active.");
       return;
     }
+    if (!hasPermission("users.verify_kyc")) {
+      showLocalizedAlert("Access Denied", "Your current role lacks `users.verify_kyc` permission.");
+      return;
+    }
 
     const notesToLog = customNotes || kycReviewNotes || (approved ? "Compliance verified" : "Rejected on review");
     const timestamp = new Date().toISOString();
     const newStatus = approved ? UserVerificationStatus.VERIFIED : UserVerificationStatus.REJECTED;
 
     try {
-      // 1. Atomic update to kyc_documents
-      await supabase
-        .from("kyc_documents")
-        .upsert({
-          user_id: targetUser.id,
-          document_type: targetUser.document_type || "passport",
-          document_number: targetUser.document_number,
-          is_verified: approved,
-          verification_notes: notesToLog,
-          verified_by: admin.id || null,
-          verified_at: timestamp,
-          updated_at: timestamp,
-        });
+      // Execute authoritative KYC verification command with RBAC + audit trail
+      const cmdResult = await executeAdminCommand(
+        new VerifyUserKYCCommand(targetUser.id, approved, notesToLog),
+        admin
+      );
+      if (!cmdResult.success) {
+        showLocalizedAlert("Governance Block", cmdResult.error || "Failed to execute KYC decision.");
+        return;
+      }
 
-      // 2. Atomic update to user_admin_details
-      await supabase
-        .from("user_admin_details")
-        .upsert({
-          user_id: targetUser.id,
-          verification_status: newStatus,
-          kyc_status: newStatus,
-          updated_at: timestamp,
-        });
-
-      // 3. Update community profile metadata
+      // Update community profile metadata
       await supabase
         .from("community_profiles")
         .update({
@@ -376,12 +409,6 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
           },
         })
         .eq("id", targetUser.id);
-
-      // 4. Log to admin_activity_logs via Dispatcher or Supabase insert
-      await executeAdminCommand(
-        new VerifyUserKYCCommand(targetUser.id, approved, notesToLog),
-        admin
-      );
 
       // 5. Update local state
       setUsersList((prev) =>
@@ -426,6 +453,15 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
     actionType: "suspend" | "unsuspend" | "ban" | "unban",
     targetUser?: ExtendedUserItem
   ) => {
+    const isBanAction = actionType === "ban" || actionType === "unban";
+    const requiredPerm = isBanAction ? "users.ban" : "users.suspend";
+    if (!hasPermission(requiredPerm)) {
+      showLocalizedAlert(
+        "Access Denied",
+        `Your current role lacks \`${requiredPerm}\` permission to perform this security action.`
+      );
+      return;
+    }
     const usr = targetUser || selectedUser;
     if (!usr) return;
     setSecurityModal({
@@ -543,47 +579,16 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
     }
   };
 
-  // Quick Account Creator
+  // Provisioning guard: Supabase Auth handles account creation securely via sign-up or server invite
   const handleCreateUser = () => {
-    if (!newUserName.trim() || !newUserEmail.trim()) {
-      showLocalizedAlert("Required Fields", "Please enter a name and email address.");
-      return;
-    }
-    const newUser: ExtendedUserItem = {
-      id: `usr-${Date.now()}`,
-      user_id: `u-${Date.now()}`,
-      name: newUserName.trim(),
-      email: newUserEmail.trim(),
-      role: newUserRole,
-      roleCategory: newUserRole.toLowerCase().includes("admin")
-        ? "admins"
-        : newUserRole.toLowerCase().includes("agency")
-        ? "agencies"
-        : newUserRole.toLowerCase().includes("corporate")
-        ? "corporate"
-        : "travelers",
-      verification_status: UserVerificationStatus.VERIFIED,
-      kyc_status: UserVerificationStatus.VERIFIED,
-      is_suspended: false,
-      is_banned: false,
-      location: newUserLocation.trim() || "Dhaka, Bangladesh",
-      last_active: "Just now",
-      avatar_url:
-        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-      phone: "+880 1711 000000",
-      total_bookings: 0,
-      total_spent: "৳0",
-      mfa_enabled: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    setUsersList([newUser, ...usersList]);
     setAddUserModalVisible(false);
     setNewUserName("");
     setNewUserEmail("");
     setNewUserLocation("");
-    showLocalizedAlert("Success", `User account ${newUser.name} created successfully.`);
+    showLocalizedAlert(
+      "Provisioning Policy",
+      "Direct client-side account injection is disabled for security. New users join via OAuth/Sign-Up or server-issued admin invitations."
+    );
   };
 
   // --------------------------------------------------------------------------
@@ -611,10 +616,10 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
         <View style={{ flexDirection: "row", gap: 8 }}>
           <TouchableOpacity
             style={styles.primaryAddBtn}
-            onPress={() => setAddUserModalVisible(true)}
+            onPress={() => loadUsersFromServer(serverPage, searchQuery, true)}
           >
-            <FontAwesome5 name="user-plus" size={12} color="#FFFFFF" style={{ marginEnd: 5 }} />
-            <Text style={styles.primaryAddBtnText}>Add User</Text>
+            <Ionicons name="refresh" size={14} color="#FFFFFF" style={{ marginEnd: 5 }} />
+            <Text style={styles.primaryAddBtnText}>Sync Directory</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -783,12 +788,7 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
 
         {/* List Content */}
         {loading && usersList.length === 0 ? (
-          <View style={{ alignItems: "center", paddingVertical: 40 }}>
-            <ActivityIndicator size="large" color="#0f172a" />
-            <Text style={{ marginTop: 10, fontSize: 13, color: "#64748b" }}>
-              Querying database cursor...
-            </Text>
-          </View>
+          <AdminProfileRowSkeleton count={5} />
         ) : filteredUsers.length === 0 ? (
           <View style={{ alignItems: "center", justifyContent: "center", paddingVertical: 32 }}>
             <Ionicons name="people-outline" size={40} color="#94a3b8" />
@@ -1025,8 +1025,10 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                     <Text style={styles.kycDoc}>
                       {item.document_type === "passport"
                         ? "International Passport"
-                        : "National Smart NID"}{" "}
-                      • #{item.document_number}
+                        : item.document_type === "national_id"
+                        ? "National Smart NID"
+                        : "Identity Document"}{" "}
+                      • {item.document_number ? `#${item.document_number}` : "No doc #"}
                     </Text>
                   </View>
                   <View style={{ alignItems: "flex-end" }}>
@@ -1035,13 +1037,17 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                         styles.faceMatchChip,
                         {
                           backgroundColor:
-                            (item.face_match_score || 95) > 90 ? "#ecfdf5" : "#fef3c7",
+                            typeof item.face_match_score === "number" && item.face_match_score > 90
+                              ? "#ecfdf5"
+                              : "#f1f5f9",
                         },
                       ]}
                     >
                       <Ionicons name="scan-outline" size={11} color="#047857" style={{ marginEnd: 3 }} />
                       <Text style={styles.faceMatchText}>
-                        {item.face_match_score?.toFixed(1) || "98.4"}% Match
+                        {typeof item.face_match_score === "number"
+                          ? `${item.face_match_score.toFixed(1)}% Match`
+                          : "Manual Check"}
                       </Text>
                     </View>
                     <Text style={styles.kycDate}>Tap for Split-Screen</Text>
@@ -1058,20 +1064,22 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                     <Text style={styles.kycInspectBtnText}>Open Split-Screen Reviewer</Text>
                   </TouchableOpacity>
 
-                  <View style={{ flexDirection: "row", gap: 8 }}>
-                    <TouchableOpacity
-                      style={styles.kycRejectBtn}
-                      onPress={() => handleKycDecision(item, false)}
-                    >
-                      <Text style={styles.kycRejectBtnText}>Reject</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.kycApproveBtn}
-                      onPress={() => handleKycDecision(item, true)}
-                    >
-                      <Text style={styles.kycApproveBtnText}>Approve</Text>
-                    </TouchableOpacity>
-                  </View>
+                  {hasPermission("users.verify_kyc") && (
+                    <View style={{ flexDirection: "row", gap: 8 }}>
+                      <TouchableOpacity
+                        style={styles.kycRejectBtn}
+                        onPress={() => handleKycDecision(item, false)}
+                      >
+                        <Text style={styles.kycRejectBtnText}>Reject</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.kycApproveBtn}
+                        onPress={() => handleKycDecision(item, true)}
+                      >
+                        <Text style={styles.kycApproveBtnText}>Approve</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
               </TouchableOpacity>
             ))
@@ -1170,28 +1178,48 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
 
                 {/* Document Body */}
                 <View style={styles.documentBodyRow}>
-                  {/* Photo with Face Detection Box */}
+                  {/* Submitted Document Preview / Biometric Portrait */}
                   <View style={styles.documentPhotoContainer}>
-                    <Image source={{ uri: user.avatar_url }} style={styles.documentPhoto} />
+                    {loadingKycDoc ? (
+                      <View style={[styles.documentPhoto, { justifyContent: "center", alignItems: "center", backgroundColor: "#1e293b" }]}>
+                        <ActivityIndicator size="small" color="#10b981" />
+                      </View>
+                    ) : signedKycDocUrl || user.avatar_url ? (
+                      <Image
+                        source={{ uri: signedKycDocUrl || user.avatar_url }}
+                        style={styles.documentPhoto}
+                      />
+                    ) : (
+                      <View style={[styles.documentPhoto, { justifyContent: "center", alignItems: "center", backgroundColor: "#1e293b", padding: 6 }]}>
+                        <Ionicons name="document-outline" size={24} color="#94a3b8" />
+                        <Text style={{ color: "#94a3b8", fontSize: 10, textAlign: "center", marginTop: 4 }}>
+                          No scan uploaded
+                        </Text>
+                      </View>
+                    )}
                     <View style={styles.faceBoundingBox}>
                       <Text style={styles.faceMatchTag}>
-                        {user.face_match_score?.toFixed(1) || "98.4"}% Match
+                        {typeof user.face_match_score === "number"
+                          ? `${user.face_match_score.toFixed(1)}% Match`
+                          : signedKycDocUrl
+                          ? "Signed Doc"
+                          : "Manual Review"}
                       </Text>
                     </View>
                   </View>
 
-                  {/* OCR Extracted Text Fields */}
+                  {/* Extracted Document Fields */}
                   <View style={{ flex: 1, paddingStart: 12 }}>
                     <View style={styles.docFieldRow}>
                       <Text style={styles.docFieldLabel}>DOCUMENT TYPE</Text>
                       <Text style={styles.docFieldValue}>
-                        {isPassport ? "P (Passport)" : "NID (Identity Card)"}
+                        {isPassport ? "P (Passport)" : user.document_type === "national_id" ? "NID (Identity Card)" : "Not specified"}
                       </Text>
                     </View>
                     <View style={styles.docFieldRow}>
                       <Text style={styles.docFieldLabel}>DOCUMENT NUMBER</Text>
-                      <Text style={[styles.docFieldValue, { color: "#10b981", fontWeight: "700" }]}>
-                        {user.document_number}
+                      <Text style={[styles.docFieldValue, { color: user.document_number ? "#10b981" : "#94a3b8", fontWeight: "700" }]}>
+                        {user.document_number || "Not recorded"}
                       </Text>
                     </View>
                     <View style={styles.docFieldRow}>
@@ -1201,41 +1229,37 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
                     <View style={styles.docFieldRow}>
                       <Text style={styles.docFieldLabel}>NATIONALITY / DOB</Text>
                       <Text style={styles.docFieldValue}>
-                        {user.nationality || "BANGLADESHI"} • {user.dob || "1994-06-15"}
+                        {(user.nationality || "Not recorded").toUpperCase()} • {user.dob || "DOB not set"}
                       </Text>
                     </View>
                     <View style={styles.docFieldRow}>
                       <Text style={styles.docFieldLabel}>DATE OF EXPIRY</Text>
-                      <Text style={styles.docFieldValue}>{user.document_expiry || "2032-10-18"}</Text>
+                      <Text style={styles.docFieldValue}>{user.document_expiry || "Not recorded"}</Text>
                     </View>
                   </View>
                 </View>
 
-                {/* MRZ Zone for Passport */}
-                {isPassport && (
-                  <View style={styles.mrzContainer}>
-                    <Text style={styles.mrzText}>
-                      {`P<BGDSARKAR<<${user.name.replace(/\s+/g, "<").toUpperCase()}<<<<<<<<<<<<<<<<<<`}
-                    </Text>
-                    <Text style={styles.mrzText}>
-                      {`${user.document_number}4BGD9406153M3210186<<<<<<<<<<<<<<04`}
-                    </Text>
-                  </View>
-                )}
-
-                {/* Biometric Security Badges */}
+                {/* Document Status Summary */}
                 <View style={styles.securityAuditRow}>
                   <View style={styles.securityTag}>
-                    <Ionicons name="checkmark-circle" size={12} color="#10b981" />
-                    <Text style={styles.securityTagText}>Hologram Valid</Text>
+                    <Ionicons
+                      name={signedKycDocUrl ? "lock-closed" : "alert-circle-outline"}
+                      size={12}
+                      color={signedKycDocUrl ? "#10b981" : "#f59e0b"}
+                    />
+                    <Text style={styles.securityTagText}>
+                      {signedKycDocUrl ? "Presigned Secure URL" : "No Presigned Scan"}
+                    </Text>
                   </View>
                   <View style={styles.securityTag}>
-                    <Ionicons name="checkmark-circle" size={12} color="#10b981" />
-                    <Text style={styles.securityTagText}>Liveness Confirmed</Text>
-                  </View>
-                  <View style={styles.securityTag}>
-                    <Ionicons name="checkmark-circle" size={12} color="#10b981" />
-                    <Text style={styles.securityTagText}>Zero Tampering</Text>
+                    <Ionicons
+                      name={user.document_number ? "checkmark-circle" : "time-outline"}
+                      size={12}
+                      color={user.document_number ? "#10b981" : "#f59e0b"}
+                    />
+                    <Text style={styles.securityTagText}>
+                      {user.document_number ? "Document # Logged" : "Missing Doc #"}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -1304,22 +1328,26 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
 
               {/* Compliance Discrepancy Matrix */}
               <View style={styles.discrepancyBox}>
-                <Text style={styles.discrepancyTitle}>Automated Verification Checklist</Text>
+                <Text style={styles.discrepancyTitle}>Compliance Review Checklist</Text>
                 <View style={styles.checklistRow}>
-                  <Ionicons name="checkbox" size={16} color="#10b981" />
-                  <Text style={styles.checklistText}>Name on Document matches Account Name (100% match)</Text>
+                  <Ionicons name={user.name ? "checkmark-circle" : "ellipse-outline"} size={16} color={user.name ? "#10b981" : "#94a3b8"} />
+                  <Text style={styles.checklistText}>Verify document holder name matches profile ({user.name})</Text>
                 </View>
                 <View style={styles.checklistRow}>
-                  <Ionicons name="checkbox" size={16} color="#10b981" />
-                  <Text style={styles.checklistText}>Date of birth verifies age compliance (21+ years old)</Text>
+                  <Ionicons name={user.document_number ? "checkmark-circle" : "alert-circle-outline"} size={16} color={user.document_number ? "#10b981" : "#f59e0b"} />
+                  <Text style={styles.checklistText}>
+                    {user.document_number ? `Document #${user.document_number} present for validation` : "Document number not recorded on file"}
+                  </Text>
                 </View>
                 <View style={styles.checklistRow}>
-                  <Ionicons name="checkbox" size={16} color="#10b981" />
-                  <Text style={styles.checklistText}>Document expiry date is active and valid until 2032</Text>
+                  <Ionicons name={user.document_expiry ? "checkmark-circle" : "ellipse-outline"} size={16} color={user.document_expiry ? "#10b981" : "#94a3b8"} />
+                  <Text style={styles.checklistText}>
+                    {user.document_expiry ? `Expiry recorded: ${user.document_expiry}` : "Confirm document expiry date on scan"}
+                  </Text>
                 </View>
                 <View style={styles.checklistRow}>
-                  <Ionicons name="checkbox" size={16} color="#10b981" />
-                  <Text style={styles.checklistText}>No sanctions or PEP blacklist records flagged</Text>
+                  <Ionicons name="shield-checkmark-outline" size={16} color="#94a3b8" />
+                  <Text style={styles.checklistText}>Confirm photo matches submitted identity document</Text>
                 </View>
               </View>
 
@@ -1341,21 +1369,29 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
 
         {/* Fixed Split-Screen Decision Footer */}
         <View style={styles.splitViewerFooter}>
-          <TouchableOpacity
-            style={styles.footerRejectBtn}
-            onPress={() => handleKycDecision(user, false, kycReviewNotes)}
-          >
-            <Ionicons name="close-circle-outline" size={18} color="#ffffff" style={{ marginEnd: 6 }} />
-            <Text style={styles.footerRejectBtnText}>Reject KYC</Text>
-          </TouchableOpacity>
+          {hasPermission("users.verify_kyc") ? (
+            <>
+              <TouchableOpacity
+                style={styles.footerRejectBtn}
+                onPress={() => handleKycDecision(user, false, kycReviewNotes)}
+              >
+                <Ionicons name="close-circle-outline" size={18} color="#ffffff" style={{ marginEnd: 6 }} />
+                <Text style={styles.footerRejectBtnText}>Reject KYC</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.footerApproveBtn}
-            onPress={() => handleKycDecision(user, true, kycReviewNotes)}
-          >
-            <Ionicons name="checkmark-done" size={18} color="#ffffff" style={{ marginEnd: 6 }} />
-            <Text style={styles.footerApproveBtnText}>Approve & Verify KYC</Text>
-          </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.footerApproveBtn}
+                onPress={() => handleKycDecision(user, true, kycReviewNotes)}
+              >
+                <Ionicons name="checkmark-done" size={18} color="#ffffff" style={{ marginEnd: 6 }} />
+                <Text style={styles.footerApproveBtnText}>Approve & Verify KYC</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Text style={{ color: "#94a3b8", fontSize: 13, fontWeight: "600" }}>
+              Read-only view: `users.verify_kyc` permission required to approve or reject KYC.
+            </Text>
+          )}
         </View>
       </View>
     );
@@ -1431,7 +1467,10 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.quickAction4Btn}
+              style={[
+                styles.quickAction4Btn,
+                !hasPermission("users.suspend") && { opacity: 0.45 },
+              ]}
               onPress={() =>
                 openSecurityModal(selectedUser.is_suspended ? "unsuspend" : "suspend", selectedUser)
               }
@@ -1454,7 +1493,10 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.quickAction4Btn}
+              style={[
+                styles.quickAction4Btn,
+                !hasPermission("users.ban") && { opacity: 0.45 },
+              ]}
               onPress={() =>
                 openSecurityModal(selectedUser.is_banned ? "unban" : "ban", selectedUser)
               }
@@ -1512,7 +1554,7 @@ export const UserManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Contact Number</Text>
-              <Text style={styles.infoValue}>{selectedUser.phone || "+880 1700 000000"}</Text>
+              <Text style={styles.infoValue}>{selectedUser.phone || "Not provided"}</Text>
             </View>
             <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
               <Text style={styles.infoLabel}>Account Status</Text>

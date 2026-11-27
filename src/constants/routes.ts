@@ -67,6 +67,19 @@ export const ROUTES = {
     ITINERARY_CLONE: "/screens/itinerary-clone" as const,
     TRIP_CHECKOUT: "/screens/trip-checkout" as const,
     TRAVEL_INTELLIGENCE: "/screens/travel-intelligence" as const,
+    OFF_GRID_MESH: "/screens/off-grid-mesh" as const,
+    NOTIFICATIONS: "/screens/notifications" as const,
+    TRAVEL_PREFERENCES: "/screens/travel-preferences" as const,
+    LOCAL_MARKETPLACE: "/screens/local-marketplace" as const,
+    RIDE_HAILING: "/screens/ride-hailing" as const,
+  },
+
+  // Partner & Ecosystem Portals
+  PORTALS: {
+    RIDER: "/rider" as const,
+    HOTEL: "/hotel" as const,
+    PROVIDER: "/provider" as const,
+    AGENCY: "/agency" as const,
   },
 
   // Authentication Routes

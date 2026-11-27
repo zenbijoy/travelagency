@@ -156,14 +156,16 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
  */
 export const ROLE_ALLOWED_TABS: Record<AdminRole, AdminTab[]> = {
   [AdminRole.SUPER_ADMIN]: [
-    "dashboard", "booking-ops", "users", "hotels", "agencies", "agency-ops", "agency-kyc",
+    "dashboard", "hero-banners", "marketplace", "booking-ops", "users", "hotels",
+    "agencies", "agency-ops", "agency-kyc",
     "payment-ops", "refunds", "commissions", "destinations", "reviews",
     "support", "notifications", "marketing", "ads", "reports", "demand-heatmap", "monitoring",
     "audit-trail", "settings",
   ],
 
   [AdminRole.ADMIN]: [
-    "dashboard", "booking-ops", "users", "hotels", "agencies", "agency-ops", "agency-kyc",
+    "dashboard", "hero-banners", "marketplace", "booking-ops", "users", "hotels",
+    "agencies", "agency-ops", "agency-kyc",
     "destinations", "reviews", "support", "notifications", "marketing", "ads",
     "reports", "demand-heatmap", "monitoring", "audit-trail", "settings",
   ],
@@ -181,7 +183,7 @@ export const ROLE_ALLOWED_TABS: Record<AdminRole, AdminTab[]> = {
   ],
 
   [AdminRole.CONTENT_ADMIN]: [
-    "dashboard", "destinations", "hotels", "reviews", "marketing",
+    "dashboard", "hero-banners", "marketplace", "destinations", "hotels", "reviews", "marketing",
   ],
 
   [AdminRole.AGENCY_MANAGER]: [
@@ -203,8 +205,14 @@ export function checkPermission(
   permission: AdminPermission
 ): boolean {
   if (!admin) return false;
-  const role = admin.role || AdminRole.READONLY;
-  const permissions = ROLE_PERMISSIONS[role] || [];
+  // 1. Check per-user JSONB permission overrides first (from admin_users.permissions column)
+  if (admin.permissions && typeof admin.permissions === "object") {
+    const override = (admin.permissions as Record<string, boolean>)[permission];
+    if (typeof override === "boolean") return override;
+  }
+  // 2. Fall back to role-based permissions (fail to READONLY if role unknown)
+  const role = admin.role ?? AdminRole.READONLY;
+  const permissions = ROLE_PERMISSIONS[role] ?? [];
   return permissions.includes(permission);
 }
 

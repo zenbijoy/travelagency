@@ -183,62 +183,7 @@ const SAMPLE_AGENCY_ADS: AgencyAdCard[] = [];
 const GLOBAL_PAYMENTS_DATA: GlobalPaymentItem[] = [];
 const SAMPLE_BOOKINGS: BookingRecord[] = [];
 
-const INITIAL_PAYOUT_REQUESTS: AgencyPayoutItem[] = [
-  {
-    id: "payout-8941",
-    agency_id: "ag-1",
-    agency_name: "Chalo Shobai Tours Ltd",
-    license_number: "TL-DHK-2024-8921",
-    bank_name: "City Bank PLC",
-    account_name: "Chalo Shobai Tours Ltd",
-    account_number: "•••• •••• •••• 9201",
-    routing_number: "225271890",
-    amount: "৳185,000",
-    currency: "BDT",
-    commission_fee: "10.0%",
-    net_amount: "৳166,500",
-    commission_balance: "৳240,000",
-    status: "pending",
-    requested_at: "Today, 09:30 AM",
-    reference: "PAY-2026-8941",
-  },
-  {
-    id: "payout-8940",
-    agency_id: "ag-2",
-    agency_name: "Bengal Heritage Expeditions",
-    license_number: "TL-CTG-2023-4410",
-    bank_name: "BRAC Bank PLC",
-    account_name: "Bengal Heritage Expeditions",
-    account_number: "•••• •••• •••• 4482",
-    routing_number: "060271420",
-    amount: "৳320,000",
-    currency: "BDT",
-    commission_fee: "8.0%",
-    net_amount: "৳294,400",
-    commission_balance: "৳450,000",
-    status: "pending",
-    requested_at: "Yesterday, 04:15 PM",
-    reference: "PAY-2026-8940",
-  },
-  {
-    id: "payout-8938",
-    agency_id: "ag-3",
-    agency_name: "Skyline Travel & Holiday",
-    license_number: "TL-SYL-2025-1029",
-    bank_name: "Standard Chartered Bank",
-    account_name: "Skyline Holiday BD",
-    account_number: "•••• •••• •••• 1150",
-    routing_number: "010271100",
-    amount: "৳95,000",
-    currency: "BDT",
-    commission_fee: "12.0%",
-    net_amount: "৳83,600",
-    commission_balance: "৳120,000",
-    status: "paid_out",
-    requested_at: new Date(Date.now() - 3 * 86400000).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-    reference: "PAY-2026-8938",
-  },
-];
+const INITIAL_PAYOUT_REQUESTS: AgencyPayoutItem[] = [];
 
 export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
   admin: propAdmin,
@@ -505,45 +450,20 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
 
     try {
       if (actionType === "suspend") {
-        // Atomic update agencies table
-        await supabase
-          .from("agencies")
-          .update({ is_verified: false, status: "suspended" })
-          .eq("id", agency.id);
-
-        // Atomic update agency_admin_details
-        await supabase.from("agency_admin_details").upsert({
-          agency_id: agency.id,
-          is_suspended: true,
-          suspension_reason: reason.trim(),
-          suspension_date: timestamp,
-          verification_status: "suspended",
-          updated_at: timestamp,
-        });
-
-        // Insert immutable audit record into admin_activity_logs
-        await supabase.from("admin_activity_logs").insert({
-          admin_id: admin.id || null,
-          action: "AGENCY_SUSPEND",
-          module: "agencies",
-          entity_type: "travel_agency",
-          entity_id: agency.id,
-          details: {
-            agency_name: agency.name,
-            trade_license: agency.agencyId,
-            reason: reason.trim(),
-            operator: admin.name || "System Admin",
-            timestamp,
-          },
-          ip_address: "127.0.0.1",
-          created_at: timestamp,
-        });
+        const cmdRes = await executeAdminCommand(
+          new SuspendAgencyCommand(agency.id, reason.trim()),
+          admin
+        );
+        if (!cmdRes.success) {
+          showLocalizedAlert("Governance Block", cmdRes.error || "Failed to suspend agency.");
+          return;
+        }
 
         setAgenciesList((prev) =>
           prev.map((a) => (a.id === agency.id ? { ...a, status: "Suspended" } : a))
         );
         if (selectedAgency?.id === agency.id) {
-          setSelectedAgency((prev) => ({ ...prev, status: "Suspended" }));
+          setSelectedAgency((prev) => (prev ? { ...prev, status: "Suspended" } : prev));
         }
 
         closeSecurityModal();
@@ -552,53 +472,30 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
           `${agency.name} operational privileges suspended. Atomic audit event logged to admin_activity_logs.`
         );
       } else if (actionType === "revoke_license") {
-        // Revoke license: sets is_verified: false and marks trade license status revoked
-        await supabase
-          .from("agencies")
-          .update({ is_verified: false })
-          .eq("id", agency.id);
+        const cmdRes = await executeAdminCommand(
+          new SuspendAgencyCommand(agency.id, `Trade License Revoked: ${reason.trim()}`),
+          admin
+        );
+        if (!cmdRes.success) {
+          showLocalizedAlert("Governance Block", cmdRes.error || "Failed to revoke trade license.");
+          return;
+        }
 
-        await supabase.from("agency_admin_details").upsert({
-          agency_id: agency.id,
-          is_certified: false,
-          verification_status: "rejected",
-          suspension_reason: `Trade License Revoked: ${reason.trim()}`,
-          suspension_date: timestamp,
-          updated_at: timestamp,
-        });
-
-        // Update agency_documents if present
-        await supabase
+        const { error: docErr } = await supabase
           .from("agency_documents")
           .update({
-            verification_status: "rejected",
-            verification_notes: `Trade License Revoked by ${admin.name}: ${reason.trim()}`,
+            is_verified: false,
           })
           .eq("agency_id", agency.id);
-
-        // Insert immutable audit record into admin_activity_logs
-        await supabase.from("admin_activity_logs").insert({
-          admin_id: admin.id || null,
-          action: "AGENCY_REVOKE_LICENSE",
-          module: "agencies",
-          entity_type: "agency_license",
-          entity_id: agency.id,
-          details: {
-            agency_name: agency.name,
-            trade_license: agency.agencyId,
-            reason: reason.trim(),
-            operator: admin.name || "System Admin",
-            timestamp,
-          },
-          ip_address: "127.0.0.1",
-          created_at: timestamp,
-        });
+        if (docErr) {
+          console.warn("Agency document update warning:", docErr.message);
+        }
 
         setAgenciesList((prev) =>
           prev.map((a) => (a.id === agency.id ? { ...a, status: "Pending" } : a))
         );
         if (selectedAgency?.id === agency.id) {
-          setSelectedAgency((prev) => ({ ...prev, status: "Pending" }));
+          setSelectedAgency((prev) => (prev ? { ...prev, status: "Pending" } : prev));
         }
 
         closeSecurityModal();
@@ -607,42 +504,31 @@ export const AgencyManagementScreen: React.FC<{ admin?: AdminUser | null }> = ({
           `Trade license for ${agency.name} has been REVOKED under compliance governance. Audit record persisted in admin_activity_logs.`
         );
       } else if (actionType === "ban") {
-        // Ban agency
+        const cmdRes = await executeAdminCommand(
+          new SuspendAgencyCommand(agency.id, `PERMANENT BAN: ${reason.trim()}`),
+          admin
+        );
+        if (!cmdRes.success) {
+          showLocalizedAlert("Governance Block", cmdRes.error || "Failed to ban agency.");
+          return;
+        }
+
         await supabase
-          .from("agencies")
-          .update({ is_verified: false, status: "inactive" })
-          .eq("id", agency.id);
-
-        await supabase.from("agency_admin_details").upsert({
-          agency_id: agency.id,
-          is_banned: true,
-          ban_reason: reason.trim(),
-          ban_date: timestamp,
-          verification_status: "banned",
-          updated_at: timestamp,
-        });
-
-        await supabase.from("admin_activity_logs").insert({
-          admin_id: admin.id || null,
-          action: "AGENCY_BAN",
-          module: "agencies",
-          entity_type: "travel_agency",
-          entity_id: agency.id,
-          details: {
-            agency_name: agency.name,
-            reason: reason.trim(),
-            operator: admin.name || "System Admin",
-            timestamp,
-          },
-          ip_address: "127.0.0.1",
-          created_at: timestamp,
-        });
+          .from("agency_admin_details")
+          .update({
+            is_banned: true,
+            ban_reason: reason.trim(),
+            ban_date: timestamp,
+            verification_status: "banned",
+            updated_at: timestamp,
+          })
+          .eq("agency_id", agency.id);
 
         setAgenciesList((prev) =>
           prev.map((a) => (a.id === agency.id ? { ...a, status: "Inactive" } : a))
         );
         if (selectedAgency?.id === agency.id) {
-          setSelectedAgency((prev) => ({ ...prev, status: "Inactive" }));
+          setSelectedAgency((prev) => (prev ? { ...prev, status: "Inactive" } : prev));
         }
 
         closeSecurityModal();

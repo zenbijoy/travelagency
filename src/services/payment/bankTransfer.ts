@@ -36,10 +36,11 @@ export class BankTransferProvider implements IPaymentProvider {
   }
 
   async verify(transactionId: string): Promise<PaymentStatus> {
-    return "completed";
+    // Bank transfers remain pending manual accounting verification
+    return "pending";
   }
 
   async refund(request: RefundRequest): Promise<boolean> {
-    return true;
+    return false;
   }
 }

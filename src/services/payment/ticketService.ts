@@ -68,6 +68,21 @@ export const ticketService = {
   },
 
   /**
+   * Retrieve an offline cached ticket by booking reference or ID
+   */
+  async getTicketByBookingReference(bookingReferenceOrId: string, userId: string = "guest"): Promise<ETicket | null> {
+    try {
+      const tickets = await this.getCachedTickets(userId);
+      return tickets.find(
+        (t) => t.bookingReference === bookingReferenceOrId || t.id === bookingReferenceOrId
+      ) || null;
+    } catch (err) {
+      console.warn("Failed to retrieve ticket by booking reference:", err);
+      return null;
+    }
+  },
+
+  /**
    * Generate an official PDF ticket and share it
    */
   async generateAndShareTicketPdf(ticket: ETicket): Promise<void> {

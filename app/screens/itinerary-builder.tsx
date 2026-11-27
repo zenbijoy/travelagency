@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -248,7 +250,11 @@ export default function ItineraryBuilderScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Basic Trip Metadata */}
         <View style={[styles.card, { backgroundColor: isDark ? colors.card : "#FFFFFF", borderColor: colors.border }]}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>Trip Overview</Text>
@@ -364,6 +370,7 @@ export default function ItineraryBuilderScreen() {
           </View>
         ))}
       </ScrollView>
+    </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

@@ -40,6 +40,12 @@ import { CacheManagerModal } from "../components/settings/CacheManagerModal";
 import { ActiveDevicesModal } from "../components/settings/ActiveDevicesModal";
 import { AccountDeletionModal } from "../components/settings/AccountDeletionModal";
 import { RTLIcon } from "../components/ui";
+import { ROUTES } from "../constants/routes";
+import {
+  DigestFrequency,
+  usePersonalizationStore,
+} from "../store/personalizationStore";
+import { useNotificationStore } from "../store/notificationStore";
 
 export function SettingsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,6 +68,12 @@ export function SettingsScreen() {
     offline,
     updateOfflinePreference,
   } = useSettingsStore();
+
+  const personalizationPrefs = usePersonalizationStore((s) => s.preferences);
+  const updatePersonalizationPrefs = usePersonalizationStore(
+    (s) => s.updatePreferences
+  );
+  const inboxUnreadCount = useNotificationStore((s) => s.unreadCount);
 
   // Active Category for Split-Pane Web Navigation
   const [activeCategory, setActiveCategory] = useState<
@@ -143,6 +155,27 @@ export function SettingsScreen() {
     value: boolean
   ) => {
     updateNotificationPreference(key, value);
+
+    const personalizationPatchMap: Record<string, Record<string, boolean>> = {
+      pushEnabled: { push_enabled: value },
+      bookingUpdates: { category_booking: value },
+      priceAlerts: { category_price_alerts: value },
+      tripUpdates: { category_flight_alerts: value },
+      promoOffers: { category_marketing: value },
+      communityActivity: { category_community: value },
+      quietHoursEnabled: { quiet_hours_enabled: value },
+    };
+    if (personalizationPatchMap[key]) {
+      updatePersonalizationPrefs(personalizationPatchMap[key]).catch(() => {});
+    }
+
+    if (key === "pushEnabled" && value) {
+      import("../services/fcmNotificationService")
+        .then(({ fcmNotificationService }) =>
+          fcmNotificationService.requestPushPermissionsAndSync(user?.id)
+        )
+        .catch(() => {});
+    }
 
     // Sync to user profile in Supabase if logged in
     if (user?.id) {
@@ -586,9 +619,173 @@ export function SettingsScreen() {
     </SettingsSection>
   );
 
-  // Section 4: Notifications
+  // Section 4: Notifications & Personalization
   const renderNotificationsSection = () => (
     <SettingsSection title={t("notificationsSection")}>
+      {/* Travel Preferences & Personalization Entry */}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => router.push(ROUTES.SCREENS.TRAVEL_PREFERENCES as any)}
+        style={[styles.clickableRow, { borderBottomColor: colors.border }]}
+      >
+        <View style={styles.rowLeft}>
+          <View
+            style={[
+              styles.iconBox,
+              { backgroundColor: colors.primary + "15" },
+            ]}
+          >
+            <Ionicons name="sparkles-outline" size={18} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.rowTitle, { color: colors.text }]}>
+              {language === "bn"
+                ? "ভ্রমণ পছন্দ ও ব্যক্তিগতকরণ"
+                : "Travel Preferences & Personalization"}
+            </Text>
+            <Text style={[styles.rowSubtitle, { color: colors.subtext }]}>
+              {language === "bn"
+                ? `গন্তব্য (${personalizationPrefs.favorite_destinations.length}), বাজেট, ধরন ও সময়সূচী`
+                : `Destinations (${personalizationPrefs.favorite_destinations.length}), styles, budget & quiet hours`}
+            </Text>
+          </View>
+        </View>
+        <RTLIcon name="chevron-forward" size={18} color={colors.subtext} />
+      </TouchableOpacity>
+
+      {/* Personalized Notification Inbox Entry */}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => router.push(ROUTES.SCREENS.NOTIFICATIONS as any)}
+        style={[styles.clickableRow, { borderBottomColor: colors.border }]}
+      >
+        <View style={styles.rowLeft}>
+          <View
+            style={[
+              styles.iconBox,
+              { backgroundColor: "#3b82f615" },
+            ]}
+          >
+            <Ionicons name="mail-unread-outline" size={18} color="#2563eb" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.rowTitle, { color: colors.text }]}>
+              {language === "bn"
+                ? "পার্সোনালাইজড নোটিফিকেশন ইনবক্স"
+                : "Notification Inbox"}
+            </Text>
+            <Text style={[styles.rowSubtitle, { color: colors.subtext }]}>
+              {language === "bn"
+                ? "বার্তা দেখুন, \"কেন দেখছি?\" জানুন ও মতামত দিন"
+                : "View alerts, check \"Why am I seeing this?\", and give feedback"}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.rowRight}>
+          {inboxUnreadCount > 0 && (
+            <View
+              style={{
+                backgroundColor: colors.primary,
+                paddingHorizontal: 7,
+                paddingVertical: 2,
+                borderRadius: 999,
+                marginEnd: 6,
+              }}
+            >
+              <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "700" }}>
+                {inboxUnreadCount}
+              </Text>
+            </View>
+          )}
+          <RTLIcon name="chevron-forward" size={18} color={colors.subtext} />
+        </View>
+      </TouchableOpacity>
+
+      {/* Hyper-Personalization Toggle */}
+      <SettingsToggleRow
+        icon={<Ionicons name="options-outline" size={20} color="#0ea5e9" />}
+        title={
+          language === "bn"
+            ? "স্মার্ট নোটিফিকেশন ব্যক্তিগতকরণ"
+            : "Personalization Controls"
+        }
+        subtitle={
+          language === "bn"
+            ? "আপনার আগ্রহ ও ভ্রমণ ধরণ অনুযায়ী বার্তা সাজানো"
+            : "Tailor deals and discovery alerts to your travel profile"
+        }
+        value={personalizationPrefs.personalization_enabled}
+        onValueChange={(val) => {
+          void updatePersonalizationPrefs({ personalization_enabled: val }).catch(
+            () => {}
+          );
+        }}
+      />
+
+      {/* Digest Frequency Quick Selector */}
+      <View
+        style={[
+          styles.themeSelectorContainer,
+          { borderBottomColor: colors.border },
+        ]}
+      >
+        <Text style={[styles.sectionSubtitle, { color: colors.subtext }]}>
+          {language === "bn"
+            ? "ট্রাভেল ডাইজেস্ট ফ্রিকোয়েন্সি"
+            : "Digest Frequency"}
+        </Text>
+        <View
+          style={[
+            styles.segmentedControl,
+            {
+              backgroundColor: isDark ? "#0f172a" : "#f1f5f9",
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          {(
+            [
+              { key: "daily", label: language === "bn" ? "দৈনিক" : "Daily" },
+              { key: "weekly", label: language === "bn" ? "সাপ্তাহিক" : "Weekly" },
+              { key: "disabled", label: language === "bn" ? "বন্ধ" : "Disabled" },
+            ] as const
+          ).map((item) => {
+            const isSelected =
+              personalizationPrefs.digest_frequency === item.key;
+            return (
+              <TouchableOpacity
+                key={item.key}
+                activeOpacity={0.8}
+                onPress={() =>
+                  updatePersonalizationPrefs({
+                    digest_frequency: item.key as DigestFrequency,
+                  }).catch(() => {})
+                }
+                style={[
+                  styles.segmentButton,
+                  isSelected && [
+                    styles.segmentButtonActive,
+                    { backgroundColor: colors.card, shadowColor: "#000" },
+                  ],
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.segmentText,
+                    {
+                      color: isSelected ? colors.primary : colors.subtext,
+                      fontWeight: isSelected ? "700" : "500",
+                    },
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
       <SettingsToggleRow
         icon={<Ionicons name="notifications" size={20} color={colors.primary} />}
         title={t("pushNotifications")}

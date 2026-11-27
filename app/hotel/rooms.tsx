@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,11 +10,14 @@ import {
   ScrollView,
   Alert,
   Switch,
-  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
 import { useResponsive } from "@/hooks/useResponsive";
+import {
+  useHotelPmsStore,
+  useHotelPmsComputed,
+  HotelRoomUnit,
+} from "@/features/hotel";
 
 const NAVY = "#0F172A";
 const NAVY_LIGHT = "#1E293B";
@@ -22,409 +25,467 @@ const GOLD = "#E5A93C";
 const GREEN = "#22C55E";
 const RED = "#EF4444";
 const YELLOW = "#F59E0B";
+const BLUE = "#3B82F6";
 
-type RoomType = "Single" | "Double" | "Suite" | "Deluxe";
-type RoomStatus = "Available" | "Occupied" | "Maintenance";
-
-interface Amenity {
-  id: string;
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-}
-
-interface Room {
-  id: string;
-  number: string;
-  type: RoomType;
-  pricePerNight: number;
-  status: RoomStatus;
-  maxGuests: number;
-  amenities: string[];
-  photos: string[];
-  aiTags: string[];
-  dynamicPricingEnabled: boolean;
-  seasonalMultiplier: number;
-}
-
-const AMENITIES: Amenity[] = [
-  { id: "wifi", label: "WiFi", icon: "wifi-outline" },
-  { id: "ac", label: "Air Conditioning", icon: "snow-outline" },
-  { id: "tv", label: "TV", icon: "tv-outline" },
-  { id: "minibar", label: "Mini Bar", icon: "wine-outline" },
-  { id: "balcony", label: "Balcony", icon: "partly-sunny-outline" },
-  { id: "jacuzzi", label: "Jacuzzi", icon: "water-outline" },
-  { id: "parking", label: "Parking", icon: "car-outline" },
-  { id: "breakfast", label: "Breakfast", icon: "restaurant-outline" },
+const FLOOR_TABS = [
+  { id: "all", label: "All Floors" },
+  { id: "1", label: "1xx Ground" },
+  { id: "2", label: "2xx Ocean" },
+  { id: "3", label: "3xx Suites" },
+  { id: "suites", label: "VIP Suites" },
 ];
-
-const AI_TAGS_BY_TYPE: Record<RoomType, string[]> = {
-  Single: ["City View", "Quiet Floor"],
-  Double: ["Garden View", "Couple Suite"],
-  Suite: ["Ocean View", "Premium", "VIP"],
-  Deluxe: ["Mountain View", "Luxury", "Corner Room"],
-};
-
-const INITIAL_ROOMS: Room[] = [
-  { id: "1", number: "101", type: "Single", pricePerNight: 3200, status: "Available", maxGuests: 1, amenities: ["wifi", "ac", "tv"], photos: [], aiTags: ["City View", "Quiet Floor"], dynamicPricingEnabled: false, seasonalMultiplier: 1.0 },
-  { id: "2", number: "201", type: "Double", pricePerNight: 5500, status: "Occupied", maxGuests: 2, amenities: ["wifi", "ac", "tv", "minibar"], photos: [], aiTags: ["Garden View", "Couple Suite"], dynamicPricingEnabled: true, seasonalMultiplier: 1.2 },
-  { id: "3", number: "301", type: "Suite", pricePerNight: 12000, status: "Available", maxGuests: 4, amenities: ["wifi", "ac", "tv", "minibar", "jacuzzi", "balcony"], photos: [], aiTags: ["Ocean View", "Premium", "VIP"], dynamicPricingEnabled: true, seasonalMultiplier: 1.5 },
-  { id: "4", number: "401", type: "Deluxe", pricePerNight: 8500, status: "Maintenance", maxGuests: 3, amenities: ["wifi", "ac", "tv", "balcony", "parking"], photos: [], aiTags: ["Mountain View", "Luxury"], dynamicPricingEnabled: false, seasonalMultiplier: 1.0 },
-];
-
-const STATUS_COLORS: Record<RoomStatus, string> = {
-  Available: GREEN,
-  Occupied: RED,
-  Maintenance: YELLOW,
-};
-
-function StatusBadge({ status }: { status: RoomStatus }) {
-  return (
-    <View style={[badge.container, { backgroundColor: STATUS_COLORS[status] + "33" }]}>
-      <View style={[badge.dot, { backgroundColor: STATUS_COLORS[status] }]} />
-      <Text style={[badge.text, { color: STATUS_COLORS[status] }]}>{status}</Text>
-    </View>
-  );
-}
-
-function AiTagChip({ label }: { label: string }) {
-  return (
-    <View style={chip.container}>
-      <Ionicons name="sparkles" size={10} color={GOLD} />
-      <Text style={chip.text}>{label}</Text>
-    </View>
-  );
-}
-
-interface RoomModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSave: (room: Omit<Room, "id">) => void;
-  initial?: Room | null;
-}
-
-function RoomModal({ visible, onClose, onSave, initial }: RoomModalProps) {
-  const [number, setNumber] = useState(initial?.number ?? "");
-  const [type, setType] = useState<RoomType>(initial?.type ?? "Single");
-  const [price, setPrice] = useState(String(initial?.pricePerNight ?? ""));
-  const [maxGuests, setMaxGuests] = useState(String(initial?.maxGuests ?? "1"));
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(initial?.amenities ?? []);
-  const [photos, setPhotos] = useState<string[]>(initial?.photos ?? []);
-  const [dynamicPricing, setDynamicPricing] = useState(initial?.dynamicPricingEnabled ?? false);
-  const [multiplier, setMultiplier] = useState(String(initial?.seasonalMultiplier ?? "1.0"));
-  const [galleryIndex, setGalleryIndex] = useState(0);
-
-  const toggleAmenity = (id: string) => {
-    setSelectedAmenities((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
-    );
-  };
-
-  const pickImage = async () => {
-    if (photos.length >= 10) {
-      Alert.alert("Limit reached", "Max 10 photos per room.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsMultipleSelection: false,
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setPhotos((prev) => [...prev, result.assets[0].uri]);
-    }
-  };
-
-  const handleSave = () => {
-    if (!number || !price) {
-      Alert.alert("Error", "Room number and price are required.");
-      return;
-    }
-    onSave({
-      number,
-      type,
-      pricePerNight: Number(price),
-      status: "Available",
-      maxGuests: Number(maxGuests),
-      amenities: selectedAmenities,
-      photos,
-      aiTags: AI_TAGS_BY_TYPE[type],
-      dynamicPricingEnabled: dynamicPricing,
-      seasonalMultiplier: Number(multiplier),
-    });
-    onClose();
-  };
-
-  const ROOM_TYPES: RoomType[] = ["Single", "Double", "Suite", "Deluxe"];
-
-  return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={modal.overlay}>
-        <View style={modal.container}>
-          <View style={modal.header}>
-            <Text style={modal.title}>{initial ? "Edit Room" : "Add New Room"}</Text>
-            <Pressable onPress={onClose}>
-              <Ionicons name="close" size={24} color="#94A3B8" />
-            </Pressable>
-          </View>
-          <ScrollView style={modal.scroll}>
-            <Text style={modal.label}>Room Number</Text>
-            <TextInput style={modal.input} value={number} onChangeText={setNumber} placeholder="e.g. 101" placeholderTextColor="#64748B" />
-
-            <Text style={modal.label}>Room Type</Text>
-            <View style={modal.typeRow}>
-              {ROOM_TYPES.map((t) => (
-                <Pressable key={t} style={[modal.typeBtn, type === t && modal.typeBtnActive]} onPress={() => setType(t)}>
-                  <Text style={[modal.typeText, type === t && modal.typeTextActive]}>{t}</Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <Text style={modal.label}>Price / Night (৳)</Text>
-            <TextInput style={modal.input} value={price} onChangeText={setPrice} keyboardType="numeric" placeholder="e.g. 5000" placeholderTextColor="#64748B" />
-
-            <Text style={modal.label}>Max Guests</Text>
-            <TextInput style={modal.input} value={maxGuests} onChangeText={setMaxGuests} keyboardType="numeric" placeholder="e.g. 2" placeholderTextColor="#64748B" />
-
-            <Text style={modal.label}>Amenities</Text>
-            <View style={modal.amenitiesGrid}>
-              {AMENITIES.map((amenity) => {
-                const selected = selectedAmenities.includes(amenity.id);
-                return (
-                  <Pressable
-                    key={amenity.id}
-                    style={[modal.amenityChip, selected && modal.amenityChipActive]}
-                    onPress={() => toggleAmenity(amenity.id)}
-                  >
-                    <Ionicons name={amenity.icon} size={14} color={selected ? GOLD : "#94A3B8"} />
-                    <Text style={[modal.amenityText, selected && modal.amenityTextActive]}>{amenity.label}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <View style={modal.row}>
-              <Text style={modal.label}>Dynamic Pricing</Text>
-              <Switch value={dynamicPricing} onValueChange={setDynamicPricing} thumbColor={dynamicPricing ? GOLD : "#64748B"} trackColor={{ false: "#334155", true: GOLD + "66" }} />
-            </View>
-            {dynamicPricing && (
-              <>
-                <Text style={modal.label}>Seasonal Multiplier</Text>
-                <TextInput style={modal.input} value={multiplier} onChangeText={setMultiplier} keyboardType="decimal-pad" placeholder="e.g. 1.5" placeholderTextColor="#64748B" />
-              </>
-            )}
-
-            <Text style={modal.label}>Photos ({photos.length}/10)</Text>
-            <Pressable style={modal.photoBtn} onPress={pickImage}>
-              <Ionicons name="camera-outline" size={20} color={GOLD} />
-              <Text style={modal.photoBtnText}>Upload Photo</Text>
-            </Pressable>
-
-            {photos.length > 0 && (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
-                {photos.map((uri, idx) => (
-                  <View key={idx} style={modal.photoThumb}>
-                    <Image source={{ uri }} style={modal.photoImage} />
-                    <Pressable
-                      style={modal.photoRemove}
-                      onPress={() => setPhotos((prev) => prev.filter((_, i) => i !== idx))}
-                    >
-                      <Ionicons name="close-circle" size={18} color={RED} />
-                    </Pressable>
-                  </View>
-                ))}
-              </ScrollView>
-            )}
-          </ScrollView>
-
-          <Pressable style={modal.saveBtn} onPress={handleSave}>
-            <Text style={modal.saveBtnText}>{initial ? "Update Room" : "Add Room"}</Text>
-          </Pressable>
-        </View>
-      </View>
-    </Modal>
-  );
-}
 
 export default function RoomsScreen() {
-  const { isDesktop, getGridItemWidth } = useResponsive();
-  const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const { isDesktop, contentMaxWidth } = useResponsive();
+  const {
+    workspace,
+    selectedFloor,
+    setSelectedFloor,
+    searchQuery,
+    setSearchQuery,
+    initWorkspace,
+    patchWorkspace,
+    createMaintenanceTicket,
+    toggleRateRule,
+    blockRoomDates,
+  } = useHotelPmsStore();
+  const { currentProperty, filteredUnits } = useHotelPmsComputed();
 
-  const numCols = isDesktop ? 3 : 1;
-  const itemWidth = getGridItemWidth(12, 16, numCols);
+  const [selectedUnit, setSelectedUnit] = useState<HotelRoomUnit | null>(null);
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
 
-  const handleSave = (data: Omit<Room, "id">) => {
-    if (editingRoom) {
-      setRooms((prev) =>
-        prev.map((r) => (r.id === editingRoom.id ? { ...data, id: editingRoom.id } : r))
-      );
-    } else {
-      setRooms((prev) => [...prev, { ...data, id: String(Date.now()) }]);
+  const [newRoomNum, setNewRoomNum] = useState("");
+  const [newRoomType, setNewRoomType] = useState("Deluxe Sea View");
+  const [newFloor, setNewFloor] = useState("2");
+  const [newPrice, setNewPrice] = useState("8500");
+
+  useEffect(() => {
+    if (workspace.units.length === 0) initWorkspace();
+  }, []);
+
+  const getOccupancyColor = (status: HotelRoomUnit["occupancyStatus"]) => {
+    switch (status) {
+      case "vacant":
+        return GREEN;
+      case "occupied":
+        return RED;
+      case "reserved":
+        return BLUE;
+      case "due_out":
+        return GOLD;
+      case "blocked":
+      case "out_of_order":
+        return YELLOW;
+      default:
+        return "#94A3B8";
     }
-    setEditingRoom(null);
   };
 
-  const handleDelete = (id: string) => {
-    Alert.alert("Delete Room", "Are you sure?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => setRooms((prev) => prev.filter((r) => r.id !== id)) },
-    ]);
+  const getHkColor = (status: HotelRoomUnit["housekeepingStatus"]) => {
+    switch (status) {
+      case "ready":
+      case "clean":
+        return GREEN;
+      case "cleaning":
+        return BLUE;
+      case "inspection":
+        return GOLD;
+      case "dirty":
+        return RED;
+      default:
+        return "#94A3B8";
+    }
   };
 
-  const renderRoom = ({ item }: { item: Room }) => (
-    <View style={[roomCard.container, { width: numCols > 1 ? itemWidth : "100%" }]}>
-      <View style={roomCard.photoArea}>
-        {item.photos.length > 0 ? (
-          <Image source={{ uri: item.photos[0] }} style={roomCard.photo} />
-        ) : (
-          <View style={roomCard.photoPlaceholder}>
-            <Ionicons name="bed-outline" size={40} color="#334155" />
-          </View>
-        )}
-        <StatusBadge status={item.status} />
-      </View>
+  const handleOpenActions = (unit: HotelRoomUnit) => {
+    setSelectedUnit(unit);
+    setActionModalVisible(true);
+  };
 
-      <View style={roomCard.body}>
-        <View style={roomCard.row}>
-          <Text style={roomCard.number}>Room {item.number}</Text>
-          <Text style={roomCard.type}>{item.type}</Text>
-        </View>
-        <Text style={roomCard.price}>৳{item.pricePerNight.toLocaleString()}/night</Text>
-        {item.dynamicPricingEnabled && (
-          <Text style={roomCard.dynPrice}>Dynamic: ×{item.seasonalMultiplier}</Text>
-        )}
-        <Text style={roomCard.guests}>Up to {item.maxGuests} guests</Text>
+  const handleQuickAssignClean = (unit: HotelRoomUnit) => {
+    const newTaskId = `hk_${Date.now()}`;
+    const nowIso = new Date().toISOString();
+    patchWorkspace((draft) => ({
+      ...draft,
+      units: draft.units.map((u) =>
+        u.id === unit.id ? { ...u, housekeepingStatus: "cleaning" } : u
+      ),
+      housekeepingTasks: [
+        {
+          id: newTaskId,
+          hotelId: currentProperty.id,
+          roomUnitId: unit.id,
+          roomNumber: unit.roomNumber,
+          roomTypeName: unit.roomTypeName,
+          taskType: "stayover_refresh",
+          priority: "high",
+          status: "cleaning",
+          assignedStaffName: "Housekeeping Floor Lead",
+          slaMinutes: 30,
+          checklist: [
+            { id: "c1", label: "Sanitize washroom & replenish towels", completed: false },
+            { id: "c2", label: "Change linens & vacuum floor", completed: false },
+          ],
+          createdAt: nowIso,
+        },
+        ...draft.housekeepingTasks,
+      ],
+    }));
+    setActionModalVisible(false);
+    Alert.alert("Cleaning Dispatched", `Room ${unit.roomNumber} transitioned to CLEANING queue.`);
+  };
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 6 }}>
-          {item.aiTags.map((tag) => (
-            <AiTagChip key={tag} label={tag} />
-          ))}
-        </ScrollView>
+  const handleMarkReady = (unit: HotelRoomUnit) => {
+    patchWorkspace((draft) => ({
+      ...draft,
+      units: draft.units.map((u) =>
+        u.id === unit.id
+          ? { ...u, housekeepingStatus: "ready", occupancyStatus: u.occupancyStatus === "out_of_order" ? "vacant" : u.occupancyStatus }
+          : u
+      ),
+    }));
+    setActionModalVisible(false);
+    Alert.alert("Room Ready", `Room ${unit.roomNumber} is now marked READY for check-in.`);
+  };
 
-        <View style={roomCard.amenitiesRow}>
-          {item.amenities.slice(0, 4).map((aid) => {
-            const a = AMENITIES.find((x) => x.id === aid);
-            return a ? <Ionicons key={aid} name={a.icon} size={14} color="#64748B" /> : null;
-          })}
-          {item.amenities.length > 4 && (
-            <Text style={roomCard.moreAmenities}>+{item.amenities.length - 4}</Text>
-          )}
-        </View>
+  const handleMaintenanceHold = async (unit: HotelRoomUnit) => {
+    await createMaintenanceTicket({
+      roomUnitId: unit.id,
+      category: "other",
+      title: `Preventative Maintenance Hold (#${unit.roomNumber})`,
+      description: `Inspection & maintenance hold requested for Room ${unit.roomNumber}`,
+      severity: "high",
+      estimatedCostBdt: 1200,
+      blocksRoomSale: true,
+    });
+    patchWorkspace((draft) => ({
+      ...draft,
+      units: draft.units.map((u) =>
+        u.id === unit.id ? { ...u, occupancyStatus: "out_of_order" } : u
+      ),
+    }));
+    setActionModalVisible(false);
+    Alert.alert("Maintenance Hold", `Room ${unit.roomNumber} placed on Maintenance Hold & ticket opened.`);
+  };
 
-        <View style={roomCard.actions}>
-          <Pressable
-            style={roomCard.editBtn}
-            onPress={() => { setEditingRoom(item); setModalVisible(true); }}
-          >
-            <Ionicons name="pencil-outline" size={14} color={GOLD} />
-            <Text style={roomCard.editText}>Edit</Text>
-          </Pressable>
-          <Pressable style={roomCard.deleteBtn} onPress={() => handleDelete(item.id)}>
-            <Ionicons name="trash-outline" size={14} color={RED} />
-            <Text style={roomCard.deleteText}>Delete</Text>
-          </Pressable>
-        </View>
-      </View>
-    </View>
-  );
+  const handleBlockToday = async (unit: HotelRoomUnit) => {
+    const today = new Date().toISOString().slice(0, 10);
+    await blockRoomDates({
+      roomUnitId: unit.id,
+      date: today,
+      reason: "VIP Hold / Owner Inspection",
+    });
+    setActionModalVisible(false);
+    Alert.alert("Date Blocked", `Room ${unit.roomNumber} blocked for ${today}.`);
+  };
+
+  const handleAddRoom = () => {
+    if (!newRoomNum.trim()) {
+      Alert.alert("Room Number Required", "Please specify a room unit number (e.g. 205).");
+      return;
+    }
+    const priceNum = parseInt(newPrice, 10) || 5000;
+    const floorNum = parseInt(newFloor, 10) || 1;
+    const newUnit: HotelRoomUnit = {
+      id: `unit_${Date.now()}`,
+      hotelId: currentProperty.id,
+      roomTypeId: `rt_${newRoomType.toLowerCase().replace(/\s+/g, "_")}`,
+      roomTypeName: newRoomType,
+      roomNumber: newRoomNum.trim(),
+      floorNumber: floorNum,
+      occupancyStatus: "vacant",
+      housekeepingStatus: "ready",
+      isVipRoom: newRoomType.toLowerCase().includes("suite"),
+      dynamicPricingEnabled: true,
+      baseNightlyRateBdt: priceNum,
+      maxGuests: 2,
+      amenities: ["wifi", "ac", "tv", "breakfast"],
+      photos: [],
+      aiTags: ["Verified Unit"],
+      isActive: true,
+    };
+
+    patchWorkspace((draft) => ({
+      ...draft,
+      units: [...draft.units, newUnit],
+    }));
+
+    setAddModalVisible(false);
+    setNewRoomNum("");
+    Alert.alert("Room Added", `Room ${newUnit.roomNumber} (${newUnit.roomTypeName}) added to floor matrix.`);
+  };
+
+  const yieldRule = workspace.rateRules.find((r) => r.hotelId === currentProperty.id) || workspace.rateRules[0];
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Room Management</Text>
-        <Pressable style={styles.addBtn} onPress={() => { setEditingRoom(null); setModalVisible(true); }}>
-          <Ionicons name="add" size={18} color={NAVY} />
-          <Text style={styles.addBtnText}>Add Room</Text>
-        </Pressable>
-      </View>
-
-      <FlatList
-        data={rooms}
-        keyExtractor={(item) => item.id}
-        renderItem={renderRoom}
-        numColumns={numCols}
-        key={numCols}
-        columnWrapperStyle={numCols > 1 ? { gap: 12, paddingHorizontal: 16 } : undefined}
-        contentContainerStyle={styles.listContent}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          isDesktop && { maxWidth: contentMaxWidth, alignSelf: "center" as const, width: "100%" },
+        ]}
         showsVerticalScrollIndicator={false}
-      />
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>Floor & Room Matrix</Text>
+            <Text style={styles.headerSub}>
+              {filteredUnits.length} Matching Units • Live Yield & Turnaround
+            </Text>
+          </View>
+          <Pressable style={styles.addBtn} onPress={() => setAddModalVisible(true)}>
+            <Ionicons name="add" size={20} color={NAVY} />
+            <Text style={styles.addBtnText}>Add Room</Text>
+          </Pressable>
+        </View>
 
-      <RoomModal
-        visible={modalVisible}
-        onClose={() => { setModalVisible(false); setEditingRoom(null); }}
-        onSave={handleSave}
-        initial={editingRoom}
-      />
+        {/* Search & Floor Filter */}
+        <View style={styles.searchBox}>
+          <Ionicons name="search-outline" size={16} color="#94A3B8" />
+          <TextInput
+            placeholder="Search room #, type or guest..."
+            placeholderTextColor="#64748B"
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
+          {FLOOR_TABS.map((tab) => {
+            const active = selectedFloor === tab.id;
+            return (
+              <Pressable
+                key={tab.id}
+                style={[styles.floorTab, active && styles.floorTabActive]}
+                onPress={() => setSelectedFloor(tab.id)}
+              >
+                <Text style={[styles.floorTabText, active && styles.floorTabTextActive]}>
+                  {tab.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        {/* Global Yield Automation Toggle */}
+        {yieldRule && (
+          <View style={styles.yieldBanner}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.yieldTitle}>AI Dynamic Yield Rule: {yieldRule.ruleName}</Text>
+              <Text style={styles.yieldSub}>
+                Multiplier {yieldRule.multiplier}x • Fair Price Ceiling (0.5x – 1.25x)
+              </Text>
+            </View>
+            <Switch
+              value={yieldRule.isActive}
+              onValueChange={(val) => {
+                void toggleRateRule(yieldRule.id, val);
+              }}
+              trackColor={{ false: "#334155", true: GOLD + "88" }}
+              thumbColor={yieldRule.isActive ? GOLD : "#94A3B8"}
+            />
+          </View>
+        )}
+
+        {/* Room Cards Matrix */}
+        <FlatList
+          data={filteredUnits}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false}
+          numColumns={isDesktop ? 2 : 1}
+          key={isDesktop ? "grid" : "list"}
+          columnWrapperStyle={isDesktop ? { gap: 12 } : undefined}
+          renderItem={({ item }) => {
+            const occColor = getOccupancyColor(item.occupancyStatus);
+            const hkColor = getHkColor(item.housekeepingStatus);
+            return (
+              <Pressable style={styles.roomCard} onPress={() => handleOpenActions(item)}>
+                <View style={styles.roomTop}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <View style={[styles.roomNumberBox, { borderColor: occColor }]}>
+                      <Text style={styles.roomNumberText}>{item.roomNumber}</Text>
+                    </View>
+                    <View>
+                      <Text style={styles.roomTypeText}>{item.roomTypeName}</Text>
+                      <Text style={styles.floorLabel}>
+                        Floor {item.floorNumber} • Max {item.maxGuests} Guests
+                        {item.currentGuestName ? ` • ${item.currentGuestName}` : ""}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={{ alignItems: "flex-end" }}>
+                    <Text style={styles.priceText}>৳{item.baseNightlyRateBdt.toLocaleString()}</Text>
+                    <Text style={styles.perNight}>/ night</Text>
+                  </View>
+                </View>
+
+                <View style={styles.statusRow}>
+                  <View style={[styles.badge, { backgroundColor: occColor + "22" }]}>
+                    <Text style={[styles.badgeText, { color: occColor }]}>
+                      {item.occupancyStatus.replace("_", " ").toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={[styles.badge, { backgroundColor: hkColor + "22" }]}>
+                    <Text style={[styles.badgeText, { color: hkColor }]}>
+                      HK: {item.housekeepingStatus.toUpperCase()}
+                    </Text>
+                  </View>
+                  {item.occupancyStatus === "out_of_order" && (
+                    <View style={[styles.badge, { backgroundColor: RED + "22" }]}>
+                      <Text style={[styles.badgeText, { color: RED }]}>REPAIR HOLD</Text>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.amenitiesRow}>
+                  {item.amenities.slice(0, 4).map((am) => (
+                    <View key={am} style={styles.amenityChip}>
+                      <Text style={styles.amenityText}>{am}</Text>
+                    </View>
+                  ))}
+                  <Text style={styles.tapHint}>Tap for quick actions →</Text>
+                </View>
+              </Pressable>
+            );
+          }}
+        />
+      </ScrollView>
+
+      {/* Instant Action Modal */}
+      <Modal visible={actionModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Room {selectedUnit?.roomNumber} • Quick Controls</Text>
+            <Text style={styles.modalSub}>{selectedUnit?.roomTypeName}</Text>
+
+            <View style={{ gap: 10, marginTop: 14 }}>
+              <Pressable style={styles.actionRowBtn} onPress={() => selectedUnit && handleQuickAssignClean(selectedUnit)}>
+                <Ionicons name="sparkles-outline" size={18} color={BLUE} />
+                <Text style={styles.actionRowText}>Assign Urgent Cleaning</Text>
+              </Pressable>
+
+              <Pressable style={styles.actionRowBtn} onPress={() => selectedUnit && handleMarkReady(selectedUnit)}>
+                <Ionicons name="checkmark-done-circle-outline" size={18} color={GREEN} />
+                <Text style={styles.actionRowText}>Mark Room Ready & Inspected</Text>
+              </Pressable>
+
+              <Pressable style={styles.actionRowBtn} onPress={() => selectedUnit && handleMaintenanceHold(selectedUnit)}>
+                <Ionicons name="construct-outline" size={18} color={YELLOW} />
+                <Text style={styles.actionRowText}>Place Maintenance Hold</Text>
+              </Pressable>
+
+              <Pressable style={styles.actionRowBtn} onPress={() => selectedUnit && handleBlockToday(selectedUnit)}>
+                <Ionicons name="ban-outline" size={18} color={RED} />
+                <Text style={styles.actionRowText}>Block Today (Owner / VIP Hold)</Text>
+              </Pressable>
+            </View>
+
+            <Pressable style={styles.closeBtn} onPress={() => setActionModalVisible(false)}>
+              <Text style={styles.closeBtnText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Add Room Modal */}
+      <Modal visible={addModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Add Room Unit</Text>
+
+            <TextInput
+              placeholder="Room Number (e.g. 205)"
+              placeholderTextColor="#64748B"
+              style={styles.input}
+              value={newRoomNum}
+              onChangeText={setNewRoomNum}
+            />
+            <TextInput
+              placeholder="Room Type (e.g. Deluxe Sea View)"
+              placeholderTextColor="#64748B"
+              style={styles.input}
+              value={newRoomType}
+              onChangeText={setNewRoomType}
+            />
+            <TextInput
+              placeholder="Floor Number (e.g. 2)"
+              placeholderTextColor="#64748B"
+              keyboardType="numeric"
+              style={styles.input}
+              value={newFloor}
+              onChangeText={setNewFloor}
+            />
+            <TextInput
+              placeholder="Base Price per Night (BDT)"
+              placeholderTextColor="#64748B"
+              keyboardType="numeric"
+              style={styles.input}
+              value={newPrice}
+              onChangeText={setNewPrice}
+            />
+
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 8 }}>
+              <Pressable style={[styles.closeBtn, { flex: 1 }]} onPress={() => setAddModalVisible(false)}>
+                <Text style={styles.closeBtnText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={[styles.saveBtn, { flex: 1 }]} onPress={handleAddRoom}>
+                <Text style={styles.saveBtnText}>Save Room</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: NAVY },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 16, paddingTop: 52 },
-  title: { fontSize: 22, fontWeight: "800", color: "#F1F5F9" },
-  addBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: GOLD, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
-  addBtnText: { color: NAVY, fontWeight: "700", fontSize: 14 },
-  listContent: { padding: 16, paddingBottom: 32 },
-});
-
-const roomCard = StyleSheet.create({
-  container: { backgroundColor: NAVY_LIGHT, borderRadius: 16, marginBottom: 14, overflow: "hidden" },
-  photoArea: { height: 160, position: "relative" },
-  photo: { width: "100%", height: "100%", resizeMode: "cover" },
-  photoPlaceholder: { width: "100%", height: "100%", backgroundColor: "#1E3A5F", alignItems: "center", justifyContent: "center" },
-  body: { padding: 14 },
-  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
-  number: { fontSize: 16, fontWeight: "800", color: "#F1F5F9" },
-  type: { fontSize: 12, color: "#94A3B8", backgroundColor: "#334155", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-  price: { fontSize: 15, fontWeight: "700", color: GOLD, marginBottom: 2 },
-  dynPrice: { fontSize: 11, color: "#A855F7", marginBottom: 4 },
-  guests: { fontSize: 12, color: "#64748B", marginBottom: 6 },
-  amenitiesRow: { flexDirection: "row", gap: 8, alignItems: "center", marginTop: 6, marginBottom: 10 },
-  moreAmenities: { color: "#64748B", fontSize: 11 },
-  actions: { flexDirection: "row", gap: 8 },
-  editBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, backgroundColor: GOLD + "22", borderRadius: 10, paddingVertical: 8 },
-  editText: { color: GOLD, fontSize: 13, fontWeight: "600" },
-  deleteBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, backgroundColor: RED + "22", borderRadius: 10, paddingVertical: 8 },
-  deleteText: { color: RED, fontSize: 13, fontWeight: "600" },
-});
-
-const badge = StyleSheet.create({
-  container: { flexDirection: "row", alignItems: "center", gap: 4, position: "absolute", top: 10, right: 10, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 },
-  dot: { width: 6, height: 6, borderRadius: 3 },
-  text: { fontSize: 11, fontWeight: "700" },
-});
-
-const chip = StyleSheet.create({
-  container: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: GOLD + "22", borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3, marginRight: 6 },
-  text: { color: GOLD, fontSize: 10, fontWeight: "600" },
-});
-
-const modal = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "flex-end" },
-  container: { backgroundColor: NAVY_LIGHT, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "90%", paddingBottom: 20 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 20, borderBottomWidth: 1, borderBottomColor: "#334155" },
-  title: { fontSize: 18, fontWeight: "800", color: "#F1F5F9" },
-  scroll: { paddingHorizontal: 20, paddingTop: 12, maxHeight: 480 },
-  label: { color: "#94A3B8", fontSize: 13, fontWeight: "600", marginBottom: 6, marginTop: 12 },
-  input: { backgroundColor: "#0F172A", borderRadius: 12, padding: 14, color: "#F1F5F9", fontSize: 14, borderWidth: 1, borderColor: "#334155" },
-  typeRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
-  typeBtn: { flex: 1, minWidth: 70, alignItems: "center", padding: 10, borderRadius: 10, borderWidth: 1, borderColor: "#334155" },
-  typeBtnActive: { borderColor: GOLD, backgroundColor: GOLD + "22" },
-  typeText: { color: "#94A3B8", fontSize: 13, fontWeight: "600" },
-  typeTextActive: { color: GOLD },
-  amenitiesGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  amenityChip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: "#334155" },
-  amenityChipActive: { borderColor: GOLD, backgroundColor: GOLD + "22" },
-  amenityText: { color: "#94A3B8", fontSize: 12 },
-  amenityTextActive: { color: GOLD },
-  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12 },
-  photoBtn: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: GOLD + "22", borderRadius: 12, padding: 12, marginTop: 8 },
-  photoBtnText: { color: GOLD, fontWeight: "600" },
-  photoThumb: { position: "relative", marginRight: 8 },
-  photoImage: { width: 70, height: 70, borderRadius: 10 },
-  photoRemove: { position: "absolute", top: -4, right: -4 },
-  saveBtn: { backgroundColor: GOLD, borderRadius: 14, padding: 16, marginHorizontal: 20, marginTop: 12, alignItems: "center" },
-  saveBtnText: { color: NAVY, fontSize: 16, fontWeight: "800" },
+  scroll: { flex: 1 },
+  content: { padding: 16, paddingBottom: 40 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 48, marginBottom: 16 },
+  headerTitle: { fontSize: 21, fontWeight: "800", color: "#F1F5F9" },
+  headerSub: { fontSize: 12, color: "#94A3B8", marginTop: 2 },
+  addBtn: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: GOLD, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 },
+  addBtnText: { color: NAVY, fontSize: 12, fontWeight: "800" },
+  searchBox: { flexDirection: "row", alignItems: "center", backgroundColor: NAVY_LIGHT, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 12, gap: 8 },
+  searchInput: { flex: 1, color: "#F1F5F9", fontSize: 13 },
+  floorTab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: NAVY_LIGHT, marginRight: 8 },
+  floorTabActive: { backgroundColor: GOLD },
+  floorTabText: { color: "#94A3B8", fontSize: 12, fontWeight: "600" },
+  floorTabTextActive: { color: NAVY, fontWeight: "800" },
+  yieldBanner: { flexDirection: "row", alignItems: "center", backgroundColor: "#1E293B", borderWidth: 1, borderColor: GOLD + "44", borderRadius: 14, padding: 14, marginBottom: 16 },
+  yieldTitle: { color: "#F1F5F9", fontSize: 13, fontWeight: "700" },
+  yieldSub: { color: "#94A3B8", fontSize: 11, marginTop: 2 },
+  roomCard: { flex: 1, backgroundColor: NAVY_LIGHT, borderRadius: 16, padding: 14, marginBottom: 12 },
+  roomTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  roomNumberBox: { width: 48, height: 48, borderRadius: 12, borderWidth: 2, alignItems: "center", justifyContent: "center", backgroundColor: NAVY },
+  roomNumberText: { color: "#F1F5F9", fontSize: 15, fontWeight: "800" },
+  roomTypeText: { color: "#F1F5F9", fontSize: 14, fontWeight: "700" },
+  floorLabel: { color: "#94A3B8", fontSize: 11, marginTop: 2 },
+  priceText: { color: GOLD, fontSize: 16, fontWeight: "800" },
+  perNight: { color: "#64748B", fontSize: 10 },
+  statusRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 12 },
+  badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  badgeText: { fontSize: 10, fontWeight: "700" },
+  amenitiesRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 6, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#334155" },
+  amenityChip: { backgroundColor: NAVY, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  amenityText: { color: "#CBD5E1", fontSize: 10, textTransform: "capitalize" },
+  tapHint: { color: GOLD, fontSize: 10, fontWeight: "600", marginLeft: "auto" },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "center", padding: 20 },
+  modalBox: { backgroundColor: NAVY_LIGHT, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: "#334155" },
+  modalTitle: { color: "#F1F5F9", fontSize: 17, fontWeight: "800" },
+  modalSub: { color: "#94A3B8", fontSize: 12, marginTop: 2 },
+  actionRowBtn: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: NAVY, padding: 14, borderRadius: 12 },
+  actionRowText: { color: "#F1F5F9", fontSize: 13, fontWeight: "600" },
+  closeBtn: { marginTop: 16, backgroundColor: "#334155", padding: 12, borderRadius: 12, alignItems: "center" },
+  closeBtnText: { color: "#F1F5F9", fontWeight: "700", fontSize: 13 },
+  saveBtn: { marginTop: 16, backgroundColor: GOLD, padding: 12, borderRadius: 12, alignItems: "center" },
+  saveBtnText: { color: NAVY, fontWeight: "800", fontSize: 13 },
+  input: { backgroundColor: NAVY, color: "#F1F5F9", borderRadius: 10, padding: 12, marginTop: 10, fontSize: 13, borderWidth: 1, borderColor: "#334155" },
 });

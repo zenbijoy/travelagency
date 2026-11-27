@@ -13,19 +13,21 @@ import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { callService } from "../services/callService";
 import { CallSignal, callsRepository } from "../services/repositories/calls";
-import { DEMO_USER_ID } from "../services/repositories/friends";
+import { useAuthStore } from "../store/authStore";
 
 
 export function IncomingCallBanner() {
+  const currentUserId = useAuthStore((s) => s.user?.id);
   const [incomingCall, setIncomingCall] = useState<CallSignal | null>(null);
   const slideAnim = useRef(new Animated.Value(-150)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    if (!currentUserId) return;
     const unsubscribe = callService.subscribeToSignals((signal) => {
       // Incoming call for current user
-      if (signal.type === "call_request" && signal.receiverId === DEMO_USER_ID) {
+      if (signal.type === "call_request" && signal.receiverId === currentUserId) {
         showCallBanner(signal);
       } else if (
         (signal.type === "call_end" || signal.type === "call_reject") &&
@@ -40,7 +42,7 @@ export function IncomingCallBanner() {
       callService.stopRingingPattern();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [incomingCall?.callId]);
+  }, [currentUserId, incomingCall?.callId]);
 
   const showCallBanner = (signal: CallSignal) => {
     setIncomingCall(signal);
@@ -87,6 +89,8 @@ export function IncomingCallBanner() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     callService.stopRingingPattern();
 
+    const receiverId = currentUserId || "";
+
     // Send accept signal
     callService.sendSignal({
       type: "call_accept",
@@ -94,7 +98,7 @@ export function IncomingCallBanner() {
       callerId: incomingCall.callerId,
       callerName: incomingCall.callerName,
       callerAvatar: incomingCall.callerAvatar,
-      receiverId: DEMO_USER_ID,
+      receiverId,
       callType: incomingCall.callType,
     });
 
@@ -120,6 +124,8 @@ export function IncomingCallBanner() {
     if (!incomingCall) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
+    const receiverId = currentUserId || "";
+
     // Send reject signal
     callService.sendSignal({
       type: "call_reject",
@@ -127,18 +133,20 @@ export function IncomingCallBanner() {
       callerId: incomingCall.callerId,
       callerName: incomingCall.callerName,
       callerAvatar: incomingCall.callerAvatar,
-      receiverId: DEMO_USER_ID,
+      receiverId,
       callType: incomingCall.callType,
     });
 
     // Record missed/rejected call
-    callsRepository.createCallLog(
-      incomingCall.callerId,
-      DEMO_USER_ID,
-      incomingCall.callType,
-      isTimeout ? "missed" : "rejected",
-      0
-    );
+    if (receiverId) {
+      callsRepository.createCallLog(
+        incomingCall.callerId,
+        receiverId,
+        incomingCall.callType,
+        isTimeout ? "missed" : "rejected",
+        0
+      );
+    }
 
     dismissCallBanner();
   };

@@ -27,13 +27,12 @@ export interface FriendRequest {
   receiver?: FriendProfile;
 }
 
-export const DEMO_USER_ID = "5e491c34-50b4-4d2a-8cac-d09fddd7745c"; // Elvis Mittra
-
 export const friendsRepository = {
   /**
    * Get all accepted friends for a user
    */
-  async getFriends(userId: string = DEMO_USER_ID): Promise<FriendProfile[]> {
+  async getFriends(userId: string): Promise<FriendProfile[]> {
+    if (!userId) throw new Error("Authenticated user is required");
     try {
       const { data, error } = await supabase
         .from("friend_requests")
@@ -63,7 +62,7 @@ export const friendsRepository = {
   /**
    * Get incoming and outgoing pending friend requests
    */
-  async getFriendRequests(userId: string = DEMO_USER_ID): Promise<{
+  async getFriendRequests(userId: string): Promise<{
     incoming: FriendRequest[];
     outgoing: FriendRequest[];
   }> {
@@ -96,7 +95,8 @@ export const friendsRepository = {
   /**
    * Get suggested friends (community profiles not yet friends or pending)
    */
-  async getSuggestedFriends(userId: string = DEMO_USER_ID): Promise<FriendProfile[]> {
+  async getSuggestedFriends(userId: string): Promise<FriendProfile[]> {
+    if (!userId) throw new Error("Authenticated user is required");
     try {
       // 1. Get all requests involving this user
       const { data: requests } = await supabase

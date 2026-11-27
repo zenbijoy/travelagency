@@ -17,16 +17,19 @@ import {
   Dimensions,
   RefreshControl,
   Animated,
+  Platform,
+  Share,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Svg, { Path, Circle } from "react-native-svg";
 import { reportService, adminService } from "@/services/adminService";
+import { supabase } from "@/utils/supabase";
 import { FinancialReport, AdminUser } from "@/types/admin";
+import { showLocalizedAlert } from "../../utils/localizedAlert";
+import { exportCsvOrTextFile } from "../../utils/webExport";
 
 import { useResponsive } from "../../hooks/useResponsive";
-
-const { width } = Dimensions.get("window");
 
 /**
  * Report Card Component
@@ -90,15 +93,29 @@ const SimpleChart: React.FC<{
   title: string;
   data: { label: string; value: number }[];
 }> = ({ title, data }) => {
-  const chartWidth = width - 40;
+  const { width, isDesktop } = useResponsive();
+  const [measuredWidth, setMeasuredWidth] = useState<number>(0);
+  const chartWidth = measuredWidth > 0 ? measuredWidth : Math.max(280, (isDesktop ? width - 320 : width) - 64);
   const chartHeight = 200;
   const padding = 20;
-  const graphWidth = chartWidth - 2 * padding;
+  const graphWidth = Math.max(120, chartWidth - 2 * padding);
   const graphHeight = chartHeight - 2 * padding;
-  const maxValue = Math.max(...data.map((d) => d.value));
+
+  if (!data || data.length === 0) {
+    return (
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>{title}</Text>
+        <Text style={{ color: "#64748b", fontSize: 13, paddingVertical: 32, textAlign: "center" }}>
+          No report periods recorded yet.
+        </Text>
+      </View>
+    );
+  }
+
+  const maxValue = Math.max(...data.map((d) => d.value), 1);
 
   const points = data.map((d, i) => ({
-    x: padding + (i / (data.length - 1)) * graphWidth,
+    x: padding + (data.length === 1 ? graphWidth / 2 : (i / (data.length - 1)) * graphWidth),
     y: chartHeight - padding - (d.value / maxValue) * graphHeight,
     label: d.label,
   }));
@@ -113,6 +130,10 @@ const SimpleChart: React.FC<{
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
       style={styles.chartContainer}
+      onLayout={(e) => {
+        const w = Math.floor(e.nativeEvent.layout.width - 32);
+        if (w > 120 && Math.abs(w - measuredWidth) > 4) setMeasuredWidth(w);
+      }}
     >
       <Text style={styles.chartTitle}>{title}</Text>
       <Svg width={chartWidth} height={chartHeight}>
@@ -176,7 +197,9 @@ const SimpleChart: React.FC<{
 const FinancialReportCard: React.FC<{
   report: FinancialReport;
   onPress: (report: FinancialReport) => void;
-}> = ({ report, onPress }) => {
+  onDownload?: (report: FinancialReport) => void;
+  onShare?: (report: FinancialReport) => void;
+}> = ({ report, onPress, onDownload, onShare }) => {
   return (
     <TouchableOpacity onPress={() => onPress(report)}>
       <LinearGradient
@@ -193,7 +216,7 @@ const FinancialReportCard: React.FC<{
                 month: "long",
               })}
             </Text>
-            <Text style={styles.reportSubtitle}>Financial Report</Text>
+            <Text style={styles.reportSubtitle}>Financial Statement</Text>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: "#d1fae5" }]}>
             <Text style={[styles.statusText, { color: "#059669" }]}>
@@ -207,37 +230,34 @@ const FinancialReportCard: React.FC<{
             <View style={styles.metricItem}>
               <Text style={styles.metricLabel}>Revenue</Text>
               <Text style={styles.metricValue}>
-                ${report.total_revenue?.toFixed(2)}
+                ৳ {Number(report.total_revenue || 0).toLocaleString()}
               </Text>
             </View>
             <View style={styles.metricItem}>
               <Text style={styles.metricLabel}>Expenses</Text>
               <Text style={[styles.metricValue, { color: "#ef4444" }]}>
-                ${report.total_expenses?.toFixed(2)}
+                ৳ {Number(report.total_expenses || 0).toLocaleString()}
               </Text>
             </View>
             <View style={styles.metricItem}>
-              <Text style={styles.metricLabel}>Profit</Text>
+              <Text style={styles.metricLabel}>Net Margin</Text>
               <Text style={[styles.metricValue, { color: "#10b981" }]}>
-                $
-                {(
-                  (report.total_revenue || 0) - (report.total_expenses || 0)
-                ).toFixed(2)}
+                ৳ {((report.total_revenue || 0) - (report.total_expenses || 0)).toLocaleString()}
               </Text>
             </View>
           </View>
         </View>
 
         <View style={styles.reportFooter}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => onPress(report)}>
             <Ionicons name="eye-outline" size={14} color="#667eea" />
-            <Text style={styles.actionButtonText}>View</Text>
+            <Text style={styles.actionButtonText}>View Details</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => onDownload?.(report)}>
             <MaterialCommunityIcons name="download" size={14} color="#667eea" />
-            <Text style={styles.actionButtonText}>Download</Text>
+            <Text style={styles.actionButtonText}>Export CSV</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => onShare?.(report)}>
             <MaterialCommunityIcons
               name="share-variant"
               size={14}
@@ -264,6 +284,12 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
     null,
   );
 
+  const [liveKpis, setLiveKpis] = useState({
+    totalBookings: 0,
+    activeUsers: 0,
+    conversionRate: 0,
+  });
+
   useEffect(() => {
     loadReports();
   }, []);
@@ -273,8 +299,27 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
     try {
       const endDate = new Date().toISOString();
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
-      const allReports = await reportService.getFinancialReports("revenue", startDate, endDate);
+      const [allReports, bookingsRes, usersRes] = await Promise.all([
+        reportService.getFinancialReports("revenue", startDate, endDate),
+        supabase.from("bookings").select("status", { count: "exact" }),
+        supabase.from("community_profiles").select("*", { count: "exact", head: true }),
+      ]);
       setReports(allReports);
+
+      const bookingRows = bookingsRes.data || [];
+      const totalBookings = bookingsRes.count ?? bookingRows.length;
+      const completedCount = bookingRows.filter(
+        (b: any) => b.status === "completed" || b.status === "confirmed"
+      ).length;
+      const activeUsers = usersRes.count ?? 0;
+      const conversionRate =
+        totalBookings > 0 ? Math.round((completedCount / totalBookings) * 1000) / 10 : 0;
+
+      setLiveKpis({
+        totalBookings,
+        activeUsers,
+        conversionRate,
+      });
     } catch (error) {
       console.error("Error loading reports:", error);
     } finally {
@@ -292,9 +337,73 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
   const revenueData = reports.length > 0
     ? reports.slice(0, 6).map((r) => ({
         label: r.report_period_start ? new Date(r.report_period_start).toLocaleDateString("en-US", { month: "short" }) : "Period",
-        value: Math.round(Number(r.total_revenue) / 1000) || 10,
+        value: Math.round(Number(r.total_revenue) / 1000) || 0,
       }))
     : [];
+
+  // Derived aggregated metrics in BDT
+  const totalRevenueBDT = reports.reduce(
+    (sum, r) => sum + (Number(r.total_revenue) || 0),
+    0
+  );
+  const totalExpensesBDT = reports.reduce(
+    (sum, r) => sum + (Number(r.total_expenses) || 0),
+    0
+  );
+
+  const handleExportCsv = async () => {
+    if (reports.length === 0) {
+      showLocalizedAlert("Notice", "No reports available to export.");
+      return;
+    }
+    const headers = "Report ID,Report Date,Period Start,Period End,Type,Revenue (BDT),Expenses (BDT),Profit (BDT)\n";
+    const rows = reports
+      .map(
+        (r) =>
+          `"${r.id}","${r.report_date || ""}","${r.report_period_start || ""}","${r.report_period_end || ""}","${r.report_type}",${r.total_revenue || 0},${r.total_expenses || 0},${(r.total_revenue || 0) - (r.total_expenses || 0)}`
+      )
+      .join("\n");
+    const csvContent = headers + rows;
+
+    try {
+      await exportCsvOrTextFile({
+        filename: `shopnojatra_financial_reports_${new Date().toISOString().slice(0, 10)}.csv`,
+        content: csvContent,
+        title: "ShopnoJatra Financial Report CSV",
+      });
+      showLocalizedAlert("Export Successful", "Financial CSV exported successfully.");
+    } catch (err: any) {
+      showLocalizedAlert("Export Error", err?.message || `Failed to export ${reports.length} records.`);
+    }
+  };
+
+  const handleExportPdf = () => {
+    showLocalizedAlert(
+      "Financial PDF Export",
+      `ShopnoJatra Consolidated Statement\nPeriod: Last 30 Days\nTotal Revenue: ৳ ${totalRevenueBDT.toLocaleString()}\nTotal Operating Expenses: ৳ ${totalExpensesBDT.toLocaleString()}\nNet Operating Margin: ৳ ${(totalRevenueBDT - totalExpensesBDT).toLocaleString()}\n\nStatement formatted for executive audit print.`
+    );
+  };
+
+  const handleDownloadSingleReport = async (report: FinancialReport) => {
+    const content = `Report ID: ${report.id}\nType: ${report.report_type}\nRevenue: ৳ ${report.total_revenue}\nExpenses: ৳ ${report.total_expenses}\nNet: ৳ ${(report.total_revenue || 0) - (report.total_expenses || 0)}`;
+    try {
+      await exportCsvOrTextFile({
+        filename: `report_${report.id.slice(0, 8)}.txt`,
+        content,
+        mimeType: "text/plain;charset=utf-8;",
+        title: `Report ${report.id}`,
+      });
+    } catch (err: any) {
+      showLocalizedAlert("Export Error", err?.message || "Failed to download report.");
+    }
+  };
+
+  const handleShareSingleReport = (report: FinancialReport) => {
+    Share.share({
+      message: `ShopnoJatra Financial Statement (${report.report_type.toUpperCase()}):\nRevenue: ৳ ${Number(report.total_revenue || 0).toLocaleString()}\nExpenses: ৳ ${Number(report.total_expenses || 0).toLocaleString()}\nProfit: ৳ ${((report.total_revenue || 0) - (report.total_expenses || 0)).toLocaleString()}`,
+      title: "Share Financial Report",
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -306,7 +415,7 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
       >
         <Text style={styles.headerTitle}>Reports & Analytics</Text>
         <Text style={styles.headerSubtitle}>
-          Financial metrics and business insights
+          Financial metrics, revenue audits and business insights
         </Text>
       </LinearGradient>
 
@@ -324,20 +433,17 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
         >
           {/* Key Metrics */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Key Metrics</Text>
+            <Text style={styles.sectionTitle}>Key Financial Metrics</Text>
             <View style={styles.metricsGrid}>
               <ReportCard
-                title="Total Revenue"
-                value="$125,450"
-                unit="USD"
-                trend={12.5}
+                title="Gross Revenue"
+                value={`৳ ${totalRevenueBDT.toLocaleString()}`}
                 icon="cash"
                 gradient={["#10b981", "#059669"]}
               />
               <ReportCard
                 title="Total Bookings"
-                value="1,245"
-                trend={8.3}
+                value={liveKpis.totalBookings.toLocaleString()}
                 icon="calendar-check"
                 gradient={["#06b6d4", "#0891b2"]}
               />
@@ -346,16 +452,14 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
             <View style={styles.metricsGrid}>
               <ReportCard
                 title="Active Users"
-                value="8,342"
-                trend={-2.1}
+                value={liveKpis.activeUsers.toLocaleString()}
                 icon="users"
                 gradient={["#667eea", "#764ba2"]}
               />
               <ReportCard
                 title="Conversion Rate"
-                value="3.2"
+                value={liveKpis.conversionRate.toFixed(1)}
                 unit="%"
-                trend={5.7}
                 icon="trending-up"
                 gradient={["#f59e0b", "#f97316"]}
               />
@@ -364,8 +468,8 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
 
           {/* Revenue Chart */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Revenue Trend</Text>
-            <SimpleChart title="Monthly Revenue" data={revenueData} />
+            <Text style={styles.sectionTitle}>Revenue Trend (in k BDT)</Text>
+            <SimpleChart title="Monthly Revenue Velocity" data={revenueData} />
           </View>
 
           {/* Reports List */}
@@ -378,6 +482,8 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
                     key={report.id}
                     report={report}
                     onPress={(r) => setSelectedReport(r)}
+                    onDownload={handleDownloadSingleReport}
+                    onShare={handleShareSingleReport}
                   />
                 ))}
               </View>
@@ -399,7 +505,7 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Export Reports</Text>
             <View style={styles.exportGrid}>
-              <TouchableOpacity style={styles.exportButton}>
+              <TouchableOpacity style={styles.exportButton} onPress={handleExportCsv}>
                 <LinearGradient
                   colors={["#667eea", "#764ba2"]}
                   start={{ x: 0, y: 0 }}
@@ -411,11 +517,11 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
                     size={24}
                     color="#fff"
                   />
-                  <Text style={styles.exportButtonText}>Export to Excel</Text>
+                  <Text style={styles.exportButtonText}>Export CSV / Excel</Text>
                 </LinearGradient>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.exportButton}>
+              <TouchableOpacity style={styles.exportButton} onPress={handleExportPdf}>
                 <LinearGradient
                   colors={["#ef4444", "#dc2626"]}
                   start={{ x: 0, y: 0 }}
@@ -436,6 +542,72 @@ export const ReportsScreen: React.FC<{ admin: AdminUser | null }> = ({
           <View style={{ height: 30 }} />
         </ScrollView>
       )}
+
+      {/* Report Details Modal */}
+      <Modal
+        visible={!!selectedReport}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSelectedReport(null)}
+      >
+        <View style={modalStyles.backdrop}>
+          <View style={modalStyles.content}>
+            <View style={modalStyles.header}>
+              <Text style={modalStyles.title}>Financial Report Details</Text>
+              <TouchableOpacity onPress={() => setSelectedReport(null)}>
+                <Ionicons name="close" size={24} color="#374151" />
+              </TouchableOpacity>
+            </View>
+
+            {selectedReport && (
+              <ScrollView style={{ maxHeight: 360 }}>
+                <View style={modalStyles.row}>
+                  <Text style={modalStyles.label}>Report ID</Text>
+                  <Text style={modalStyles.value}>{selectedReport.id}</Text>
+                </View>
+                <View style={modalStyles.row}>
+                  <Text style={modalStyles.label}>Report Type</Text>
+                  <Text style={modalStyles.value}>{selectedReport.report_type.toUpperCase()}</Text>
+                </View>
+                <View style={modalStyles.row}>
+                  <Text style={modalStyles.label}>Period Start</Text>
+                  <Text style={modalStyles.value}>{selectedReport.report_period_start || "N/A"}</Text>
+                </View>
+                <View style={modalStyles.row}>
+                  <Text style={modalStyles.label}>Period End</Text>
+                  <Text style={modalStyles.value}>{selectedReport.report_period_end || "N/A"}</Text>
+                </View>
+                <View style={modalStyles.divider} />
+                <View style={modalStyles.row}>
+                  <Text style={modalStyles.label}>Gross Revenue</Text>
+                  <Text style={[modalStyles.value, { color: "#059669", fontWeight: "700" }]}>
+                    ৳ {Number(selectedReport.total_revenue || 0).toLocaleString()}
+                  </Text>
+                </View>
+                <View style={modalStyles.row}>
+                  <Text style={modalStyles.label}>Operating Expenses</Text>
+                  <Text style={[modalStyles.value, { color: "#dc2626", fontWeight: "700" }]}>
+                    ৳ {Number(selectedReport.total_expenses || 0).toLocaleString()}
+                  </Text>
+                </View>
+                <View style={modalStyles.row}>
+                  <Text style={modalStyles.label}>Net Operating Margin</Text>
+                  <Text style={[modalStyles.value, { color: "#2563eb", fontWeight: "700" }]}>
+                    ৳ {((selectedReport.total_revenue || 0) - (selectedReport.total_expenses || 0)).toLocaleString()}
+                  </Text>
+                </View>
+              </ScrollView>
+            )}
+
+            <TouchableOpacity
+              style={modalStyles.closeButton}
+              onPress={() => setSelectedReport(null)}
+            >
+              <Text style={modalStyles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -649,6 +821,65 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#9ca3af",
     marginTop: 12,
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  content: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    maxWidth: 520,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+  },
+  label: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  value: {
+    fontSize: 14,
+    color: "#111827",
+    fontWeight: "500",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#e5e7eb",
+    marginVertical: 12,
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: "#3b82f6",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "#ffffff",
+    fontWeight: "600",
+    fontSize: 14,
   },
 });
 

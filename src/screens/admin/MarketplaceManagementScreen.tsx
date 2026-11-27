@@ -22,6 +22,7 @@ import axios from "axios";
 
 import { ProviderProfile } from "../../types/marketplace";
 import { CURATED_PROVIDERS } from "../../services/marketplaceService";
+import { apiClient } from "../../services/apiClient";
 
 type MarketplaceSubTab = "pending" | "providers" | "active_trips" | "emergency_events";
 
@@ -36,41 +37,14 @@ interface PendingApplicant {
   applied_at: string;
 }
 
-const SAMPLE_PENDING: PendingApplicant[] = [
-  {
-    id: "app-001",
-    full_name: "Kazi Shafiqul Islam",
-    phone: "+8801712998877",
-    category: "boatman",
-    destination: "Sundarbans",
-    experience_years: 12,
-    documents: [
-      { type: "NID Card (Smart)", number: "19881234567890", verified: true },
-      { type: "BIWTA Boat Fitness Cert", number: "BIWTA-KHU-8821", verified: false },
-      { type: "Police Clearance Cert", number: "PCC-2026-9901", verified: true },
-    ],
-    applied_at: "2 hours ago",
-  },
-  {
-    id: "app-002",
-    full_name: "Ching Hla Mong Marma",
-    phone: "+8801815667788",
-    category: "trekking_guide",
-    destination: "Bandarban",
-    experience_years: 7,
-    documents: [
-      { type: "NID Card (Smart)", number: "19945566778899", verified: true },
-      { type: "Tourist Police Guide License", number: "TP-BAN-4412", verified: false },
-    ],
-    applied_at: "Yesterday",
-  },
-];
+const SAMPLE_PENDING: PendingApplicant[] = [];
 
 export const MarketplaceManagementScreen: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<MarketplaceSubTab>("pending");
   const [pendingList, setPendingList] = useState<PendingApplicant[]>(SAMPLE_PENDING);
   const [approvedList, setApprovedList] = useState<ProviderProfile[]>(CURATED_PROVIDERS);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loadingPending, setLoadingPending] = useState(false);
 
   // Modal State for Reviewing an Application
   const [selectedApplicant, setSelectedApplicant] = useState<PendingApplicant | null>(null);
@@ -78,6 +52,27 @@ export const MarketplaceManagementScreen: React.FC = () => {
   const [adminNotes, setAdminNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const loadPendingProviders = useCallback(async () => {
+    setLoadingPending(true);
+    try {
+      const res = await apiClient.get<{ data?: PendingApplicant[] }>(
+        "/marketplace/admin/providers/pending"
+      );
+      if (Array.isArray(res?.data)) {
+        setPendingList(res.data);
+      }
+    } catch (err) {
+      console.warn("Failed to load pending marketplace providers:", err);
+      setPendingList([]);
+    } finally {
+      setLoadingPending(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPendingProviders();
+  }, [loadPendingProviders]);
 
   // Filtered providers
   const filteredApproved = useMemo(() => {
@@ -92,24 +87,36 @@ export const MarketplaceManagementScreen: React.FC = () => {
   }, [approvedList, searchQuery]);
 
   // Handle Approve
-  const handleApprove = useCallback(() => {
+  const handleApprove = useCallback(async () => {
     if (!selectedApplicant) return;
     setIsProcessing(true);
 
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      await apiClient.post(
+        `/marketplace/admin/providers/${selectedApplicant.id}/approve`,
+        { notes: adminNotes }
+      );
       setPendingList((prev) => prev.filter((a) => a.id !== selectedApplicant.id));
       setReviewModalVisible(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch (_) {}
       Alert.alert(
-        "Application Approved! ✅",
+        "Application Approved!",
         `${selectedApplicant.full_name} is now a Verified ${selectedApplicant.category.replace("_", " ")}.`
       );
-    }, 700);
-  }, [selectedApplicant]);
+    } catch (err: any) {
+      Alert.alert(
+        "Approval Failed",
+        err?.message || "Unable to approve provider on backend. No local changes were saved."
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [selectedApplicant, adminNotes]);
 
   // Handle Reject
-  const handleReject = useCallback(() => {
+  const handleReject = useCallback(async () => {
     if (!selectedApplicant) return;
     if (!rejectionReason.trim()) {
       Alert.alert("Reason Required", "Please state the reason for rejection (e.g. invalid license, expired NID).");
@@ -117,13 +124,25 @@ export const MarketplaceManagementScreen: React.FC = () => {
     }
 
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      await apiClient.post(
+        `/marketplace/admin/providers/${selectedApplicant.id}/reject`,
+        { reason: rejectionReason }
+      );
       setPendingList((prev) => prev.filter((a) => a.id !== selectedApplicant.id));
       setReviewModalVisible(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      } catch (_) {}
       Alert.alert("Application Rejected", `Rejection reason recorded for ${selectedApplicant.full_name}.`);
-    }, 700);
+    } catch (err: any) {
+      Alert.alert(
+        "Rejection Failed",
+        err?.message || "Unable to reject provider on backend."
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   }, [selectedApplicant, rejectionReason]);
 
   return (
@@ -183,7 +202,24 @@ export const MarketplaceManagementScreen: React.FC = () => {
         {/* SUB-TAB 1: PENDING VERIFICATIONS */}
         {activeSubTab === "pending" && (
           <View>
-            {pendingList.length === 0 ? (
+            <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 10 }}>
+              <TouchableOpacity
+                style={[styles.docChip, { paddingHorizontal: 12, paddingVertical: 6 }]}
+                onPress={loadPendingProviders}
+                disabled={loadingPending}
+              >
+                <Ionicons name="refresh" size={14} color="#0055F2" />
+                <Text style={[styles.docChipText, { color: "#0055F2" }]}>
+                  {loadingPending ? "Refreshing..." : "Refresh Queue"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {loadingPending ? (
+              <View style={styles.emptyBox}>
+                <ActivityIndicator size="large" color="#0055F2" />
+                <Text style={styles.emptySub}>Loading pending provider verifications...</Text>
+              </View>
+            ) : pendingList.length === 0 ? (
               <View style={styles.emptyBox}>
                 <Ionicons name="checkmark-done-circle-outline" size={48} color="#10B981" />
                 <Text style={styles.emptyTitle}>Queue Cleared!</Text>

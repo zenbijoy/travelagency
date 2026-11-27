@@ -238,6 +238,12 @@ async def test_ride_request_radar_claim_and_cancel(client: AsyncClient, setup_ri
     admin_headers = {"Authorization": f"Bearer {setup_ride_actors['admin_token']}"}
 
     await _onboard_and_go_online(client, rider_headers, admin_headers, plate_number="DHK-LA-11-9001")
+    res_mismatched_mode = await client.patch(
+        "/api/v1/rides/riders/profile/me",
+        json={"active_vehicle_mode": "sedan"},
+        headers=rider_headers,
+    )
+    assert res_mismatched_mode.status_code == 400
 
     req_payload = {
         "vehicle_mode": "bike",

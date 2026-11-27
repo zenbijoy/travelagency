@@ -246,6 +246,10 @@ export const busAndLaunchService = {
   async bookTransportTicket(
     booking: Omit<TransportBooking, "id" | "status" | "created_at">
   ): Promise<TransportBooking> {
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData?.user?.id;
+    const refCode = `SJ-${(booking.transport_type || "BUS").toUpperCase().slice(0, 3)}-${Date.now().toString(36).toUpperCase()}`;
+
     const newBooking: TransportBooking = {
       ...booking,
       id: `ticket-${booking.transport_type}-${Date.now()}`,
@@ -253,17 +257,25 @@ export const busAndLaunchService = {
       created_at: new Date().toISOString(),
     };
 
-    try {
-      await supabase.from("bookings").insert([
-        {
-          booking_type: booking.transport_type,
-          total_price: booking.total_fare,
-          status: "confirmed",
-          metadata: newBooking,
-        },
-      ]);
-    } catch (syncErr) {
-      console.warn("[busAndLaunchService] Remote ticket sync failed, saving locally:", syncErr);
+    if (userId) {
+      try {
+        await supabase.from("bookings").insert([
+          {
+            user_id: userId,
+            booking_reference: refCode,
+            product_type: booking.transport_type === "launch" ? "launch" : "bus",
+            booking_type: booking.transport_type,
+            destination_city: booking.to || "Dhaka",
+            total_price: booking.total_fare,
+            final_price: booking.total_fare,
+            currency: "BDT",
+            status: "confirmed",
+            metadata: newBooking,
+          },
+        ]);
+      } catch (syncErr) {
+        console.warn("[busAndLaunchService] Remote ticket sync error:", syncErr);
+      }
     }
 
     const raw = await AsyncStorage.getItem(TRANSPORT_BOOKINGS_KEY);
@@ -279,6 +291,27 @@ export const busAndLaunchService = {
    */
   async getMyTickets(): Promise<TransportBooking[]> {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+
+      if (userId) {
+        const { data: remoteRows, error } = await supabase
+          .from("bookings")
+          .select("*")
+          .eq("user_id", userId)
+          .in("product_type", ["bus", "launch"])
+          .order("created_at", { ascending: false });
+
+        if (!error && remoteRows && remoteRows.length > 0) {
+          return remoteRows.map((r: any) => ({
+            ...(r.metadata || {}),
+            id: r.id || r.metadata?.id,
+            status: r.status || "confirmed",
+            created_at: r.created_at,
+          }));
+        }
+      }
+
       const raw = await AsyncStorage.getItem(TRANSPORT_BOOKINGS_KEY);
       return raw ? JSON.parse(raw) : [];
     } catch {

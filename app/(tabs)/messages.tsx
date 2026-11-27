@@ -24,11 +24,12 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 
+import { useAuth } from "../../src/hooks/useAuth";
+import { useTheme } from "../../src/context/ThemeContext";
 import {
   friendsRepository,
   FriendProfile,
   FriendRequest,
-  DEMO_USER_ID,
 } from "../../src/services/repositories/friends";
 import {
   messengerRepository,
@@ -41,6 +42,14 @@ import {
 import { callService } from "../../src/services/callService";
 import { DirectChatModal } from "../../src/components/DirectChatModal";
 import { supabase } from "../../src/utils/supabase";
+import { NotificationBellDropdown } from "../../src/components/notifications/NotificationBellDropdown";
+import { WhySeeingThisModal } from "../../src/components/notifications/WhySeeingThisModal";
+import {
+  AppNotification,
+  NotificationCategoryFilter,
+  useNotificationStore,
+} from "../../src/store/notificationStore";
+import { ROUTES } from "../../src/constants/routes";
 
 const PRIMARY = "#E5A93C";
 const DARK_BLUE = "#121622";
@@ -58,11 +67,21 @@ export interface LiveNotification {
 }
 
 export default function MessagesTab() {
-  const currentUserId = DEMO_USER_ID;
+  const { user } = useAuth();
+  const { colors, isDark } = useTheme();
+  const currentUserId = user?.id || "";
 
   // Tabs: "chats" | "friends" | "calls" | "notifications"
   const [activeTab, setActiveTab] = useState<"chats" | "friends" | "calls" | "notifications">("chats");
-  const [notifCategory, setNotifCategory] = useState<"all" | "booking" | "promo" | "community">("all");
+  const [notifCategory, setNotifCategory] = useState<NotificationCategoryFilter>("all");
+  const [whyTarget, setWhyTarget] = useState<AppNotification | null>(null);
+
+  const storeNotifications = useNotificationStore((s) => s.notifications);
+  const storeUnreadCount = useNotificationStore((s) => s.unreadCount);
+  const fetchStoreNotifications = useNotificationStore((s) => s.fetchNotifications);
+  const markStoreAsRead = useNotificationStore((s) => s.markAsRead);
+  const markAllStoreAsRead = useNotificationStore((s) => s.markAllAsRead);
+  const recordStoreInteraction = useNotificationStore((s) => s.recordInteraction);
 
   // Messenger State
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
@@ -86,6 +105,19 @@ export default function MessagesTab() {
 
   // Load All Messenger & Social Data
   const loadAllData = useCallback(async () => {
+    if (!currentUserId) {
+      setConversations([]);
+      setFriends([]);
+      setIncomingRequests([]);
+      setOutgoingRequests([]);
+      setSuggestedFriends([]);
+      setCallLogs([]);
+      setNotifications([]);
+      setLoading(false);
+      setIsRefreshing(false);
+      return;
+    }
+
     try {
       const [convos, friendsList, reqs, suggestions, logs] = await Promise.all([
         messengerRepository.getConversations(currentUserId),
@@ -93,6 +125,7 @@ export default function MessagesTab() {
         friendsRepository.getFriendRequests(currentUserId),
         friendsRepository.getSuggestedFriends(currentUserId),
         callsRepository.getCallLogs(currentUserId),
+        fetchStoreNotifications(currentUserId),
       ]);
 
       setConversations(convos);
@@ -102,10 +135,11 @@ export default function MessagesTab() {
       setSuggestedFriends(suggestions);
       setCallLogs(logs);
 
-      // Load live notifications from real bookings
+      // Load live notifications securely scoped to the current user
       const { data: userBookings } = await supabase
         .from("bookings")
         .select("*, hotel:hotels(*), flight:flights(*)")
+        .eq("user_id", currentUserId)
         .order("created_at", { ascending: false })
         .limit(5);
 
@@ -162,7 +196,7 @@ export default function MessagesTab() {
         time: "Today",
         unread: true,
         category: "community",
-        route: "/screens/community",
+        route: "/(tabs)/community",
       });
 
       setNotifications(dynamicNotifs);
@@ -273,30 +307,55 @@ export default function MessagesTab() {
   });
 
   return (
-    <SafeAreaView style={styles.shell} edges={["top", "bottom"]}>
+    <SafeAreaView style={[styles.shell, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={{ flex: 1 }}>
       {/* Top Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Messenger & Social</Text>
-          <Text style={styles.headerSubtitle}>Direct chats, friends & calls</Text>
+      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Messenger & Social</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+            Direct chats, friends & personalized alerts
+          </Text>
         </View>
 
-        <Pressable
-          style={styles.communityBtn}
-          onPress={() => router.push("/(tabs)/community" as any)}
-        >
-          <Ionicons name="people" size={16} color={PRIMARY} />
-          <Text style={styles.communityBtnText}>Feed</Text>
-        </Pressable>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <NotificationBellDropdown
+            onOpenInbox={() => router.push(ROUTES.SCREENS.NOTIFICATIONS as any)}
+            onOpenPreferences={() =>
+              router.push(ROUTES.SCREENS.TRAVEL_PREFERENCES as any)
+            }
+          />
+          <Pressable
+            style={[styles.communityBtn, isDark && { backgroundColor: "#1E293B" }]}
+            onPress={() =>
+              router.push(ROUTES.SCREENS.TRAVEL_PREFERENCES as any)
+            }
+            accessibilityLabel="Travel Preferences"
+          >
+            <Ionicons name="options-outline" size={16} color={PRIMARY} />
+          </Pressable>
+          <Pressable
+            style={[styles.communityBtn, isDark && { backgroundColor: "#1E293B" }]}
+            onPress={() => router.push("/(tabs)/community" as any)}
+          >
+            <Ionicons name="people" size={16} color={PRIMARY} />
+            <Text style={styles.communityBtnText}>Feed</Text>
+          </Pressable>
+        </View>
       </View>
 
       {/* Main Tab Segment Bar */}
-      <View style={styles.tabSegmentsRow}>
+      <View style={[styles.tabSegmentsRow, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <Pressable
-          style={[styles.segmentBtn, activeTab === "chats" && styles.segmentBtnActive]}
+          style={[
+            styles.segmentBtn,
+            activeTab === "chats" && [
+              styles.segmentBtnActive,
+              isDark && { backgroundColor: "rgba(229, 169, 60, 0.16)" },
+            ],
+          ]}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setActiveTab("chats");
@@ -305,17 +364,27 @@ export default function MessagesTab() {
           <Ionicons
             name="chatbubbles"
             size={16}
-            color={activeTab === "chats" ? PRIMARY : "#64748B"}
+            color={activeTab === "chats" ? PRIMARY : colors.textSecondary}
           />
           <Text
-            style={[styles.segmentText, activeTab === "chats" && styles.segmentTextActive]}
+            style={[
+              styles.segmentText,
+              { color: colors.textSecondary },
+              activeTab === "chats" && styles.segmentTextActive,
+            ]}
           >
             Chats
           </Text>
         </Pressable>
 
         <Pressable
-          style={[styles.segmentBtn, activeTab === "friends" && styles.segmentBtnActive]}
+          style={[
+            styles.segmentBtn,
+            activeTab === "friends" && [
+              styles.segmentBtnActive,
+              isDark && { backgroundColor: "rgba(229, 169, 60, 0.16)" },
+            ],
+          ]}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setActiveTab("friends");
@@ -324,10 +393,14 @@ export default function MessagesTab() {
           <Ionicons
             name="people"
             size={16}
-            color={activeTab === "friends" ? PRIMARY : "#64748B"}
+            color={activeTab === "friends" ? PRIMARY : colors.textSecondary}
           />
           <Text
-            style={[styles.segmentText, activeTab === "friends" && styles.segmentTextActive]}
+            style={[
+              styles.segmentText,
+              { color: colors.textSecondary },
+              activeTab === "friends" && styles.segmentTextActive,
+            ]}
           >
             Friends
           </Text>
@@ -339,7 +412,13 @@ export default function MessagesTab() {
         </Pressable>
 
         <Pressable
-          style={[styles.segmentBtn, activeTab === "calls" && styles.segmentBtnActive]}
+          style={[
+            styles.segmentBtn,
+            activeTab === "calls" && [
+              styles.segmentBtnActive,
+              isDark && { backgroundColor: "rgba(229, 169, 60, 0.16)" },
+            ],
+          ]}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setActiveTab("calls");
@@ -348,10 +427,14 @@ export default function MessagesTab() {
           <Ionicons
             name="call"
             size={16}
-            color={activeTab === "calls" ? PRIMARY : "#64748B"}
+            color={activeTab === "calls" ? PRIMARY : colors.textSecondary}
           />
           <Text
-            style={[styles.segmentText, activeTab === "calls" && styles.segmentTextActive]}
+            style={[
+              styles.segmentText,
+              { color: colors.textSecondary },
+              activeTab === "calls" && styles.segmentTextActive,
+            ]}
           >
             Calls
           </Text>
@@ -360,7 +443,10 @@ export default function MessagesTab() {
         <Pressable
           style={[
             styles.segmentBtn,
-            activeTab === "notifications" && styles.segmentBtnActive,
+            activeTab === "notifications" && [
+              styles.segmentBtnActive,
+              isDark && { backgroundColor: "rgba(229, 169, 60, 0.16)" },
+            ],
           ]}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -370,11 +456,12 @@ export default function MessagesTab() {
           <Ionicons
             name="notifications"
             size={16}
-            color={activeTab === "notifications" ? PRIMARY : "#64748B"}
+            color={activeTab === "notifications" ? PRIMARY : colors.textSecondary}
           />
           <Text
             style={[
               styles.segmentText,
+              { color: colors.textSecondary },
               activeTab === "notifications" && styles.segmentTextActive,
             ]}
           >
@@ -385,11 +472,45 @@ export default function MessagesTab() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, { paddingBottom: 140 }]}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={[PRIMARY]} />
         }
       >
+        {!currentUserId && activeTab !== "notifications" && (
+          <View
+            style={{
+              backgroundColor: colors.card,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: colors.border,
+              padding: 18,
+              marginBottom: 16,
+              gap: 10,
+            }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.text }}>
+              Sign in for Messenger & Travel Buddies
+            </Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary, lineHeight: 19 }}>
+              Connect with fellow travelers, send direct messages, and make in-app audio/video calls.
+            </Text>
+            <Pressable
+              onPress={() => router.push("/(auth)/login" as any)}
+              style={{
+                backgroundColor: PRIMARY,
+                paddingVertical: 11,
+                borderRadius: 10,
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "#111827", fontWeight: "700", fontSize: 14 }}>
+                Sign In to Continue
+              </Text>
+            </Pressable>
+          </View>
+        )}
+
         {/* =================================================================== */}
         {/* TAB 1: CHATS (MESSENGER DIRECT MESSAGES) */}
         {/* =================================================================== */}
@@ -403,11 +524,24 @@ export default function MessagesTab() {
                 contentContainerStyle={styles.onlineScroll}
               >
                 {/* Self Story / Status Pill */}
-                <View style={styles.onlineItem}>
+                <Pressable
+                  style={styles.onlineItem}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (!currentUserId) {
+                      router.push("/(auth)/login" as any);
+                    } else {
+                      router.push("/(tabs)/community?composer=open" as any);
+                    }
+                  }}
+                >
                   <View style={styles.selfAvatarWrap}>
-                    <AppImage placeholderCategory="avatar"
+                    <AppImage
+                      placeholderCategory="avatar"
                       source={{
-                        uri: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
+                        uri:
+                          user?.user_metadata?.avatar_url ||
+                          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
                       }}
                       style={styles.onlineAvatar}
                     />
@@ -415,10 +549,10 @@ export default function MessagesTab() {
                       <Ionicons name="add" size={12} color="#fff" />
                     </View>
                   </View>
-                  <Text style={styles.onlineName} numberOfLines={1}>
+                  <Text style={[styles.onlineName, { color: colors.text }]} numberOfLines={1}>
                     Your Story
                   </Text>
-                </View>
+                </Pressable>
 
                 {friends.map((friend) => (
                   <Pressable
@@ -737,7 +871,11 @@ export default function MessagesTab() {
                 style={styles.simulateCallBtn}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  callService.triggerTestIncomingCall("video");
+                  if (!currentUserId) {
+                    Alert.alert("Sign in required", "Please sign in before testing calls.");
+                    return;
+                  }
+                  callService.triggerTestIncomingCall("video", currentUserId);
                 }}
               >
                 <Ionicons name="call" size={13} color="#0055F2" />
@@ -819,14 +957,52 @@ export default function MessagesTab() {
         {/* =================================================================== */}
         {activeTab === "notifications" && (
           <View>
-            <Text style={styles.sectionTitle}>Booking & System Alerts</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>
+                Personalized Alerts ({storeUnreadCount} unread)
+              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                {storeUnreadCount > 0 && (
+                  <Pressable
+                    onPress={markAllStoreAsRead}
+                    style={styles.simulateCallBtn}
+                  >
+                    <Text style={styles.simulateCallBtnText}>Mark all read</Text>
+                  </Pressable>
+                )}
+                <Pressable
+                  onPress={() =>
+                    router.push(ROUTES.SCREENS.TRAVEL_PREFERENCES as any)
+                  }
+                  style={styles.communityBtn}
+                >
+                  <Ionicons name="options-outline" size={14} color={PRIMARY} />
+                  <Text style={styles.communityBtnText}>Preferences</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() =>
+                    router.push(ROUTES.SCREENS.NOTIFICATIONS as any)
+                  }
+                  style={styles.communityBtn}
+                >
+                  <Text style={styles.communityBtnText}>Full Inbox</Text>
+                </Pressable>
+              </View>
+            </View>
 
-            {/* Category Filter Pills (Point 4) */}
-            <View style={styles.notifFilterRow}>
+            {/* Category Filter Pills */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.notifFilterRow}
+            >
               {(
                 [
                   { key: "all", label: "সব (All)" },
                   { key: "booking", label: "✈️ বুকিং" },
+                  { key: "flight_alert", label: "🛫 Flight" },
+                  { key: "price_alert", label: "📉 Price" },
+                  { key: "travel_discovery", label: "🧭 Discovery" },
                   { key: "promo", label: "🏷️ অফার" },
                   { key: "community", label: "👥 কমিউনিটি" },
                 ] as const
@@ -852,58 +1028,170 @@ export default function MessagesTab() {
                   </Text>
                 </Pressable>
               ))}
-            </View>
-            {notifications.filter((n) => notifCategory === "all" || n.category === notifCategory).length > 0 ? (
-              <FlatList
-                data={notifications.filter((n) => notifCategory === "all" || n.category === notifCategory)}
-                keyExtractor={(n) => n.id}
-                scrollEnabled={false}
-                initialNumToRender={8}
-                maxToRenderPerBatch={10}
-                windowSize={5}
-                renderItem={({ item: n }) => (
-                <Pressable key={n.id} style={[styles.notifCard, n.unread && styles.notifUnread]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setNotifications((prev) =>
-                      prev.map((item) => (item.id === n.id ? { ...item, unread: false } : item))
-                    );
-                    if (n.route) {
-                      router.push(n.route as any);
-                    } else if (n.category === "booking") {
-                      router.push("/(tabs)/trips" as any);
-                    } else if (n.category === "promo") {
-                      router.push("/screens/rewards" as any);
-                    } else if (n.category === "community") {
-                      router.push("/screens/community" as any);
-                    }
-                  }}
-                >
-                  <View style={[styles.notifIcon, { backgroundColor: `${n.color}15` }]}>
-                    <Ionicons name={n.icon as any} size={20} color={n.color} />
-                  </View>
-                  <View style={styles.notifBody}>
-                    <View style={styles.notifTitleRow}>
-                      <Text style={[styles.notifTitle, n.unread && styles.notifTitleUnread]}>
-                        {n.title}
-                      </Text>
-                      {n.unread && <View style={styles.unreadDot} />}
-                    </View>
-                    <Text style={styles.notifText} numberOfLines={2}>
-                      {n.body}
+            </ScrollView>
+
+            {(() => {
+              const fallbackAsAppNotifs: AppNotification[] = notifications.map((n) => ({
+                id: n.id,
+                title: n.title,
+                body: n.body,
+                type: n.category || "system",
+                category: n.category || "system",
+                is_read: !n.unread,
+                deep_link: n.route,
+                data: { route: n.route, timeLabel: n.time },
+                created_at: new Date().toISOString(),
+              }));
+              const seenIds = new Set(storeNotifications.map((x) => x.id));
+              const combined: AppNotification[] = [
+                ...storeNotifications,
+                ...fallbackAsAppNotifs.filter((x) => !seenIds.has(x.id)),
+              ];
+              const filtered = combined.filter((item) => {
+                if (notifCategory === "all") return true;
+                const cat = String(item.category || item.type || "system").toLowerCase();
+                if (notifCategory === "promo") {
+                  return cat === "promo" || cat === "marketing";
+                }
+                return cat === notifCategory || item.type === notifCategory;
+              });
+
+              if (filtered.length === 0) {
+                return (
+                  <View style={styles.emptyContainer}>
+                    <Ionicons name="notifications-off-outline" size={48} color="#94A3B8" />
+                    <Text style={styles.emptyTitle}>All Caught Up</Text>
+                    <Text style={styles.emptySubtitle}>
+                      No alerts in this category. Customize your Travel Preferences anytime.
                     </Text>
-                    <Text style={styles.notifTime}>{n.time}</Text>
                   </View>
-                </Pressable>
-              )}
-              />
-            ) : (
-              <View style={styles.emptyContainer}>
-                <Ionicons name="notifications-off-outline" size={48} color="#94A3B8" />
-                <Text style={styles.emptyTitle}>All Caught Up</Text>
-                <Text style={styles.emptySubtitle}>You have no new alerts or booking notifications.</Text>
-              </View>
-            )}
+                );
+              }
+
+              return (
+                <FlatList
+                  data={filtered}
+                  keyExtractor={(n) => n.id}
+                  scrollEnabled={false}
+                  initialNumToRender={8}
+                  maxToRenderPerBatch={10}
+                  windowSize={5}
+                  renderItem={({ item: n }) => {
+                    const cat = String(n.category || n.type || "system").toLowerCase();
+                    const iconName =
+                      cat === "booking"
+                        ? "briefcase"
+                        : cat === "flight_alert"
+                        ? "airplane"
+                        : cat === "price_alert"
+                        ? "trending-down"
+                        : cat === "promo" || cat === "marketing"
+                        ? "pricetag"
+                        : cat === "community"
+                        ? "people"
+                        : "sparkles";
+                    const iconColor =
+                      cat === "booking"
+                        ? "#10b981"
+                        : cat === "flight_alert"
+                        ? "#0055F2"
+                        : cat === "promo" || cat === "marketing"
+                        ? "#f59e0b"
+                        : "#8B5CF6";
+                    const targetRoute = n.deep_link || n.data?.route;
+
+                    return (
+                      <View
+                        key={n.id}
+                        style={[styles.notifCard, !n.is_read && styles.notifUnread]}
+                      >
+                        <View style={[styles.notifIcon, { backgroundColor: `${iconColor}15` }]}>
+                          <Ionicons name={iconName as any} size={20} color={iconColor} />
+                        </View>
+                        <View style={styles.notifBody}>
+                          <Pressable
+                            onPress={() => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              markStoreAsRead(n.id);
+                              recordStoreInteraction(n.id, "clicked", {
+                                channel: "in_app",
+                              }).catch(() => {});
+                              setNotifications((prev) =>
+                                prev.map((item) =>
+                                  item.id === n.id ? { ...item, unread: false } : item
+                                )
+                              );
+                              if (typeof targetRoute === "string" && targetRoute.startsWith("/")) {
+                                router.push(targetRoute as any);
+                              } else if (cat === "booking") {
+                                router.push("/(tabs)/trips" as any);
+                              } else if (cat === "promo" || cat === "marketing") {
+                                router.push("/screens/rewards" as any);
+                              } else if (cat === "community") {
+                                router.push("/(tabs)/community" as any);
+                              }
+                            }}
+                          >
+                            <View style={styles.notifTitleRow}>
+                              <Text style={[styles.notifTitle, !n.is_read && styles.notifTitleUnread]}>
+                                {n.title}
+                              </Text>
+                              {!n.is_read && <View style={styles.unreadDot} />}
+                            </View>
+                            <Text style={styles.notifText} numberOfLines={2}>
+                              {n.body}
+                            </Text>
+                          </Pressable>
+
+                          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
+                            <Pressable
+                              onPress={() => setWhyTarget(n)}
+                              style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+                            >
+                              <Ionicons name="help-circle-outline" size={14} color="#64748B" />
+                              <Text style={{ fontSize: 11, color: "#64748B", fontWeight: "600" }}>
+                                Why am I seeing this?
+                              </Text>
+                            </Pressable>
+
+                            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                              <Pressable
+                                onPress={() =>
+                                  recordStoreInteraction(n.id, "clicked", {
+                                    channel: "in_app",
+                                    feedback: "helpful",
+                                  }).catch(() => {})
+                                }
+                              >
+                                <Ionicons
+                                  name={n.feedback === "helpful" ? "thumbs-up" : "thumbs-up-outline"}
+                                  size={14}
+                                  color={n.feedback === "helpful" ? "#10B981" : "#64748B"}
+                                />
+                              </Pressable>
+                              <Pressable
+                                onPress={() =>
+                                  recordStoreInteraction(n.id, "dismissed", {
+                                    channel: "in_app",
+                                    feedback: "not_relevant",
+                                  }).catch(() => {})
+                                }
+                              >
+                                <Ionicons
+                                  name={n.feedback === "not_relevant" ? "thumbs-down" : "thumbs-down-outline"}
+                                  size={14}
+                                  color={n.feedback === "not_relevant" ? "#EF4444" : "#64748B"}
+                                />
+                              </Pressable>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    );
+                  }}
+                />
+              );
+            })()}
           </View>
         )}
 
@@ -922,6 +1210,12 @@ export default function MessagesTab() {
         }}
         onOpenProfile={(p) => handleOpenProfile(p.id)}
         onStartCall={(p, type) => handleStartCall(p, type)}
+      />
+
+      <WhySeeingThisModal
+        visible={Boolean(whyTarget)}
+        notification={whyTarget}
+        onClose={() => setWhyTarget(null)}
       />
       </View>
       </TouchableWithoutFeedback>

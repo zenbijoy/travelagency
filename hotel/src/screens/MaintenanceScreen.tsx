@@ -1,124 +1,217 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { hotelService, HotelMaintenanceTicketRecord } from '../services/hotelService';
 
-export function MaintenanceScreen() {
-  const OverviewCard = ({ label, value, color, bgColor, borderColor }: any) => (
-    <View className={`flex-1 p-3 rounded-xl items-center border ${bgColor} ${borderColor} mx-0.5`}>
-      <Text className={`text-xs ${color} mb-1`}>{label}</Text>
-      <Text className={`text-2xl font-bold ${color === 'text-slate-400' ? 'text-white' : color}`}>{value}</Text>
-    </View>
-  );
+export function MaintenanceScreen({ navigation }: any) {
+  const [tickets, setTickets] = useState<HotelMaintenanceTicketRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const RequestItem = ({ id, title, subtitle, info, status, statusColor, statusBg, time, icon, iconColor, iconBg }: any) => (
-    <View className="bg-slate-800/40 border border-white/5 p-4 rounded-2xl mb-4">
-      <View className="flex-row items-start justify-between">
-        <View className="flex-row space-x-4 flex-1">
-          <View className={`w-10 h-10 rounded-xl ${iconBg} items-center justify-center`}>
-            <MaterialIcons name={icon} size={20} color={iconColor} />
-          </View>
-          <View className="flex-1">
-            <Text className="text-sm font-semibold text-white">{id}</Text>
-            <Text className="text-xs text-slate-400 mt-1">{title}</Text>
-            <Text className="text-[10px] text-slate-500 mt-1">{subtitle} • {info}</Text>
-          </View>
-        </View>
-        <View className="items-end space-y-2">
-          <View className={`px-3 py-1 rounded-full ${statusBg}`}>
-            <Text className={`text-[10px] font-medium ${statusColor}`}>{status}</Text>
-          </View>
-          <Text className="text-[10px] text-slate-500">{time}</Text>
-        </View>
-      </View>
-    </View>
-  );
+  // New ticket form
+  const [roomNumber, setRoomNumber] = useState('');
+  const [category, setCategory] = useState<HotelMaintenanceTicketRecord['category']>('plumbing');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<HotelMaintenanceTicketRecord['priority']>('normal');
+
+  const loadTickets = async () => {
+    try {
+      const data = await hotelService.getMaintenanceTickets();
+      setTickets(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
+  const handleResolveTicket = async (ticket: HotelMaintenanceTicketRecord) => {
+    const res = await hotelService.updateMaintenanceStatus(ticket.id, 'resolved', ticket.costBdt, 'Maintenance inspected & verified safe');
+    if (res.success) {
+      setTickets((prev) =>
+        prev.map((t) => (t.id === ticket.id ? { ...t, status: 'resolved', resolutionNotes: 'Maintenance inspected & verified safe' } : t))
+      );
+      Alert.alert('Ticket Resolved', `Room ${ticket.roomNumber} maintenance cleared. Room restored to operational.`);
+    }
+  };
+
+  const handleCreateTicket = async () => {
+    if (!description.trim() || !roomNumber.trim()) {
+      Alert.alert('Required Fields', 'Please enter room number and issue description.');
+      return;
+    }
+
+    const res = await hotelService.createMaintenanceTicket({
+      roomUnitId: `u_${roomNumber.trim()}`,
+      category,
+      description: description.trim(),
+      priority,
+      costBdt: 1500,
+    });
+
+    if (res.success) {
+      setModalVisible(false);
+      setDescription('');
+      setRoomNumber('');
+      loadTickets();
+      Alert.alert('Ticket Reported', `Work order logged for Room ${roomNumber}. Room marked with maintenance flag.`);
+    }
+  };
+
+  const urgentCount = tickets.filter((t) => t.priority === 'urgent' && t.status !== 'resolved').length;
+  const inProgressCount = tickets.filter((t) => t.status === 'in_progress').length;
+  const resolvedCount = tickets.filter((t) => t.status === 'resolved' || t.status === 'closed').length;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#020817]">
+    <SafeAreaView className="flex-1 bg-[#0b1326]">
       <StatusBar barStyle="light-content" />
 
       {/* Header */}
-      <View className="pt-4 px-6 pb-4">
-        <View className="flex-row justify-between items-center mb-6">
-          <View className="flex-row items-center space-x-3">
-            <TouchableOpacity>
-              <MaterialIcons name="menu" size={24} color="#94a3b8" />
-            </TouchableOpacity>
-            <Text className="text-xl font-semibold text-white">Maintenance</Text>
-          </View>
-          <TouchableOpacity className="relative">
-            <MaterialIcons name="notifications-none" size={24} color="#94a3b8" />
-            <View className="absolute -top-1 -right-1 bg-red-500 w-4 h-4 rounded-full items-center justify-center">
-              <Text className="text-white text-[10px] font-bold">2</Text>
-            </View>
+      <View className="px-6 py-4 flex-row justify-between items-center border-b border-slate-800/80">
+        <View className="flex-row items-center space-x-3">
+          <TouchableOpacity className="p-2 bg-slate-800/50 rounded-lg" onPress={() => navigation?.goBack?.()}>
+            <MaterialIcons name="arrow-back" size={20} color="#cbd5e1" />
           </TouchableOpacity>
+          <Text className="text-base font-bold text-white ms-2">Maintenance & Work Orders</Text>
         </View>
-
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-lg font-medium text-white">Overview</Text>
-          <TouchableOpacity className="flex-row items-center bg-slate-800/50 px-2 py-1 rounded-md">
-            <Text className="text-slate-400 text-sm">This Month</Text>
-            <MaterialIcons name="keyboard-arrow-down" size={16} color="#94a3b8" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Overview Grid */}
-        <View className="flex-row justify-between">
-          <OverviewCard label="Total" value="28" color="text-slate-400" bgColor="bg-slate-800/40" borderColor="border-blue-500/30" />
-          <OverviewCard label="Done" value="16" color="text-green-400" bgColor="bg-green-500/10" borderColor="border-green-500/30" />
-          <OverviewCard label="Progress" value="08" color="text-orange-400" bgColor="bg-orange-500/10" borderColor="border-orange-500/30" />
-          <OverviewCard label="Pending" value="04" color="text-red-400" bgColor="bg-red-500/10" borderColor="border-red-500/30" />
-        </View>
+        <TouchableOpacity
+          className="bg-indigo-600 px-3 py-1.5 rounded-xl flex-row items-center"
+          onPress={() => setModalVisible(true)}
+        >
+          <MaterialIcons name="add" size={16} color="white" />
+          <Text className="text-white text-xs font-bold ms-1">New Order</Text>
+        </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1 px-6 pb-24" showsVerticalScrollIndicator={false}>
-        <View className="flex-row justify-between items-center mb-4 mt-2">
-          <Text className="font-medium text-white">Maintenance Requests</Text>
-          <TouchableOpacity>
-            <Text className="text-indigo-400 text-sm font-medium">View All</Text>
-          </TouchableOpacity>
+      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+        {/* KPI Strip */}
+        <View className="flex-row justify-between mt-4">
+          <View className="bg-rose-950/30 border border-rose-500/20 rounded-xl p-3 flex-1 mx-1 items-center">
+            <Text className="text-[10px] text-rose-400 font-semibold">Urgent</Text>
+            <Text className="text-xl font-bold text-white mt-1">{urgentCount}</Text>
+          </View>
+          <View className="bg-amber-950/30 border border-amber-500/20 rounded-xl p-3 flex-1 mx-1 items-center">
+            <Text className="text-[10px] text-amber-400 font-semibold">In Progress</Text>
+            <Text className="text-xl font-bold text-white mt-1">{inProgressCount}</Text>
+          </View>
+          <View className="bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-3 flex-1 mx-1 items-center">
+            <Text className="text-[10px] text-emerald-400 font-semibold">Resolved</Text>
+            <Text className="text-xl font-bold text-white mt-1">{resolvedCount}</Text>
+          </View>
         </View>
 
-        <View className="pb-24">
-          <RequestItem
-            id="#MT-1024" title="AC not cooling in Room 205" subtitle="Room 205" info="Guest Reported"
-            status="Pending" statusColor="text-orange-400" statusBg="bg-orange-500/20"
-            time="10:30 AM" icon="ac-unit" iconColor="#fb923c" iconBg="bg-orange-500/20"
-          />
-          <RequestItem
-            id="#MT-1023" title="Water leakage in bathroom" subtitle="Room 301" info="Housekeeping"
-            status="In Progress" statusColor="text-blue-400" statusBg="bg-blue-500/20"
-            time="09:15 AM" icon="water-drop" iconColor="#60a5fa" iconBg="bg-indigo-500/20"
-          />
-          <RequestItem
-            id="#MT-1022" title="TV not working" subtitle="Room 102" info="Guest Reported"
-            status="Completed" statusColor="text-green-400" statusBg="bg-green-500/20"
-            time="Yesterday" icon="tv" iconColor="#4ade80" iconBg="bg-green-500/20"
-          />
-          <RequestItem
-            id="#MT-1021" title="Light flickering" subtitle="Corridor 2" info="Staff Reported"
-            status="Completed" statusColor="text-green-400" statusBg="bg-green-500/20"
-            time="2 Days Ago" icon="lightbulb" iconColor="#4ade80" iconBg="bg-green-500/20"
-          />
-          <RequestItem
-            id="#MT-1020" title="Door lock issue" subtitle="Room 404" info="Guest Reported"
-            status="Pending" statusColor="text-orange-400" statusBg="bg-orange-500/20"
-            time="2 Days Ago" icon="lock" iconColor="#fb923c" iconBg="bg-orange-500/20"
-          />
+        {/* Tickets List */}
+        <View className="mt-6 mb-24">
+          <Text className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Open Work Orders ({tickets.length})
+          </Text>
+
+          {loading ? (
+            <ActivityIndicator size="small" color="#6366f1" className="py-8" />
+          ) : (
+            tickets.map((t) => {
+              const isResolved = t.status === 'resolved' || t.status === 'closed';
+              return (
+                <View key={t.id} className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 mb-3">
+                  <View className="flex-row justify-between items-start">
+                    <View className="flex-1 me-2">
+                      <View className="flex-row items-center">
+                        <Text className="text-sm font-bold text-white">Room {t.roomNumber}</Text>
+                        <Text className="text-xs text-indigo-400 ms-2 font-medium">• {t.category.toUpperCase()}</Text>
+                        {t.priority === 'urgent' && (
+                          <View className="bg-rose-500/20 px-2 py-0.5 rounded-full ms-2">
+                            <Text className="text-rose-400 text-[9px] font-bold">URGENT</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text className="text-xs text-slate-300 mt-1">{t.description}</Text>
+                      {t.resolutionNotes && (
+                        <Text className="text-[10px] text-emerald-400 mt-1">Resolution: {t.resolutionNotes}</Text>
+                      )}
+                    </View>
+
+                    <View className={`px-2.5 py-1 rounded-full ${isResolved ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
+                      <Text className={`text-[10px] font-bold ${isResolved ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        {t.status.toUpperCase()}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="flex-row justify-between items-center mt-3 pt-3 border-t border-slate-800/80">
+                    <Text className="text-[10px] text-slate-500">
+                      Est. Cost: ৳{t.costBdt.toLocaleString()}
+                    </Text>
+                    {!isResolved && (
+                      <TouchableOpacity
+                        className="bg-emerald-600 px-3 py-1.5 rounded-xl flex-row items-center"
+                        onPress={() => handleResolveTicket(t)}
+                      >
+                        <MaterialIcons name="check" size={14} color="white" />
+                        <Text className="text-white text-xs font-bold ms-1">Mark Resolved</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              );
+            })
+          )}
         </View>
       </ScrollView>
 
-      {/* FAB */}
-      <TouchableOpacity className="absolute bottom-24 right-6 w-14 h-14 bg-indigo-600 rounded-full items-center justify-center shadow-lg active:scale-95">
-        <MaterialIcons name="add" size={32} color="white" />
-      </TouchableOpacity>
+      {/* New Work Order Modal */}
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View className="flex-1 bg-black/75 justify-center items-center p-6">
+          <View className="bg-[#1a1c2e] w-full rounded-3xl p-6 border border-white/10">
+            <Text className="text-base font-bold text-white mb-3">Create Maintenance Order</Text>
+
+            <TextInput
+              placeholder="Room Number (e.g. 203)"
+              placeholderTextColor="#64748b"
+              value={roomNumber}
+              onChangeText={setRoomNumber}
+              className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs mb-3"
+            />
+
+            <TextInput
+              placeholder="Issue Description"
+              placeholderTextColor="#64748b"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={3}
+              className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs mb-4 h-20"
+            />
+
+            <View className="flex-row space-x-3">
+              <TouchableOpacity
+                className="flex-1 py-3 bg-slate-800 rounded-xl items-center"
+                onPress={() => setModalVisible(false)}
+              >
+                <Text className="text-slate-300 font-semibold text-xs">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 py-3 bg-indigo-600 rounded-xl items-center"
+                onPress={handleCreateTicket}
+              >
+                <Text className="text-white font-bold text-xs">Create Ticket</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

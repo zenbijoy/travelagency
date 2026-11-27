@@ -43,6 +43,13 @@ import { AdminRole } from "@/types/admin";
 import { useRBAC } from "./rbac";
 import { AdminTab } from "./AdminPortalShell";
 import { useResponsive } from "@/hooks/useResponsive";
+import {
+  executeAdminCommand,
+  ConfirmBookingCommand,
+  CancelBookingCommand,
+} from "./commands";
+import { AdminDashboardSkeleton } from "@/components/ui/AdminSkeletons";
+import { BlinkingText } from "@/components/ui/BlinkingText";
 
 export interface AdminDashboardProps {
   onNavigateTab?: (tab: AdminTab) => void;
@@ -99,7 +106,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Time range selection for revenue chart (7D, 14D, 30D)
   const [chartRange, setChartRange] = useState<7 | 14 | 30>(30);
-  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
   // Selected vertical in distribution donut
   const [selectedVerticalId, setSelectedVerticalId] = useState<string | null>(null);
@@ -132,128 +138,90 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
   const [actionModalVisible, setActionModalVisible] = useState(false);
 
-  // Dynamic booking list (seed default matching white-label portal, live updated from Supabase)
-  const [dashboardBookings, setDashboardBookings] = useState([
-    {
-      id: "ord_101",
-      orderId: "ORD123456",
-      customerName: "Amit Kumar",
-      customerEmail: "amit@gmail.com",
-      serviceType: "flight",
-      serviceTitle: "Flight",
-      route: "Delhi - Mumbai",
-      pnr: "6E1X7A",
-      travelDate: "20 May 2024",
-      amount: 7650,
-      status: "confirmed",
-      icon: "airplane",
-      iconColor: "#2563EB",
-    },
-    {
-      id: "ord_102",
-      orderId: "ORD123457",
-      customerName: "Neha Sharma",
-      customerEmail: "neha@gmail.com",
-      serviceType: "hotel",
-      serviceTitle: "Hotel",
-      route: "Goa, India",
-      pnr: "HTL8765",
-      travelDate: "21 May 2024",
-      amount: 6200,
-      status: "confirmed",
-      icon: "office-building",
-      iconColor: "#10B981",
-    },
-    {
-      id: "ord_103",
-      orderId: "ORD123458",
-      customerName: "Ravi Singh",
-      customerEmail: "ravi@gmail.com",
-      serviceType: "bus",
-      serviceTitle: "Bus",
-      route: "Delhi - Jaipur",
-      pnr: "BUS3344",
-      travelDate: "22 May 2024",
-      amount: 950,
-      status: "completed",
-      icon: "bus",
-      iconColor: "#F59E0B",
-    },
-    {
-      id: "ord_104",
-      orderId: "ORD123459",
-      customerName: "Pooja Mehta",
-      customerEmail: "pooja@gmail.com",
-      serviceType: "holiday",
-      serviceTitle: "Holiday",
-      route: "Thailand Tour",
-      pnr: "HOL4455",
-      travelDate: "25 May 2024",
-      amount: 45500,
-      status: "confirmed",
-      icon: "umbrella-beach",
-      iconColor: "#8B5CF6",
-    },
-    {
-      id: "ord_105",
-      orderId: "ORD123460",
-      customerName: "Vikram Das",
-      customerEmail: "vikram@gmail.com",
-      serviceType: "visa",
-      serviceTitle: "Visa",
-      route: "UAE Visit Visa",
-      pnr: "VSA5566",
-      travelDate: "27 May 2024",
-      amount: 4800,
-      status: "pending",
-      icon: "file-document-check",
-      iconColor: "#EF4444",
-    },
-    {
-      id: "ord_106",
-      orderId: "ORD123461",
-      customerName: "Ananya Roy",
-      customerEmail: "ananya@gmail.com",
-      serviceType: "flight",
-      serviceTitle: "Flight",
-      route: "Dhaka - Cox's Bazar",
-      pnr: "BG433",
-      travelDate: "28 May 2024",
-      amount: 8400,
-      status: "confirmed",
-      icon: "airplane",
-      iconColor: "#2563EB",
-    },
-    {
-      id: "ord_107",
-      orderId: "ORD123462",
-      customerName: "Tanvir Ahmed",
-      customerEmail: "tanvir@gmail.com",
-      serviceType: "hotel",
-      serviceTitle: "Hotel",
-      route: "Sayeman Beach Resort",
-      pnr: "HTL9122",
-      travelDate: "29 May 2024",
-      amount: 14200,
-      status: "confirmed",
-      icon: "office-building",
-      iconColor: "#10B981",
-    },
-  ]);
+  // Dynamic booking list loaded from Supabase
+  const [dashboardBookings, setDashboardBookings] = useState<Array<{
+    id: string;
+    orderId: string;
+    customerName: string;
+    customerEmail: string;
+    serviceType: string;
+    serviceTitle: string;
+    route: string;
+    pnr: string;
+    travelDate: string;
+    amount: number;
+    status: string;
+    icon: string;
+    iconColor: string;
+  }>>([]);
+  const [topDestinations, setTopDestinations] = useState<Array<{
+    name: string;
+    amount: number;
+    pct: number;
+    color: string;
+  }>>([]);
+  const [serviceCounts, setServiceCounts] = useState({
+    flight: 0,
+    hotel: 0,
+    bus: 0,
+    holiday: 0,
+    visa: 0,
+  });
 
   const handleUpdateStatus = async (newStatus: "confirmed" | "completed" | "pending" | "cancelled") => {
     if (!selectedBooking) return;
+    const activeAdmin = admin || rbacAdmin;
+    if (!activeAdmin) {
+      Alert.alert("Governance Block", "Active verified administrator session is required.");
+      return;
+    }
+
+    if (newStatus === "confirmed") {
+      const res = await executeAdminCommand(
+        new ConfirmBookingCommand(selectedBooking.id, "Confirmed via Command Center"),
+        activeAdmin as any
+      );
+      if (!res.success) {
+        Alert.alert("RBAC Access Denied", res.error || "Not authorized to confirm booking.");
+        return;
+      }
+    } else if (newStatus === "cancelled") {
+      const res = await executeAdminCommand(
+        new CancelBookingCommand(selectedBooking.id, "Cancelled via Command Center"),
+        activeAdmin as any
+      );
+      if (!res.success) {
+        Alert.alert("RBAC Access Denied", res.error || "Not authorized to cancel booking.");
+        return;
+      }
+    } else {
+      if (!hasPermission("bookings.modify")) {
+        Alert.alert("RBAC Access Denied", "Missing 'bookings.modify' permission.");
+        return;
+      }
+      const dbStatus = newStatus === "pending" ? "payment_pending" : newStatus;
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: dbStatus, updated_at: new Date().toISOString() })
+        .eq("id", selectedBooking.id);
+      if (error) {
+        Alert.alert("Error", error.message || "Failed to update booking status.");
+        return;
+      }
+      await adminService.logActivity({
+        admin_id: activeAdmin.id,
+        action: `BOOKING_STATUS_${newStatus.toUpperCase()}`,
+        module: "bookings",
+        entity_type: "booking",
+        entity_id: selectedBooking.id,
+        details: { new_status: dbStatus },
+      });
+    }
+
     setDashboardBookings((prev) =>
       prev.map((b) => (b.id === selectedBooking.id ? { ...b, status: newStatus } : b))
     );
     setSelectedBooking((prev: any) => (prev ? { ...prev, status: newStatus } : null));
-    try {
-      if (selectedBooking.id && selectedBooking.id.length > 10) {
-        await supabase.from("bookings").update({ status: newStatus }).eq("id", selectedBooking.id);
-      }
-    } catch (e) {
-      console.warn("Status sync notice:", e);
-    }
     Alert.alert("Status Updated", `Booking ${selectedBooking.orderId} marked as ${newStatus.toUpperCase()}`);
     setActionModalVisible(false);
   };
@@ -329,13 +297,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         metricsHistoryRes,
       ] = await Promise.all([
         supabase.from("community_profiles").select("*", { count: "exact", head: true }),
-        supabase.from("community_profiles").select("*", { count: "exact", head: true }).eq("is_verified", false),
+        supabase.from("user_admin_details").select("*", { count: "exact", head: true }).eq("kyc_status", "pending"),
         supabase.from("agencies").select("*", { count: "exact", head: true }),
-        supabase.from("agencies").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("agencies").select("*", { count: "exact", head: true }).eq("verification_status", "pending"),
         supabase.from("hotels").select("*", { count: "exact", head: true }),
         supabase.from("tours").select("*", { count: "exact", head: true }),
         supabase.from("flights").select("*", { count: "exact", head: true }),
-        supabase.from("bookings").select("id, total_price, currency, status, product_type, created_at"),
+        supabase
+          .from("bookings")
+          .select("id, booking_reference, total_price, currency, status, product_type, destination_city, origin_city, start_date, created_at, traveler_details(first_name, last_name, email)")
+          .order("created_at", { ascending: false })
+          .limit(200),
         supabase.from("refund_requests").select("*", { count: "exact", head: true }).eq("status", "requested"),
         supabase.from("support_tickets").select("*", { count: "exact", head: true }).in("status", ["open", "in_progress"]),
         supabase.from("dashboard_metrics").select("*").order("metric_date", { ascending: false }).limit(30),
@@ -358,31 +330,81 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       );
       const cancelledBookingsList = rawBookings.filter((b: any) => b.status === "cancelled");
 
-      // Calculate Total GMV dynamically from confirmed bookings
-      const calculatedGMVFromBookings = confirmedBookingsList.reduce(
+      // Calculate real Total GMV from confirmed/completed bookings
+      const dynamicGMV = confirmedBookingsList.reduce(
         (sum: number, b: any) => sum + (Number(b.total_price) || 0),
         0
       );
+      const latestMetric = metricsHistoryRes.data?.[0];
+      const dynamicDAU = latestMetric?.active_users ?? 0;
+      const dynamicConfirmedCount = confirmedBookingsList.length;
 
-      // Total GMV (with organic platform baseline if fresh database)
-      const dynamicGMV =
-        calculatedGMVFromBookings > 0
-          ? calculatedGMVFromBookings
-          : Math.max(4850200, totalUsersCount * 1450);
+      // Map real recent bookings for Command Center table
+      const iconByType: Record<string, { icon: string; color: string; title: string }> = {
+        flight: { icon: "airplane", color: "#2563EB", title: "Flight" },
+        hotel: { icon: "office-building", color: "#10B981", title: "Hotel" },
+        bus: { icon: "bus", color: "#F59E0B", title: "Bus" },
+        launch: { icon: "ferry", color: "#0891B2", title: "Launch" },
+        train: { icon: "train", color: "#6366F1", title: "Train" },
+        tour: { icon: "umbrella-beach", color: "#8B5CF6", title: "Holiday" },
+        package: { icon: "umbrella-beach", color: "#8B5CF6", title: "Holiday" },
+      };
 
-      // Active Users (DAU) derived dynamically from user base
-      const dynamicDAU =
-        totalUsersCount > 0
-          ? Math.max(Math.ceil(totalUsersCount * 0.42), 120)
-          : 3420;
+      setDashboardBookings(
+        rawBookings.slice(0, 15).map((b: any) => {
+          const td = Array.isArray(b.traveler_details) ? b.traveler_details[0] : b.traveler_details;
+          const pType = (b.product_type || "tour").toLowerCase();
+          const meta = iconByType[pType] || { icon: "ticket-confirmation", color: "#475569", title: pType.toUpperCase() };
+          const serviceKey = pType === "package" || pType === "tour" ? "holiday" : pType;
+          const normalizedStatus =
+            b.status === "payment_pending" || b.status === "draft" ? "pending" : b.status || "pending";
+          return {
+            id: b.id,
+            orderId: b.booking_reference || b.id.slice(0, 8).toUpperCase(),
+            customerName: td ? `${td.first_name || ""} ${td.last_name || ""}`.trim() || "Traveler" : "Traveler",
+            customerEmail: td?.email || "",
+            serviceType: serviceKey,
+            serviceTitle: meta.title,
+            route: b.origin_city ? `${b.origin_city} - ${b.destination_city}` : b.destination_city || "Trip",
+            pnr: b.booking_reference || b.id.slice(0, 6).toUpperCase(),
+            travelDate: b.start_date ? new Date(b.start_date).toLocaleDateString() : new Date(b.created_at).toLocaleDateString(),
+            amount: Number(b.total_price) || 0,
+            status: normalizedStatus,
+            icon: meta.icon,
+            iconColor: meta.color,
+          };
+        })
+      );
 
-      // Confirmed bookings volume
-      const dynamicConfirmedCount =
-        confirmedBookingsList.length > 0
-          ? confirmedBookingsList.length
-          : Math.max(rawBookings.length, 339);
+      // Compute real counts by service type
+      const flightCount = rawBookings.filter((b: any) => b.product_type === "flight").length;
+      const hotelCount = rawBookings.filter((b: any) => b.product_type === "hotel").length;
+      const busCount = rawBookings.filter((b: any) => b.product_type === "bus" || b.product_type === "launch" || b.product_type === "train").length;
+      const holidayCount = rawBookings.filter((b: any) => b.product_type === "tour" || b.product_type === "package").length;
+      const visaCount = rawBookings.filter((b: any) => b.product_type === "visa").length;
+      setServiceCounts({ flight: flightCount, hotel: hotelCount, bus: busCount, holiday: holidayCount, visa: visaCount });
 
-      // Compile dynamic 30-day time series
+      // Compute real top destinations from confirmed/all bookings
+      const destTotals: Record<string, number> = {};
+      for (const b of rawBookings) {
+        const city = b.destination_city || "Other";
+        destTotals[city] = (destTotals[city] || 0) + (Number(b.total_price) || 0);
+      }
+      const destPalette = ["#2563EB", "#10B981", "#8B5CF6", "#F59E0B", "#EF4444"];
+      const sortedDest = Object.entries(destTotals)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+      const maxDestRev = Math.max(1, sortedDest[0]?.[1] || 1);
+      setTopDestinations(
+        sortedDest.map(([name, amount], idx) => ({
+          name,
+          amount,
+          pct: Math.round((amount / maxDestRev) * 100),
+          color: destPalette[idx % destPalette.length],
+        }))
+      );
+
+      // Compile dynamic 30-day time series without fabricated sine waves
       const metricsHistory = metricsHistoryRes.data || [];
       const historyPoints: RevenueDataPoint[] = [];
       const now = new Date();
@@ -393,7 +415,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const dateIso = d.toISOString().split("T")[0];
         const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-        // Check if real bookings occurred on this date
         const bookingsOnDay = rawBookings.filter(
           (b: any) => b.created_at && b.created_at.startsWith(dateIso)
         );
@@ -401,101 +422,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           (sum: number, b: any) => sum + (Number(b.total_price) || 0),
           0
         );
-
-        // Check recorded metric row if available
         const metricRow = metricsHistory.find((m: any) => m.metric_date === dateIso);
-
-        // Derive dynamic daily revenue
-        let dailyRev = dayRevFromBookings;
-        if (dailyRev === 0 && metricRow && metricRow.total_revenue > 0) {
-          dailyRev = Number(metricRow.total_revenue);
-        }
-
-        // If newly seeded without 30-day history, compute organic continuous curve
-        if (dailyRev === 0) {
-          const avgDaily = Math.round(dynamicGMV / 30);
-          const isWeekend = d.getDay() === 5 || d.getDay() === 6;
-          const curveFactor = 0.85 + Math.sin(i * 0.45) * 0.22 + (isWeekend ? 0.25 : -0.05);
-          dailyRev = Math.round(avgDaily * curveFactor);
-        }
-
-        const dailyOrders =
-          bookingsOnDay.length > 0
-            ? bookingsOnDay.length
-            : Math.max(3, Math.round(dailyRev / 14500));
+        const dailyRev = dayRevFromBookings > 0 ? dayRevFromBookings : Number(metricRow?.total_revenue || 0);
 
         historyPoints.push({
           day: 30 - i,
           dateStr,
           revenue: dailyRev,
-          bookings: dailyOrders,
+          bookings: bookingsOnDay.length,
         });
       }
       setDailyRevenueHistory(historyPoints);
 
-      // Compile dynamic 4-vertical booking distribution
-      let hotelOrders = rawBookings.filter((b: any) => b.product_type === "hotel").length;
-      let flightOrders = rawBookings.filter((b: any) => b.product_type === "flight").length;
-      let transitOrders = rawBookings.filter(
-        (b: any) => b.product_type === "train" || b.product_type === "car"
-      ).length;
-      let tourOrders = rawBookings.filter(
-        (b: any) => b.product_type === "tour" || b.product_type === "package"
-      ).length;
+      // Compile real 4-vertical booking distribution
+      const hotelOrders = hotelCount;
+      const flightOrders = flightCount;
+      const transitOrders = busCount;
+      const tourOrders = holidayCount;
+      const totalVerticalOrders = hotelOrders + flightOrders + transitOrders + tourOrders;
 
-      // If no bookings in DB, derive proportions from catalog inventory
-      const totalCatalog = Math.max(1, hotelsCount + flightsCount + toursCount);
-      if (hotelOrders + flightOrders + transitOrders + tourOrders === 0) {
-        hotelOrders = Math.round(dynamicConfirmedCount * (hotelsCount / totalCatalog || 0.42));
-        flightOrders = Math.round(dynamicConfirmedCount * (flightsCount / totalCatalog || 0.28));
-        transitOrders = Math.round(dynamicConfirmedCount * 0.16);
-        tourOrders = Math.max(1, dynamicConfirmedCount - hotelOrders - flightOrders - transitOrders);
+      if (totalVerticalOrders === 0) {
+        setVerticalData([]);
+      } else {
+        const hotelPct = Math.round((hotelOrders / totalVerticalOrders) * 100);
+        const flightPct = Math.round((flightOrders / totalVerticalOrders) * 100);
+        const transitPct = Math.round((transitOrders / totalVerticalOrders) * 100);
+        const tourPct = Math.max(0, 100 - hotelPct - flightPct - transitPct);
+
+        const sumRevBy = (types: string[]) =>
+          rawBookings
+            .filter((b: any) => types.includes((b.product_type || "").toLowerCase()))
+            .reduce((s: number, b: any) => s + (Number(b.total_price) || 0), 0);
+
+        setVerticalData([
+          { id: "hotels", label: "Hotels & Stays", icon: "office-building", count: hotelOrders, percentage: hotelPct, revenue: sumRevBy(["hotel"]), color: "#3B82F6" },
+          { id: "flights", label: "Flight Tickets", icon: "airplane", count: flightOrders, percentage: flightPct, revenue: sumRevBy(["flight"]), color: "#10B981" },
+          { id: "transit", label: "Intercity Transit", icon: "bus", count: transitOrders, percentage: transitPct, revenue: sumRevBy(["bus", "launch", "train"]), color: "#F59E0B" },
+          { id: "tours", label: "Holiday Tours", icon: "compass-rose", count: tourOrders, percentage: tourPct, revenue: sumRevBy(["tour", "package"]), color: "#8B5CF6" },
+        ]);
       }
-
-      const totalVerticalOrders = Math.max(1, hotelOrders + flightOrders + transitOrders + tourOrders);
-      const hotelPct = Math.round((hotelOrders / totalVerticalOrders) * 100);
-      const flightPct = Math.round((flightOrders / totalVerticalOrders) * 100);
-      const transitPct = Math.round((transitOrders / totalVerticalOrders) * 100);
-      const tourPct = Math.max(1, 100 - hotelPct - flightPct - transitPct);
-
-      setVerticalData([
-        {
-          id: "hotels",
-          label: "Hotels & Stays",
-          icon: "office-building",
-          count: hotelOrders,
-          percentage: hotelPct,
-          revenue: Math.round(dynamicGMV * (hotelPct / 100)),
-          color: "#3B82F6",
-        },
-        {
-          id: "flights",
-          label: "Flight Tickets",
-          icon: "airplane",
-          count: flightOrders,
-          percentage: flightPct,
-          revenue: Math.round(dynamicGMV * (flightPct / 100)),
-          color: "#10B981",
-        },
-        {
-          id: "transit",
-          label: "Intercity Transit",
-          icon: "bus",
-          count: transitOrders,
-          percentage: transitPct,
-          revenue: Math.round(dynamicGMV * (transitPct / 100)),
-          color: "#F59E0B",
-        },
-        {
-          id: "tours",
-          label: "Holiday Tours",
-          icon: "compass-rose",
-          count: tourOrders,
-          percentage: tourPct,
-          revenue: Math.round(dynamicGMV * (tourPct / 100)),
-          color: "#8B5CF6",
-        },
-      ]);
 
       const liveMetrics = {
         total_users: totalUsersCount,
@@ -596,56 +561,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4f46e5" />
-        <Text style={styles.loadingText}>Initializing Executive Command Telemetry...</Text>
+        <AdminDashboardSkeleton />
+        <BlinkingText
+          text="Initializing Executive Command Telemetry..."
+          color="#94a3b8"
+          fontSize={13}
+          style={{ textAlign: "center", marginTop: 16 }}
+        />
       </View>
     );
   }
 
-  // SVG Line Chart Metrics
-  const chartWidth = Math.max(280, width - 40);
-  const chartHeight = 180;
-  const padLeft = 48;
-  const padRight = 14;
-  const padTop = 18;
-  const padBottom = 26;
-  const usableWidth = chartWidth - padLeft - padRight;
-  const usableHeight = chartHeight - padTop - padBottom;
-
   const revValues = displayedRevenueData.map((d) => d.revenue * currencyRate);
   const maxRevenue = Math.max(...revValues, 100);
-  const minRevenue = Math.min(...revValues, 0);
-  const revRange = Math.max(1, maxRevenue - minRevenue);
-
-  const chartPoints = displayedRevenueData.map((d, i) => {
-    const val = d.revenue * currencyRate;
-    const x = padLeft + (i / Math.max(1, displayedRevenueData.length - 1)) * usableWidth;
-    const y = padTop + (1 - (val - minRevenue) / revRange) * usableHeight;
-    return { x, y, data: d, convertedVal: val };
-  });
-
-  const pathD = chartPoints
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
-    .join(" ");
-
-  const areaD =
-    chartPoints.length > 0
-      ? `${pathD} L ${chartPoints[chartPoints.length - 1].x.toFixed(1)} ${(padTop + usableHeight).toFixed(1)} L ${chartPoints[0].x.toFixed(1)} ${(padTop + usableHeight).toFixed(1)} Z`
-      : "";
-
-  const activePoint =
-    selectedDayIndex !== null && chartPoints[selectedDayIndex]
-      ? chartPoints[selectedDayIndex]
-      : chartPoints[chartPoints.length - 1];
-
-  // SVG Donut Chart Parameters
-  const donutSize = 160;
-  const donutRadius = 55;
-  const donutStrokeWidth = 24;
-  const donutCenter = donutSize / 2;
-  const circumference = 2 * Math.PI * donutRadius;
-
-  let cumulativePercentage = 0;
 
   return (
     <ScrollView
@@ -741,9 +669,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <View style={styles.kpiContentColumn}>
                 <Text style={styles.kpiLabelMuted}>Total Bookings</Text>
                 <Text style={styles.kpiNumberLarge}>
-                  {(metrics?.total_bookings || 1482).toLocaleString()}
+                  {(metrics?.total_bookings ?? 0).toLocaleString()}
                 </Text>
-                <Text style={styles.kpiGrowthGreen}>+18.5% from last month</Text>
+                <Text style={styles.kpiGrowthGreen}>{metrics?.confirmed_bookings ?? 0} confirmed</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -757,9 +685,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <View style={styles.kpiContentColumn}>
                 <Text style={styles.kpiLabelMuted}>Total Revenue</Text>
                 <Text style={styles.kpiNumberLarge}>
-                  {currencySymbol} {canViewFinancials ? (metrics?.total_gmv ? Math.round(metrics.total_gmv * currencyRate).toLocaleString() : "52,65,250") : "••••••••"}
+                  {currencySymbol} {canViewFinancials ? Math.round((metrics?.total_gmv ?? 0) * currencyRate).toLocaleString() : "••••••••"}
                 </Text>
-                <Text style={styles.kpiGrowthGreen}>+22.8% from last month</Text>
+                <Text style={styles.kpiGrowthGreen}>{canViewFinancials ? "Live ledger total" : "Restricted by role"}</Text>
               </View>
             </View>
           </View>
@@ -777,9 +705,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <View style={styles.kpiContentColumn}>
                 <Text style={styles.kpiLabelMuted}>Pending Bookings</Text>
                 <Text style={styles.kpiNumberLarge}>
-                  {(metrics?.pending_bookings || 156).toLocaleString()}
+                  {(metrics?.pending_bookings ?? 0).toLocaleString()}
                 </Text>
-                <Text style={styles.kpiGrowthRed}>-5.4% from last month</Text>
+                <Text style={styles.kpiGrowthRed}>{metrics?.refund_count ?? 0} refund requests</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -797,9 +725,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <View style={styles.kpiContentColumn}>
                 <Text style={styles.kpiLabelMuted}>Total Customers</Text>
                 <Text style={styles.kpiNumberLarge}>
-                  {(metrics?.total_users || 2635).toLocaleString()}
+                  {(metrics?.total_users ?? 0).toLocaleString()}
                 </Text>
-                <Text style={styles.kpiGrowthGreen}>+16.3% from last month</Text>
+                <Text style={styles.kpiGrowthGreen}>{metrics?.pending_kyc ?? 0} pending KYC</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -1015,11 +943,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <Text style={styles.serviceCounterSectionTitle}>Bookings by Service</Text>
               <View style={styles.serviceCounterCardsRow}>
                 {[
-                  { label: "Flight", tab: "flight", count: 651, icon: "airplane", color: "#2563EB" },
-                  { label: "Hotel", tab: "hotel", count: 423, icon: "office-building", color: "#10B981" },
-                  { label: "Bus", tab: "bus", count: 198, icon: "bus", color: "#F59E0B" },
-                  { label: "Holiday", tab: "holiday", count: 132, icon: "umbrella-beach", color: "#8B5CF6" },
-                  { label: "Visa", tab: "visa", count: 78, icon: "file-document-check", color: "#EF4444" },
+                  { label: "Flight", tab: "flight", count: serviceCounts.flight, icon: "airplane", color: "#2563EB" },
+                  { label: "Hotel", tab: "hotel", count: serviceCounts.hotel, icon: "office-building", color: "#10B981" },
+                  { label: "Bus", tab: "bus", count: serviceCounts.bus, icon: "bus", color: "#F59E0B" },
+                  { label: "Holiday", tab: "holiday", count: serviceCounts.holiday, icon: "umbrella-beach", color: "#8B5CF6" },
+                  { label: "Visa", tab: "visa", count: serviceCounts.visa, icon: "file-document-check", color: "#EF4444" },
                 ].map((s) => (
                   <TouchableOpacity
                     key={s.label}
@@ -1058,83 +986,89 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <View style={styles.revenueSummaryBanner}>
                 <Text style={styles.revBannerLabel}>Total Revenue</Text>
                 <Text style={styles.revBannerAmount}>
-                  {currencySymbol} 52,65,250
+                  {currencySymbol}{" "}
+                  {canViewFinancials
+                    ? Math.round((metrics?.total_gmv ?? 0) * currencyRate).toLocaleString()
+                    : "••••••••"}
                 </Text>
-                <Text style={styles.revBannerGrowth}>+22.8% from last month</Text>
+                <Text style={styles.revBannerGrowth}>
+                  {canViewFinancials ? `${metrics?.confirmed_bookings ?? 0} settled bookings` : "Restricted"}
+                </Text>
               </View>
 
               {/* Donut Chart & Legend Row */}
               <View style={styles.donutAndLegendRow}>
-                {/* Donut SVG */}
                 <View style={styles.donutBoxRelative}>
                   <Svg width={130} height={130} viewBox="0 0 130 130">
                     <G rotation="-90" origin="65, 65">
-                      {[
-                        { pct: 42.7, color: "#2563EB" },
-                        { pct: 29.7, color: "#10B981" },
-                        { pct: 14.9, color: "#8B5CF6" },
-                        { pct: 6.2, color: "#F59E0B" },
-                        { pct: 2.8, color: "#EF4444" },
-                        { pct: 3.7, color: "#64748B" },
-                      ].reduce((acc: any[], slice) => {
-                        const r = 45;
-                        const circ = 2 * Math.PI * r;
-                        const prevOffset = acc.length > 0 ? acc[acc.length - 1].cumulativePct : 0;
-                        const strokeDasharray = `${(slice.pct / 100) * circ} ${circ}`;
-                        const strokeDashoffset = -((prevOffset / 100) * circ);
-                        acc.push({
-                          ...slice,
-                          strokeDasharray,
-                          strokeDashoffset,
-                          cumulativePct: prevOffset + slice.pct,
-                        });
-                        return acc;
-                      }, []).map((slice: any, i: number) => (
-                        <Circle
-                          key={i}
-                          cx={65}
-                          cy={65}
-                          r={45}
-                          stroke={slice.color}
-                          strokeWidth={16}
-                          strokeDasharray={slice.strokeDasharray}
-                          strokeDashoffset={slice.strokeDashoffset}
-                          fill="transparent"
-                        />
-                      ))}
+                      {(verticalData.length > 0
+                        ? verticalData.map((v) => ({ pct: v.percentage, color: v.color }))
+                        : [{ pct: 100, color: "#E2E8F0" }]
+                      )
+                        .reduce((acc: any[], slice) => {
+                          const r = 45;
+                          const circ = 2 * Math.PI * r;
+                          const prevOffset = acc.length > 0 ? acc[acc.length - 1].cumulativePct : 0;
+                          const strokeDasharray = `${(slice.pct / 100) * circ} ${circ}`;
+                          const strokeDashoffset = -((prevOffset / 100) * circ);
+                          acc.push({
+                            ...slice,
+                            strokeDasharray,
+                            strokeDashoffset,
+                            cumulativePct: prevOffset + slice.pct,
+                          });
+                          return acc;
+                        }, [])
+                        .map((slice: any, i: number) => (
+                          <Circle
+                            key={i}
+                            cx={65}
+                            cy={65}
+                            r={45}
+                            stroke={slice.color}
+                            strokeWidth={16}
+                            strokeDasharray={slice.strokeDasharray}
+                            strokeDashoffset={slice.strokeDashoffset}
+                            fill="transparent"
+                          />
+                        ))}
                     </G>
                   </Svg>
                   <View style={styles.donutInnerOverlayCenter}>
                     <Text style={styles.donutInnerTextTotal}>Total</Text>
-                    <Text style={styles.donutInnerTextSum}>{currencySymbol} 52.65 L</Text>
+                    <Text style={styles.donutInnerTextSum}>
+                      {canViewFinancials
+                        ? `${currencySymbol} ${Math.round((metrics?.total_gmv ?? 0) * currencyRate).toLocaleString()}`
+                        : "•••"}
+                    </Text>
                   </View>
                 </View>
 
-                {/* Donut Legend */}
                 <View style={styles.donutLegendList}>
-                  {[
-                    { label: "Flight", amount: "22.45 L", pct: "42.7%", color: "#2563EB" },
-                    { label: "Hotel", amount: "15.65 L", pct: "29.7%", color: "#10B981" },
-                    { label: "Holiday", amount: "7.85 L", pct: "14.9%", color: "#8B5CF6" },
-                    { label: "Bus", amount: "3.25 L", pct: "6.2%", color: "#F59E0B" },
-                    { label: "Visa", amount: "1.45 L", pct: "2.8%", color: "#EF4444" },
-                    { label: "Others", amount: "0.45 L", pct: "0.7%", color: "#64748B" },
-                  ].map((item) => (
-                    <View key={item.label} style={styles.donutLegendRowItem}>
-                      <View style={[styles.donutLegendDot, { backgroundColor: item.color }]} />
-                      <Text style={styles.donutLegendLabel}>{item.label}</Text>
-                      <Text style={styles.donutLegendAmount}>{currencySymbol} {item.amount}</Text>
-                      <Text style={styles.donutLegendPct}>({item.pct})</Text>
-                    </View>
-                  ))}
+                  {verticalData.length === 0 ? (
+                    <Text style={{ color: "#64748B", fontSize: 12 }}>No vertical breakdown yet.</Text>
+                  ) : (
+                    verticalData.map((item) => (
+                      <View key={item.id} style={styles.donutLegendRowItem}>
+                        <View style={[styles.donutLegendDot, { backgroundColor: item.color }]} />
+                        <Text style={styles.donutLegendLabel}>{item.label}</Text>
+                        <Text style={styles.donutLegendAmount}>
+                          {canViewFinancials
+                            ? `${currencySymbol} ${Math.round(item.revenue * currencyRate).toLocaleString()}`
+                            : "•••"}
+                        </Text>
+                        <Text style={styles.donutLegendPct}>({item.percentage}%)</Text>
+                      </View>
+                    ))
+                  )}
                 </View>
               </View>
             </View>
 
-            {/* 2. Revenue Trend Card (Smooth Spline Area Chart) */}
+            {/* 2. Revenue Trend Card (Live 30/14/7-Day Revenue Polyline) */}
             <View style={styles.analyticsWhiteCard}>
               <View style={styles.cardHeaderWithDropdown}>
-                <Text style={styles.analyticsCardTitle}>Revenue Trend</Text>
+                <Text style={styles.analyticsCardTitle}>Revenue Trend ({chartRange}D)</Text>
                 <TouchableOpacity
                   style={styles.cardHeaderDropdownBtn}
                   onPress={() => setTrendDropdownOpen(true)}
@@ -1144,101 +1078,66 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </TouchableOpacity>
               </View>
 
-              {/* Area Spline SVG */}
-              <Svg width={Math.max(260, isDesktop ? 320 : width - 70)} height={130}>
-                <Defs>
-                  <SvgLinearGradient id="trendGradArea" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0%" stopColor="#2563EB" stopOpacity="0.25" />
-                    <Stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
-                  </SvgLinearGradient>
-                </Defs>
-
-                {/* Horizontal reference grid lines */}
-                {[0, 25, 50, 75, 100].map((y, idx) => (
-                  <Line
-                    key={idx}
-                    x1={36}
-                    y1={y + 10}
-                    x2={isDesktop ? 320 : width - 80}
-                    y2={y + 10}
-                    stroke="#F1F5F9"
-                    strokeWidth={1}
-                  />
-                ))}
-
-                {/* Y-axis labels */}
-                <SvgText x={30} y={14} fill="#94A3B8" fontSize="8" textAnchor="end">{currencySymbol} 80L</SvgText>
-                <SvgText x={30} y={39} fill="#94A3B8" fontSize="8" textAnchor="end">{currencySymbol} 60L</SvgText>
-                <SvgText x={30} y={64} fill="#94A3B8" fontSize="8" textAnchor="end">{currencySymbol} 40L</SvgText>
-                <SvgText x={30} y={89} fill="#94A3B8" fontSize="8" textAnchor="end">{currencySymbol} 20L</SvgText>
-                <SvgText x={30} y={114} fill="#94A3B8" fontSize="8" textAnchor="end">{currencySymbol} 0</SvgText>
-
-                {/* Spline Area Fill */}
-                <Path
-                  d="M 45 92 Q 80 84, 110 70 T 160 62 T 210 52 T 255 24 T 290 40 T 320 54 L 320 110 L 45 110 Z"
-                  fill="url(#trendGradArea)"
-                />
-
-                {/* Spline Line */}
-                <Path
-                  d="M 45 92 Q 80 84, 110 70 T 160 62 T 210 52 T 255 24 T 290 40 T 320 54"
-                  fill="none"
-                  stroke="#2563EB"
-                  strokeWidth="2.2"
-                />
-
-                {/* Key Points */}
-                {[
-                  { cx: 45, cy: 92 },
-                  { cx: 110, cy: 70 },
-                  { cx: 160, cy: 62 },
-                  { cx: 210, cy: 52 },
-                  { cx: 255, cy: 24 },
-                  { cx: 290, cy: 40 },
-                  { cx: 320, cy: 54 },
-                ].map((pt, idx) => (
-                  <Circle
-                    key={idx}
-                    cx={pt.cx}
-                    cy={pt.cy}
-                    r={3}
-                    fill="#ffffff"
-                    stroke="#2563EB"
-                    strokeWidth={2}
-                  />
-                ))}
-
-                {/* X-axis date labels */}
-                <SvgText x={45} y={124} fill="#94A3B8" fontSize="8" textAnchor="middle">01 May</SvgText>
-                <SvgText x={110} y={124} fill="#94A3B8" fontSize="8" textAnchor="middle">08 May</SvgText>
-                <SvgText x={180} y={124} fill="#94A3B8" fontSize="8" textAnchor="middle">15 May</SvgText>
-                <SvgText x={255} y={124} fill="#94A3B8" fontSize="8" textAnchor="middle">22 May</SvgText>
-                <SvgText x={315} y={124} fill="#94A3B8" fontSize="8" textAnchor="middle">31 May</SvgText>
-              </Svg>
+              {!canViewFinancials ? (
+                <Text style={{ color: "#64748B", fontSize: 12, paddingVertical: 24 }}>
+                  Financial trend series restricted for current role.
+                </Text>
+              ) : (
+                <Svg width="100%" height={130} viewBox="0 0 340 130">
+                  <Defs>
+                    <SvgLinearGradient id="trendGradArea" x1="0" y1="0" x2="0" y2="1">
+                      <Stop offset="0%" stopColor="#2563EB" stopOpacity="0.25" />
+                      <Stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
+                    </SvgLinearGradient>
+                  </Defs>
+                  {[10, 35, 60, 85, 110].map((y, idx) => (
+                    <Line key={idx} x1={12} y1={y} x2={332} y2={y} stroke="#F1F5F9" strokeWidth={1} />
+                  ))}
+                  {(() => {
+                    const pts = displayedRevenueData.map((d, idx) => {
+                      const val = d.revenue * currencyRate;
+                      const x = 16 + (idx / Math.max(1, displayedRevenueData.length - 1)) * 310;
+                      const y = 110 - (maxRevenue > 0 ? (val / maxRevenue) * 95 : 0);
+                      return { x, y };
+                    });
+                    if (pts.length === 0) return null;
+                    const lineD = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+                    const fillD = `${lineD} L ${pts[pts.length - 1].x.toFixed(1)} 110 L ${pts[0].x.toFixed(1)} 110 Z`;
+                    return (
+                      <>
+                        <Path d={fillD} fill="url(#trendGradArea)" />
+                        <Path d={lineD} fill="none" stroke="#2563EB" strokeWidth="2.2" />
+                      </>
+                    );
+                  })()}
+                </Svg>
+              )}
             </View>
 
             {/* 3. Top Selling Destinations (Holidays) Card */}
             <View style={styles.analyticsWhiteCard}>
-              <Text style={styles.analyticsCardTitle}>Top Selling Destinations (Holidays)</Text>
+              <Text style={styles.analyticsCardTitle}>Top Selling Destinations</Text>
               <View style={styles.destinationsListContainer}>
-                {[
-                  { name: "Thailand", amount: "12,45,000", pct: 100, color: "#2563EB" },
-                  { name: "Dubai", amount: "9,85,000", pct: 79, color: "#10B981" },
-                  { name: "Singapore", amount: "6,25,000", pct: 50, color: "#8B5CF6" },
-                  { name: "Bali", amount: "4,75,000", pct: 38, color: "#F59E0B" },
-                  { name: "Malaysia", amount: "3,15,000", pct: 25, color: "#EF4444" },
-                ].map((d) => (
-                  <View key={d.name} style={styles.destinationRowItem}>
-                    <View style={styles.destNameCol}>
-                      <View style={[styles.destDot, { backgroundColor: d.color }]} />
-                      <Text style={styles.destNameText}>{d.name}</Text>
+                {topDestinations.length === 0 ? (
+                  <Text style={{ color: "#64748B", fontSize: 12 }}>No destination bookings recorded yet.</Text>
+                ) : (
+                  topDestinations.map((d) => (
+                    <View key={d.name} style={styles.destinationRowItem}>
+                      <View style={styles.destNameCol}>
+                        <View style={[styles.destDot, { backgroundColor: d.color }]} />
+                        <Text style={styles.destNameText}>{d.name}</Text>
+                      </View>
+                      <View style={styles.destBarCol}>
+                        <View style={[styles.destBarFill, { width: `${d.pct}%`, backgroundColor: d.color }]} />
+                      </View>
+                      <Text style={styles.destAmountText}>
+                        {canViewFinancials
+                          ? `${currencySymbol} ${Math.round(d.amount * currencyRate).toLocaleString()}`
+                          : "•••"}
+                      </Text>
                     </View>
-                    <View style={styles.destBarCol}>
-                      <View style={[styles.destBarFill, { width: `${d.pct}%`, backgroundColor: d.color }]} />
-                    </View>
-                    <Text style={styles.destAmountText}>{currencySymbol} {d.amount}</Text>
-                  </View>
-                ))}
+                  ))
+                )}
               </View>
             </View>
 

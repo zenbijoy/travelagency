@@ -121,28 +121,73 @@ export const SupportCenterScreen: React.FC = () => {
     setResponseMessage(template);
   };
 
-  const handleSendResponse = () => {
+  const handleSendResponse = async () => {
     if (!responseMessage.trim()) {
       showLocalizedAlert("Empty Response", "Please type a message before sending.");
       return;
     }
+    if (!selectedTicket) return;
     setSendingState("sending");
-    setTimeout(() => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from("ticket_messages").insert({
+        ticket_id: selectedTicket.id,
+        sender_id: user?.id || null,
+        message: responseMessage.trim(),
+        is_internal: replyTab === "Internal Note",
+      });
+      if (error) throw error;
       setSendingState("sent");
-      setTimeout(() => {
-        setSendingState("idle");
-        setResponseMessage("");
-        showLocalizedAlert("Response Delivered", `Reply dispatched for ticket ${selectedTicket?.id || ""}`);
-      }, 1500);
-    }, 1200);
+      setResponseMessage("");
+      showLocalizedAlert("Response Delivered", `Reply saved for ticket ${selectedTicket.id}`);
+      setTimeout(() => setSendingState("idle"), 800);
+    } catch (err: any) {
+      setSendingState("idle");
+      showLocalizedAlert("Dispatch Failed", err?.message || "Could not persist ticket reply.");
+    }
   };
 
-  const handleUpdateInvestigation = () => {
-    showLocalizedAlert(
-      "Investigation Updated",
-      `Ticket ${selectedTicket?.id || ""} status updated to ${investigationStatus}.`
-    );
+  const handleUpdateInvestigation = async () => {
+    if (!selectedTicket) return;
+    const mappedStatus =
+      investigationStatus === "Resolved"
+        ? "resolved"
+        : investigationStatus === "Pending"
+        ? "in_progress"
+        : "open";
+    try {
+      const { error } = await supabase
+        .from("support_tickets")
+        .update({ status: mappedStatus, updated_at: new Date().toISOString() })
+        .eq("id", selectedTicket.id);
+      if (error) throw error;
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === selectedTicket.id
+            ? {
+                ...t,
+                status:
+                  mappedStatus === "resolved"
+                    ? "Closed"
+                    : mappedStatus === "in_progress"
+                    ? "Working"
+                    : "Open",
+              }
+            : t
+        )
+      );
+      showLocalizedAlert(
+        "Investigation Updated",
+        `Ticket ${selectedTicket.id} status updated to ${investigationStatus}.`
+      );
+    } catch (err: any) {
+      showLocalizedAlert("Update Failed", err?.message || "Could not update ticket status.");
+    }
   };
+
+  const activeTicketCount = tickets.filter((t) => t.status === "Open" || t.status === "Working").length;
+  const resolvedTicketCount = tickets.filter((t) => t.status === "Closed").length;
+  const criticalTicketCount = tickets.filter((t) => t.priority === "P1 CRITICAL").length;
 
   // --------------------------------------------------------------------------
   // 1. OVERVIEW & LIVE FEED SCREEN
@@ -168,7 +213,7 @@ export const SupportCenterScreen: React.FC = () => {
               <View style={[styles.statusDot, { backgroundColor: "#f43f5e" }]} />
               <Text style={styles.statLabel}>ACTIVE</Text>
             </View>
-            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statNumber}>{String(activeTicketCount).padStart(2, "0")}</Text>
           </View>
 
           {/* Resolved */}
@@ -177,7 +222,7 @@ export const SupportCenterScreen: React.FC = () => {
               <View style={[styles.statusDot, { backgroundColor: "#10b981" }]} />
               <Text style={styles.statLabel}>RESOLVED</Text>
             </View>
-            <Text style={styles.statNumber}>84</Text>
+            <Text style={styles.statNumber}>{String(resolvedTicketCount).padStart(2, "0")}</Text>
           </View>
 
           {/* Critical */}
@@ -186,7 +231,7 @@ export const SupportCenterScreen: React.FC = () => {
               <View style={[styles.statusDot, { backgroundColor: "#f59e0b" }]} />
               <Text style={styles.statLabel}>CRITICAL</Text>
             </View>
-            <Text style={styles.statNumber}>03</Text>
+            <Text style={styles.statNumber}>{String(criticalTicketCount).padStart(2, "0")}</Text>
           </View>
         </View>
 

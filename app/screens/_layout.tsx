@@ -1,6 +1,7 @@
 import React from "react";
 import { Platform } from "react-native";
 import { Stack } from "expo-router";
+import { useTheme } from "../../src/context/ThemeContext";
 
 /**
  * Unified Screens Stack Navigator Layout
@@ -10,6 +11,7 @@ import { Stack } from "expo-router";
  * native iOS swipe gestures, standard back stack behavior, and consistent contentStyle.
  */
 export default function ScreensLayout() {
+  const { colors } = useTheme();
   return (
     <Stack
       screenOptions={{
@@ -17,7 +19,7 @@ export default function ScreensLayout() {
         animation: Platform.OS === "ios" ? "default" : "slide_from_right",
         gestureEnabled: true,
         fullScreenGestureEnabled: Platform.OS === "ios",
-        contentStyle: { backgroundColor: "#ffffff" },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="[slug]" />
@@ -37,8 +39,10 @@ export default function ScreensLayout() {
       <Stack.Screen name="search" />
       <Stack.Screen name="recommended-tours" />
       <Stack.Screen name="car-rentals" />
+      <Stack.Screen name="ride-hailing" />
       <Stack.Screen name="customer-support" />
       <Stack.Screen name="agencies" />
+      <Stack.Screen name="agency-detail" />
       <Stack.Screen name="events" />
       <Stack.Screen name="rewards" />
       <Stack.Screen name="landmark-scanner" />
@@ -68,6 +72,20 @@ export default function ScreensLayout() {
       <Stack.Screen name="group-trip" />
       <Stack.Screen name="live" />
       <Stack.Screen name="agency-chat" />
+      <Stack.Screen name="off-grid-mesh" />
+      <Stack.Screen name="explore-trips" />
+      <Stack.Screen name="itinerary-details" />
+      <Stack.Screen name="itinerary-builder" />
+      <Stack.Screen name="itinerary-clone" />
+      <Stack.Screen name="trip-checkout" />
+      <Stack.Screen name="travel-intelligence" />
+      <Stack.Screen name="train-live-tracking" />
+      <Stack.Screen name="bus-live-tracking" />
+      <Stack.Screen name="active-trip" />
+      <Stack.Screen name="active-devices" />
+      <Stack.Screen name="delete-account" />
+      <Stack.Screen name="notifications" />
+      <Stack.Screen name="travel-preferences" />
     </Stack>
   );
 }

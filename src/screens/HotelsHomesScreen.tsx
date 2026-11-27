@@ -29,14 +29,15 @@ import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { supabase } from "../utils/supabase";
-import { DEMO_USER_ID, FriendProfile } from "../services/repositories/friends";
+import { FriendProfile } from "../services/repositories/friends";
+import { useAuthStore } from "../store/authStore";
 import { messengerRepository, ConversationItem } from "../services/repositories/messenger";
 import { DirectChatModal } from "../components/DirectChatModal";
 import { ListSkeleton, CardSkeleton, ErrorStateCard, ResultsSummaryHeader, ComparisonModal, ComparisonItem } from "../components/common";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PrecisionSlider } from "../components/ui/PrecisionSlider";
 import { PriceHistogramSlider } from "../components/ui/PriceHistogramSlider";
-import { formatPrice as utilsFormatPrice } from "../utils/currency";
+import { formatPrice as utilsFormatPrice, formatSourcePrice } from "../utils/currency";
 import { useTravelStore } from "../store/travelStore";
 import { travelRepository, HotelSearchResult, HotelSearchFilters } from "../repositories";
 import { formatLocalizedCurrency, formatLocalizedDate } from "../utils/formatters";
@@ -51,6 +52,12 @@ import {
   getVibeTagBadgeStyle,
   TravelDimension,
 } from "../services/nlp/sentimentService";
+import {
+  CONSUMER_STAY_ADDONS,
+  useHotelPmsStore,
+  hasDateOverlap,
+  issueDigitalKeyPayload,
+} from "../features/hotel";
 
 
 const TRIP_BLUE = "#E5A93C"; // Luxury Gold Design Token
@@ -95,8 +102,8 @@ export const POPULAR_VILLA_DESTINATIONS = [
 // FORMATTING & CALCULATION UTILITIES (ZERO HARD-CODING)
 // ============================================================================
 
-export function formatPrice(amount: number | string, currency?: string): string {
-  return utilsFormatPrice(Number(amount) || 0, currency as any);
+export function formatPrice(amount: number | string, sourceCurrency: string = "USD"): string {
+  return formatSourcePrice(Number(amount) || 0, sourceCurrency);
 }
 
 export function formatDateShort(date: Date, locale?: string): string {
@@ -327,6 +334,7 @@ export function HotelsHomesScreen() {
   const { isDesktop, isTablet } = useResponsive();
   const numCols = isDesktop ? 3 : isTablet ? 2 : 1;
   const { colors, isDark } = useTheme();
+  const authUserId = useAuthStore((s) => s.user?.id);
   // Shared travel store integration
   const { hotelFilters, setHotelFilters, resetFilters } = useTravelStore();
 
@@ -356,6 +364,16 @@ export function HotelsHomesScreen() {
 
   // Selected Villa for Booking Bottom Sheet
   const [selectedVilla, setSelectedVilla] = useState<VacationRental | null>(null);
+
+  // Consumer Stay PMS Upgrades: Add-on Upsells, Promo/Loyalty & Digital QR Pass
+  const pmsWorkspace = useHotelPmsStore((s) => s.workspace);
+  const patchPmsWorkspace = useHotelPmsStore((s) => s.patchWorkspace);
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [promoCodeInput, setPromoCodeInput] = useState("");
+  const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
+  const [redeemLoyaltyPoints, setRedeemLoyaltyPoints] = useState(false);
+  const [qrPassModalVisible, setQrPassModalVisible] = useState(false);
+  const AVAILABLE_LOYALTY_POINTS = 1500; // User tier balance
 
   // Hotel Comparison State
   const [selectedCompareHotels, setSelectedCompareHotels] = useState<VacationRental[]>([]);
@@ -674,10 +692,17 @@ export function HotelsHomesScreen() {
   // Open Message Host Conversation
   const handleMessageHost = useCallback(async (host: HostInfo) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (!authUserId) {
+      Alert.alert("Sign In Required", "Please sign in to message the host.", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Sign In", onPress: () => router.push("/(auth)/login" as any) },
+      ]);
+      return;
+    }
     setChatLoading(true);
     try {
       const convo = await messengerRepository.getOrCreateDirectConversation(
-        DEMO_USER_ID,
+        authUserId,
         host.id
       );
       setActiveChatConvo(convo);
@@ -687,7 +712,7 @@ export function HotelsHomesScreen() {
     } finally {
       setChatLoading(false);
     }
-  }, []);
+  }, [authUserId]);
 
   // Reset all filters action for EmptyState
   const handleResetFilters = useCallback(() => {
@@ -789,6 +814,59 @@ export function HotelsHomesScreen() {
     }
   }, [pageLimit, filteredRentals.length]);
 
+  // Live Availability Check against PMS Calendar & Date Blocks
+  const liveAvailability = useMemo(() => {
+    if (!selectedVilla) return { isAvailable: true, message: "" };
+    const startIso = checkInDate.toISOString().split("T")[0];
+    const endIso = checkOutDate.toISOString().split("T")[0];
+
+    const matchedUnit = pmsWorkspace.units.find(
+      (u) => u.occupancyStatus === "vacant" && (u.housekeepingStatus === "ready" || u.housekeepingStatus === "clean")
+    );
+
+    const conflictingRes = pmsWorkspace.reservations.find(
+      (r) =>
+        r.roomUnitId === selectedVilla.id &&
+        r.status !== "cancelled" &&
+        r.status !== "checked_out" &&
+        hasDateOverlap(startIso, endIso, r.checkInDate, r.checkOutDate)
+    );
+
+    if (conflictingRes) {
+      return {
+        isAvailable: false,
+        message: `Conflict: Dates overlap booking ${conflictingRes.bookingReference}`,
+      };
+    }
+
+    return {
+      isAvailable: true,
+      message: matchedUnit
+        ? `Live Verified • Instant Digital Key ready (#${matchedUnit.roomNumber})`
+        : "Live Availability Confirmed • Instant Confirmation",
+    };
+  }, [selectedVilla, checkInDate, checkOutDate, pmsWorkspace]);
+
+  // Toggle Stay Add-On Upsell
+  const toggleAddon = useCallback((addonId: string) => {
+    Haptics.selectionAsync();
+    setSelectedAddons((prev) =>
+      prev.includes(addonId) ? prev.filter((id) => id !== addonId) : [...prev, addonId]
+    );
+  }, []);
+
+  // Apply Promo Code
+  const handleApplyPromo = useCallback(() => {
+    const clean = promoCodeInput.trim().toUpperCase();
+    if (clean === "STAY10" || clean === "SEA20" || clean === "VIP25") {
+      setAppliedPromoCode(clean);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert("Promo Applied", `Code ${clean} activated on your stay checkout!`);
+    } else {
+      Alert.alert("Invalid Promo", "Try code STAY10, SEA20, or VIP25.");
+    }
+  }, [promoCodeInput]);
+
   // Calculate Price Breakdown for Selected Villa (Zero hard-coding)
   const priceBreakdown = useMemo(() => {
     if (!selectedVilla) {
@@ -796,8 +874,11 @@ export function HotelsHomesScreen() {
         nightlyTotal: 0,
         cleaningFee: 0,
         serviceFee: 0,
+        addonsTotal: 0,
         deposit: 0,
         voucherDiscount: 0,
+        promoDiscount: 0,
+        loyaltyDiscount: 0,
         totalPayable: 0,
       };
     }
@@ -806,28 +887,75 @@ export function HotelsHomesScreen() {
     const cleaningFee = selectedVilla.cleaningFee;
     const serviceFee = Math.round(nightlyTotal * selectedVilla.serviceFeePercent);
     const deposit = selectedVilla.deposit;
+
+    // Add-on Upsells Calculation
+    const addonsTotal = selectedAddons.reduce((sum, id) => {
+      const addon = CONSUMER_STAY_ADDONS.find((a) => a.id === id);
+      if (!addon) return sum;
+      const usdUnit = Math.max(5, Math.round(addon.priceBdt / 110));
+      return sum + (addon.perNight ? usdUnit * nightsCount : usdUnit);
+    }, 0);
+
     const voucherDiscount = claimedVoucher ? HOSPITALITY_CONFIG.VOUCHER_DISCOUNT : 0;
+    const promoDiscount =
+      appliedPromoCode === "VIP25"
+        ? 25
+        : appliedPromoCode === "SEA20"
+        ? 20
+        : appliedPromoCode === "STAY10"
+        ? Math.round(nightlyTotal * 0.1)
+        : 0;
+    const loyaltyDiscount = redeemLoyaltyPoints ? 12 : 0; // 1500 pts = $12 credit
+
     const totalPayable = Math.max(
       0,
-      nightlyTotal + cleaningFee + serviceFee + deposit - voucherDiscount
+      nightlyTotal + cleaningFee + serviceFee + addonsTotal + deposit - voucherDiscount - promoDiscount - loyaltyDiscount
     );
 
     return {
       nightlyTotal,
       cleaningFee,
       serviceFee,
+      addonsTotal,
       deposit,
       voucherDiscount,
+      promoDiscount,
+      loyaltyDiscount,
       totalPayable,
     };
-  }, [selectedVilla, nightsCount, claimedVoucher]);
+  }, [selectedVilla, nightsCount, claimedVoucher, selectedAddons, appliedPromoCode, redeemLoyaltyPoints]);
 
   // Handle Reserve / Book Villa
   const handleBookVilla = useCallback(() => {
     if (!selectedVilla) return;
+    if (!liveAvailability.isAvailable) {
+      Alert.alert("Unavailable Dates", liveAvailability.message);
+      return;
+    }
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const v = selectedVilla;
+    const startIso = checkInDate.toISOString().split("T")[0];
+    const endIso = checkOutDate.toISOString().split("T")[0];
+    const bookingRef = `SJ-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    // Sync provisional Digital Check-In Key into consumer PMS wallet
+    const readyUnit = pmsWorkspace.units[0];
+    if (readyUnit) {
+      const provisionalKey = issueDigitalKeyPayload({
+        hotelId: readyUnit.hotelId,
+        unit: readyUnit,
+        bookingReference: bookingRef,
+        guestUserId: authUserId || "guest_consumer",
+        guestName: v.name,
+        validUntil: `${endIso}T12:00:00Z`,
+      });
+      patchPmsWorkspace((draft) => ({
+        ...draft,
+        guestKeys: [provisionalKey, ...draft.guestKeys],
+      }));
+    }
+
     setSelectedVilla(null);
 
     router.push({
@@ -837,16 +965,33 @@ export function HotelsHomesScreen() {
         hotelName: v.name,
         roomType: v.propertyType,
         amount: String(priceBreakdown.totalPayable),
-        reference: `Vacation Rental: ${v.name}`,
-        checkIn: checkInDate.toISOString().split("T")[0],
-        checkOut: checkOutDate.toISOString().split("T")[0],
+        reference: `${bookingRef} · ${v.name}`,
+        checkIn: startIso,
+        checkOut: endIso,
         nights: String(nightsCount),
         guests: `${guestsConfig.adults} Adults, ${guestsConfig.children} Children`,
         cleaningFee: String(v.cleaningFee),
         deposit: String(v.deposit),
+        addons: selectedAddons.join(","),
+        promoCode: appliedPromoCode || "",
+        loyaltyRedeemed: redeemLoyaltyPoints ? "1500" : "0",
       },
     });
-  }, [selectedVilla, priceBreakdown.totalPayable, checkInDate, checkOutDate, nightsCount, guestsConfig]);
+  }, [
+    selectedVilla,
+    liveAvailability,
+    priceBreakdown.totalPayable,
+    checkInDate,
+    checkOutDate,
+    nightsCount,
+    guestsConfig,
+    selectedAddons,
+    appliedPromoCode,
+    redeemLoyaltyPoints,
+    pmsWorkspace.units,
+    authUserId,
+    patchPmsWorkspace,
+  ]);
 
   // ============================================================================
   // VIRTUALIZED PERFORMANCE: FLATLIST OPTIMIZATIONS
@@ -1136,6 +1281,13 @@ export function HotelsHomesScreen() {
               </Pressable>
 
               <View style={styles.headerRight} className="flex-row items-center gap-2">
+                <Pressable
+                  style={styles.headerIconBtn}
+                  className="w-9 h-9 rounded-full bg-black/40 items-center justify-center"
+                  onPress={() => setQrPassModalVisible(true)}
+                >
+                  <Ionicons name="qr-code-outline" size={20} color="#E5A93C" />
+                </Pressable>
                 <Pressable
                   style={styles.headerIconBtn}
                   className="w-9 h-9 rounded-full bg-black/40 items-center justify-center"
@@ -1993,6 +2145,132 @@ export function HotelsHomesScreen() {
                   </View>
                 </View>
 
+                {/* Real Availability Check Badge */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    backgroundColor: liveAvailability.isAvailable ? "#ECFDF5" : "#FEF2F2",
+                    borderColor: liveAvailability.isAvailable ? "#A7F3D0" : "#FECACA",
+                    borderWidth: 1,
+                    borderRadius: 12,
+                    padding: 10,
+                    marginTop: 10,
+                  }}
+                >
+                  <Ionicons
+                    name={liveAvailability.isAvailable ? "checkmark-circle" : "alert-circle"}
+                    size={16}
+                    color={liveAvailability.isAvailable ? "#059669" : "#DC2626"}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontWeight: "700",
+                      color: liveAvailability.isAvailable ? "#065F46" : "#991B1B",
+                      marginLeft: 6,
+                      flex: 1,
+                    }}
+                  >
+                    {liveAvailability.message}
+                  </Text>
+                </View>
+
+                {/* Room Add-On Upsells */}
+                <View style={{ marginTop: 14 }}>
+                  <Text style={{ fontSize: 12, fontWeight: "800", color: "#0F172A", marginBottom: 8 }}>
+                    Enhance Your Stay (Optional Add-Ons)
+                  </Text>
+                  {CONSUMER_STAY_ADDONS.map((addon) => {
+                    const isChecked = selectedAddons.includes(addon.id);
+                    const usdUnit = Math.max(5, Math.round(addon.priceBdt / 110));
+                    return (
+                      <Pressable
+                        key={addon.id}
+                        onPress={() => toggleAddon(addon.id)}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          padding: 10,
+                          borderRadius: 12,
+                          borderWidth: 1,
+                          borderColor: isChecked ? "#2563EB" : "#E2E8F0",
+                          backgroundColor: isChecked ? "#EFF6FF" : "#FFFFFF",
+                          marginBottom: 8,
+                        }}
+                      >
+                        <Ionicons
+                          name={isChecked ? "checkbox" : "square-outline"}
+                          size={18}
+                          color={isChecked ? "#2563EB" : "#94A3B8"}
+                        />
+                        <View style={{ flex: 1, marginLeft: 10 }}>
+                          <Text style={{ fontSize: 12, fontWeight: "700", color: "#0F172A" }}>
+                            {addon.label}
+                          </Text>
+                          <Text style={{ fontSize: 10, color: "#64748B" }}>{addon.description}</Text>
+                        </View>
+                        <Text style={{ fontSize: 12, fontWeight: "800", color: "#1E293B" }}>
+                          +{formatPrice(usdUnit)}{addon.perNight ? "/nt" : ""}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                {/* Promo Code & Loyalty Points Redemption */}
+                <View style={{ backgroundColor: "#F8FAFC", borderRadius: 12, borderWidth: 1, borderColor: "#E2E8F0", padding: 12, marginTop: 8 }}>
+                  <Text style={{ fontSize: 12, fontWeight: "800", color: "#0F172A", marginBottom: 8 }}>
+                    Promo Code & ShopnoJatra Loyalty
+                  </Text>
+                  <View style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
+                    <TextInput
+                      placeholder="Promo (e.g. STAY10, VIP25)"
+                      placeholderTextColor="#94A3B8"
+                      value={promoCodeInput}
+                      onChangeText={setPromoCodeInput}
+                      style={{
+                        flex: 1,
+                        backgroundColor: "#FFFFFF",
+                        borderWidth: 1,
+                        borderColor: "#CBD5E1",
+                        borderRadius: 8,
+                        paddingHorizontal: 10,
+                        paddingVertical: 6,
+                        fontSize: 12,
+                        color: "#0F172A",
+                      }}
+                    />
+                    <Pressable
+                      onPress={handleApplyPromo}
+                      style={{
+                        backgroundColor: "#0F172A",
+                        paddingHorizontal: 12,
+                        borderRadius: 8,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "700" }}>Apply</Text>
+                    </Pressable>
+                  </View>
+
+                  <Pressable
+                    onPress={() => setRedeemLoyaltyPoints((prev) => !prev)}
+                    style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
+                  >
+                    <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                      <Ionicons
+                        name={redeemLoyaltyPoints ? "checkmark-circle" : "ellipse-outline"}
+                        size={18}
+                        color={redeemLoyaltyPoints ? "#059669" : "#64748B"}
+                      />
+                      <Text style={{ fontSize: 11, fontWeight: "700", color: "#334155", marginLeft: 6 }}>
+                        Redeem {AVAILABLE_LOYALTY_POINTS} Loyalty Points (-{formatPrice(12)})
+                      </Text>
+                    </View>
+                  </Pressable>
+                </View>
+
                 {/* Price Breakdown Calculation Card (Zero hard-coding) */}
                 <View style={styles.priceBreakdownCard} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 mt-3 mb-4">
                   <View style={styles.priceBreakdownHeader} className="mb-2">
@@ -2009,6 +2287,17 @@ export function HotelsHomesScreen() {
                       {formatPrice(priceBreakdown.nightlyTotal)}
                     </Text>
                   </View>
+
+                  {priceBreakdown.addonsTotal > 0 && (
+                    <View style={styles.breakdownRow} className="flex-row justify-between mb-1.5">
+                      <Text style={styles.breakdownLabel} className="text-xs text-blue-700 font-semibold">
+                        Selected Add-Ons ({selectedAddons.length})
+                      </Text>
+                      <Text style={styles.breakdownValue} className="text-xs font-bold text-blue-700">
+                        +{formatPrice(priceBreakdown.addonsTotal)}
+                      </Text>
+                    </View>
+                  )}
 
                   <View style={styles.breakdownRow} className="flex-row justify-between mb-1.5">
                     <Text style={styles.breakdownLabel} className="text-xs text-slate-600">
@@ -2044,6 +2333,28 @@ export function HotelsHomesScreen() {
                       </Text>
                       <Text style={[styles.breakdownValue, { color: "#10B981" }]} className="text-xs font-bold text-emerald-600">
                         -{formatPrice(priceBreakdown.voucherDiscount)}.00
+                      </Text>
+                    </View>
+                  )}
+
+                  {priceBreakdown.promoDiscount > 0 && (
+                    <View style={styles.breakdownRow} className="flex-row justify-between mb-1.5">
+                      <Text style={[styles.breakdownLabel, { color: "#10B981" }]} className="text-xs font-bold text-emerald-600">
+                        Promo Code ({appliedPromoCode})
+                      </Text>
+                      <Text style={[styles.breakdownValue, { color: "#10B981" }]} className="text-xs font-bold text-emerald-600">
+                        -{formatPrice(priceBreakdown.promoDiscount)}
+                      </Text>
+                    </View>
+                  )}
+
+                  {priceBreakdown.loyaltyDiscount > 0 && (
+                    <View style={styles.breakdownRow} className="flex-row justify-between mb-1.5">
+                      <Text style={[styles.breakdownLabel, { color: "#10B981" }]} className="text-xs font-bold text-emerald-600">
+                        Loyalty Points Redemption
+                      </Text>
+                      <Text style={[styles.breakdownValue, { color: "#10B981" }]} className="text-xs font-bold text-emerald-600">
+                        -{formatPrice(priceBreakdown.loyaltyDiscount)}
                       </Text>
                     </View>
                   )}
@@ -2321,7 +2632,7 @@ export function HotelsHomesScreen() {
       {activeChatConvo && (
         <DirectChatModal
           conversation={activeChatConvo}
-          currentUserId={DEMO_USER_ID}
+          currentUserId={authUserId || ""}
           onClose={() => setActiveChatConvo(null)}
           onOpenProfile={(prof) => {
             router.push({
@@ -2332,7 +2643,12 @@ export function HotelsHomesScreen() {
           onStartCall={(prof, type) => {
             router.push({
               pathname: "/screens/call" as any,
-              params: { friendId: prof.id, callType: type },
+              params: {
+                targetUserId: prof.id,
+                targetName: prof.display_name,
+                targetAvatar: prof.avatar_url,
+                callType: type,
+              },
             });
           }}
         />
@@ -2397,6 +2713,58 @@ export function HotelsHomesScreen() {
         }}
         selectButtonLabel="বুকিং ও বিবরণ দেখুন"
       />
+
+      {/* Digital QR Check-In & Key Pass Modal */}
+      <Modal
+        visible={qrPassModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setQrPassModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(15, 23, 42, 0.78)", justifyContent: "center", padding: 24 }}>
+          <View style={{ backgroundColor: "#FFFFFF", borderRadius: 24, padding: 22, alignItems: "center" }}>
+            <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: "#FEF3C7", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
+              <Ionicons name="key-outline" size={24} color="#D97706" />
+            </View>
+            <Text style={{ fontSize: 18, fontWeight: "900", color: "#0F172A" }}>
+              Express Digital Check-In Pass
+            </Text>
+            <Text style={{ fontSize: 12, color: "#64748B", textAlign: "center", marginTop: 4, marginBottom: 16 }}>
+              Present this QR code at hotel reception or Smart Lock for instant check-in.
+            </Text>
+
+            {pmsWorkspace.guestKeys.filter((k) => k.status === "active").slice(0, 1).map((activeKey) => (
+              <View key={activeKey.id} style={{ width: "100%", backgroundColor: "#F8FAFC", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#E2E8F0", alignItems: "center" }}>
+                <Ionicons name="qr-code-outline" size={110} color="#0F172A" />
+                <Text style={{ fontSize: 15, fontWeight: "900", color: "#0F172A", marginTop: 10, letterSpacing: 1 }}>
+                  {activeKey.qrPassCode}
+                </Text>
+                <Text style={{ fontSize: 12, fontWeight: "700", color: "#2563EB", marginTop: 4 }}>
+                  Room #{activeKey.roomNumber} • Door PIN: {activeKey.pinCodeLast4}
+                </Text>
+                <Text style={{ fontSize: 11, color: "#475569", marginTop: 6 }}>
+                  WiFi: {activeKey.wifiSsid} / Pass: {activeKey.wifiPassword}
+                </Text>
+              </View>
+            ))}
+
+            {pmsWorkspace.guestKeys.filter((k) => k.status === "active").length === 0 && (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <Text style={{ fontSize: 13, fontWeight: "700", color: "#64748B" }}>
+                  No active keys yet. Complete a booking to generate your Express Pass.
+                </Text>
+              </View>
+            )}
+
+            <Pressable
+              onPress={() => setQrPassModalVisible(false)}
+              style={{ width: "100%", backgroundColor: "#0F172A", paddingVertical: 14, borderRadius: 14, alignItems: "center", marginTop: 18 }}
+            >
+              <Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "800" }}>Close Digital Pass</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

@@ -14,6 +14,14 @@ from app.models.user import (
 from app.models.hotel import Hotel, HotelReview, HotelRoom, HotelRoomAvailability
 from app.models.flight import Airline, Airport, Flight, FlightSeat
 from app.models.booking import Booking, BookingEvent, BookingItem, BookingPassenger, BookingPayment
+from app.models.tenant import (
+    Cell,
+    Organization,
+    OrganizationMembership,
+    Tenant,
+    TenantCellAssignment,
+    TenantMembership,
+)
 from app.models.payment import (
     Payment,
     PaymentSecurityNonce,
@@ -137,6 +145,12 @@ __all__ = [
     "KYCAuditLog",
     "Ticket",
     "TicketScan",
+    "Tenant",
+    "TenantMembership",
+    "Organization",
+    "OrganizationMembership",
+    "Cell",
+    "TenantCellAssignment",
     "ProviderProfileModel",
     "ProviderDocumentModel",
     "ProviderServiceModel",

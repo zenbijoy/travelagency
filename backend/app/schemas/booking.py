@@ -113,6 +113,7 @@ class BookingResponse(BaseModel):
     service_fee: float
     final_price: float
     currency: str
+    tenant_id: Optional[uuid.UUID] = None
     created_at: datetime
     confirmed_at: Optional[datetime] = None
     items: List[BookingItemResponse] = Field(default_factory=list)

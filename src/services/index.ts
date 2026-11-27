@@ -170,6 +170,22 @@ export * from "./offline/offlineGuideService";
 // Mobile Navigation & Universal Deep Linking Engine
 export * from "./navigation/deepLinkingService";
 
+// Special Zone Intelligence & Military Escorts (Sajek, Saint Martin, Tanguar Haor)
+export * from "./specialZoneService";
+
+// Corporate VAT & Mushak 6.3 Tax Invoice Generator
+export * from "./corporateInvoiceService";
+
+// Bangladesh NID & Transit Identity Validator
+export * from "../utils/nidValidator";
+
+// Rider & Mobility Ecosystem Service
+export { riderService } from "./riderService";
+
+// Local Artisan Marketplace Commerce Service
+export { localMarketplaceService } from "./localMarketplaceService";
+
+
 
 
 

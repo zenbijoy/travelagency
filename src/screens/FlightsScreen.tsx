@@ -1050,7 +1050,7 @@ export function FlightsScreen() {
                     <RTLIcon name="arrow-back" size={20} color="#FFFFFF" />
                   </Pressable>
                   <View style={styles.brandRow}>
-                    <Text style={styles.tripLogoText}>Trip.com</Text>
+                    <Text style={styles.tripLogoText}>Shopno Jatra</Text>
                     <View style={styles.vDivider} />
                     <View style={styles.airlineBadge}>
                       <View style={styles.redDot} />

@@ -25,6 +25,7 @@ export interface EmptyStateProps {
   title: string;
   description?: string;
   illustration?: React.ReactNode;
+  icon?: string;
   type?: EmptyStateType;
   actionLabel?: string;
   onAction?: () => void;
@@ -43,6 +44,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   illustration,
+  icon,
   type = "generic",
   actionLabel,
   onAction,
@@ -57,7 +59,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   testID,
 }: EmptyStateProps) => {
   const { colors: themeColors } = useTheme();
-  const defaultIcon = getEmptyStateIcon(type);
+  const defaultIcon = icon ? { name: icon, color: colors.neutral[400] } : getEmptyStateIcon(type);
 
   return (
     <View

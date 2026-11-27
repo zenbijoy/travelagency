@@ -1280,7 +1280,7 @@ export function TripPlannerScreen() {
         </TouchableOpacity>
 
         <View style={styles.headerTitleWrap}>
-          <Text style={styles.headerTitle}>Trip.Planner</Text>
+          <Text style={styles.headerTitle}>Shopno Planner</Text>
           <Badge
             status="info"
             variant="subtle"

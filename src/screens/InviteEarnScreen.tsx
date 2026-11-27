@@ -14,9 +14,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../context/ThemeContext";
+import { copyToClipboard } from "../utils/clipboard";
 
 export function InviteEarnScreen() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const { colors, isDark } = useTheme();
 
   // State management
   const [showToast, setShowToast] = useState<boolean>(false);
@@ -25,12 +30,12 @@ export function InviteEarnScreen() {
   const [showDetailsModal, setShowDetailsModal] = useState<boolean>(false);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
 
-  const referralCode = "TRIP2026-X89";
-  const PRE_WRITTEN_MESSAGE =
-    "স্বপ্ন ট্রাভেলের সাথে যেকোনো বাস, ট্রেন বা বিমানে ভ্রমণের টিকিট বুকিংয়ে পান ২০% পর্যন্ত দারুণ ছাড়! এখনই আমার রেফারেল কোড [TRIP2026-X89] ব্যবহার করে সাইন আপ করুন: https://shopnotravel.com/invite?code=TRIP2026-X89";
+  const referralCode = user?.id ? `SJ-${user.id.slice(0, 6).toUpperCase()}` : "SJ-SHOPNO2026";
+  const PRE_WRITTEN_MESSAGE = `স্বপ্নযাত্রার সাথে যেকোনো বাস, লঞ্চ, হোটেল বা বিমানে ভ্রমণের টিকিট বুকিংয়ে পান ২০% পর্যন্ত দারুণ ছাড়! এখনই আমার রেফারেল কোড [${referralCode}] ব্যবহার করে সাইন আপ করুন: https://shopnojatra.com/invite?code=${referralCode}`;
 
   const handleCopyCode = () => {
-    setToastMessage("রেফারেল কোড [TRIP2026-X89] ক্লিপবোর্ডে কপি হয়েছে!");
+    copyToClipboard(referralCode, { label: "রেফারেল কোড" });
+    setToastMessage(`রেফারেল কোড [${referralCode}] ক্লিপবোর্ডে কপি হয়েছে!`);
     setShowToast(true);
     setTimeout(() => {
       setShowToast(false);
@@ -38,6 +43,7 @@ export function InviteEarnScreen() {
   };
 
   const handleCopyPrewrittenMessage = () => {
+    copyToClipboard(PRE_WRITTEN_MESSAGE, { label: "শেয়ার বার্তা" });
     setToastMessage("আগে থেকে তৈরি শেয়ার বার্তা কপি হয়েছে!");
     setShowToast(true);
     setTimeout(() => {
@@ -49,7 +55,7 @@ export function InviteEarnScreen() {
     try {
       await Share.share({
         message: PRE_WRITTEN_MESSAGE,
-        title: "স্বপ্ন ট্রাভেলে ২০% ছাড় ও রেফারেল বোনাস",
+        title: "স্বপ্নযাত্রায় ২০% ছাড় ও রেফারেল বোনাস",
       });
     } catch (e) {
       handleCopyPrewrittenMessage();
@@ -57,7 +63,7 @@ export function InviteEarnScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top", "left", "right"]}>
       {/* Toast Notification */}
       {showToast && (
         <View style={styles.toastBox}>
@@ -422,7 +428,7 @@ export function InviteEarnScreen() {
 
             <ScrollView style={{ maxHeight: 280, marginVertical: 10 }}>
               <Text style={styles.tcText}>
-                1. **Eligibility**: Existing Trip.com users can invite new users who have not previously made a booking.
+                1. **Eligibility**: Existing Shopno Jatra users can invite new users who have not previously made a booking.
               </Text>
               <Text style={styles.tcText}>
                 2. **Friend Reward**: Referred friends receive a 20% discount coupon (up to $50 max value) applicable on hotel or flight bookings.

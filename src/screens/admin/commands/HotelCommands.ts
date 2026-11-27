@@ -16,13 +16,13 @@ export class VerifyHotelCommand implements AdminCommand<{ id: string; status: st
   ) {}
 
   async execute(admin: AdminUser) {
-    try {
-      await supabase
-        .from("hotels")
-        .update({ is_active: true })
-        .eq("id", this.entityId);
-    } catch (e) {
-      console.warn("Supabase hotel verify update (handled):", e);
+    const { error } = await supabase
+      .from("hotels")
+      .update({ is_active: true, updated_at: new Date().toISOString() })
+      .eq("id", this.entityId);
+
+    if (error) {
+      throw new Error(error.message || "Failed to verify hotel.");
     }
 
     return { id: this.entityId, status: "Active" };
@@ -52,13 +52,13 @@ export class SuspendHotelCommand implements AdminCommand<{ id: string; status: s
   ) {}
 
   async execute(admin: AdminUser) {
-    try {
-      await supabase
-        .from("hotels")
-        .update({ is_active: false })
-        .eq("id", this.entityId);
-    } catch (e) {
-      console.warn("Supabase hotel suspend update (handled):", e);
+    const { error } = await supabase
+      .from("hotels")
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq("id", this.entityId);
+
+    if (error) {
+      throw new Error(error.message || "Failed to suspend hotel.");
     }
 
     return { id: this.entityId, status: "Suspended" };
@@ -88,13 +88,13 @@ export class ActivateHotelCommand implements AdminCommand<{ id: string; status: 
   ) {}
 
   async execute(admin: AdminUser) {
-    try {
-      await supabase
-        .from("hotels")
-        .update({ is_active: true })
-        .eq("id", this.entityId);
-    } catch (e) {
-      console.warn("Supabase hotel activate update (handled):", e);
+    const { error } = await supabase
+      .from("hotels")
+      .update({ is_active: true, updated_at: new Date().toISOString() })
+      .eq("id", this.entityId);
+
+    if (error) {
+      throw new Error(error.message || "Failed to activate hotel.");
     }
 
     return { id: this.entityId, status: "Active" };
@@ -125,6 +125,13 @@ export class UpdateHotelPricingCommand implements AdminCommand<{ id: string; adj
   ) {}
 
   async execute(admin: AdminUser) {
+    const { error } = await supabase
+      .from("hotels")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", this.entityId);
+    if (error) {
+      throw new Error(error.message || "Failed to update hotel pricing.");
+    }
     return { id: this.entityId, adjustment: `${this.multiplier}x` };
   }
 

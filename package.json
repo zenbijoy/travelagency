@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
-  "workspaces": [
-    "AGEN",
-    "hotel",
-    "packages/*"
-  ],
   "main": "index.js",
   "scripts": {
     "start": "node --max-old-space-size=4096 ./node_modules/expo/bin/cli start",
@@ -15,7 +10,7 @@
     "ios": "expo run:ios",
     "web": "node --max-old-space-size=4096 node_modules/expo/bin/cli start --web",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
+    "test": "node --max-old-space-size=4096 ./node_modules/jest/bin/jest.js --maxWorkers=2 --forceExit",
     "build:android": "eas build --platform android",
     "build:ios": "eas build --platform ios",
     "build:preview": "eas build --platform android --profile preview",
@@ -126,7 +121,22 @@
     "typescript": "~5.9.2"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "maxWorkers": 2,
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/AGEN/",
+      "<rootDir>/hotel/",
+      "<rootDir>/.kilo/",
+      "<rootDir>/spatial-engine/"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/.kilo/"
+    ],
+    "moduleDirectories": [
+      "<rootDir>/node_modules",
+      "node_modules"
+    ]
   },
   "allowScripts": {
     "@firebase/util@1.15.1": true,

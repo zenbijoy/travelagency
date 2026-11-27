@@ -124,8 +124,8 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "trip-home-sticky-1",
-    source: "trip.com_mobile_with_precise_sticky_scroll_1/code.html",
-    title: "Trip.com",
+    source: "shopnojatra_mobile_with_precise_sticky_scroll_1/code.html",
+    title: "Shopno Jatra",
     subtitle:
       "Hotels, flights, trains, package tours, and destination discovery.",
     kind: "home",
@@ -139,13 +139,13 @@ export const screens: UIScreen[] = [
       "Car Rentals",
       "+7 more",
     ],
-    actions: ["Deals", "Events", "Trip.Planner", "Trending"],
+    actions: ["Deals", "Events", "Shopno Planner", "Trending"],
     activeTab: "Home",
   },
   {
     slug: "trip-home-sticky-2",
-    source: "trip.com_mobile_with_precise_sticky_scroll_2/code.html",
-    title: "Trip.com",
+    source: "shopnojatra_mobile_with_precise_sticky_scroll_2/code.html",
+    title: "Shopno Jatra",
     subtitle:
       "Silver member home screen with sticky search and travel services.",
     kind: "home",
@@ -163,20 +163,20 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "trip-mobile-interface",
-    source: "trip.com_mobile_interface_replicated_2/code.html",
-    title: "Trip.com",
+    source: "shopnojatra_mobile_interface_replicated_2/code.html",
+    title: "Shopno Jatra",
     subtitle: "Replicated mobile services dashboard and destination grid.",
     kind: "home",
     theme: "trip",
     hero: tripHero,
     tabs: ["Hotels", "Flights", "Flight + Hotel", "Trains"],
-    chips: ["Rome", "Deals", "Events", "Trip.Planner"],
+    chips: ["Rome", "Deals", "Events", "Shopno Planner"],
     actions: ["Vacation Rentals", "Attractions", "Car Rentals", "+7 more"],
     activeTab: "Home",
   },
   {
     slug: "flights",
-    source: "trip.com_combined_pixel_perfect_flights_screen/code.html",
+    source: "shopnojatra_combined_pixel_perfect_flights_screen/code.html",
     title: "Discover the beauty of China",
     subtitle: "Book with China Eastern and get a free flight within China.",
     kind: "search",
@@ -221,7 +221,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "search-stays",
-    source: "trip.com_combined_pixel_perfect_hotels_discovery/code.html",
+    source: "shopnojatra_combined_pixel_perfect_hotels_discovery/code.html",
     title: "Search Stays",
     subtitle: "New user benefits, stay discovery, and inspiration cards.",
     kind: "hotel",
@@ -259,7 +259,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "hotels-homes",
-    source: "trip.com_hotels_homes_replicated/code.html",
+    source: "shopnojatra_hotels_homes_replicated/code.html",
     title: "Hotels & Homes",
     subtitle: "Destination, dates, rooms, adults, children, and hotel offers.",
     kind: "hotel",
@@ -402,7 +402,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "my-trips",
-    source: "trip.com_combined_pixel_perfect_my_trips_screen/code.html",
+    source: "shopnojatra_combined_pixel_perfect_my_trips_screen/code.html",
     title: "My Trips",
     subtitle: "No upcoming trips, memories, and destination posts.",
     kind: "trips",
@@ -419,7 +419,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "messages",
-    source: "trip.com_messages_screen_replicated/code.html",
+    source: "shopnojatra_messages_screen_replicated/code.html",
     title: "Messages",
     subtitle: "Notifications from the last 3 months.",
     kind: "messages",
@@ -440,7 +440,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "trains",
-    source: "trip.com_trains_replicated/code.html",
+    source: "shopnojatra_trains_replicated/code.html",
     title: "Trains",
     subtitle: "Trains, buses, passes, date, return trip, and passenger search.",
     kind: "search",
@@ -484,7 +484,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "private-tours-search",
-    source: "trip.com_private_tours_search_replicated/code.html",
+    source: "shopnojatra_private_tours_search_replicated/code.html",
     title: "Private Tours",
     subtitle: "Custom China and Asia itinerary search.",
     kind: "search",
@@ -502,7 +502,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "recommended-tours",
-    source: "trip.com_recommended_tours_replicated/code.html",
+    source: "shopnojatra_recommended_tours_replicated/code.html",
     title: "Private Tours",
     subtitle: "Filterable private tours list with prices and promos.",
     kind: "list",
@@ -540,7 +540,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "car-rentals",
-    source: "trip.com_car_rentals_replicated/code.html",
+    source: "shopnojatra_car_rentals_replicated/code.html",
     title: "Car Rentals",
     subtitle: "Compare top car rental companies worldwide with no hidden fees.",
     kind: "list",
@@ -591,7 +591,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "customer-support",
-    source: "trip.com_customer_support_replicated/code.html",
+    source: "shopnojatra_customer_support_replicated/code.html",
     title: "Customer Support",
     subtitle: "Service Chat, FAQs, hot topics, and category support.",
     kind: "support",
@@ -612,9 +612,9 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "partner-program",
-    source: "trip.com_partner_program_replicated/code.html",
+    source: "shopnojatra_partner_program_replicated/code.html",
     title: "Join Us",
-    subtitle: "Partner with Trip.com and reach travelers worldwide.",
+    subtitle: "Partner with Shopno Jatra and reach travelers worldwide.",
     kind: "list",
     theme: "trip",
     cards: [
@@ -638,7 +638,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "invite-earn",
-    source: "trip.com_invite_earn_replicated/code.html",
+    source: "shopnojatra_invite_earn_replicated/code.html",
     title: "Invite & earn",
     subtitle: "Refer friends. Earn up to $100.",
     kind: "invite",
@@ -657,9 +657,9 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "rewards",
-    source: "trip.com_rewards_replicated/code.html",
+    source: "shopnojatra_rewards_replicated/code.html",
     title: "Silver",
-    subtitle: "Trip.com Rewards member tier and new user package.",
+    subtitle: "Shopno Jatra Rewards member tier and new user package.",
     kind: "rewards",
     theme: "trip",
     benefits: ["0/1 Booking", "Update your member profile", "New user package"],
@@ -671,7 +671,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "rewards-login",
-    source: "trip.com_rewards_login_replicated/code.html",
+    source: "shopnojatra_rewards_login_replicated/code.html",
     title: "Sign in for member rewards",
     subtitle:
       "Get Member Benefits and continue with Google, email, or Facebook.",
@@ -686,26 +686,26 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "premium-account",
-    source: "trip.com_premium_account_experience/code.html",
-    title: "Trip.com Member",
+    source: "shopnojatra_premium_account_experience/code.html",
+    title: "Shopno Jatra Member",
     subtitle: "Silver member profile, promo codes, creator center, and perks.",
     kind: "account",
     theme: "trip",
-    benefits: ["8 Promo Codes", "Earn 25 Trip Coins", "Perks"],
+    benefits: ["8 Promo Codes", "Earn 25 Shopno Coins", "Perks"],
     cards: [
       {
         title: "Manage account",
         subtitle: "Your exclusive new-user special discounts",
       },
       { title: "Creator center" },
-      { title: "About Trip.com" },
+      { title: "About Shopno Jatra" },
       { title: "Terms & conditions" },
     ],
     activeTab: "Account",
   },
   {
     slug: "account-security",
-    source: "trip.com_account_security_replicated/code.html",
+    source: "shopnojatra_account_security_replicated/code.html",
     title: "Account Security",
     subtitle: "Security, payment settings, and member profile cards.",
     kind: "settings",
@@ -728,7 +728,7 @@ export const screens: UIScreen[] = [
   },
   {
     slug: "settings",
-    source: "trip.com_settings_replicated/code.html",
+    source: "shopnojatra_settings_replicated/code.html",
     title: "Settings",
     subtitle:
       "Localization, account, interface, notifications, accessibility, and legal settings.",

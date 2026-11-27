@@ -74,7 +74,7 @@ export type CurrencyCode = "USD" | "BDT" | "EUR" | "GBP";
 
 const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
   USD: "$",
-  BDT: "à§³",
+  BDT: "৳",
   EUR: "â‚¬",
   GBP: "Â£",
 };
@@ -314,61 +314,61 @@ export interface PromoRule {
 const REGISTERED_PROMOS: PromoRule[] = [
   {
     code: "SHOPNO10",
-    title: "à¦—à§à¦²à§‹à¦¬à¦¾à¦² à§§à§¦% à¦›à¦¾à¦¡à¦¼ (Global 10% Off)",
-    description: "à¦¸à¦•à¦² à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸à§‡ à¦¬à§‡à¦¸ à¦«à§‡à¦¯à¦¼à¦¾à¦°à§‡ à§§à§¦% à¦¤à¦¾à§Žà¦•à§à¦·à¦£à¦¿à¦• à¦›à¦¾à¦¡à¦¼",
+    title: "গ্লোবাল ১০% ছাড় (Global 10% Off)",
+    description: "সকল সার্ভিসে বেস ফেয়ারে ১০% তাৎক্ষণিক ছাড়",
     discountType: "percentage",
     discountValue: 10,
     minSpendUSD: 40,
-    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§¨-à§©à§§",
+    expiryDate: "২০২৬-১২-৩১",
     applicableCategory: "all",
   },
   {
     code: "FLYMORE",
-    title: "à¦²à¦‚-à¦¹à¦² $50 (à§³6,000) à¦›à¦¾à¦¡à¦¼",
-    description: "à¦«à§à¦²à¦¾à¦‡à¦Ÿ à¦“ à¦ªà§à¦¯à¦¾à¦•à§‡à¦œ à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸à§‡ $50 à¦«à§à¦²à§à¦¯à¦¾à¦Ÿ à¦›à¦¾à¦¡à¦¼",
+    title: "লং-হল $50 (৳6,000) ছাড়",
+    description: "ফ্লাইট ও প্যাকেজ সার্ভিসে $50 ফ্ল্যাট ছাড়",
     discountType: "fixed",
     discountValue: 50,
     minSpendUSD: 250,
-    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§§-à§©à§¦",
+    expiryDate: "২০২৬-১১-৩০",
     applicableCategory: "flight",
   },
   {
     code: "EID15",
-    title: "à¦›à§à¦Ÿà¦¿à¦° à¦‰à§Žà¦¸à¦¬ à§§à§«% à¦›à¦¾à¦¡à¦¼ (Eid Special 15%)",
-    description: "à¦¡à¦®à§‡à¦¸à§à¦Ÿà¦¿à¦• à¦“ à¦†à¦¨à§à¦¤à¦°à§à¦œà¦¾à¦¤à¦¿à¦• à¦¬à§à¦•à¦¿à¦‚à¦¯à¦¼à§‡ à§§à§«% à¦¸à¦¿à¦œà¦¨à¦¾à¦² à¦¸à§‡à¦­à¦¿à¦‚à¦¸",
+    title: "ছুটির উৎসব ১৫% ছাড় (Eid Special 15%)",
+    description: "ডমেস্টিক ও আন্তর্জাতিক বুকিংয়ে ১৫% সিজনাল সেভিংস",
     discountType: "percentage",
     discountValue: 15,
     minSpendUSD: 80,
-    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§¨-à§¨à§«",
+    expiryDate: "২০২৬-১২-২৫",
     applicableCategory: "all",
   },
   {
     code: "EXPEDITION25",
-    title: "à¦Ÿà§à¦¯à§à¦° à¦­à¦¾à¦‰à¦šà¦¾à¦° $25 (à§³3,000) à¦›à¦¾à¦¡à¦¼",
-    description: "à¦¸à¦•à¦² à¦Ÿà§à¦¯à§à¦° à¦“ à¦à¦•à§à¦¸à¦ªà§‡à¦¡à¦¿à¦¶à¦¨ à¦¬à§à¦•à¦¿à¦‚à¦¯à¦¼à§‡ $25 à¦¤à¦¾à§Žà¦•à§à¦·à¦£à¦¿à¦• à¦›à¦¾à¦¡à¦¼",
+    title: "ট্যুর ভাউচার $25 (৳3,000) ছাড়",
+    description: "সকল ট্যুর ও এক্সপেডিশন বুকিংয়ে $25 তাৎক্ষণিক ছাড়",
     discountType: "fixed",
     discountValue: 25,
     minSpendUSD: 120,
-    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§¨-à§§à§«",
+    expiryDate: "২০২৬-১২-১৫",
     applicableCategory: "tour",
   },
   {
     code: "HOTELSTAY",
-    title: "à¦¹à§‹à¦Ÿà§‡à¦² à¦“ à¦°à¦¿à¦¸à§‹à¦°à§à¦Ÿ à§§à§¨% à¦›à¦¾à¦¡à¦¼",
-    description: "à¦ªà§à¦°à¦¿à¦®à¦¿à¦¯à¦¼à¦¾à¦® à¦¹à§‹à¦Ÿà§‡à¦² à¦“ à¦¹à§‹à¦®à¦¸à§à¦Ÿà§‡ à¦¬à§à¦•à¦¿à¦‚à¦¯à¦¼à§‡ à§§à§¨% à¦à¦•à§à¦¸à¦•à§à¦²à§à¦¸à¦¿à¦­ à¦›à¦¾à¦¡à¦¼",
+    title: "হোটেল ও রিসোর্ট ১২% ছাড়",
+    description: "প্রিমিয়াম হোটেল ও হোমস্টে বুকিংয়ে ১২% এক্সক্লুসিভ ছাড়",
     discountType: "percentage",
     discountValue: 12,
     minSpendUSD: 60,
-    expiryDate: "à§¨à§¦à§¨à§¬-à§§à§§-à§¨à§¦",
+    expiryDate: "২০২৬-১১-২০",
     applicableCategory: "hotel",
   },
 ];
 
 export const STEP_TITLES: Record<1 | 2 | 3 | 4, string> = {
-  1: "à¦¯à¦¾à¦¤à§à¦°à§€à¦° à¦¤à¦¥à§à¦¯ (Traveler Details)",
-  2: "à¦…à§à¦¯à¦¾à¦¡-à¦…à¦¨ à¦“ à¦…à¦¤à¦¿à¦°à¦¿à¦•à§à¦¤ à¦¸à§‡à¦¬à¦¾ (Addons & Extras)",
-  3: "à¦¬à§à¦•à¦¿à¦‚ à¦¸à¦¾à¦°à¦¾à¦‚à¦¶ à¦“ à¦¨à§€à¦¤à¦¿ (Summary & Policy)",
-  4: "à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦“ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤à¦•à¦°à¦£ (Payment & Confirm)",
+  1: "যাত্রীর তথ্য (Traveler Details)",
+  2: "অ্যাড-অন ও অতিরিক্ত সেবা (Addons & Extras)",
+  3: "বুকিং সারাংশ ও নীতি (Summary & Policy)",
+  4: "পেমেন্ট ও নিশ্চিতকরণ (Payment & Confirm)",
 };
 
 export const SAVED_PASSENGERS_STORAGE_KEY = "@travel_saved_passengers_v3";
@@ -651,7 +651,7 @@ export function BookingSystemScreen({
   const handleExtendHoldTimer = () => {
     setHoldSecondsLeft(600);
     setIsTimerExpired(false);
-    setActionMessage("âœ“ à¦¸à¦¿à¦Ÿ à¦“ à¦Ÿà¦¿à¦•à¦¿à¦Ÿ à¦§à¦°à§‡ à¦°à¦¾à¦–à¦¾à¦° à¦¸à¦®à¦¯à¦¼ à¦†à¦°à§‹ à§§à§¦:à§¦à§¦ à¦®à¦¿à¦¨à¦¿à¦Ÿ à¦¬à§ƒà¦¦à§à¦§à¦¿ à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡!");
+    setActionMessage("✓ সিট ও টিকিট ধরে রাখার সময় আরো ১০:০০ মিনিট বৃদ্ধি করা হয়েছে!");
   };
 
   // Saved Passengers State & Modal (Requirement 2)
@@ -675,7 +675,7 @@ export function BookingSystemScreen({
     setTraveler(p);
     setFormErrors({});
     setIsSavedPassengersModalOpen(false);
-    setActionMessage(`âœ“ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¯à¦¾à¦¤à§à¦°à§€ "${p.first_name} ${p.last_name}"-à¦à¦° à¦¤à¦¥à§à¦¯ à¦²à§‹à¦¡ à¦¹à¦¯à¦¼à§‡à¦›à§‡!`);
+    setActionMessage(`✓ সংরক্ষিত যাত্রী "${p.first_name} ${p.last_name}"-এর তথ্য লোড হয়েছে!`);
     store.setTravelers([
       {
         firstName: p.first_name,
@@ -693,7 +693,7 @@ export function BookingSystemScreen({
 
   const handleSaveCurrentTraveler = async () => {
     if (!traveler.first_name || !traveler.last_name) {
-      Alert.alert("à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦¤à¦¥à§à¦¯", "à¦¯à¦¾à¦¤à§à¦°à§€à¦° à¦¨à¦¾à¦® à¦ªà§‚à¦°à¦£ à¦¨à¦¾ à¦•à¦°à§‡ à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦•à¦°à¦¾ à¦¯à¦¾à¦¬à§‡ à¦¨à¦¾à¥¤");
+      Alert.alert("অসম্পূর্ণ তথ্য", "যাত্রীর নাম পূরণ না করে সংরক্ষণ করা যাবে না।");
       return;
     }
     const updated = [
@@ -704,7 +704,7 @@ export function BookingSystemScreen({
     ];
     setSavedPassengers(updated);
     await AsyncStorage.setItem(SAVED_PASSENGERS_STORAGE_KEY, JSON.stringify(updated));
-    setActionMessage(`âœ“ "${traveler.first_name} ${traveler.last_name}" à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¯à¦¾à¦¤à§à¦°à§€ à¦¤à¦¾à¦²à¦¿à¦•à¦¾à¦¯à¦¼ à¦¸à§‡à¦­ à¦¹à¦¯à¦¼à§‡à¦›à§‡!`);
+    setActionMessage(`✓ "${traveler.first_name} ${traveler.last_name}" সংরক্ষিত যাত্রী তালিকায় সেভ হয়েছে!`);
   };
 
   const handleDeleteSavedPassenger = async (index: number) => {
@@ -746,7 +746,7 @@ export function BookingSystemScreen({
         isPrimary: true,
       },
     ]);
-    setActionMessage("âœ“ à¦†à¦ªà¦¨à¦¾à¦° à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦¥à§‡à¦•à§‡ à¦¨à¦¿à¦œà§‡à¦° à¦¤à¦¥à§à¦¯ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦…à¦Ÿà§‹à¦«à¦¿à¦² à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡!");
+    setActionMessage("✓ আপনার প্রোফাইল থেকে নিজের তথ্য সফলভাবে অটোফিল করা হয়েছে!");
   };
 
   // Draft Exit Interception & Resume Banner State (Requirement 1)
@@ -776,7 +776,7 @@ export function BookingSystemScreen({
       if (savedDraftData.currentStep) goToStep(savedDraftData.currentStep);
       if (savedDraftData.holdSecondsLeft) setHoldSecondsLeft(savedDraftData.holdSecondsLeft);
       setHasPendingDraft(false);
-      setActionMessage(`âœ“ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦–à¦¸à¦¡à¦¼à¦¾ à¦¥à§‡à¦•à§‡ à¦§à¦¾à¦ª ${savedDraftData.currentStep || 1} à¦ªà§à¦¨à¦°à§à¦¦à§à¦§à¦¾à¦° à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤ à¦¬à§à¦•à¦¿à¦‚ à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦¨!`);
+      setActionMessage(`✓ সংরক্ষিত খসড়া থেকে ধাপ ${savedDraftData.currentStep || 1} পুনরুদ্ধার করা হয়েছে। বুকিং চালিয়ে যান!`);
     }
   };
 
@@ -785,7 +785,7 @@ export function BookingSystemScreen({
     setSavedDraftData(null);
     await AsyncStorage.removeItem(BOOKING_DRAFT_STORAGE_KEY);
     store.resetDraft();
-    setActionMessage("à¦ªà§‚à¦°à§à¦¬à¦¬à¦°à§à¦¤à§€ à¦–à¦¸à¦¡à¦¼à¦¾ à¦®à§à¦›à§‡ à¦¨à¦¤à§à¦¨ à¦¬à§à¦•à¦¿à¦‚ à¦¶à§à¦°à§ à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤");
+    setActionMessage("পূর্ববর্তী খসড়া মুছে নতুন বুকিং শুরু করা হয়েছে।");
   };
 
   const isBookingInProgress = Boolean(
@@ -795,16 +795,16 @@ export function BookingSystemScreen({
   const handleBackInterception = useCallback(
     (onConfirmExit?: () => void) => {
       Alert.alert(
-        "à¦–à¦¸à¦¡à¦¼à¦¾ à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦•à¦°à¦¬à§‡à¦¨? (Save Draft?)",
-        "à¦†à¦ªà¦¨à¦¾à¦° à¦¬à§à¦•à¦¿à¦‚à¦Ÿà¦¿à¦° à¦¤à¦¥à§à¦¯ à¦à¦–à¦¨à¦“ à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦°à¦¯à¦¼à§‡à¦›à§‡à¥¤ à¦†à¦ªà¦¨à¦¿ à¦•à¦¿ à¦–à¦¸à¦¡à¦¼à¦¾ à¦¹à¦¿à¦¸à§‡à¦¬à§‡ à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦•à¦°à§‡ à¦¬à§‡à¦° à¦¹à¦¤à§‡ à¦šà¦¾à¦¨, à¦¯à¦¾à¦¤à§‡ à¦ªà¦°à§‡ à¦à¦¸à§‡ à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à§‡à¦¤à§‡ à¦ªà¦¾à¦°à§‡à¦¨?",
+        "খসড়া সংরক্ষণ করবেন? (Save Draft?)",
+        "আপনার বুকিংটির তথ্য এখনও অসম্পূর্ণ রয়েছে। আপনি কি খসড়া হিসেবে সংরক্ষণ করে বের হতে চান, যাতে পরে এসে চালিয়ে যেতে পারেন?",
         [
           {
-            text: "à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦¨ (Stay)",
+            text: "চালিয়ে যান (Stay)",
             style: "cancel",
             onPress: () => {},
           },
           {
-            text: "à¦®à§à¦›à§‡ à¦¬à§‡à¦° à¦¹à¦¨ (Discard)",
+            text: "মুছে বের হন (Discard)",
             style: "destructive",
             onPress: async () => {
               isExitingAllowed.current = true;
@@ -818,7 +818,7 @@ export function BookingSystemScreen({
             },
           },
           {
-            text: "à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦“ à¦¬à§‡à¦° à¦¹à¦¨ (Save & Exit)",
+            text: "সংরক্ষণ ও বের হন (Save & Exit)",
             style: "default",
             onPress: async () => {
               isExitingAllowed.current = true;
@@ -1236,11 +1236,11 @@ export function BookingSystemScreen({
       return;
       const _legacyCount = 0;
       setActionMessage(
-        `âš ï¸ ${count}à¦Ÿà¦¿ à¦¤à¦¥à§à¦¯à§‡ à¦­à§à¦² à¦°à¦¯à¦¼à§‡à¦›à§‡à¥¤ à¦²à¦¾à¦² à¦šà¦¿à¦¹à§à¦¨à¦¿à¦¤ à¦˜à¦°à¦—à§à¦²à§‹ à¦¸à¦ à¦¿à¦•à¦­à¦¾à¦¬à§‡ à¦ªà§‚à¦°à¦£ à¦•à¦°à§à¦¨à¥¤`
+        `⚠️ ${count}টি তথ্যে ভুল রয়েছে। লাল চিহ্নিত ঘরগুলো সঠিকভাবে পূরণ করুন।`
       );
       Alert.alert(
-        "à¦«à¦°à§à¦® à¦¸à¦‚à¦¶à§‹à¦§à¦¨ à¦ªà§à¦°à¦¯à¦¼à§‹à¦œà¦¨ (Validation Required)",
-        `à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦²à¦¾à¦² à¦šà¦¿à¦¹à§à¦¨à¦¿à¦¤ ${count}à¦Ÿà¦¿ à¦«à¦¿à¦²à§à¦¡à§‡à¦° à¦­à§à¦² à¦¸à¦‚à¦¶à§‹à¦§à¦¨ à¦•à¦°à§‡ à¦ªà§à¦¨à¦°à¦¾à¦¯à¦¼ à¦šà§‡à¦·à§à¦Ÿà¦¾ à¦•à¦°à§à¦¨à¥¤ à¦ªà§à¦°à¦¥à¦® à¦­à§à¦²à§‡à¦° à¦¸à§à¦¥à¦¾à¦¨à§‡ à¦¸à§à¦•à§à¦°à¦² à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤`,
+        "ফর্ম সংশোধন প্রয়োজন (Validation Required)",
+        `অনুগ্রহ করে লাল চিহ্নিত ${count}টি ফিল্ডের ভুল সংশোধন করে পুনরায় চেষ্টা করুন। প্রথম ভুলের স্থানে স্ক্রল করা হয়েছে।`,
       );
       return;
     }
@@ -1279,7 +1279,7 @@ export function BookingSystemScreen({
   const handleApplyPromo = (overrideCode?: string) => {
     const code = (overrideCode || promoInput).trim().toUpperCase();
     if (!code) {
-      setPromoStatus({ error: "à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦à¦•à¦Ÿà¦¿ à¦ªà§à¦°à§‹à¦®à§‹ à¦•à§‹à¦¡ à¦²à¦¿à¦–à§à¦¨ à¦¬à¦¾ à¦¨à¦¿à¦šà§‡à¦° à¦¤à¦¾à¦²à¦¿à¦•à¦¾ à¦¥à§‡à¦•à§‡ à¦¬à¦¾à¦›à§à¦¨à¥¤" });
+      setPromoStatus({ error: "অনুগ্রহ করে একটি প্রোমো কোড লিখুন বা নিচের তালিকা থেকে বাছুন।" });
       return;
     }
 
@@ -1292,15 +1292,15 @@ export function BookingSystemScreen({
         matchedRule.applicableCategory !== selectedProductType
       ) {
         const catMap: Record<string, string> = {
-          flight: "à¦«à§à¦²à¦¾à¦‡à¦Ÿ",
-          hotel: "à¦¹à§‹à¦Ÿà§‡à¦²",
-          train: "à¦Ÿà§à¦°à§‡à¦¨",
-          bus: "à¦¬à¦¾à¦¸",
-          tour: "à¦Ÿà§à¦¯à§à¦°",
+          flight: "ফ্লাইট",
+          hotel: "হোটেল",
+          train: "ট্রেন",
+          bus: "বাস",
+          tour: "ট্যুর",
         };
         const catLabel = catMap[matchedRule.applicableCategory] || matchedRule.applicableCategory;
         setPromoStatus({
-          error: `"${code}" à¦•à§‹à¦¡à¦Ÿà¦¿ à¦¶à§à¦§à§à¦®à¦¾à¦¤à§à¦° ${catLabel} à¦¬à§à¦•à¦¿à¦‚à¦¯à¦¼à§‡à¦° à¦œà¦¨à§à¦¯ à¦ªà§à¦°à¦¯à§‹à¦œà§à¦¯, ${selectedProductType} à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸à§‡ à¦¨à¦¯à¦¼à¥¤`,
+          error: `"${code}" কোডটি শুধুমাত্র ${catLabel} বুকিংয়ের জন্য প্রযোজ্য, ${selectedProductType} সার্ভিসে নয়।`,
         });
         return;
       }
@@ -1313,7 +1313,7 @@ export function BookingSystemScreen({
         const minSpendLocal = formatCurrency(matchedRule.minSpendUSD, currency);
         const currentFareLocal = formatCurrency(pricingCalculation.baseFare, currency);
         setPromoStatus({
-          error: `"${code}" à¦•à§‹à¦¡à§‡à¦° à¦œà¦¨à§à¦¯ à¦¸à¦°à§à¦¬à¦¨à¦¿à¦®à§à¦¨ ${minSpendLocal} ($${matchedRule.minSpendUSD}) à¦¬à§‡à¦¸ à¦­à¦¾à¦¡à¦¼à¦¾ à¦ªà§à¦°à¦¯à¦¼à§‹à¦œà¦¨à¥¤ à¦†à¦ªà¦¨à¦¾à¦° à¦¬à¦°à§à¦¤à¦®à¦¾à¦¨ à¦¬à§‡à¦¸ à¦­à¦¾à¦¡à¦¼à¦¾ ${currentFareLocal}à¥¤`,
+          error: `"${code}" কোডের জন্য সর্বনিম্ন ${minSpendLocal} ($${matchedRule.minSpendUSD}) বেস ভাড়া প্রয়োজন। আপনার বর্তমান বেস ভাড়া ${currentFareLocal}।`,
         });
         return;
       }
@@ -1327,7 +1327,7 @@ export function BookingSystemScreen({
           matchedRule.discountValue,
         );
         setPromoStatus({
-          success: `âœ“ ${matchedRule.code} à¦ªà§à¦°à¦¯à¦¼à§‹à¦— à¦¹à¦¯à¦¼à§‡à¦›à§‡! ${matchedRule.discountValue}% à¦¡à¦¿à¦¸à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦¯à§‹à¦— à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤`,
+          success: `✓ ${matchedRule.code} প্রয়োগ হয়েছে! ${matchedRule.discountValue}% ডিসকাউন্ট সফলভাবে যোগ করা হয়েছে।`,
         });
       } else {
         store.applyPromoCode(
@@ -1336,12 +1336,12 @@ export function BookingSystemScreen({
           "fixed",
         );
         setPromoStatus({
-          success: `âœ“ ${matchedRule.code} à¦ªà§à¦°à¦¯à¦¼à§‹à¦— à¦¹à¦¯à¦¼à§‡à¦›à§‡! ${formatCurrency(matchedRule.discountValue, currency)} à¦«à§à¦²à§à¦¯à¦¾à¦Ÿ à¦¡à¦¿à¦¸à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦¯à§‹à¦— à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤`,
+          success: `✓ ${matchedRule.code} প্রয়োগ হয়েছে! ${formatCurrency(matchedRule.discountValue, currency)} ফ্ল্যাট ডিসকাউন্ট সফলভাবে যোগ করা হয়েছে।`,
         });
       }
     } else {
       setPromoStatus({
-        error: `"${code}" à¦…à¦•à¦¾à¦°à§à¦¯à¦•à¦° à¦ªà§à¦°à§‹à¦®à§‹ à¦•à§‹à¦¡à¥¤ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦¸à¦ à¦¿à¦• à¦•à§‹à¦¡ à¦¦à¦¿à¦¨ à¦…à¦¥à¦¬à¦¾ à¦¨à¦¿à¦šà§‡à¦° à¦ªà§à¦°à¦¯à§‹à¦œà§à¦¯ à¦•à§‹à¦¡ à¦¤à¦¾à¦²à¦¿à¦•à¦¾ à¦¥à§‡à¦•à§‡ à¦¬à§‡à¦›à§‡ à¦¨à¦¿à¦¨à¥¤`,
+        error: `"${code}" অকার্যকর প্রোমো কোড। অনুগ্রহ করে সঠিক কোড দিন অথবা নিচের প্রযোজ্য কোড তালিকা থেকে বেছে নিন।`,
       });
     }
   };
@@ -1363,8 +1363,8 @@ export function BookingSystemScreen({
     if (!hasAgreedToPolicy) {
       setPolicyError(true);
       Alert.alert(
-        "à¦¸à¦®à§à¦®à¦¤à¦¿ à¦†à¦¬à¦¶à§à¦¯à¦• (Consent Required)",
-        "à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿà§‡ à¦à¦—à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦“à¦¯à¦¼à¦¾à¦° à¦†à¦—à§‡ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦¬à¦¾à¦¤à¦¿à¦²à§‡à¦° à¦¨à§€à¦¤à¦¿ à¦“ à¦¨à¦¿à¦¯à¦¼à¦®-à¦¶à¦°à§à¦¤à¦¾à¦¬à¦²à§€à¦¤à§‡ à¦¸à¦®à§à¦®à¦¤à¦¿ à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦•à¦°à§à¦¨à¥¤"
+        "সম্মতি আবশ্যক (Consent Required)",
+        "পেমেন্টে এগিয়ে যাওয়ার আগে অনুগ্রহ করে বাতিলের নীতি ও নিয়ম-শর্তাবলীতে সম্মতি প্রদান করুন।"
       );
       return;
     }
@@ -1702,10 +1702,10 @@ export function BookingSystemScreen({
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.resumeDraftTitle}>
-                  ðŸ“Œ à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦¬à§à¦•à¦¿à¦‚ à¦–à¦¸à¦¡à¦¼à¦¾ à¦°à¦¯à¦¼à§‡à¦›à§‡ (à¦§à¦¾à¦ª {savedDraftData.currentStep || 1}/à§ª)
+                  📌 অসম্পূর্ণ বুকিং খসড়া রয়েছে (ধাপ {savedDraftData.currentStep || 1}/৪)
                 </Text>
                 <Text style={styles.resumeDraftSub}>
-                  {savedDraftData.trip?.destination_city || "à¦—à¦¨à§à¦¤à¦¬à§à¦¯"} â€¢ {savedDraftData.traveler?.first_name ? `${savedDraftData.traveler.first_name} ${savedDraftData.traveler.last_name}` : "à¦¯à¦¾à¦¤à§à¦°à§€à¦° à¦¤à¦¥à§à¦¯ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤"}
+                  {savedDraftData.trip?.destination_city || "গন্তব্য"} • {savedDraftData.traveler?.first_name ? `${savedDraftData.traveler.first_name} ${savedDraftData.traveler.last_name}` : "যাত্রীর তথ্য সংরক্ষিত"}
                 </Text>
                 <View style={styles.resumeDraftActionsRow}>
                   <TouchableOpacity
@@ -1714,7 +1714,7 @@ export function BookingSystemScreen({
                     activeOpacity={0.8}
                   >
                     <Ionicons name="play" size={13} color="#ffffff" />
-                    <Text style={styles.resumeDraftConfirmBtnText}>à¦¬à§à¦•à¦¿à¦‚ à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦¨</Text>
+                    <Text style={styles.resumeDraftConfirmBtnText}>বুকিং চালিয়ে যান</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleDiscardDraft}
@@ -1722,7 +1722,7 @@ export function BookingSystemScreen({
                     activeOpacity={0.8}
                   >
                     <Ionicons name="trash-outline" size={13} color="#ef4444" />
-                    <Text style={styles.resumeDraftDiscardBtnText}>à¦¨à¦¤à§à¦¨ à¦¶à§à¦°à§ à¦•à¦°à§à¦¨</Text>
+                    <Text style={styles.resumeDraftDiscardBtnText}>নতুন শুরু করুন</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1771,17 +1771,17 @@ export function BookingSystemScreen({
                     ]}
                   >
                     {isTimerExpired
-                      ? "â›” à¦¸à¦¿à¦Ÿ à¦§à¦°à§‡ à¦°à¦¾à¦–à¦¾à¦° à¦®à§‡à¦¯à¦¼à¦¾à¦¦ à¦¶à§‡à¦· à¦¹à¦¯à¦¼à§‡à¦›à§‡!"
+                      ? "⛔ সিট ধরে রাখার মেয়াদ শেষ হয়েছে!"
                       : holdSecondsLeft <= 120
-                        ? `âš ï¸ à¦¸à¦¤à¦°à§à¦•à¦¤à¦¾: à¦¸à¦¿à¦Ÿ à¦§à¦°à§‡ à¦°à¦¾à¦–à¦¾à¦° à¦¸à¦®à¦¯à¦¼ à¦ªà§à¦°à¦¾à¦¯à¦¼ à¦¶à§‡à¦·! à¦®à¦¾à¦¤à§à¦° ${Math.floor(holdSecondsLeft / 60)}:${String(holdSecondsLeft % 60).padStart(2, "0")} à¦®à¦¿à¦¨à¦¿à¦Ÿ à¦¬à¦¾à¦•à¦¿`
-                        : `à¦¸à¦¿à¦Ÿ à¦“ à¦Ÿà¦¿à¦•à¦¿à¦Ÿ à¦§à¦°à§‡ à¦°à¦¾à¦–à¦¾ à¦¹à¦¯à¦¼à§‡à¦›à§‡: ${Math.floor(holdSecondsLeft / 60)}:${String(holdSecondsLeft % 60).padStart(2, "0")} à¦®à¦¿à¦¨à¦¿à¦Ÿ`}
+                        ? `⚠️ সতর্কতা: সিট ধরে রাখার সময় প্রায় শেষ! মাত্র ${Math.floor(holdSecondsLeft / 60)}:${String(holdSecondsLeft % 60).padStart(2, "0")} মিনিট বাকি`
+                        : `সিট ও টিকিট ধরে রাখা হয়েছে: ${Math.floor(holdSecondsLeft / 60)}:${String(holdSecondsLeft % 60).padStart(2, "0")} মিনিট`}
                   </Text>
                   <Text style={styles.holdTimerSub}>
                     {isTimerExpired
-                      ? "à¦®à§‡à¦¯à¦¼à¦¾à¦¦ à¦‰à¦¤à§à¦¤à§€à¦°à§à¦£ à¦¹à¦“à¦¯à¦¼à¦¾à¦¯à¦¼ à¦¸à¦¿à¦Ÿ à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦¹à¦¤à§‡ à¦ªà¦¾à¦°à§‡à¥¤ à¦à¦• à¦Ÿà§à¦¯à¦¾à¦ªà§‡ à¦†à¦¬à¦¾à¦° à§§à§¦ à¦®à¦¿à¦¨à¦¿à¦Ÿ à¦¸à¦®à¦¯à¦¼ à¦¨à¦¿à¦¨à¥¤"
+                      ? "মেয়াদ উত্তীর্ণ হওয়ায় সিট পরিবর্তন হতে পারে। এক ট্যাপে আবার ১০ মিনিট সময় নিন।"
                       : holdSecondsLeft <= 120
-                        ? "à¦…à¦¨à§à¦¯ à¦—à§à¦°à¦¾à¦¹à¦• à¦¬à§à¦• à¦•à¦°à¦¾à¦° à¦†à¦—à§‡à¦‡ à¦¦à§à¦°à§à¦¤ à¦†à¦ªà¦¨à¦¾à¦° à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦¸à¦®à§à¦ªà¦¨à§à¦¨ à¦•à¦°à§à¦¨à¥¤"
-                        : "à¦†à¦ªà¦¨à¦¾à¦° à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¿à¦¤ à¦ªà§à¦¯à¦¾à¦•à§‡à¦œ à¦“ à¦¸à¦¿à¦Ÿ à¦¨à¦¿à¦°à§à¦¦à¦¿à¦·à§à¦Ÿ à¦¸à¦®à¦¯à¦¼à§‡à¦° à¦œà¦¨à§à¦¯ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦°à¦¯à¦¼à§‡à¦›à§‡à¥¤"}
+                        ? "অন্য গ্রাহক বুক করার আগেই দ্রুত আপনার পেমেন্ট সম্পন্ন করুন।"
+                        : "আপনার নির্বাচিত প্যাকেজ ও সিট নির্দিষ্ট সময়ের জন্য সংরক্ষিত রয়েছে।"}
                   </Text>
                 </View>
               </View>
@@ -1793,7 +1793,7 @@ export function BookingSystemScreen({
                   activeOpacity={0.8}
                 >
                   <Ionicons name="refresh" size={13} color="#ffffff" />
-                  <Text style={styles.reholdSeatBtnText}>à¦ªà§à¦¨à¦°à¦¾à¦¯à¦¼ à¦§à¦°à§‡ à¦°à¦¾à¦–à§à¦¨ (à§§à§¦ à¦®à¦¿à¦¨à¦¿à¦Ÿ)</Text>
+                  <Text style={styles.reholdSeatBtnText}>পুনরায় ধরে রাখুন (১০ মিনিট)</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -1882,18 +1882,18 @@ export function BookingSystemScreen({
             </ScrollView>
           </View>
 
-          {/* Stepper Header (Requirement 3: Universal Step Indicator with "à¦§à¦¾à¦ª à§¨/à§ª" & Interactive Tapping) */}
+          {/* Stepper Header (Requirement 3: Universal Step Indicator with "ধাপ ২/৪" & Interactive Tapping) */}
           <View style={styles.stepperCard}>
             {/* Top Indicator Badge & Progress Line */}
             <View style={styles.stepHeaderTopRow}>
               <View style={styles.stepHeaderPill}>
                 <Ionicons name="navigate-circle-outline" size={16} color={primary} />
                 <Text style={styles.stepHeaderPillText}>
-                  à¦§à¦¾à¦ª {currentStep}/à§ª: {STEP_TITLES[currentStep]}
+                  ধাপ {currentStep}/৪: {STEP_TITLES[currentStep]}
                 </Text>
               </View>
               <Text style={styles.stepSubtitleHint}>
-                à¦†à¦—à§‡à¦° à¦§à¦¾à¦ªà§‡ à¦Ÿà§à¦¯à¦¾à¦ª à¦•à¦°à§‡ à¦«à¦¿à¦°à¦¤à§‡ à¦ªà¦¾à¦°à§‡à¦¨
+                আগের ধাপে ট্যাপ করে ফিরতে পারেন
               </Text>
             </View>
 
@@ -1945,7 +1945,7 @@ export function BookingSystemScreen({
                     currentStep === 1 && styles.stepLabelActive,
                   ]}
                 >
-                  à¦¯à¦¾à¦¤à§à¦°à§€ (Traveler)
+                  যাত্রী (Traveler)
                 </Text>
               </TouchableOpacity>
 
@@ -1995,7 +1995,7 @@ export function BookingSystemScreen({
                     currentStep === 2 && styles.stepLabelActive,
                   ]}
                 >
-                  à¦…à§à¦¯à¦¾à¦¡-à¦…à¦¨ (Addons)
+                  অ্যাড-অন (Addons)
                 </Text>
               </TouchableOpacity>
 
@@ -2043,7 +2043,7 @@ export function BookingSystemScreen({
                     currentStep === 3 && styles.stepLabelActive,
                   ]}
                 >
-                  à¦¸à¦¾à¦°à¦¾à¦‚à¦¶ (Summary)
+                  সারাংশ (Summary)
                 </Text>
               </TouchableOpacity>
 
@@ -2085,7 +2085,7 @@ export function BookingSystemScreen({
                     currentStep === 4 && styles.stepLabelActive,
                   ]}
                 >
-                  à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ (Payment)
+                  পেমেন্ট (Payment)
                 </Text>
               </TouchableOpacity>
             </View>
@@ -2126,7 +2126,7 @@ export function BookingSystemScreen({
                     accessibilityLabel="Choose from saved passengers"
                   >
                     <Ionicons color={primary} name="people-outline" size={14} />
-                    <Text style={styles.demoFillBtnText}>à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¯à¦¾à¦¤à§à¦°à§€ ({savedPassengers.length})</Text>
+                    <Text style={styles.demoFillBtnText}>সংরক্ষিত যাত্রী ({savedPassengers.length})</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -2135,7 +2135,7 @@ export function BookingSystemScreen({
                     accessibilityLabel="Auto-fill from Profile"
                   >
                     <Ionicons color="#10b981" name="person-circle-outline" size={14} />
-                    <Text style={[styles.demoFillBtnText, { color: "#10b981" }]}>à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦…à¦Ÿà§‹à¦«à¦¿à¦²</Text>
+                    <Text style={[styles.demoFillBtnText, { color: "#10b981" }]}>প্রোফাইল অটোফিল</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -2376,7 +2376,7 @@ export function BookingSystemScreen({
               >
                 <Ionicons name="bookmark-outline" size={15} color="#2563eb" />
                 <Text style={styles.saveTravelerSecondaryBtnText}>
-                  à¦­à¦¬à¦¿à¦·à§à¦¯à¦¤à§‡à¦° à¦œà¦¨à§à¦¯ à¦à¦‡ à¦¯à¦¾à¦¤à§à¦°à§€à¦° à¦¤à¦¥à§à¦¯ à¦¸à¦‚à¦°à¦•à§à¦·à¦£ à¦•à¦°à§à¦¨ (Save Traveler)
+                  ভবিষ্যতের জন্য এই যাত্রীর তথ্য সংরক্ষণ করুন (Save Traveler)
                 </Text>
               </TouchableOpacity>
 
@@ -2897,7 +2897,7 @@ export function BookingSystemScreen({
                 {/* Sub-itemization box for transparency */}
                 <View style={styles.itemizedBox}>
                   <View style={styles.itemizedRow}>
-                    <Text style={styles.itemizedLabel}>â€¢ 2% System & Payment Fee</Text>
+                    <Text style={styles.itemizedLabel}>• 2% System & Payment Fee</Text>
                     <Text style={styles.itemizedVal}>
                       +{formatCurrency(pricingCalculation.platformServiceFee, currency)}
                     </Text>
@@ -2905,7 +2905,7 @@ export function BookingSystemScreen({
                   {addons.travelInsurance ? (
                     <View style={styles.itemizedRow}>
                       <Text style={styles.itemizedLabel}>
-                        â€¢ Travel Medical Insurance ({trip.number_of_guests}x)
+                        • Travel Medical Insurance ({trip.number_of_guests}x)
                       </Text>
                       <Text style={styles.itemizedVal}>
                         +{formatCurrency(pricingCalculation.insuranceCost, currency)}
@@ -2915,7 +2915,7 @@ export function BookingSystemScreen({
                   {addons.extraLuggageCount > 0 ? (
                     <View style={styles.itemizedRow}>
                       <Text style={styles.itemizedLabel}>
-                        â€¢ Extra Checked Baggage ({addons.extraLuggageCount} bag)
+                        • Extra Checked Baggage ({addons.extraLuggageCount} bag)
                       </Text>
                       <Text style={styles.itemizedVal}>
                         +{formatCurrency(pricingCalculation.luggageCost, currency)}
@@ -2925,7 +2925,7 @@ export function BookingSystemScreen({
                   {addons.inFlightMealsCount > 0 ? (
                     <View style={styles.itemizedRow}>
                       <Text style={styles.itemizedLabel}>
-                        â€¢ Gourmet Catering ({addons.inFlightMealsCount} meal)
+                        • Gourmet Catering ({addons.inFlightMealsCount} meal)
                       </Text>
                       <Text style={styles.itemizedVal}>
                         +{formatCurrency(pricingCalculation.mealsCost, currency)}
@@ -2935,7 +2935,7 @@ export function BookingSystemScreen({
                   {addons.airportLoungeAccess ? (
                     <View style={styles.itemizedRow}>
                       <Text style={styles.itemizedLabel}>
-                        â€¢ VIP Fast-Track & Lounge
+                        • VIP Fast-Track & Lounge
                       </Text>
                       <Text style={styles.itemizedVal}>
                         +{formatCurrency(pricingCalculation.loungeCost, currency)}
@@ -3227,7 +3227,7 @@ export function BookingSystemScreen({
                     />
                     <PaymentOptionCard
                       title="Shopno Travel Wallet"
-                      sub="Balance: à§³45,000 / $500 available"
+                      sub="Balance: ৳45,000 / $500 available"
                       icon="cash-outline"
                       isSelected={selectedPaymentMethod === "wallet"}
                       onSelect={() => setSelectedPaymentMethod("wallet")}
@@ -3461,7 +3461,7 @@ export function BookingSystemScreen({
                 <View style={styles.timelineText}>
                   <Text style={styles.timelineTitle}>{event.title}</Text>
                   <Text style={styles.timelineMeta}>
-                    {event.event_type} â€¢{" "}
+                    {event.event_type} •{" "}
                     {new Date(
                       event.event_at || event.event_time || Date.now(),
                     ).toLocaleTimeString()}
@@ -3513,14 +3513,14 @@ export function BookingSystemScreen({
         newPrice={pricingCalculation.totalDue}
         currency={pricingCalculation.currency}
         breakdown={[
-          { label: "à¦®à§‚à¦² à¦­à¦¾à¦¡à¦¼à¦¾ (Base Fare)", amount: pricingCalculation.baseFare },
-          { label: "à¦¸à¦°à¦•à¦¾à¦°à¦¿ à¦Ÿà§à¦¯à¦¾à¦•à§à¦¸ à¦“ à¦­à§à¦¯à¦¾à¦Ÿ (Govt Taxes)", amount: pricingCalculation.taxes, isAddition: true },
-          { label: "à¦ªà§à¦²à§à¦¯à¦¾à¦Ÿà¦«à¦°à§à¦® à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸ à¦«à¦¿ (Service Fee)", amount: pricingCalculation.platformServiceFee, isAddition: true },
+          { label: "মূল ভাড়া (Base Fare)", amount: pricingCalculation.baseFare },
+          { label: "সরকারি ট্যাক্স ও ভ্যাট (Govt Taxes)", amount: pricingCalculation.taxes, isAddition: true },
+          { label: "প্ল্যাটফর্ম সার্ভিস ফি (Service Fee)", amount: pricingCalculation.platformServiceFee, isAddition: true },
           ...(pricingCalculation.addonsCost > 0
-            ? [{ label: "à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¿à¦¤ à¦…à§à¦¯à¦¾à¦¡-à¦…à¦¨ à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸", amount: pricingCalculation.addonsCost, isAddition: true }]
+            ? [{ label: "নির্বাচিত অ্যাড-অন সার্ভিস", amount: pricingCalculation.addonsCost, isAddition: true }]
             : []),
           ...(pricingCalculation.discount > 0
-            ? [{ label: "à¦ªà§à¦°à§‹à¦®à§‹ à¦¡à¦¿à¦¸à¦•à¦¾à¦‰à¦¨à§à¦Ÿ (Promo Savings)", amount: pricingCalculation.discount, isDiscount: true }]
+            ? [{ label: "প্রোমো ডিসকাউন্ট (Promo Savings)", amount: pricingCalculation.discount, isDiscount: true }]
             : []),
         ]}
         onAccept={() => {

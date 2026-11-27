@@ -36,10 +36,11 @@ export class PaypalProvider implements IPaymentProvider {
   }
 
   async verify(transactionId: string): Promise<PaymentStatus> {
-    return "completed";
+    // Zero-Trust Security: Never return "completed" without authoritative gateway verification
+    return "pending";
   }
 
   async refund(request: RefundRequest): Promise<boolean> {
-    return true;
+    return false;
   }
 }

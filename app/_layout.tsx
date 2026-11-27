@@ -3,39 +3,12 @@ import "../global.css";
 import React, { useEffect, Suspense, lazy } from "react";
 import { View, ActivityIndicator, StyleSheet, LogBox, Platform } from "react-native";
 
-// Intercept dev console error/warn messages that trigger intrusive LogBox overlays on web
-const origError = console.error;
-console.error = (...args: any[]) => {
-  const msg = args && args[0] ? String(args[0]) : "";
-  if (
-    msg.includes("Can't perform a React state update") ||
-    msg.includes("Supabase Dev") ||
-    msg.includes("Network request failed")
-  ) {
-    return;
-  }
-  origError(...args);
-};
-
-const origWarn = console.warn;
-console.warn = (...args: any[]) => {
-  const msg = args && args[0] ? String(args[0]) : "";
-  if (
-    msg.includes("Can't perform a React state update") ||
-    msg.includes("Supabase Dev") ||
-    msg.includes("Network request failed")
-  ) {
-    return;
-  }
-  origWarn(...args);
-};
-
-LogBox.ignoreAllLogs(true);
-LogBox.ignoreLogs([
-  "Can't perform a React state update on an unmounted component",
-  "Supabase Dev Network Error",
-  "Network request failed",
-]);
+// Configure dev LogBox warnings gracefully without suppressing network errors
+if (__DEV__) {
+  LogBox.ignoreLogs([
+    "Can't perform a React state update on an unmounted component",
+  ]);
+}
 
 if (Platform.OS === "web" && typeof document !== "undefined") {
   const fontLinkId = "google-fonts-typography";
@@ -267,6 +240,30 @@ const RootLayoutContent = () => {
         {/* Dynamic B2B Travel Agency Web Portal (Isolated into Async Chunks) */}
         <Stack.Screen
           name="agency"
+          options={{
+            headerShown: false,
+          }}
+        />
+
+        {/* Standalone Hotel PMS Partner Portal */}
+        <Stack.Screen
+          name="hotel"
+          options={{
+            headerShown: false,
+          }}
+        />
+
+        {/* Service Provider Hub */}
+        <Stack.Screen
+          name="provider"
+          options={{
+            headerShown: false,
+          }}
+        />
+
+        {/* Rider & Delivery Partner Portal */}
+        <Stack.Screen
+          name="rider"
           options={{
             headerShown: false,
           }}

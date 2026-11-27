@@ -23,11 +23,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../hooks/useAuth";
 import { bookingRepository } from "../services/repositories/booking";
 import { searchRepository } from "../services/repositories/search";
+import { photonGeocoder, GeocodingResult } from "../services/location/photonGeocoder";
+import {
+  estimateRideFare,
+  formatPaisaBDT,
+  haversineDistanceKm,
+} from "../features/rider/calculators";
+import { useRiderStore } from "../store/riderStore";
 import { supabase } from "../utils/supabase";
 
 import { useResponsive } from "../hooks/useResponsive";
 import { formatPrice, getActiveCurrency } from "../utils/currency";
 import { RTLIcon } from "../components/ui";
+import { useTheme } from "../context/ThemeContext";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const TRIP_BLUE = "#E5A93C"; // Luxury Gold Design Token
@@ -75,6 +83,8 @@ export interface RentalLocation {
   city: string;
   country: string;
   type: "airport" | "downtown";
+  latitude?: number;
+  longitude?: number;
 }
 
 export const RENTAL_LOCATIONS: RentalLocation[] = [
@@ -85,6 +95,8 @@ export const RENTAL_LOCATIONS: RentalLocation[] = [
     city: "Dhaka",
     country: "Bangladesh",
     type: "airport",
+    latitude: 23.8433,
+    longitude: 90.3978,
   },
   {
     id: "loc-dac-dt",
@@ -93,6 +105,8 @@ export const RENTAL_LOCATIONS: RentalLocation[] = [
     city: "Dhaka",
     country: "Bangladesh",
     type: "downtown",
+    latitude: 23.7925,
+    longitude: 90.4078,
   },
   {
     id: "loc-cxb",
@@ -101,6 +115,8 @@ export const RENTAL_LOCATIONS: RentalLocation[] = [
     city: "Cox's Bazar",
     country: "Bangladesh",
     type: "airport",
+    latitude: 21.4522,
+    longitude: 91.9639,
   },
   {
     id: "loc-cxb-beach",
@@ -109,6 +125,8 @@ export const RENTAL_LOCATIONS: RentalLocation[] = [
     city: "Cox's Bazar",
     country: "Bangladesh",
     type: "downtown",
+    latitude: 21.4163,
+    longitude: 91.9818,
   },
   {
     id: "loc-dxb",
@@ -170,6 +188,16 @@ const PERKS = [
 export function CarRentalsScreen() {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useResponsive();
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
+
+  const defaultPickup = useMemo(() => {
+    const d = new Date(Date.now() + 86400000);
+    return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  }, []);
+  const defaultDropoff = useMemo(() => {
+    const d = new Date(Date.now() + 4 * 86400000);
+    return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  }, []);
 
   // Location States
   const [dropoffType, setDropoffType] = useState<"same" | "diff">("same");
@@ -178,9 +206,9 @@ export function CarRentalsScreen() {
 
   // Rental Period & Calculator States
   const [rentalDays, setRentalDays] = useState(3);
-  const [pickupDateText, setPickupDateText] = useState("Thu, Oct 15");
+  const [pickupDateText, setPickupDateText] = useState(defaultPickup);
   const [pickupTimeText, setPickupTimeText] = useState("10:00 AM");
-  const [dropoffDateText, setDropoffDateText] = useState("Sun, Oct 18");
+  const [dropoffDateText, setDropoffDateText] = useState(defaultDropoff);
   const [dropoffTimeText, setDropoffTimeText] = useState("10:00 AM");
 
   // Driver Age State
@@ -196,6 +224,10 @@ export function CarRentalsScreen() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationModalMode, setLocationModalMode] = useState<"pickup" | "dropoff">("pickup");
   const [locationSearchQuery, setLocationSearchQuery] = useState("");
+  const [photonLocations, setPhotonLocations] = useState<GeocodingResult[]>([]);
+  const [searchingPhoton, setSearchingPhoton] = useState(false);
+
+  const bookConsumerRide = useRiderStore((s) => s.bookConsumerRide);
 
   const [showPeriodModal, setShowPeriodModal] = useState(false);
   const [selectedVehicleForDrawer, setSelectedVehicleForDrawer] = useState<RentalVehicle | null>(null);
@@ -288,6 +320,42 @@ export function CarRentalsScreen() {
   useEffect(() => {
     fetchCarRentals();
   }, [activeChip, pickupLocation.city]);
+
+  useEffect(() => {
+    if (!showLocationModal) return;
+    const q = locationSearchQuery.trim();
+    if (q.length < 2) {
+      setPhotonLocations([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setSearchingPhoton(true);
+      const res = await photonGeocoder.searchPlaces(q, 6);
+      setPhotonLocations(res);
+      setSearchingPhoton(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [locationSearchQuery, showLocationModal]);
+
+  const liveChauffeurEstimate = useMemo(() => {
+    const pLat = pickupLocation.latitude ?? 23.8433;
+    const pLng = pickupLocation.longitude ?? 90.3978;
+    const effectiveDrop = dropoffType === "same" ? RENTAL_LOCATIONS[1] : dropoffLocation;
+    const dLat = effectiveDrop.latitude ?? 23.7925;
+    const dLng = effectiveDrop.longitude ?? 90.4078;
+    const distKm = Math.max(4, haversineDistanceKm(pLat, pLng, dLat, dLng));
+    const sedanQuote = estimateRideFare({
+      vehicleMode: "sedan",
+      distanceKm: distKm,
+      rideType: "hourly_rental",
+    });
+    const suvQuote = estimateRideFare({
+      vehicleMode: "suv",
+      distanceKm: distKm,
+      rideType: "intercity",
+    });
+    return { distKm, sedanQuote, suvQuote, effectiveDrop };
+  }, [pickupLocation, dropoffLocation, dropoffType]);
 
   // Real-time Supabase Subscription on car_rentals table
   useEffect(() => {
@@ -482,7 +550,7 @@ export function CarRentalsScreen() {
   const vehiclesToDisplay = dbVehicles;
 
   return (
-    <SafeAreaView style={styles.shell}>
+    <SafeAreaView style={[styles.shell, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header Hero Section */}
         <View style={styles.heroSection}>
@@ -518,7 +586,7 @@ export function CarRentalsScreen() {
                   router.push("/screens/rewards" as any);
                 }}
               >
-                <Text style={styles.goldBadgeText}>T</Text>
+                <Text style={styles.goldBadgeText}>SJ</Text>
               </Pressable>
             </View>
 
@@ -677,6 +745,80 @@ export function CarRentalsScreen() {
               <Text style={styles.perkText}>{perk.text}</Text>
             </View>
           ))}
+        </View>
+
+        {/* Live Spatial-Engine / Fare Estimator & Instant Chauffeur Bar */}
+        <View
+          style={{
+            marginHorizontal: 16,
+            marginBottom: 16,
+            backgroundColor: "#0F172A",
+            borderRadius: 16,
+            padding: 16,
+            borderWidth: 1,
+            borderColor: "#334155",
+          }}
+        >
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <Text style={{ color: "#E5A93C", fontSize: 12, fontWeight: "800" }}>
+              LIVE CHAUFFEUR & ON-DEMAND ESTIMATE
+            </Text>
+            <Text style={{ color: "#10B981", fontSize: 11, fontWeight: "700" }}>
+              {liveChauffeurEstimate.distKm.toFixed(1)} km
+            </Text>
+          </View>
+          <Text style={{ color: "#F8FAFC", fontSize: 14, fontWeight: "700" }}>
+            {pickupLocation.city} → {liveChauffeurEstimate.effectiveDrop.city}
+          </Text>
+          <Text style={{ color: "#94A3B8", fontSize: 12, marginTop: 4, marginBottom: 12 }}>
+            Sedan AC: {formatPaisaBDT(liveChauffeurEstimate.sedanQuote.quoted_fare_paisa)} • SUV:{" "}
+            {formatPaisaBDT(liveChauffeurEstimate.suvQuote.quoted_fare_paisa)} (Weather Guard Protected)
+          </Text>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <Pressable
+              style={{
+                flex: 1,
+                backgroundColor: "#10B981",
+                paddingVertical: 10,
+                borderRadius: 10,
+                alignItems: "center",
+              }}
+              onPress={async () => {
+                await bookConsumerRide({
+                  vehicle_mode: "sedan",
+                  ride_type: "hourly_rental",
+                  pickup_address: pickupLocation.name,
+                  pickup_lat: pickupLocation.latitude ?? 23.8433,
+                  pickup_lng: pickupLocation.longitude ?? 90.3978,
+                  dropoff_address: liveChauffeurEstimate.effectiveDrop.name,
+                  dropoff_lat: liveChauffeurEstimate.effectiveDrop.latitude ?? 23.7925,
+                  dropoff_lng: liveChauffeurEstimate.effectiveDrop.longitude ?? 90.4078,
+                  payment_method: "bkash",
+                });
+                router.push("/screens/ride-hailing" as any);
+              }}
+            >
+              <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "800" }}>
+                Lock Chauffeur Fare
+              </Text>
+            </Pressable>
+            <Pressable
+              style={{
+                paddingHorizontal: 14,
+                backgroundColor: "#1E293B",
+                borderWidth: 1,
+                borderColor: "#E5A93C",
+                paddingVertical: 10,
+                borderRadius: 10,
+                justifyContent: "center",
+              }}
+              onPress={() => router.push("/screens/ride-hailing" as any)}
+            >
+              <Text style={{ color: "#E5A93C", fontSize: 12, fontWeight: "700" }}>
+                Moto / CNG / Boat →
+              </Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Category Filter Chips */}
@@ -901,6 +1043,46 @@ export function CarRentalsScreen() {
 
           {/* Locations List */}
           <ScrollView showsVerticalScrollIndicator={false} style={styles.locationList}>
+            {searchingPhoton && (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10 }}>
+                <ActivityIndicator size="small" color={TRIP_BLUE} />
+                <Text style={{ fontSize: 12, color: "#6B7280" }}>Searching Photon OpenStreetMap...</Text>
+              </View>
+            )}
+            {photonLocations.map((geo) => (
+              <Pressable
+                key={geo.id}
+                style={styles.locationItemRow}
+                onPress={() =>
+                  handleSelectLocation({
+                    id: geo.id,
+                    code: geo.city.slice(0, 3).toUpperCase(),
+                    name: geo.displayName,
+                    city: geo.city,
+                    country: "Bangladesh",
+                    type: "downtown",
+                    latitude: geo.latitude,
+                    longitude: geo.longitude,
+                  })
+                }
+              >
+                <View style={styles.locIconCircle}>
+                  <Ionicons name="location-outline" size={20} color={TRIP_BLUE} />
+                </View>
+                <View style={styles.locDetailsCol}>
+                  <View style={styles.locTitleRow}>
+                    <Text style={styles.locCityText}>{geo.city}</Text>
+                    <View style={styles.locCodeBadge}>
+                      <Text style={styles.locCodeText}>PHOTON</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.locFullNameText} numberOfLines={1}>
+                    {geo.displayName}
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+
             {filteredLocations.map((loc) => {
               const isSelected =
                 (locationModalMode === "pickup" ? pickupLocation.id : dropoffLocation.id) === loc.id;

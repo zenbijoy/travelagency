@@ -57,6 +57,7 @@ jest.mock("expo-secure-store", () => ({
 import { FaceVerifyModal } from "../FaceVerifyModal";
 
 describe("FaceVerifyModal Component", () => {
+  const mountedTrees: Array<ReturnType<typeof renderer.create>> = [];
   const defaultProps = {
     visible: true,
     bookingId: "BK-HOTEL-9988",
@@ -74,10 +75,17 @@ describe("FaceVerifyModal Component", () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    for (const tree of mountedTrees.splice(0)) {
+      act(() => tree.unmount());
+    }
+  });
+
   it("renders biometric scan reticle and step-by-step challenge indicators", () => {
     let tree: any;
     act(() => {
       tree = renderer.create(<FaceVerifyModal {...defaultProps} />);
+      mountedTrees.push(tree);
     });
 
     const root = tree.root;
@@ -99,6 +107,7 @@ describe("FaceVerifyModal Component", () => {
     let tree: any;
     await act(async () => {
       tree = renderer.create(<FaceVerifyModal {...defaultProps} />);
+      mountedTrees.push(tree);
     });
 
     const root = tree.root;
@@ -117,6 +126,7 @@ describe("FaceVerifyModal Component", () => {
       let tree: any;
       await act(async () => {
         tree = renderer.create(<FaceVerifyModal {...defaultProps} />);
+        mountedTrees.push(tree);
       });
 
       const root = tree.root;

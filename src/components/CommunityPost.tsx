@@ -4,6 +4,7 @@ import { OptimizedImage, DEFAULT_BLURHASH } from "./common";
 import { sanitizeUserText, sanitizeMediaUrl } from "../utils/sanitizer";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useTheme } from "../context/ThemeContext";
 import { TravelVideoPlayer } from "./TravelVideoPlayer";
 
 interface CommunityPostProps {
@@ -58,6 +59,7 @@ export function CommunityPost({
   onExploreSpot,
   onOpenProfile,
 }: CommunityPostProps) {
+  const { colors, isDark } = useTheme();
   // Sanitize all user-generated content to prevent XSS / HTML / Script injection
   const safeAuthorName = useMemo(() => sanitizeUserText(authorName) || "Traveler", [authorName]);
   const safeTitle = useMemo(() => sanitizeUserText(title), [title]);
@@ -134,7 +136,7 @@ export function CommunityPost({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.card }]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.authorInfo} onPress={onOpenProfile}>
@@ -143,16 +145,21 @@ export function CommunityPost({
               source={{ uri: safeAuthorImage }}
               style={styles.avatar}
               blurhash={DEFAULT_BLURHASH}
-              
             />
           ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Ionicons name="person" size={20} color="#767683" />
+            <View
+              style={[
+                styles.avatar,
+                styles.avatarPlaceholder,
+                { backgroundColor: isDark ? "#1E293B" : "#F1F5F9" },
+              ]}
+            >
+              <Ionicons name="person" size={20} color={colors.textSecondary} />
             </View>
           )}
           <View style={styles.authorDetails}>
             <View style={styles.nameRow}>
-              <Text style={styles.authorName}>{safeAuthorName}</Text>
+              <Text style={[styles.authorName, { color: colors.text }]}>{safeAuthorName}</Text>
               {(isInfluencer || role === "Influencer") && (
                 <View style={styles.influencerBadge}>
                   <Text style={styles.influencerBadgeText}>Influencer</Text>
@@ -162,17 +169,26 @@ export function CommunityPost({
             </View>
             <View style={styles.subMetaRow}>
               {safeLocation && (
-                <View style={styles.locationPill}>
+                <View
+                  style={[
+                    styles.locationPill,
+                    isDark && { backgroundColor: "rgba(56, 189, 248, 0.14)" },
+                  ]}
+                >
                   <Ionicons name="location-sharp" size={11} color="#0055F2" />
                   <Text style={styles.locationText}>{safeLocation}</Text>
                 </View>
               )}
-              {safeTimestamp && <Text style={styles.timestamp}>{safeTimestamp}</Text>}
+              {safeTimestamp && (
+                <Text style={[styles.timestamp, { color: colors.textSecondary }]}>
+                  {safeTimestamp}
+                </Text>
+              )}
             </View>
           </View>
         </Pressable>
         <Pressable hitSlop={8} onPress={handleOpenOptions} accessibilityLabel="Post Options">
-          <Ionicons name="ellipsis-horizontal" size={20} color="#767683" />
+          <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
         </Pressable>
       </View>
 
@@ -196,7 +212,6 @@ export function CommunityPost({
             source={{ uri: safePostImage }}
             style={styles.postImage}
             blurhash={DEFAULT_BLURHASH}
-            
           />
           {safeLocation && (
             <Pressable style={styles.explorePill} onPress={onExploreSpot}>
@@ -211,8 +226,12 @@ export function CommunityPost({
       ) : null}
 
       {/* Title & Description */}
-      <Text style={styles.title}>{safeTitle}</Text>
-      {safeDescription && <Text style={styles.description}>{safeDescription}</Text>}
+      <Text style={[styles.title, { color: colors.text }]}>{safeTitle}</Text>
+      {safeDescription && (
+        <Text style={[styles.description, { color: colors.textSecondary }]}>
+          {safeDescription}
+        </Text>
+      )}
 
       {/* Actions Bar */}
       <View style={styles.actions}>
@@ -221,20 +240,26 @@ export function CommunityPost({
             <Ionicons
               name={liked ? "heart" : "heart-outline"}
               size={22}
-              color={liked ? "#EF4444" : "#454652"}
+              color={liked ? "#EF4444" : colors.textSecondary}
             />
-            <Text style={[styles.actionText, liked && styles.actionTextLiked]}>
+            <Text
+              style={[
+                styles.actionText,
+                { color: colors.textSecondary },
+                liked && styles.actionTextLiked,
+              ]}
+            >
               {likes}
             </Text>
           </Pressable>
 
           <Pressable style={styles.action} onPress={onComment}>
-            <Ionicons name="chatbubble-outline" size={20} color="#454652" />
-            <Text style={styles.actionText}>{comments}</Text>
+            <Ionicons name="chatbubble-outline" size={20} color={colors.textSecondary} />
+            <Text style={[styles.actionText, { color: colors.textSecondary }]}>{comments}</Text>
           </Pressable>
 
           <Pressable style={styles.action} onPress={onShare}>
-            <Ionicons name="paper-plane-outline" size={20} color="#454652" />
+            <Ionicons name="paper-plane-outline" size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -242,7 +267,7 @@ export function CommunityPost({
           <Ionicons
             name={saved ? "bookmark" : "bookmark-outline"}
             size={22}
-            color={saved ? "#0055F2" : "#454652"}
+            color={saved ? "#0055F2" : colors.textSecondary}
           />
         </Pressable>
       </View>
@@ -251,20 +276,28 @@ export function CommunityPost({
       {likes > 0 && (
         <View style={styles.likedByRow}>
           <Ionicons name="heart" size={11} color="#EF4444" />
-          <Text style={styles.likedByText}>
-            Liked by <Text style={{ fontWeight: "700" }}>{likes}</Text> travelers
+          <Text style={[styles.likedByText, { color: colors.textSecondary }]}>
+            Liked by <Text style={{ fontWeight: "700", color: colors.text }}>{likes}</Text> travelers
           </Text>
         </View>
       )}
 
       {/* Recent Comments Preview */}
       {safeCommentsList && safeCommentsList.length > 0 && (
-        <Pressable onPress={onComment} style={styles.commentsPreviewBox}>
+        <Pressable
+          onPress={onComment}
+          style={[
+            styles.commentsPreviewBox,
+            { backgroundColor: isDark ? "#1E293B" : "#F8FAFC" },
+          ]}
+        >
           {safeCommentsList.slice(0, 2).map((c) => (
             <View key={c.id} style={styles.commentItem}>
-              <Text style={styles.commentAuthor}>
+              <Text style={[styles.commentAuthor, { color: colors.text }]}>
                 {c.author?.display_name || "Traveler"}:{" "}
-                <Text style={styles.commentBody}>{c.content}</Text>
+                <Text style={[styles.commentBody, { color: colors.textSecondary }]}>
+                  {c.content}
+                </Text>
               </Text>
             </View>
           ))}
@@ -277,6 +310,129 @@ export function CommunityPost({
           )}
         </Pressable>
       )}
+
+      {/* Post Options Modal */}
+      <Modal
+        visible={isOptionsVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsOptionsVisible(false)}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={() => setIsOptionsVisible(false)}>
+          <View style={[styles.modalCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>পোস্টের বিকল্প</Text>
+              <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+                {safeAuthorName} • {safeTitle}
+              </Text>
+            </View>
+
+            <Pressable
+              style={styles.modalItem}
+              onPress={() => {
+                setIsOptionsVisible(false);
+                onShare?.();
+              }}
+            >
+              <Ionicons name="share-social-outline" size={20} color="#0055F2" />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.modalItemText, { color: colors.text }]}>শেয়ার করুন (Share)</Text>
+                <Text style={[styles.modalItemSub, { color: colors.textSecondary }]}>
+                  অন্যদের সাথে এই ভ্রমণ গল্প শেয়ার করুন
+                </Text>
+              </View>
+            </Pressable>
+
+            <Pressable
+              style={styles.modalItem}
+              onPress={() => {
+                setIsOptionsVisible(false);
+                setIsReportVisible(true);
+              }}
+            >
+              <Ionicons name="flag-outline" size={20} color="#D97706" />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.modalItemText, { color: colors.text }]}>রিপোর্ট করুন (Report)</Text>
+                <Text style={[styles.modalItemSub, { color: colors.textSecondary }]}>
+                  অনুপযুক্ত বা বিভ্রান্তিকর তথ্য জানান
+                </Text>
+              </View>
+            </Pressable>
+
+            <Pressable style={styles.modalItem} onPress={handleBlockUser}>
+              <Ionicons name="ban-outline" size={20} color="#EF4444" />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.modalItemText, { color: "#EF4444" }]}>
+                  ব্লক করুন ({safeAuthorName})
+                </Text>
+                <Text style={[styles.modalItemSub, { color: colors.textSecondary }]}>
+                  এই ব্যবহারকারীর কোনো পোস্ট আর দেখানো হবে না
+                </Text>
+              </View>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.modalCancelBtn,
+                { backgroundColor: isDark ? "#1E293B" : "#F1F5F9" },
+              ]}
+              onPress={() => setIsOptionsVisible(false)}
+            >
+              <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>বাতিল করুন</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Report Reason Modal */}
+      <Modal
+        visible={isReportVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsReportVisible(false)}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={() => setIsReportVisible(false)}>
+          <View style={[styles.modalCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>রিপোর্টের কারণ নির্বাচন করুন</Text>
+              <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
+                আমাদের কমিউনিটি নিরাপদ রাখতে সাহায্য করুন
+              </Text>
+            </View>
+
+            {[
+              "ভুয়া তথ্য বা স্প্যাম",
+              "অনুপযুক্ত বা আপত্তিকর বিষয়বস্তু",
+              "কপিরাইট বা মালিকানা লঙ্ঘন",
+              "হয়রানি বা বিদ্বেষমূলক বক্তব্য",
+            ].map((reason) => (
+              <Pressable
+                key={reason}
+                style={[
+                  styles.reportItem,
+                  isDark && { backgroundColor: "rgba(217, 119, 6, 0.14)" },
+                ]}
+                onPress={() => handleReportReason(reason)}
+              >
+                <Ionicons name="alert-circle-outline" size={18} color="#D97706" />
+                <Text style={[styles.reportItemText, isDark && { color: "#FBBF24" }]}>
+                  {reason}
+                </Text>
+              </Pressable>
+            ))}
+
+            <Pressable
+              style={[
+                styles.modalCancelBtn,
+                { backgroundColor: isDark ? "#1E293B" : "#F1F5F9" },
+              ]}
+              onPress={() => setIsReportVisible(false)}
+            >
+              <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>পিছনে যান</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

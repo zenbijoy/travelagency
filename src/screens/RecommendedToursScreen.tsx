@@ -1274,7 +1274,7 @@ export function RecommendedToursScreen() {
   const handleSharePass = async (pass: DigitalPass) => {
     try {
       await Share.share({
-        message: `🎫 Official Trip.com Tour Pass #${pass.passId}\nTour: ${pass.tourTitle}\nDate: ${pass.date}\nSchedule: ${pass.timeSlotLabel} (${pass.timeSlotHours})\nGuests: ${pass.groupSize} Travelers\nAssigned Guide: ${pass.guide.name}\nTotal: ${formatCurrency(pass.totalAmount, pass.currency)}`,
+        message: `🎫 Official Shopno Jatra Tour Pass #${pass.passId}\nTour: ${pass.tourTitle}\nDate: ${pass.date}\nSchedule: ${pass.timeSlotLabel} (${pass.timeSlotHours})\nGuests: ${pass.groupSize} Travelers\nAssigned Guide: ${pass.guide.name}\nTotal: ${formatCurrency(pass.totalAmount, pass.currency)}`,
       });
     } catch {
       Alert.alert("Tour Pass Ready", `Pass ID #${pass.passId} has been confirmed.`);
@@ -1823,7 +1823,7 @@ export function RecommendedToursScreen() {
                   <View style={styles.ticketHeader}>
                     <View style={styles.ticketLogoRow}>
                       <Ionicons name="airplane" size={18} color="#FFFFFF" />
-                      <Text style={styles.ticketBrand}>TRIP.COM PASS</Text>
+                      <Text style={styles.ticketBrand}>SHOPNO JATRA PASS</Text>
                     </View>
                     <Text style={styles.ticketIdBadge}>#{digitalPass.passId}</Text>
                   </View>

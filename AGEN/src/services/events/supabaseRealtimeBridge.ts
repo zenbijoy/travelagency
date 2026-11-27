@@ -19,22 +19,39 @@ let bookingsChannel: RealtimeChannel | null = null;
 let messagesChannel: RealtimeChannel | null = null;
 let paymentsChannel: RealtimeChannel | null = null;
 
+function isRecordInAgencyScope(
+  record: Record<string, any> | undefined,
+  agencyId?: string
+): boolean {
+  if (!record) return false;
+  if (!agencyId) return true;
+  const recordAgencyId = record.agency_id || record.tenant_id;
+  if (!recordAgencyId) return false;
+  return String(recordAgencyId) === String(agencyId);
+}
+
 export function initAgencyRealtimeBridge(agencyId?: string): () => void {
   teardownAgencyRealtimeBridge();
 
+  const normalizedAgencyId = agencyId ? String(agencyId).trim() : undefined;
+  const channelSuffix = normalizedAgencyId ? `-${normalizedAgencyId.slice(0, 8)}` : "";
+  const agencyFilter = normalizedAgencyId ? `agency_id=eq.${normalizedAgencyId}` : undefined;
+
   try {
-    // 1. Listen for bookings mutations
+    // 1. Listen for tenant-scoped bookings mutations
     bookingsChannel = supabase
-      .channel("agency-realtime-bookings")
+      .channel(`agency-realtime-bookings${channelSuffix}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "bookings",
+          ...(agencyFilter ? { filter: agencyFilter } : {}),
         },
         (payload) => {
           const record = (payload.new || payload.old) as Record<string, any> | undefined;
+          if (!isRecordInAgencyScope(record, normalizedAgencyId)) return;
           if (!record) return;
 
           const eventPayload: BookingStatusChangedPayload = {
@@ -56,18 +73,20 @@ export function initAgencyRealtimeBridge(agencyId?: string): () => void {
       )
       .subscribe();
 
-    // 2. Listen for payments mutations
+    // 2. Listen for tenant-scoped payments mutations
     paymentsChannel = supabase
-      .channel("agency-realtime-payments")
+      .channel(`agency-realtime-payments${channelSuffix}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "booking_payments",
+          ...(agencyFilter ? { filter: agencyFilter } : {}),
         },
         (payload) => {
           const record = payload.new as Record<string, any> | undefined;
+          if (!isRecordInAgencyScope(record, normalizedAgencyId)) return;
           if (!record) return;
 
           if (record.payment_status === "completed" || record.payment_status === "success") {
@@ -99,16 +118,18 @@ export function initAgencyRealtimeBridge(agencyId?: string): () => void {
 
     // 3. Listen for messages / customer inquiries
     messagesChannel = supabase
-      .channel("agency-realtime-messages")
+      .channel(`agency-realtime-messages${channelSuffix}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "messages",
+          ...(agencyFilter ? { filter: agencyFilter } : {}),
         },
         (payload) => {
           const record = payload.new as Record<string, any> | undefined;
+          if (!isRecordInAgencyScope(record, normalizedAgencyId)) return;
           if (!record) return;
 
           const msgPayload: NewMessageReceivedPayload = {

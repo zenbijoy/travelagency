@@ -95,22 +95,8 @@ export class GooglePayProvider implements IPaymentProvider {
   }
 
   async verify(transactionId: string): Promise<PaymentStatus> {
-    try {
-      // In production, verify with your payment gateway (Stripe, etc.)
-      // For now, simulate verification
-
-      // Mock verification - in production, call your backend
-      const isValid = transactionId.startsWith("GPAY-");
-
-      if (isValid) {
-        return "completed";
-      }
-
-      return "failed";
-    } catch (error) {
-      console.error("Google Pay verify error:", error);
-      return "failed";
-    }
+    // Zero-Trust Security: Require authoritative backend/Stripe webhook confirmation
+    return "pending";
   }
 
   async refund(request: RefundRequest): Promise<boolean> {

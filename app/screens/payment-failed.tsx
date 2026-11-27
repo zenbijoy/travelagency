@@ -21,6 +21,7 @@ import { BookingStepper } from "../../src/components/common/BookingStepper";
 import { CopyableText } from "../../src/components/common/CopyableText";
 import { safeGoBack } from "../../src/utils/navigationHelper";
 import { shareUnifiedReceipt } from "../../src/utils/receiptService";
+import { paymentService } from "../../src/services/paymentService";
 import * as Haptics from "expo-haptics";
 
 const PRIMARY = "#287dfa";
@@ -100,11 +101,23 @@ export default function PaymentFailedScreen() {
   const handleRecheckStatus = async () => {
     setIsRechecking(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setTimeout(() => {
+    try {
+      const txnId = bookingReference || bookingId || "";
+      const meth = (method as any) || "bkash";
+      const status = await paymentService.verify(meth, txnId);
       setIsRechecking(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      alert("লেনদেনটি এখনও ব্যাংক/MFS প্রক্রিয়াকরণে রয়েছে। আপনার টাকা সম্পূর্ণ নিরাপদ। আরও ৫ মিনিট পর পুনরায় চেক করুন।");
-    }, 2000);
+      if (status === "completed") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        alert("🎉 অভিনন্দন! পেমেন্ট সফলভাবে সম্পন্ন হয়েছে।");
+        router.replace("/(tabs)/trips" as any);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        alert("লেনদেনটি এখনও গেটওয়ে প্রসেসিংয়ে রয়েছে। অনুগ্রহ করে কয়েক মিনিট পর পুনরায় চেক করুন।");
+      }
+    } catch {
+      setIsRechecking(false);
+      alert("পেমেন্ট স্ট্যাটাস যাচাই করা যায়নি। আরও কিছুক্ষণ পর চেষ্টা করুন।");
+    }
   };
 
   const handleShareInquiry = async () => {

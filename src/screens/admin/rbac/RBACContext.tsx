@@ -12,24 +12,26 @@ import {
 
 interface RBACContextType {
   admin: AdminUser | null;
-  role: AdminRole;
+  role: AdminRole | null;
   switchRole: (role: AdminRole) => void;
   hasPermission: (permission: AdminPermission) => boolean;
   isTabAllowed: (tab: AdminTab) => boolean;
   allowedTabs: AdminTab[];
   permissions: AdminPermission[];
   loading: boolean;
+  isSimulationMode: boolean;
 }
 
 const RBACContext = createContext<RBACContextType>({
   admin: null,
-  role: AdminRole.SUPER_ADMIN,
+  role: null,
   switchRole: () => {},
   hasPermission: () => false,
   isTabAllowed: () => false,
   allowedTabs: [],
   permissions: [],
   loading: true,
+  isSimulationMode: false,
 });
 
 export const RBACProvider: React.FC<{
@@ -38,6 +40,8 @@ export const RBACProvider: React.FC<{
 }> = ({ initialAdmin, children }) => {
   const [admin, setAdmin] = useState<AdminUser | null>(initialAdmin || null);
   const [loading, setLoading] = useState(!initialAdmin);
+  const [simulatedRole, setSimulatedRole] = useState<AdminRole | null>(null);
+  const isSimulationMode = __DEV__ && simulatedRole !== null;
 
   useEffect(() => {
     if (!initialAdmin) {
@@ -48,26 +52,27 @@ export const RBACProvider: React.FC<{
     }
   }, [initialAdmin]);
 
-  const currentRole = admin?.role || AdminRole.SUPER_ADMIN;
+  const currentRole = (isSimulationMode ? simulatedRole : (admin?.role ?? null)) as AdminRole | null;
 
+  // DEV-only role simulation — leaves real admin object untouched
   const switchRole = (newRole: AdminRole) => {
-    if (!admin) return;
-    setAdmin({
-      ...admin,
-      role: newRole,
-    });
+    if (!__DEV__) return;
+    setSimulatedRole(newRole);
   };
 
-  const hasPermission = (permission: AdminPermission) => {
+  // Fail-closed: return false while loading or admin not yet resolved
+  const hasPermission = (permission: AdminPermission): boolean => {
+    if (loading || !admin) return false;
     return checkPermission(admin, permission);
   };
 
-  const isTabAllowed = (tab: AdminTab) => {
+  const isTabAllowed = (tab: AdminTab): boolean => {
+    if (loading || !admin || !currentRole) return false;
     return checkTabAllowed(currentRole, tab);
   };
 
-  const allowedTabs = ROLE_ALLOWED_TABS[currentRole] || ["dashboard"];
-  const permissions = ROLE_PERMISSIONS[currentRole] || [];
+  const allowedTabs: AdminTab[] = currentRole ? (ROLE_ALLOWED_TABS[currentRole] ?? ["dashboard"]) : ["dashboard"];
+  const permissions = currentRole ? (ROLE_PERMISSIONS[currentRole] ?? []) : [];
 
   return (
     <RBACContext.Provider
@@ -80,6 +85,7 @@ export const RBACProvider: React.FC<{
         allowedTabs,
         permissions,
         loading,
+        isSimulationMode,
       }}
     >
       {children}

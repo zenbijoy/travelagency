@@ -83,9 +83,73 @@ describe("Group Trip Balances & Debt Minimisation Engine", () => {
       const total = Array.from(shares.values()).reduce((a, b) => a + b, 0n);
       expect(total).toBe(100n);
     });
+
+    it("keeps equal split shares inside the trip and preserves the expense total", () => {
+      const shares = splitExpenseWithLargestRemainder(
+        101n,
+        { type: "equal", participants: ["alice", "outsider"] },
+        ["alice", "bob"]
+      );
+
+      expect(Array.from(shares.keys()).sort()).toEqual(["alice"]);
+      expect(Array.from(shares.values()).reduce((sum, share) => sum + share, 0n)).toBe(101n);
+    });
+
+    it("redistributes an empty exact split across trip members", () => {
+      const shares = splitExpenseWithLargestRemainder(
+        100n,
+        { type: "exact", amounts_paisa: {} },
+        ["alice", "bob"]
+      );
+
+      expect(shares.get("alice")).toBe(50n);
+      expect(shares.get("bob")).toBe(50n);
+    });
+
+    it("rejects exact shares that exceed the expense total", () => {
+      expect(() =>
+        splitExpenseWithLargestRemainder(
+          100n,
+          { type: "exact", amounts_paisa: { alice: 101n } },
+          ["alice", "bob"]
+        )
+      ).toThrow("Expense shares cannot exceed the total amount");
+    });
+
+    it("filters outsiders from weighted splits and falls back for invalid weights", () => {
+      const shares = splitExpenseWithLargestRemainder(
+        101n,
+        { type: "shares", shares: { alice: 0, bob: 0, outsider: 10 } },
+        ["alice", "bob"]
+      );
+
+      expect(shares.get("alice")).toBe(51n);
+      expect(shares.get("bob")).toBe(50n);
+      expect(shares.has("outsider")).toBe(false);
+    });
   });
 
   describe("compute_balances()", () => {
+    it("keeps net balances at zero when invalid participants are supplied", () => {
+      const balances = compute_balances(
+        [{ paid_by: "alice", amount_paisa: 100n, split: { type: "equal", participants: ["outsider"] } }],
+        ["alice", "bob"]
+      );
+
+      expect(Object.values(balances).reduce((sum, value) => sum + value, 0n)).toBe(0n);
+      expect(balances.outsider).toBeUndefined();
+    });
+
+    it("ignores expenses paid by users outside the trip", () => {
+      const balances = compute_balances(
+        [{ paid_by: "outsider", amount_paisa: 100n, split: { type: "equal", participants: ["alice", "bob"] } }],
+        ["alice", "bob"]
+      );
+
+      expect(balances).toEqual({ alice: 0n, bob: 0n });
+      expect(Object.values(balances).reduce((sum, value) => sum + value, 0n)).toBe(0n);
+    });
+
     it("computes net zero balances for simple split between two users", () => {
       const members = ["alice", "bob"];
       const expenses: GroupExpense[] = [

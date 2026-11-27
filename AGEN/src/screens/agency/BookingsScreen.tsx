@@ -9,6 +9,7 @@ import {
   Animated,
   Image,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -75,7 +76,7 @@ export default function BookingsScreen({ navigation }: Props) {
     setBookings((prev) =>
       prev.map((b) => (selectedIds.includes(b.id) ? { ...b, status: newStatus } : b))
     );
-    alert(`${selectedIds.length}টি বুকিংয়ের স্ট্যাটাস আপডেট করা হয়েছে।`);
+    Alert.alert("স্ট্যাটাস আপডেট", `${selectedIds.length}টি বুকিংয়ের স্ট্যাটাস আপডেট করা হয়েছে।`);
     setSelectedIds([]);
   };
 

@@ -2,4 +2,13 @@ packages:
   - "."
   - "AGEN"
   - "hotel"
-  - "packages/*"
+  - "rider"
+  - "packages/shared"
+allowBuilds:
+  '@firebase/util': true
+  protobufjs: true
+permissions:
+  dotenv:
+    skills: true
+  expo-sqlite:
+    skills: true

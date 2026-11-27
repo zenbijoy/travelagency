@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,14 @@ import {
   ScrollView,
   Pressable,
   Switch,
+  Modal,
+  TextInput,
+  Alert,
   Share,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useHotelPmsStore, useHotelPmsComputed } from "@/features/hotel";
 
 const NAVY = "#0F172A";
 const NAVY_LIGHT = "#1E293B";
@@ -18,254 +22,353 @@ const GREEN = "#22C55E";
 const BLUE = "#3B82F6";
 const PURPLE = "#A855F7";
 const RED = "#EF4444";
-const YELLOW = "#F59E0B";
-
-interface RevenueCard {
-  id: string;
-  label: string;
-  value: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  color: string;
-  change: string;
-}
-
-interface PayoutItem {
-  id: string;
-  amount: string;
-  date: string;
-  status: "Pending" | "Processing" | "Completed";
-}
-
-interface CompetitorPrice {
-  id: string;
-  name: string;
-  price: string;
-  diff: "lower" | "higher" | "same";
-}
-
-interface AiInsight {
-  id: string;
-  text: string;
-  icon: keyof typeof Ionicons.glyphMap;
-}
-
-const REVENUE_CARDS: RevenueCard[] = [
-  { id: "1", label: "Total Revenue", value: "৳4,82,500", icon: "wallet-outline", color: GOLD, change: "+18%" },
-  { id: "2", label: "This Month", value: "৳1,24,200", icon: "calendar-outline", color: BLUE, change: "+12%" },
-  { id: "3", label: "This Week", value: "৳28,600", icon: "time-outline", color: GREEN, change: "+5%" },
-];
-
-const BAR_DATA = [42000, 68500, 55000, 80000, 65000, 90000, 72000];
-const BAR_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-const PAYOUTS: PayoutItem[] = [
-  { id: "1", amount: "৳45,200", date: "Nov 1, 2026", status: "Completed" },
-  { id: "2", amount: "৳38,900", date: "Nov 8, 2026", status: "Processing" },
-  { id: "3", amount: "৳28,600", date: "Nov 15, 2026", status: "Pending" },
-];
-
-const PAYOUT_COLORS: Record<PayoutItem["status"], string> = {
-  Completed: GREEN,
-  Processing: YELLOW,
-  Pending: BLUE,
-};
-
-const COMPETITORS: CompetitorPrice[] = [
-  { id: "1", name: "Hotel Surma", price: "৳6,500", diff: "higher" },
-  { id: "2", name: "Green Garden", price: "৳4,200", diff: "lower" },
-  { id: "3", name: "City Inn", price: "৳5,500", diff: "same" },
-];
-
-const AI_INSIGHTS: AiInsight[] = [
-  { id: "1", text: "Weekends earn 40% more — consider premium pricing", icon: "trending-up-outline" },
-  { id: "2", text: "December is your peak month — start promotions now", icon: "calendar-outline" },
-  { id: "3", text: "Suite occupancy is 95% — add more luxury rooms", icon: "star-outline" },
-];
-
-function BarChart() {
-  const max = Math.max(...BAR_DATA);
-  return (
-    <View style={bar.container}>
-      <Text style={bar.title}>Last 7 Days Revenue</Text>
-      <View style={bar.chart}>
-        {BAR_DATA.map((val, i) => (
-          <View key={i} style={bar.colWrap}>
-            <Text style={bar.amount}>৳{(val / 1000).toFixed(0)}k</Text>
-            <View style={[bar.barFill, { height: (val / max) * 100 }]} />
-            <Text style={bar.label}>{BAR_LABELS[i]}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
 
 export default function RevenueScreen() {
-  const [dynamicPricing, setDynamicPricing] = useState(true);
   const { isDesktop, contentMaxWidth } = useResponsive();
+  const { workspace, initWorkspace, toggleRateRule, requestPayout } = useHotelPmsStore();
+  const { currentProperty, kpis } = useHotelPmsComputed();
 
-  const handleDownload = async () => {
-    const report = `Revenue Report — Grand Palace Hotel\n\nTotal Revenue: ৳4,82,500\nThis Month: ৳1,24,200\nThis Week: ৳28,600\n\nCommission (12%): ৳57,900\nNet Payout: ৳4,24,600`;
-    await Share.share({ message: report, title: "Revenue Report" });
+  const [payoutModalVisible, setPayoutModalVisible] = useState(false);
+  const [payoutAmount, setPayoutAmount] = useState("");
+  const [payoutMethod, setPayoutMethod] = useState<"bkash" | "nagad" | "bank_transfer">("bkash");
+  const [accountRef, setAccountRef] = useState("");
+
+  useEffect(() => {
+    if (workspace.units.length === 0) initWorkspace();
+  }, []);
+
+  const propertyRules = workspace.rateRules.filter((r) => r.hotelId === currentProperty.id);
+  const propertyPayouts = workspace.payouts.filter((p) => p.hotelId === currentProperty.id);
+  const maxDayAmount = Math.max(1, ...kpis.dailyRevenueSeries.map((d) => d.amountBdt));
+
+  const handleSubmitPayout = async () => {
+    const amount = parseFloat(payoutAmount);
+    if (!amount || amount < 1000) {
+      Alert.alert("Minimum Withdrawal", "Minimum payout withdrawal is ৳1,000.");
+      return;
+    }
+    if (!accountRef.trim()) {
+      Alert.alert("Account Required", "Please provide your bKash / Nagad / Bank account number.");
+      return;
+    }
+
+    const res = await requestPayout({
+      amountBdt: amount,
+      method: payoutMethod,
+      accountRef: accountRef.trim(),
+    });
+    if (res.success) {
+      setPayoutModalVisible(false);
+      setPayoutAmount("");
+      setAccountRef("");
+      Alert.alert(
+        "Payout Requested",
+        `Withdrawal of ৳${amount.toLocaleString()} submitted via ${payoutMethod.toUpperCase()} (Ref: ${res.payoutId}).`
+      );
+    } else {
+      Alert.alert("Payout Error", res.error || "Could not request payout.");
+    }
+  };
+
+  const handleExportReport = () => {
+    const summary = [
+      `${currentProperty.name} — REVENUE & YIELD REPORT`,
+      `Occupancy: ${kpis.occupancyRatePct}%`,
+      `ADR: ৳${kpis.adrBdt.toLocaleString()} | RevPAR: ৳${kpis.revParBdt.toLocaleString()} | GOPPAR: ৳${kpis.gopparBdt.toLocaleString()}`,
+      `Gross Revenue: ৳${kpis.grossRevenueBdt.toLocaleString()}`,
+      `Net Payout Available: ৳${kpis.netPayoutBdt.toLocaleString()}`,
+    ].join("\n");
+    Share.share({ message: summary }).catch(() => {});
   };
 
   return (
     <View style={styles.container}>
       <ScrollView
+        style={styles.scroll}
         contentContainerStyle={[
-          styles.scroll,
+          styles.content,
           isDesktop && { maxWidth: contentMaxWidth, alignSelf: "center" as const, width: "100%" },
         ]}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Revenue Dashboard</Text>
-          <Pressable style={styles.downloadBtn} onPress={handleDownload}>
-            <Ionicons name="download-outline" size={16} color={NAVY} />
-            <Text style={styles.downloadText}>Download</Text>
-          </Pressable>
+          <View>
+            <Text style={styles.headerTitle}>Yield & Revenue Manager</Text>
+            <Text style={styles.headerSub}>{currentProperty.name} • Live Financial Ledger</Text>
+          </View>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <Pressable style={styles.exportBtn} onPress={handleExportReport}>
+              <Ionicons name="share-outline" size={18} color="#F1F5F9" />
+            </Pressable>
+            <Pressable style={styles.withdrawBtn} onPress={() => setPayoutModalVisible(true)}>
+              <Ionicons name="wallet-outline" size={16} color={NAVY} />
+              <Text style={styles.withdrawText}>Withdraw</Text>
+            </Pressable>
+          </View>
         </View>
 
-        {/* Revenue Cards */}
+        {/* Live KPI Strip */}
         <View style={styles.cardsRow}>
-          {REVENUE_CARDS.map((card) => (
-            <View key={card.id} style={[styles.card, { borderTopColor: card.color }]}>
-              <Ionicons name={card.icon} size={20} color={card.color} />
-              <Text style={styles.cardValue}>{card.value}</Text>
-              <Text style={styles.cardLabel}>{card.label}</Text>
-              <Text style={[styles.cardChange, { color: GREEN }]}>{card.change}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Bar Chart */}
-        <BarChart />
-
-        {/* Dynamic Pricing */}
-        <View style={styles.dynamicRow}>
-          <View style={styles.dynamicInfo}>
-            <Text style={styles.dynamicTitle}>Dynamic Pricing Engine</Text>
-            <Text style={styles.dynamicSub}>Auto-adjust prices based on demand</Text>
+          <View style={[styles.revCard, { borderLeftColor: GOLD }]}>
+            <Text style={styles.revLabel}>Gross Revenue</Text>
+            <Text style={styles.revVal}>৳{kpis.grossRevenueBdt.toLocaleString()}</Text>
+            <Text style={styles.revDelta}>Room + Add-ons</Text>
           </View>
-          <Switch
-            value={dynamicPricing}
-            onValueChange={setDynamicPricing}
-            thumbColor={dynamicPricing ? GOLD : "#64748B"}
-            trackColor={{ false: "#334155", true: GOLD + "66" }}
-          />
-        </View>
-
-        {/* Payout Status */}
-        <Text style={styles.sectionTitle}>Payout Status</Text>
-        {PAYOUTS.map((payout) => (
-          <View key={payout.id} style={styles.payoutItem}>
-            <View>
-              <Text style={styles.payoutAmount}>{payout.amount}</Text>
-              <Text style={styles.payoutDate}>{payout.date}</Text>
-            </View>
-            <View style={[styles.payoutBadge, { backgroundColor: PAYOUT_COLORS[payout.status] + "33" }]}>
-              <Text style={[styles.payoutStatus, { color: PAYOUT_COLORS[payout.status] }]}>{payout.status}</Text>
-            </View>
-          </View>
-        ))}
-
-        {/* Commission Breakdown */}
-        <Text style={styles.sectionTitle}>Commission Breakdown</Text>
-        <View style={styles.commissionCard}>
-          <View style={styles.commRow}>
-            <Text style={styles.commLabel}>Gross Revenue</Text>
-            <Text style={styles.commValue}>৳4,82,500</Text>
-          </View>
-          <View style={styles.commRow}>
-            <Text style={styles.commLabel}>Platform Commission (12%)</Text>
-            <Text style={[styles.commValue, { color: RED }]}>-৳57,900</Text>
-          </View>
-          <View style={[styles.commRow, styles.commTotal]}>
-            <Text style={styles.commTotalLabel}>Net Payout</Text>
-            <Text style={styles.commTotalValue}>৳4,24,600</Text>
+          <View style={[styles.revCard, { borderLeftColor: GREEN }]}>
+            <Text style={styles.revLabel}>Net Payout Pool</Text>
+            <Text style={styles.revVal}>৳{kpis.netPayoutBdt.toLocaleString()}</Text>
+            <Text style={styles.revDelta}>After {currentProperty.commissionPct}% fee</Text>
           </View>
         </View>
 
-        {/* Competitor Prices */}
-        <Text style={styles.sectionTitle}>Competitor Prices</Text>
-        <View style={styles.competitorRow}>
-          <View style={styles.myPrice}>
-            <Text style={styles.myPriceLabel}>Your Avg.</Text>
-            <Text style={styles.myPriceValue}>৳5,500</Text>
+        <View style={styles.cardsRow}>
+          <View style={[styles.revCard, { borderLeftColor: BLUE }]}>
+            <Text style={styles.revLabel}>ADR / RevPAR</Text>
+            <Text style={styles.revVal}>৳{kpis.adrBdt.toLocaleString()}</Text>
+            <Text style={styles.revDelta}>RevPAR: ৳{kpis.revParBdt.toLocaleString()}</Text>
           </View>
-          {COMPETITORS.map((comp) => (
-            <View key={comp.id} style={styles.compCard}>
-              <Ionicons
-                name={comp.diff === "higher" ? "arrow-up" : comp.diff === "lower" ? "arrow-down" : "remove"}
-                size={12}
-                color={comp.diff === "higher" ? RED : comp.diff === "lower" ? GREEN : "#64748B"}
+          <View style={[styles.revCard, { borderLeftColor: PURPLE }]}>
+            <Text style={styles.revLabel}>GOPPAR</Text>
+            <Text style={styles.revVal}>৳{kpis.gopparBdt.toLocaleString()}</Text>
+            <Text style={styles.revDelta}>Occ: {kpis.occupancyRatePct}%</Text>
+          </View>
+        </View>
+
+        {/* 7-Day Live Chart */}
+        <View style={styles.sectionBox}>
+          <Text style={styles.sectionTitle}>7-Day Revenue Trajectory</Text>
+          <View style={styles.chartRow}>
+            {kpis.dailyRevenueSeries.map((day) => (
+              <View key={day.date} style={styles.barCol}>
+                <Text style={styles.barVal}>
+                  {day.amountBdt > 0 ? `${Math.round(day.amountBdt / 1000)}k` : "0"}
+                </Text>
+                <View
+                  style={[
+                    styles.bar,
+                    { height: Math.max(6, (day.amountBdt / maxDayAmount) * 90) },
+                  ]}
+                />
+                <Text style={styles.barLabel}>{day.label}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* AI Yield Rules Engine */}
+        <View style={styles.sectionBox}>
+          <Text style={styles.sectionTitle}>Dynamic Pricing & Flash Deal Rules</Text>
+          <Text style={styles.sectionSub}>
+            Fair Price Shield enforced: effective multiplier capped strictly between 0.5x and 1.25x.
+          </Text>
+          {propertyRules.map((rule) => (
+            <View key={rule.id} style={styles.ruleRow}>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Text style={styles.ruleName}>{rule.ruleName}</Text>
+                  {rule.isFlashDeal && (
+                    <View style={styles.flashBadge}>
+                      <Text style={styles.flashText}>FLASH DEAL</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.ruleMeta}>
+                  Multiplier: {rule.multiplier}x • Type: {rule.ruleType.replace("_", " ")}
+                </Text>
+              </View>
+              <Switch
+                value={rule.isActive}
+                onValueChange={(val) => {
+                  void toggleRateRule(rule.id, val);
+                }}
+                trackColor={{ false: "#334155", true: GOLD + "88" }}
+                thumbColor={rule.isActive ? GOLD : "#94A3B8"}
               />
-              <Text style={styles.compName}>{comp.name}</Text>
-              <Text style={styles.compPrice}>{comp.price}</Text>
             </View>
           ))}
+        </View>
+
+        {/* Competitor Rate Monitor */}
+        <View style={styles.sectionBox}>
+          <Text style={styles.sectionTitle}>Local Competitor Benchmarks</Text>
+          {workspace.competitors.map((comp) => {
+            const diff = comp.nightlyRateBdt - kpis.adrBdt;
+            return (
+              <View key={comp.id} style={styles.compRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.compName}>{comp.hotelName}</Text>
+                  <Text style={styles.compMeta}>
+                    {comp.distanceKm} km away • {comp.starRating}★ • Est. {comp.occupancyHintPct}% Occ
+                  </Text>
+                </View>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={styles.compPrice}>৳{comp.nightlyRateBdt.toLocaleString()}</Text>
+                  <Text style={{ color: diff >= 0 ? GREEN : RED, fontSize: 10, fontWeight: "700" }}>
+                    {diff >= 0 ? `+৳${diff.toLocaleString()} above you` : `৳${Math.abs(diff).toLocaleString()} lower`}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
         </View>
 
         {/* AI Insights */}
-        <Text style={styles.sectionTitle}>✨ AI Insights</Text>
-        {AI_INSIGHTS.map((insight) => (
-          <View key={insight.id} style={styles.insightCard}>
-            <Ionicons name={insight.icon} size={18} color={PURPLE} />
-            <Text style={styles.insightText}>{insight.text}</Text>
+        {kpis.aiInsights.length > 0 && (
+          <View style={styles.sectionBox}>
+            <Text style={styles.sectionTitle}>Actionable Yield Insights</Text>
+            {kpis.aiInsights.map((insight, idx) => (
+              <View key={idx} style={styles.insightRow}>
+                <Ionicons name="bulb-outline" size={16} color={GOLD} />
+                <Text style={styles.insightText}>{insight}</Text>
+              </View>
+            ))}
           </View>
-        ))}
+        )}
+
+        {/* Payout History */}
+        <View style={styles.sectionBox}>
+          <Text style={styles.sectionTitle}>Recent Payouts ({propertyPayouts.length})</Text>
+          {propertyPayouts.map((p) => (
+            <View key={p.id} style={styles.payoutRow}>
+              <View>
+                <Text style={styles.payoutAmt}>৳{p.amountBdt.toLocaleString()}</Text>
+                <Text style={styles.payoutMeta}>
+                  {p.method.toUpperCase()} • {p.accountRef}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.statusBadge,
+                  {
+                    backgroundColor:
+                      p.status === "Completed" ? GREEN + "22" : GOLD + "22",
+                  },
+                ]}
+              >
+                <Text
+                  style={{
+                    color: p.status === "Completed" ? GREEN : GOLD,
+                    fontSize: 10,
+                    fontWeight: "700",
+                  }}
+                >
+                  {p.status}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
       </ScrollView>
+
+      {/* Payout Withdrawal Modal */}
+      <Modal visible={payoutModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Withdraw Funds</Text>
+            <Text style={styles.modalSub}>Available Pool: ৳{kpis.netPayoutBdt.toLocaleString()}</Text>
+
+            <TextInput
+              placeholder="Amount (BDT, min 1000)"
+              placeholderTextColor="#64748B"
+              keyboardType="numeric"
+              style={styles.input}
+              value={payoutAmount}
+              onChangeText={setPayoutAmount}
+            />
+
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+              {(["bkash", "nagad", "bank_transfer"] as const).map((m) => (
+                <Pressable
+                  key={m}
+                  style={[styles.methodChip, payoutMethod === m && styles.methodChipActive]}
+                  onPress={() => setPayoutMethod(m)}
+                >
+                  <Text style={payoutMethod === m ? styles.methodTextActive : styles.methodText}>
+                    {m.replace("_", " ").toUpperCase()}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <TextInput
+              placeholder="Destination Phone / Bank Account"
+              placeholderTextColor="#64748B"
+              style={styles.input}
+              value={accountRef}
+              onChangeText={setAccountRef}
+            />
+
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
+              <Pressable
+                style={[styles.cancelBtn, { flex: 1 }]}
+                onPress={() => setPayoutModalVisible(false)}
+              >
+                <Text style={styles.cancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.submitBtn, { flex: 1 }]}
+                onPress={handleSubmitPayout}
+              >
+                <Text style={styles.submitText}>Request Payout</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: NAVY },
-  scroll: { padding: 16, paddingBottom: 32 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 48, marginBottom: 20 },
-  title: { fontSize: 22, fontWeight: "800", color: "#F1F5F9" },
-  downloadBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: GOLD, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
-  downloadText: { color: NAVY, fontSize: 13, fontWeight: "700" },
-  cardsRow: { flexDirection: "row", gap: 10, marginBottom: 20 },
-  card: { flex: 1, backgroundColor: NAVY_LIGHT, borderRadius: 14, padding: 14, borderTopWidth: 3, gap: 4 },
-  cardValue: { fontSize: 16, fontWeight: "800", color: "#F1F5F9" },
-  cardLabel: { fontSize: 10, color: "#94A3B8" },
-  cardChange: { fontSize: 11, fontWeight: "700" },
-  dynamicRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: NAVY_LIGHT, borderRadius: 14, padding: 16, marginBottom: 20 },
-  dynamicInfo: {},
-  dynamicTitle: { color: "#F1F5F9", fontSize: 15, fontWeight: "700" },
-  dynamicSub: { color: "#64748B", fontSize: 12, marginTop: 2 },
-  sectionTitle: { fontSize: 15, fontWeight: "700", color: "#F1F5F9", marginBottom: 12 },
-  payoutItem: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: NAVY_LIGHT, borderRadius: 12, padding: 14, marginBottom: 8 },
-  payoutAmount: { color: "#F1F5F9", fontSize: 15, fontWeight: "700" },
-  payoutDate: { color: "#64748B", fontSize: 12, marginTop: 2 },
-  payoutBadge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5 },
-  payoutStatus: { fontSize: 12, fontWeight: "700" },
-  commissionCard: { backgroundColor: NAVY_LIGHT, borderRadius: 14, padding: 16, marginBottom: 20 },
-  commRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "#334155" },
-  commLabel: { color: "#94A3B8", fontSize: 13 },
-  commValue: { color: "#F1F5F9", fontSize: 13, fontWeight: "600" },
-  commTotal: { borderBottomWidth: 0, paddingTop: 12 },
-  commTotalLabel: { color: "#F1F5F9", fontSize: 15, fontWeight: "700" },
-  commTotalValue: { color: GOLD, fontSize: 16, fontWeight: "800" },
-  competitorRow: { flexDirection: "row", gap: 8, marginBottom: 20 },
-  myPrice: { flex: 1, backgroundColor: GOLD + "22", borderRadius: 12, padding: 12, alignItems: "center", borderWidth: 1, borderColor: GOLD },
-  myPriceLabel: { color: GOLD, fontSize: 11, fontWeight: "700" },
-  myPriceValue: { color: GOLD, fontSize: 14, fontWeight: "800", marginTop: 4 },
-  compCard: { flex: 1, backgroundColor: NAVY_LIGHT, borderRadius: 12, padding: 12, alignItems: "center", gap: 4 },
-  compName: { color: "#94A3B8", fontSize: 10, fontWeight: "600", textAlign: "center" },
-  compPrice: { color: "#F1F5F9", fontSize: 13, fontWeight: "700" },
-  insightCard: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: PURPLE + "22", borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: PURPLE + "44" },
-  insightText: { color: "#F1F5F9", fontSize: 13, flex: 1, lineHeight: 18 },
-});
-
-const bar = StyleSheet.create({
-  container: { backgroundColor: NAVY_LIGHT, borderRadius: 14, padding: 16, marginBottom: 20 },
-  title: { color: "#F1F5F9", fontSize: 14, fontWeight: "700", marginBottom: 12 },
-  chart: { flexDirection: "row", alignItems: "flex-end", height: 130, gap: 6 },
-  colWrap: { flex: 1, alignItems: "center", gap: 4 },
-  amount: { color: "#64748B", fontSize: 9 },
-  barFill: { width: "100%", backgroundColor: GOLD, borderRadius: 4 },
-  label: { color: "#94A3B8", fontSize: 10 },
+  scroll: { flex: 1 },
+  content: { padding: 16, paddingBottom: 40 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 48, marginBottom: 16 },
+  headerTitle: { fontSize: 21, fontWeight: "800", color: "#F1F5F9" },
+  headerSub: { fontSize: 12, color: "#94A3B8", marginTop: 2 },
+  exportBtn: { backgroundColor: NAVY_LIGHT, padding: 10, borderRadius: 12 },
+  withdrawBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: GOLD, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12 },
+  withdrawText: { color: NAVY, fontSize: 12, fontWeight: "800" },
+  cardsRow: { flexDirection: "row", gap: 10, marginBottom: 10 },
+  revCard: { flex: 1, backgroundColor: NAVY_LIGHT, borderRadius: 14, padding: 14, borderLeftWidth: 3 },
+  revLabel: { color: "#94A3B8", fontSize: 11 },
+  revVal: { color: "#F1F5F9", fontSize: 19, fontWeight: "800", marginTop: 4 },
+  revDelta: { color: GOLD, fontSize: 10, fontWeight: "700", marginTop: 4 },
+  sectionBox: { backgroundColor: NAVY_LIGHT, borderRadius: 16, padding: 16, marginTop: 12 },
+  sectionTitle: { color: "#F1F5F9", fontSize: 15, fontWeight: "800", marginBottom: 6 },
+  sectionSub: { color: "#94A3B8", fontSize: 11, marginBottom: 12 },
+  chartRow: { flexDirection: "row", alignItems: "flex-end", height: 130, gap: 8, marginTop: 8 },
+  barCol: { flex: 1, alignItems: "center", gap: 4 },
+  barVal: { color: "#CBD5E1", fontSize: 9, fontWeight: "700" },
+  bar: { width: "100%", backgroundColor: GOLD, borderRadius: 4 },
+  barLabel: { color: "#64748B", fontSize: 10 },
+  ruleRow: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#334155" },
+  ruleName: { color: "#F1F5F9", fontSize: 13, fontWeight: "700" },
+  ruleMeta: { color: "#94A3B8", fontSize: 11, marginTop: 2 },
+  flashBadge: { backgroundColor: RED + "33", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  flashText: { color: RED, fontSize: 9, fontWeight: "800" },
+  compRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#334155" },
+  compName: { color: "#F1F5F9", fontSize: 13, fontWeight: "700" },
+  compMeta: { color: "#64748B", fontSize: 11, marginTop: 2 },
+  compPrice: { color: "#F1F5F9", fontSize: 14, fontWeight: "800" },
+  insightRow: { flexDirection: "row", alignItems: "flex-start", gap: 8, backgroundColor: NAVY, padding: 10, borderRadius: 10, marginTop: 8 },
+  insightText: { flex: 1, color: "#CBD5E1", fontSize: 12, lineHeight: 17 },
+  payoutRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#334155" },
+  payoutAmt: { color: "#F1F5F9", fontSize: 14, fontWeight: "800" },
+  payoutMeta: { color: "#64748B", fontSize: 11, marginTop: 2 },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.75)", justifyContent: "center", padding: 20 },
+  modalBox: { backgroundColor: NAVY_LIGHT, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: "#334155" },
+  modalTitle: { color: "#F1F5F9", fontSize: 17, fontWeight: "800" },
+  modalSub: { color: GOLD, fontSize: 12, fontWeight: "700", marginTop: 2, marginBottom: 10 },
+  input: { backgroundColor: NAVY, color: "#F1F5F9", borderRadius: 10, padding: 11, marginTop: 10, fontSize: 13, borderWidth: 1, borderColor: "#334155" },
+  methodChip: { flex: 1, paddingVertical: 8, borderRadius: 8, backgroundColor: NAVY, alignItems: "center", borderWidth: 1, borderColor: "#334155" },
+  methodChipActive: { backgroundColor: GOLD, borderColor: GOLD },
+  methodText: { color: "#94A3B8", fontSize: 10, fontWeight: "700" },
+  methodTextActive: { color: NAVY, fontSize: 10, fontWeight: "800" },
+  cancelBtn: { backgroundColor: "#334155", borderRadius: 12, padding: 12, alignItems: "center" },
+  cancelText: { color: "#F1F5F9", fontWeight: "700" },
+  submitBtn: { backgroundColor: GOLD, borderRadius: 12, padding: 12, alignItems: "center" },
+  submitText: { color: NAVY, fontWeight: "800" },
 });

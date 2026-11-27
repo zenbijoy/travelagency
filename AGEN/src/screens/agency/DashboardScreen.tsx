@@ -35,6 +35,8 @@ import { useAuth } from "../../hooks/useAuth";
 import { agencyDashboardService } from "../../services/agencyService";
 import { supabase } from "../../services/supabaseClient";
 import { useAgencyRBAC } from "../../context/AgencyRBACContext";
+import { initAgencyRealtimeBridge } from "../../services/events/supabaseRealtimeBridge";
+import { appEventBus, APP_EVENTS } from "../../services/events/appEventBus";
 import { useNavigation } from "@react-navigation/native";
 
 // High-fidelity UI Constants
@@ -181,6 +183,11 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [activeModalBooking, setActiveModalBooking] = useState<BookingItem | null>(null);
   const [dateRange] = useState("01 May 2024 - 31 May 2024");
+  const [scopedAlerts, setScopedAlerts] = useState<
+    Array<{ id: string; title: string; body: string; tenantId: string; isRead: boolean; createdAt: string }>
+  >([]);
+  const [alertsModalVisible, setAlertsModalVisible] = useState(false);
+  const activeAgencyId = user?.agency?.id || user?.id || "";
 
   // Animations
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -227,7 +234,26 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     loadDashboard();
-  }, [user?.agency?.id]);
+    if (!activeAgencyId) return;
+    const stopBridge = initAgencyRealtimeBridge(activeAgencyId);
+    const unsubBooking = appEventBus.subscribe(APP_EVENTS.BOOKING_STATUS_CHANGED, (payload) => {
+      setScopedAlerts((prev) => [
+        {
+          id: `rt-bk-${payload.bookingId}-${payload.timestamp}`,
+          title: `Booking ${payload.bookingReference || payload.bookingId}`,
+          body: `Status updated to ${payload.currentStatus.toUpperCase()}`,
+          tenantId: activeAgencyId,
+          isRead: false,
+          createdAt: new Date(payload.timestamp).toISOString(),
+        },
+        ...prev.slice(0, 19),
+      ]);
+    });
+    return () => {
+      unsubBooking();
+      stopBridge();
+    };
+  }, [activeAgencyId]);
 
   const loadDashboard = async () => {
     try {
@@ -247,8 +273,22 @@ export default function DashboardScreen() {
       const { data: liveBookings } = await supabase
         .from("bookings")
         .select("*")
+        .eq("agency_id", targetAgencyId)
         .order("created_at", { ascending: false })
         .limit(20);
+
+      if (liveBookings && liveBookings.length > 0) {
+        setScopedAlerts(
+          liveBookings.slice(0, 8).map((b: any) => ({
+            id: `ag-bk-${b.id}`,
+            title: `Booking ${b.booking_reference || b.order_id || b.id}`,
+            body: `${b.service_type || "Trip"} • ${String(b.status || "pending").toUpperCase()}`,
+            tenantId: String(targetAgencyId),
+            isRead: false,
+            createdAt: b.created_at || new Date().toISOString(),
+          }))
+        );
+      }
 
       if (nextMetrics) {
         setMetrics((prev) => ({
@@ -436,12 +476,20 @@ Status: ${item.status.toUpperCase()}`,
           <View style={styles.headerActions}>
             <TouchableOpacity
               style={styles.iconBtn}
-              onPress={() => Haptics.selectionAsync()}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setAlertsModalVisible(true);
+              }}
+              accessibilityLabel="Open Agency Scoped Alerts"
             >
               <Feather name="bell" size={18} color="#d1d5db" />
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>12</Text>
-              </View>
+              {scopedAlerts.filter((a) => !a.isRead).length > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {scopedAlerts.filter((a) => !a.isRead).length}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -1086,6 +1134,64 @@ Status: ${item.status.toUpperCase()}`,
                 </View>
               </>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Tenant-Scoped Agency Alerts Modal */}
+      <Modal
+        visible={alertsModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAlertsModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.72)", justifyContent: "center", padding: 16 }}>
+          <View style={{ backgroundColor: "#0f172a", borderRadius: 16, borderWidth: 1, borderColor: "#334155", maxHeight: "75%", padding: 16 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <View>
+                <Text style={{ color: "#f8fafc", fontSize: 16, fontWeight: "700" }}>Agency Alerts</Text>
+                <Text style={{ color: "#94a3b8", fontSize: 11 }}>Tenant Scope: {activeAgencyId || "default"}</Text>
+              </View>
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <TouchableOpacity onPress={() => setScopedAlerts((prev) => prev.map((a) => ({ ...a, isRead: true })))}>
+                  <Text style={{ color: "#38bdf8", fontSize: 12, fontWeight: "700" }}>Mark all read</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setAlertsModalVisible(false)}>
+                  <Ionicons name="close" size={20} color="#cbd5e1" />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <ScrollView>
+              {scopedAlerts.filter((a) => !activeAgencyId || a.tenantId === activeAgencyId).length === 0 ? (
+                <Text style={{ color: "#94a3b8", paddingVertical: 20, textAlign: "center" }}>
+                  No alerts for this agency tenant.
+                </Text>
+              ) : (
+                scopedAlerts
+                  .filter((a) => !activeAgencyId || a.tenantId === activeAgencyId)
+                  .map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={{
+                        backgroundColor: item.isRead ? "#1e293b" : "rgba(56, 189, 248, 0.14)",
+                        borderRadius: 10,
+                        padding: 12,
+                        marginBottom: 8,
+                        borderWidth: 1,
+                        borderColor: item.isRead ? "#334155" : "#0284c7",
+                      }}
+                      onPress={() =>
+                        setScopedAlerts((prev) =>
+                          prev.map((a) => (a.id === item.id ? { ...a, isRead: true } : a))
+                        )
+                      }
+                    >
+                      <Text style={{ color: "#f8fafc", fontWeight: "700", fontSize: 13 }}>{item.title}</Text>
+                      <Text style={{ color: "#cbd5e1", fontSize: 12, marginTop: 2 }}>{item.body}</Text>
+                    </TouchableOpacity>
+                  ))
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>

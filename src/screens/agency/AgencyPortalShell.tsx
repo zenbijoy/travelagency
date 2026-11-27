@@ -40,6 +40,11 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { supabase } from "@/utils/supabase";
+import { PortalAlertsModal } from "../../components/notifications/PortalAlertsModal";
+import {
+  notificationCommandService,
+  PortalScopedAlert,
+} from "../../services/notificationCommandService";
 
 export type AgencyTab =
   | "dashboard"
@@ -207,7 +212,22 @@ export function AgencyPortalShell({ initialTab = "dashboard" }: AgencyPortalShel
   const [agencyRole, setAgencyRole] = useState<"owner" | "manager" | "ticketing" | "finance">("owner");
   const [walletBalance, setWalletBalance] = useState(245800);
   const [creditLimit, setCreditLimit] = useState(500000);
-  const [notificationsCount, setNotificationsCount] = useState(3);
+  const [scopedAlerts, setScopedAlerts] = useState<PortalScopedAlert[]>([]);
+  const [alertsModalVisible, setAlertsModalVisible] = useState(false);
+  const notificationsCount = scopedAlerts.filter((a) => !a.is_read).length;
+
+  useEffect(() => {
+    let active = true;
+    notificationCommandService
+      .fetchScopedPortalAlerts("agency", agencyCode)
+      .then((list) => {
+        if (active) setScopedAlerts(list);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [agencyCode]);
 
   // Responsive Layout detection
   const [windowWidth, setWindowWidth] = useState(
@@ -312,10 +332,11 @@ export function AgencyPortalShell({ initialTab = "dashboard" }: AgencyPortalShel
             </View>
           </TouchableOpacity>
 
-          {/* Notification Bell */}
+          {/* Notification Bell (Tenant-Scoped Alerts) */}
           <TouchableOpacity
             style={styles.iconBtn}
-            onPress={() => Alert.alert("Notifications", "You have 3 operational alerts:\n- Ticket reissue confirmed for PNR SW-9182\n- Wallet deposit ৳150,000 verified\n- Passport expiry alert for Traveler Tanvir Ahmed")}
+            onPress={() => setAlertsModalVisible(true)}
+            accessibilityLabel="Open Agency Scoped Notifications"
           >
             <Feather name="bell" size={18} color={THEME.text} />
             {notificationsCount > 0 && (
@@ -528,6 +549,28 @@ export function AgencyPortalShell({ initialTab = "dashboard" }: AgencyPortalShel
           </View>
         </View>
       </Modal>
+
+      <PortalAlertsModal
+        visible={alertsModalVisible}
+        portalType="agency"
+        tenantId={agencyCode}
+        alerts={scopedAlerts}
+        onClose={() => setAlertsModalVisible(false)}
+        onMarkRead={(id) =>
+          setScopedAlerts((prev) =>
+            prev.map((a) => (a.id === id ? { ...a, is_read: true } : a))
+          )
+        }
+        onMarkAllRead={() =>
+          setScopedAlerts((prev) => prev.map((a) => ({ ...a, is_read: true })))
+        }
+        onRefresh={() => {
+          notificationCommandService
+            .fetchScopedPortalAlerts("agency", agencyCode)
+            .then(setScopedAlerts)
+            .catch(() => {});
+        }}
+      />
     </View>
   );
 }

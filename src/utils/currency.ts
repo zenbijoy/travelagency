@@ -183,6 +183,32 @@ export const formatPrice = (
   return formatLocalizedCurrency(converted, activeCurr, options);
 };
 
+/**
+ * Source-Aware Universal Price Formatter
+ * Converts an amount in its declared sourceCurrency (e.g., "USD" for hotel/package rows)
+ * into the active display currency (or explicit targetCurrency) without double conversion.
+ */
+export const formatSourcePrice = (
+  amount: number | string,
+  sourceCurrency: CurrencyCode | string = "BDT",
+  targetCurrency?: CurrencyCode,
+  options?: { locale?: string; useBengaliDigits?: boolean; showSymbol?: boolean }
+): string => {
+  const activeCurr = targetCurrency || getActiveCurrency();
+  const normalizedSource = ((sourceCurrency || "BDT").toUpperCase() in CURRENCY_METADATA
+    ? (sourceCurrency || "BDT").toUpperCase()
+    : "BDT") as CurrencyCode;
+  const numAmount = typeof amount === "string" ? parseFloat(toLatinDigits(amount)) : amount;
+
+  if (isNaN(numAmount) || numAmount === 0) {
+    const meta = CURRENCY_METADATA[activeCurr] || CURRENCY_METADATA.BDT;
+    return options?.showSymbol === false ? "0" : `${meta.symbol} 0`;
+  }
+
+  const converted = convertCurrency(numAmount, normalizedSource, activeCurr);
+  return formatLocalizedCurrency(converted, activeCurr, options);
+};
+
 export const formatDisplayPrice = (
   amountInBDT: number | string,
   targetCurrency?: CurrencyCode,

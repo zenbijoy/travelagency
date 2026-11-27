@@ -31,8 +31,6 @@ import {
 } from "../services/supabase/messenger";
 import { r2Service, UploadProgress } from "../services/r2";
 
-const DEMO_USER_ID = "5e491c34-50b4-4d2a-8cac-d09fddd7745c";
-
 // Suggested Question Batches
 const SUGGESTED_BATCH_1 = [
   { id: "s1", text: "When will I receive my refund?", answer: "Refunds are processed within 3-5 business days back to your original payment method." },
@@ -63,7 +61,7 @@ export function ServiceChatScreen() {
   const storeProfile = useAuthStore((s) => s.profile);
   const { user: authUser } = useAuth();
   const currentUser = storeUser || authUser;
-  const activeUserId = currentUser?.id || DEMO_USER_ID;
+  const activeUserId = currentUser?.id || "";
   const activeUserName = storeProfile?.full_name || currentUser?.user_metadata?.full_name || "Traveler";
   const conversationId = `service_chat_${activeUserId}`;
 
@@ -77,9 +75,9 @@ export function ServiceChatScreen() {
       id: "m1",
       conversation_id: conversationId,
       sender_id: "service_bot",
-      sender_name: "Trip.com AI Assistant",
+      sender_name: "Shopno Jatra AI Assistant",
       content:
-        "Welcome, our valued Trip.com member!\nThanks for contacting Trip.com.\nI'm your AI Service Assistant. I can handle your stay inquiries here.\nPlease share your specific questions or booking receipt so I can assist you promptly.",
+        "Welcome, our valued Shopno Jatra member!\nThanks for contacting Shopno Jatra.\nI'm your AI Service Assistant. I can handle your stay inquiries here.\nPlease share your specific questions or booking receipt so I can assist you promptly.",
       status: "read",
       created_at: new Date(Date.now() - 60000).toISOString(),
     },
@@ -104,7 +102,7 @@ export function ServiceChatScreen() {
     Clipboard.setString(msg.content);
     setSelectedActionMessage(null);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    showToast("Ã Â¦Â¬Ã Â¦Â¾Ã Â¦Â°Ã Â§ÂÃ Â¦Â¤Ã Â¦Â¾Ã Â¦Å¸Ã Â¦Â¿ Ã Â¦â€¢Ã Â¦ÂªÃ Â¦Â¿ Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¾ Ã Â¦Â¹Ã Â§Å¸Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡");
+    showToast("বার্তাটি কপি করা হয়েছে");
   };
 
   const handleReplyMessage = (msg: ChatMessage) => {
@@ -117,7 +115,7 @@ export function ServiceChatScreen() {
     setMessages((prev) => prev.filter((m) => m.id !== msgId));
     setSelectedActionMessage(null);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    showToast("Ã Â¦Â¬Ã Â¦Â¾Ã Â¦Â°Ã Â§ÂÃ Â¦Â¤Ã Â¦Â¾Ã Â¦Å¸Ã Â¦Â¿ Ã Â¦Â®Ã Â§ÂÃ Â¦â€ºÃ Â§â€¡ Ã Â¦Â«Ã Â§â€¡Ã Â¦Â²Ã Â¦Â¾ Ã Â¦Â¹Ã Â§Å¸Ã Â§â€¡Ã Â¦â€ºÃ Â§â€¡");
+    showToast("বার্তাটি মুছে ফেলা হয়েছে");
   };
 
   const handleRetryMessage = async (msgId: string) => {
@@ -161,6 +159,7 @@ export function ServiceChatScreen() {
 
   // 1. Subscribe to Supabase Realtime channel with Deduplication
   useEffect(() => {
+    if (!activeUserId) return;
     const unsubscribe = realtimeMessenger.subscribeToConversation(conversationId, {
       onMessage: (incoming) => {
         setMessages((prev) => realtimeMessenger.mergeMessages(prev, incoming));
@@ -177,7 +176,7 @@ export function ServiceChatScreen() {
     return () => {
       unsubscribe();
     };
-  }, [conversationId]);
+  }, [activeUserId, conversationId]);
 
   // 2. Pick and upload attachment with client-side compression
   const handleAttachImage = async () => {
@@ -206,6 +205,10 @@ export function ServiceChatScreen() {
 
   // 3. Send Message with sub-100ms Optimistic UI & Deduplication
   const handleSendText = async (customText?: string, autoAnswer?: string) => {
+    if (!activeUserId) {
+      showToast("চ্যাট করতে আগে সাইন ইন করুন");
+      return;
+    }
     const textToSend = customText || inputText;
     const currentAttachment = attachedImage;
 
@@ -239,7 +242,7 @@ export function ServiceChatScreen() {
           id: `bot-${Date.now()}`,
           conversation_id: conversationId,
           sender_id: "service_bot",
-          sender_name: "Trip.com AI Assistant",
+          sender_name: "Shopno Jatra AI Assistant",
           content: autoAnswer,
           status: "read",
           created_at: new Date().toISOString(),
@@ -257,7 +260,7 @@ export function ServiceChatScreen() {
         {
           role: "system",
           content:
-            "You are the AI Hotel & Stays concierge service assistant for Trip.com. Answer inquiries regarding hotel reservations, check-in policies, room amenities, and refunds concisely and politely.",
+            "You are the AI Hotel & Stays concierge service assistant for Shopno Jatra. Answer inquiries regarding hotel reservations, check-in policies, room amenities, and refunds concisely and politely.",
         },
         ...messages.map((m) => ({
           role: (m.sender_id === activeUserId ? "user" : "assistant") as "user" | "assistant",
@@ -274,7 +277,7 @@ export function ServiceChatScreen() {
         id: `bot-${Date.now()}`,
         conversation_id: conversationId,
         sender_id: "service_bot",
-        sender_name: "Trip.com AI Assistant",
+        sender_name: "Shopno Jatra AI Assistant",
         content: replyContent,
         status: "read",
         created_at: new Date().toISOString(),
@@ -286,7 +289,7 @@ export function ServiceChatScreen() {
         id: `bot-${Date.now()}`,
         conversation_id: conversationId,
         sender_id: "service_bot",
-        sender_name: "Trip.com AI Assistant",
+        sender_name: "Shopno Jatra AI Assistant",
         content: `Thank you for reaching out regarding "${textToSend}". I have logged your request with our Hotels & Homes support team.`,
         status: "read",
         created_at: new Date().toISOString(),
@@ -302,9 +305,33 @@ export function ServiceChatScreen() {
     setCurrentBatchIndex((prev) => (prev === 0 ? 1 : 0));
   };
 
+  if (!activeUserId) {
+    return (
+      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+        <View style={styles.topHeader}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#0F172A" />
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <Text style={{ color: "#0F172A", fontSize: 20, fontWeight: "700" }}>সাইন ইন প্রয়োজন</Text>
+          <Text style={{ color: "#64748B", textAlign: "center", marginTop: 8 }}>
+            সাপোর্ট চ্যাট ব্যবহার করতে আপনার অ্যাকাউন্টে সাইন ইন করুন।
+          </Text>
+          <TouchableOpacity
+            style={{ backgroundColor: "#2563EB", borderRadius: 12, marginTop: 20, paddingHorizontal: 24, paddingVertical: 12 }}
+            onPress={() => router.push("/(auth)/login")}
+          >
+            <Text style={{ color: "#FFFFFF", fontWeight: "700" }}>সাইন ইন</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Top Navigation Header Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      {/* ─── Top Navigation Header ───────────────────────────────────────── */}
       <View style={styles.topHeader}>
         <View style={styles.headerLeft}>
           <TouchableOpacity
@@ -322,7 +349,7 @@ export function ServiceChatScreen() {
           </TouchableOpacity>
 
           <View style={styles.tripLogoBadge}>
-            <Text style={styles.tripLogoText}>Trip</Text>
+            <Text style={styles.tripLogoText}>SJ</Text>
             <View style={styles.logoYellowDot} />
           </View>
 
@@ -338,20 +365,20 @@ export function ServiceChatScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Keyboard Avoiding Wrapper Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      {/* ─── Keyboard Avoiding Wrapper ────────────────────────────────────── */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
         style={styles.keyboardContainer}
       >
-        {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Chat Scroll Container Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+        {/* ─── Chat Scroll Container ──────────────────────────────────────── */}
         <ScrollView
           ref={scrollViewRef}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
           <Text style={styles.timestampText}>Live Real-Time Support</Text>
-          <Text style={styles.senderLabel}>Trip.com Support Verified</Text>
+          <Text style={styles.senderLabel}>Shopno Jatra Support Verified</Text>
 
           {/* Messages Stream */}
           {messages.map((msg) => {
@@ -441,7 +468,7 @@ export function ServiceChatScreen() {
             </View>
           )}
 
-          {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Card "You might want to ask" Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+          {/* ─── Card "You might want to ask" ─────────────────────────────── */}
           <View style={styles.suggestionCard}>
             <Text style={styles.suggestionTitle}>You might want to ask</Text>
 
@@ -483,7 +510,7 @@ export function ServiceChatScreen() {
           </View>
         </ScrollView>
 
-        {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Attachment Preview Bar Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+        {/* ─── Attachment Preview Bar ───────────────────────────────────── */}
         {attachedImage && (
           <View style={styles.attachedPreviewBar}>
             <Image source={{ uri: attachedImage }} style={styles.attachedThumb} />
@@ -500,7 +527,7 @@ export function ServiceChatScreen() {
           </View>
         )}
 
-        {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Upload Progress Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+        {/* ─── Upload Progress ─────────────────────────────────────────── */}
         {isUploading && (
           <View style={styles.uploadProgressRow}>
             <ActivityIndicator size="small" color="#2563EB" />
@@ -510,13 +537,13 @@ export function ServiceChatScreen() {
           </View>
         )}
 
-        {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Active Reply Preview Bar Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+        {/* ─── Active Reply Preview Bar ───────────────────────────────── */}
         {replyingToMessage && (
           <View style={styles.replyPreviewBar}>
             <View style={styles.replyBarIndicator} />
             <View style={styles.replyBarContent}>
               <Text style={styles.replyBarAuthor}>
-                {replyingToMessage.sender_name || (replyingToMessage.sender_id === activeUserId ? "Ã Â¦â€ Ã Â¦ÂªÃ Â¦Â¨Ã Â¦Â¿" : "Assistant")} Ã Â¦â€¢Ã Â§â€¡ Ã Â¦â€°Ã Â¦Â¤Ã Â§ÂÃ Â¦Â¤Ã Â¦Â° Ã Â¦Â¦Ã Â¦Â¿Ã Â¦Å¡Ã Â§ÂÃ Â¦â€ºÃ Â§â€¡Ã Â¦Â¨
+                {replyingToMessage.sender_name || (replyingToMessage.sender_id === activeUserId ? "আপনি" : "Assistant")} কে উত্তর দিচ্ছেন
               </Text>
               <Text style={styles.replyBarSnippet} numberOfLines={1}>
                 {replyingToMessage.content}
@@ -531,7 +558,7 @@ export function ServiceChatScreen() {
           </View>
         )}
 
-        {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Bottom Fixed Toolbar & Input Area Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+        {/* ─── Bottom Fixed Toolbar & Input Area ─────────────────────────── */}
         <View style={styles.bottomToolArea}>
           {/* Recently Viewed Chip */}
           <View style={styles.recentlyViewedWrap}>
@@ -588,7 +615,7 @@ export function ServiceChatScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ MODAL: Recently Viewed Hotels Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      {/* ─── MODAL: Recently Viewed Hotels ──────────────────────────────── */}
       <Modal
         visible={showRecentlyViewed}
         animationType="slide"
@@ -629,7 +656,7 @@ export function ServiceChatScreen() {
         </View>
       </Modal>
 
-      {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ MODAL: Transport Info Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      {/* ─── MODAL: Transport Info ───────────────────────────────────────── */}
       <Modal
         visible={showTransportModal}
         animationType="slide"
@@ -664,7 +691,7 @@ export function ServiceChatScreen() {
         </View>
       </Modal>
 
-      {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ MODAL: Chat History Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      {/* ─── MODAL: Chat History ─────────────────────────────────────────── */}
       <Modal
         visible={showHistoryModal}
         animationType="fade"
@@ -691,7 +718,7 @@ export function ServiceChatScreen() {
           </View>
         </View>
       </Modal>
-          {/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Long Press Context Action Menu Modal Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+          {/* ─── Long Press Context Action Menu Modal ───────────────────── */}
       <Modal
         visible={!!selectedActionMessage}
         transparent
@@ -704,7 +731,7 @@ export function ServiceChatScreen() {
         >
           <View style={styles.actionMenuCard}>
             <View style={styles.actionMenuHeader}>
-              <Text style={styles.actionMenuTitle}>Ã Â¦Â¬Ã Â¦Â¾Ã Â¦Â°Ã Â§ÂÃ Â¦Â¤Ã Â¦Â¾Ã Â¦Â° Ã Â¦Â¬Ã Â¦Â¿Ã Â¦â€¢Ã Â¦Â²Ã Â§ÂÃ Â¦Âª / Message Options</Text>
+              <Text style={styles.actionMenuTitle}>বার্তার বিকল্প / Message Options</Text>
               <Text style={styles.actionMenuSnippet} numberOfLines={2}>
                 "{selectedActionMessage?.content}"
               </Text>
@@ -715,7 +742,7 @@ export function ServiceChatScreen() {
               onPress={() => selectedActionMessage && handleCopyMessage(selectedActionMessage)}
             >
               <Ionicons name="copy-outline" size={20} color="#2563EB" />
-              <Text style={styles.actionMenuText}>Ã Â¦â€¢Ã Â¦ÂªÃ Â¦Â¿ Ã Â¦â€¢Ã Â¦Â°Ã Â§ÂÃ Â¦Â¨ (Copy)</Text>
+              <Text style={styles.actionMenuText}>কপি করুন (Copy)</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -723,7 +750,7 @@ export function ServiceChatScreen() {
               onPress={() => selectedActionMessage && handleReplyMessage(selectedActionMessage)}
             >
               <Ionicons name="arrow-undo-outline" size={20} color="#0D9488" />
-              <Text style={styles.actionMenuText}>Ã Â¦â€°Ã Â¦Â¤Ã Â§ÂÃ Â¦Â¤Ã Â¦Â° Ã Â¦Â¦Ã Â¦Â¿Ã Â¦Â¨ (Reply)</Text>
+              <Text style={styles.actionMenuText}>উত্তর দিন (Reply)</Text>
             </TouchableOpacity>
 
             {selectedActionMessage?.sender_id === activeUserId && (
@@ -732,7 +759,7 @@ export function ServiceChatScreen() {
                 onPress={() => selectedActionMessage && handleRetryMessage(selectedActionMessage.id)}
               >
                 <Ionicons name="refresh-outline" size={20} color="#D97706" />
-                <Text style={styles.actionMenuText}>Ã Â¦â€ Ã Â¦Â¬Ã Â¦Â¾Ã Â¦Â° Ã Â¦ÂªÃ Â¦Â¾Ã Â¦Â Ã Â¦Â¾Ã Â¦Â¨ (Resend / Retry)</Text>
+                <Text style={styles.actionMenuText}>আবার পাঠান (Resend / Retry)</Text>
               </TouchableOpacity>
             )}
 
@@ -742,7 +769,7 @@ export function ServiceChatScreen() {
             >
               <Ionicons name="trash-outline" size={20} color="#EF4444" />
               <Text style={[styles.actionMenuText, { color: "#EF4444" }]}>
-                Ã Â¦Â®Ã Â§ÂÃ Â¦â€ºÃ Â§â€¡ Ã Â¦Â«Ã Â§â€¡Ã Â¦Â²Ã Â§ÂÃ Â¦Â¨ (Delete)
+                মুছে ফেলুন (Delete)
               </Text>
             </TouchableOpacity>
           </View>

@@ -182,25 +182,52 @@ const ringbackEngine = new RingbackAudioEngine();
 export function CallScreen() {
   const params = useLocalSearchParams<{
     callType?: "audio" | "video";
+    type?: "audio" | "video";
+    isVideo?: string;
+    role?: string;
     targetUserId?: string;
+    friendId?: string;
     targetName?: string;
+    name?: string;
     targetAvatar?: string;
+    avatar?: string;
     callerId?: string;
     callId?: string;
     isIncoming?: string;
     remoteVideoUri?: string;
   }>();
 
-  const isIncoming = params.isIncoming === "true";
-  const initialCallType = params.callType === "audio" ? "audio" : "video";
+  const activeCall = useCallStore((s) => s.activeCall);
+  const isIncoming = params.isIncoming === "true" || params.role === "callee";
+  const resolvedType =
+    params.callType ||
+    params.type ||
+    (params.isVideo === "false"
+      ? "audio"
+      : params.isVideo === "true"
+      ? "video"
+      : activeCall?.type);
+  const initialCallType = resolvedType === "audio" ? "audio" : "video";
   const storeUser = useAuthStore((s) => s.user);
 
   // Dynamic user & peer resolution (No hardcoded IDs)
-  const callerId = params.callerId || storeUser?.id || "caller-" + Date.now().toString().slice(-4);
-  const targetUserId = params.targetUserId || (isIncoming ? callerId : "agency-agent-support");
-  const targetName = params.targetName || "Agency Concierge";
-  const targetAvatar = params.targetAvatar || "";
-  const initialCallId = params.callId || `call-${Date.now()}`;
+  const callerId = isIncoming ? params.callerId || "" : storeUser?.id || "";
+  const targetUserId =
+    params.targetUserId ||
+    params.friendId ||
+    activeCall?.participant?.id ||
+    (isIncoming ? callerId : "agency-agent-support");
+  const targetName =
+    params.targetName ||
+    params.name ||
+    activeCall?.participant?.name ||
+    "Agency Concierge";
+  const targetAvatar =
+    params.targetAvatar ||
+    params.avatar ||
+    activeCall?.participant?.avatarUrl ||
+    "";
+  const initialCallId = params.callId || activeCall?.callId || `call-${Date.now()}`;
   const remoteVideoSourceUri =
     params.remoteVideoUri ||
     "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
@@ -305,6 +332,13 @@ export function CallScreen() {
   useEffect(() => {
     let isMounted = true;
 
+    if (!storeUser?.id || !callerId) {
+      setCallStatus("ended");
+      return () => {
+        isMounted = false;
+      };
+    }
+
     // Set initial audio routing via callService
     callService.setAudioRoute(isSpeakerOn);
 
@@ -347,7 +381,8 @@ export function CallScreen() {
             if (isMounted) router.back();
           }, 1800);
         },
-        45000 // 45 seconds
+        45000,
+        callerId // 45 seconds
       );
     } else {
       ringbackEngine.stopRingback();
@@ -415,7 +450,7 @@ export function CallScreen() {
       callService.clearCallTimeout();
       callService.stopRingingPattern();
     };
-  }, []);
+  }, [storeUser?.id, callerId]);
 
   // 2. Outgoing Lifecycle Transitions with ICE Gathering
   useEffect(() => {

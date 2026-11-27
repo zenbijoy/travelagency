@@ -8,7 +8,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_tenant
 from app.core.exceptions import NotFoundError, PermissionDeniedError
 from app.repositories.booking_repository import BookingRepository
 from app.schemas.booking import (
@@ -20,6 +20,7 @@ from app.schemas.booking import (
 from app.schemas.common import PaginatedResponse, StandardResponse
 from app.schemas.user import CurrentUser, UserRole
 from app.services.booking_service import BookingService
+from app.schemas.tenant import TenantContext
 from app.tasks.ticket_tasks import build_ticket_pdf_buffer
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
@@ -29,16 +30,22 @@ router = APIRouter(prefix="/bookings", tags=["Bookings"])
 async def create_booking(
     request: BookingCreateRequest,
     current_user: CurrentUser = Depends(get_current_user),
+    tenant_context: TenantContext = Depends(require_tenant),
     db: AsyncSession = Depends(get_db),
 ):
     """
     Atomically reserve hotel rooms or flight seats with row-level locks (FOR UPDATE).
     Enforces double-booking prevention and establishes booking state machine.
+
+    Tenant isolation: the booking is assigned to the server-resolved tenant context
+    (never a client-supplied tenant id). Idempotency key prevents duplicate creates.
     """
     booking = await BookingService.create_booking(
         db=db,
         user_id=current_user.id,
         request=request,
+        tenant_id=tenant_context.tenant_id,
+        idempotency_key=request.idempotency_key,
     )
     return StandardResponse[BookingResponse](
         success=True,
@@ -53,9 +60,13 @@ async def list_my_bookings(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     current_user: CurrentUser = Depends(get_current_user),
+    tenant_context: TenantContext = Depends(require_tenant),
     db: AsyncSession = Depends(get_db),
 ):
-    """List authenticated user's travel bookings with pagination."""
+    """List authenticated user's travel bookings with pagination.
+
+    Results are strictly scoped to the server-resolved tenant (tenant isolation).
+    """
     repo = BookingRepository(db)
     offset = (page - 1) * page_size
     bookings, total = await repo.list_user_bookings(
@@ -63,6 +74,7 @@ async def list_my_bookings(
         status=status_filter,
         offset=offset,
         limit=page_size,
+        tenant_id=tenant_context.tenant_id,
     )
     items = [BookingResponse.model_validate(b) for b in bookings]
     total_pages = (total + page_size - 1) // page_size if total > 0 else 1
@@ -82,11 +94,15 @@ async def list_my_bookings(
 async def get_booking_by_id(
     booking_id: uuid.UUID,
     current_user: CurrentUser = Depends(get_current_user),
+    tenant_context: TenantContext = Depends(require_tenant),
     db: AsyncSession = Depends(get_db),
 ):
-    """Retrieve full booking itinerary, passenger manifests, and payments."""
+    """Retrieve full booking itinerary, passenger manifests, and payments.
+
+    Access is scoped to the server-resolved tenant (tenant isolation).
+    """
     repo = BookingRepository(db)
-    booking = await repo.get_booking_with_details(booking_id)
+    booking = await repo.get_booking_for_tenant(booking_id, tenant_context.tenant_id)
 
     if not booking:
         raise NotFoundError("Booking", booking_id)

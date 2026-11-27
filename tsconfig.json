@@ -29,6 +29,7 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "AGEN/**",
-    "hotel/**"
+    "hotel/**",
+    "rider/**"
   ]
 }

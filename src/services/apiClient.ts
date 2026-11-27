@@ -10,12 +10,23 @@
  * 5. Telemetry error emission into uxHealthMonitor and crashReporter
  */
 
+import { Platform } from "react-native";
 import { supabase } from "../utils/supabase";
 import { uxHealthMonitor } from "./telemetry/uxHealthMonitor";
 import { crashReporter } from "./telemetry/crashReporter";
 
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const resolveApiBaseUrl = (): string => {
+  const configured = process.env.EXPO_PUBLIC_API_URL;
+  if (configured) {
+    if (Platform.OS === "android" && configured.includes("localhost")) {
+      return configured.replace("localhost", "10.0.2.2");
+    }
+    return configured;
+  }
+  return Platform.OS === "android" ? "http://10.0.2.2:8000/api/v1" : "http://localhost:8000/api/v1";
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 export type AppErrorKind = "network" | "auth" | "validation" | "server" | "unknown";
 
@@ -506,8 +517,26 @@ export const backendApi = {
     }
     return apiRequest<T>(url, { method: "GET", headers: options?.headers });
   },
-  post: <T = any>(endpoint: string, body?: any, options?: { headers?: Record<string, string> }) =>
-    apiRequest<T>(endpoint, { method: "POST", body: body !== undefined ? JSON.stringify(body) : undefined, headers: options?.headers }),
+  post: <T = any>(
+    endpoint: string,
+    body?: any,
+    options?: { params?: Record<string, any>; headers?: Record<string, string> }
+  ) => {
+    let url = endpoint;
+    if (options?.params) {
+      const q = new URLSearchParams(
+        Object.entries(options.params)
+          .filter(([, v]) => v !== undefined && v !== null)
+          .map(([k, v]) => [k, String(v)])
+      ).toString();
+      if (q) url += (url.includes("?") ? "&" : "?") + q;
+    }
+    return apiRequest<T>(url, {
+      method: "POST",
+      body: body !== undefined && body !== null ? JSON.stringify(body) : undefined,
+      headers: options?.headers,
+    });
+  },
 };
 
 export const apiClient = backendApi;

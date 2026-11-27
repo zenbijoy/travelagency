@@ -47,6 +47,11 @@ const RefundStatusBadge: React.FC<{ status: string }> = ({ status }) => {
     string,
     { color: string; icon: string; label: string }
   > = {
+    requested: {
+      color: "#f59e0b",
+      icon: "clock",
+      label: "Requested",
+    },
     pending: {
       color: "#f59e0b",
       icon: "clock",
@@ -72,6 +77,11 @@ const RefundStatusBadge: React.FC<{ status: string }> = ({ status }) => {
       icon: "x-circle",
       label: "Rejected",
     },
+    failed: {
+      color: "#dc2626",
+      icon: "alert-circle",
+      label: "Failed",
+    },
     on_hold: {
       color: "#8b5cf6",
       icon: "pause-circle",
@@ -79,7 +89,7 @@ const RefundStatusBadge: React.FC<{ status: string }> = ({ status }) => {
     },
   };
 
-  const config = statusConfig[status] || statusConfig.pending;
+  const config = statusConfig[status] || statusConfig.requested;
 
   return (
     <View
@@ -145,11 +155,14 @@ const RefundCard: React.FC<{
             <View>
               <Text style={styles.amountLabel}>Refund Amount</Text>
               <Text style={styles.amountValue}>
-                $
-                {parseFloat(refund.refund_amount?.toString() || "0").toFixed(2)}
+                ৳{" "}
+                {parseFloat(refund.refund_amount?.toString() || "0").toLocaleString("en-IN", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </Text>
             </View>
-            <RefundStatusBadge status={refund.refund_status || "pending"} />
+            <RefundStatusBadge status={refund.status || refund.refund_status || "requested"} />
           </View>
 
           <View style={styles.detailsRow}>
@@ -532,11 +545,12 @@ const RefundManagementScreenComponent: React.FC<{ admin?: AdminUser | null }> = 
 
   const statuses = [
     "all",
-    "pending",
+    "requested",
     "approved",
     "processing",
     "completed",
     "rejected",
+    "failed",
   ];
 
   return (

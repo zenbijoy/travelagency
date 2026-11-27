@@ -5,6 +5,7 @@ import {
   Image,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -88,7 +89,15 @@ export default function ItineraryDetailsScreen() {
 
         <TouchableOpacity
           style={[styles.shareBtn, { backgroundColor: isDark ? colors.card : "#F1F5F9" }]}
-          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+          onPress={async () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            try {
+              await Share.share({
+                message: `🌟 Check out this verified travel plan: "${itinerary.title}" (${itinerary.destination}) for only ${formatPrice(itinerary.estimated_budget, (itinerary.currency as any) || "BDT")} on Shopno Jatra!`,
+                title: itinerary.title,
+              });
+            } catch {}
+          }}
         >
           <Ionicons name="share-social-outline" size={18} color={colors.text} />
         </TouchableOpacity>

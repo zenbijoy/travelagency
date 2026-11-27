@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shopnojatra/shared": ["../packages/shared/src/index.ts"],
+      "@shopnojatra/shared/*": ["../packages/shared/src/*"],
+      "@/*": ["../src/*"]
+    }
+  },
+  "include": [
+    "src",
+    "App.tsx",
+    "../src/features/rider/**/*",
+    "../src/store/riderStore.ts",
+    "../src/services/riderService.ts",
+    "../nativewind-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "../src/**/__tests__/**",
+    "../src/**/*.test.ts",
+    "../src/**/*.test.tsx"
+  ],
+  "extends": "expo/tsconfig.base"
+}

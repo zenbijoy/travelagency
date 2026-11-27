@@ -38,6 +38,7 @@ import { FareCalendar } from "../../src/components/common/FareCalendar";
 import { PriceAlertCard } from "../../src/components/flights/PriceAlertCard";
 import { RTLIcon } from "../../src/components/ui";
 import { ticketService } from "../../src/services/payment/ticketService";
+import { useAuthStore } from "../../src/store/authStore";
 
 
 // Colors & Design Tokens
@@ -564,6 +565,7 @@ function getDynamicBoardingPoints(bus: BusTrip): string[] {
 // -----------------------------------------------------------------------------
 export default function BusLaunchScreen() {
   // 1. Dual-Mode Switcher: "Inter-District Luxury Bus" vs "River Launch / Steamer"
+  const user = useAuthStore((s) => s.user);
   const [activeTab, setActiveTab] = useState<TransportType>("bus");
 
   // Dynamic travel date
@@ -824,7 +826,7 @@ export default function BusLaunchScreen() {
       });
 
       const busTicketPnr = `SJ-BUS-${bookingBus.operator_name.slice(0, 3).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
-      ticketService.cacheTicket("guest", {
+      ticketService.cacheTicket(user?.id || "guest", {
         id: `TK-BUS-${Date.now()}`,
         bookingReference: busTicketPnr,
         passengerName: passengerName.trim(),
@@ -848,6 +850,28 @@ export default function BusLaunchScreen() {
         "🎉 বাস টিকিট সফলভাবে নিশ্চিত হয়েছে!",
         `ধন্যবাদ ${passengerName}! ${bookingBus.operator_name}-এ আপনার সিট [${selectedBusSeats.join(", ")}] কনফার্ম করা হয়েছে।\n\n• মোট ভাড়া: ${formatCurrency(busTotalFare, "BDT")}\n• যাত্রার তারিখ: ${travelDate}\n• বোর্ডিং পয়েন্ট: ${chosenBoarding}\n• রিপোর্টিং: ${reportingTime}-এ নির্দিষ্ট কাউন্টারে পৌঁছান।`,
         [
+          {
+            text: "অনলাইন পেমেন্ট",
+            onPress: () => {
+              const b = bookingBus;
+              const fare = busTotalFare;
+              setBookingBus(null);
+              setPassengerName("");
+              setPassengerPhone("");
+              setPassengerNid("");
+              setSelectedBusSeats([]);
+              router.push({
+                pathname: "/screens/payments" as any,
+                params: {
+                  amount: String(fare),
+                  currency: "BDT",
+                  title: b.operator_name,
+                  subtitle: `${b.from_city} -> ${b.to_city}`,
+                  bookingType: "bus",
+                },
+              });
+            },
+          },
           {
             text: "বুকিং নিশ্চিত",
             onPress: () => {
@@ -896,7 +920,7 @@ export default function BusLaunchScreen() {
       });
 
       const launchTicketPnr = `SJ-LCH-${bookingLaunch.vessel_name.slice(0, 3).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
-      ticketService.cacheTicket("guest", {
+      ticketService.cacheTicket(user?.id || "guest", {
         id: `TK-LCH-${Date.now()}`,
         bookingReference: launchTicketPnr,
         passengerName: passengerName.trim(),
@@ -920,6 +944,28 @@ export default function BusLaunchScreen() {
         "🚢 লঞ্চ কেবিন বুকিং কনফার্ম হয়েছে!",
         `অভিনন্দন ${passengerName}! ${bookingLaunch.vessel_name}-এ আপনার নির্বাচিত কেবিন:\n[${selectedCabins.map((c) => c.cabinNumber).join(", ")}] নিশ্চিত করা হয়েছে।\n\n• মোট প্রদেয়: ${formatCurrency(launchTotalFare, "BDT")}\n• যাত্রার তারিখ: ${travelDate}\n• টার্মিনাল: ঢাকা সদরঘাট (পন্টুন ৩ ও ৪)\n• রিপোর্টিং: ${reportingTime}-এর মধ্যে পন্টুনে পৌঁছান।`,
         [
+          {
+            text: "অনলাইন পেমেন্ট",
+            onPress: () => {
+              const l = bookingLaunch;
+              const fare = launchTotalFare;
+              setBookingLaunch(null);
+              setSelectedCabins([]);
+              setPassengerName("");
+              setPassengerPhone("");
+              setPassengerNid("");
+              router.push({
+                pathname: "/screens/payments" as any,
+                params: {
+                  amount: String(fare),
+                  currency: "BDT",
+                  title: l.vessel_name,
+                  subtitle: `${l.terminal_from} -> ${l.terminal_to}`,
+                  bookingType: "launch",
+                },
+              });
+            },
+          },
           {
             text: "টিকিট নিশ্চিত",
             onPress: () => {
@@ -2586,9 +2632,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 6,
     borderRadius: 10,
-    gap: 8,
+    gap: 6,
   },
   dualModeSegmentBtnActiveBus: {
     backgroundColor: "#FFFFFF",

@@ -1,4 +1,6 @@
 import { FocusAwareStatusBar } from "../../components/ui/AppStatusBar";
+import { useRouter } from "expo-router";
+import { supabase } from "@/utils/supabase";
 /**
  * Admin Portal Shell - Unified Administrative Interface with Full RBAC Governance
  * Provides role-based access control, tab navigation, 3-column module switcher launcher, and role simulation.
@@ -415,6 +417,7 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
   initialTab = "dashboard",
 }) => {
   const { width, isDesktop } = useResponsive();
+  const router = useRouter();
   const { admin, role, switchRole, isTabAllowed, allowedTabs } = useRBAC();
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab as AdminTab);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -429,9 +432,24 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
   const [mobileDrawerVisible, setMobileDrawerVisible] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const [languageMenuVisible, setLanguageMenuVisible] = useState(false);
-  const [dateRange, setDateRange] = useState("01 May 2024 - 31 May 2024");
+  const [dateRange, setDateRange] = useState("");
   const [dateRangeMenuVisible, setDateRangeMenuVisible] = useState(false);
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  // Load live unread notification count
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await (supabase
+          .from("admin_activity_logs")
+          .select("id", { count: "exact", head: true }) as unknown as Promise<{ count: number | null }>);
+        setNotificationCount(result?.count ?? 0);
+      } catch {
+        setNotificationCount(0);
+      }
+    })();
+  }, []);
 
   // Fallback to dashboard gracefully if activeTab is forbidden under active role
   useEffect(() => {
@@ -563,8 +581,8 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
             </View>
             {!isSlim && (
               <View style={styles.brandTitleBox}>
-                <Text style={styles.brandName}>Rayds</Text>
-                <Text style={styles.brandSubtitle}>Travel Portal</Text>
+                <Text style={styles.brandName}>ShopnoJatra</Text>
+                <Text style={styles.brandSubtitle}>Admin Portal</Text>
               </View>
             )}
           </View>
@@ -758,11 +776,18 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
             style={[styles.sidebarItem, { marginTop: 14, marginBottom: 28 }]}
             onPress={() => {
               Alert.alert(
-                "White Label Portal",
+                "ShopnoJatra Admin Portal",
                 "Are you sure you want to exit the administrative session?",
                 [
                   { text: "Cancel", style: "cancel" },
-                  { text: "Exit", style: "destructive", onPress: () => setActiveTab("dashboard") },
+                  {
+                    text: "Exit",
+                    style: "destructive",
+                    onPress: async () => {
+                      try { await supabase.auth.signOut(); } catch {}
+                      router.replace("/login" as any);
+                    },
+                  },
                 ]
               );
             }}
@@ -795,7 +820,7 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
           </TouchableOpacity>
 
           <Text style={styles.welcomeText} numberOfLines={1}>
-            Welcome to Rayds White Label Travel Portal
+            Welcome to ShopnoJatra Admin Portal
           </Text>
         </View>
 
@@ -1060,6 +1085,7 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
           </View>
         </TouchableOpacity>
       </Modal>
+      {__DEV__ && (
       <Modal
         visible={roleModalVisible}
         animationType="slide"
@@ -1134,8 +1160,9 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
           </View>
         </View>
       </Modal>
+      )}
 
-      {/* Dynamic 3-Column Launcher Switcher Modal across all 19 Screens */}
+      {/* Dynamic 3-Column Launcher Switcher Modal across all {NAV_ITEMS.length} Screens */}
       <Modal
         visible={menuVisible}
         animationType="fade"
@@ -1155,7 +1182,7 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
                   <View>
                     <Text style={styles.launcherTitle}>Command Center Launcher</Text>
                     <Text style={styles.launcherSubtitle}>
-                      {accessibleNavItems.length} of 19 screens authorized for{" "}
+                      {accessibleNavItems.length} of {NAV_ITEMS.length} screens authorized for{" "}
                       <Text style={{ fontWeight: "700", color: currentRoleMeta.color }}>
                         {currentRoleMeta.label}
                       </Text>
@@ -1165,16 +1192,18 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
               </View>
 
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <TouchableOpacity
-                  style={styles.switchRoleSmallBtn}
-                  onPress={() => {
-                    setMenuVisible(false);
-                    setTimeout(() => setRoleModalVisible(true), 200);
-                  }}
-                >
-                  <MaterialCommunityIcons name="account-switch" size={14} color="#4f46e5" />
-                  <Text style={styles.switchRoleSmallBtnText}>Switch Role</Text>
-                </TouchableOpacity>
+                {__DEV__ && (
+                  <TouchableOpacity
+                    style={styles.switchRoleSmallBtn}
+                    onPress={() => {
+                      setMenuVisible(false);
+                      setTimeout(() => setRoleModalVisible(true), 200);
+                    }}
+                  >
+                    <MaterialCommunityIcons name="account-switch" size={14} color="#4f46e5" />
+                    <Text style={styles.switchRoleSmallBtnText}>Simulate Role (Dev)</Text>
+                  </TouchableOpacity>
+                )}
 
                 <TouchableOpacity
                   style={styles.modalCloseBtn}
@@ -1339,7 +1368,7 @@ const AdminPortalShellInner: React.FC<AdminPortalShellProps> = ({
             {/* Quick Footer Summary */}
             <View style={styles.launcherFooter}>
               <Text style={styles.launcherFooterText}>
-                Displaying {filteredLauncherItems.length} of 19 screens • Instantaneous routing enabled
+                Displaying {filteredLauncherItems.length} of {NAV_ITEMS.length} screens • Instantaneous routing enabled
               </Text>
               <TouchableOpacity
                 onPress={() => {

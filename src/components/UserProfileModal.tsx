@@ -15,11 +15,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import { useTheme } from "../context/ThemeContext";
+import { useAuthStore } from "../store/authStore";
 import { supabase } from "../utils/supabase";
 import {
   FriendProfile,
   friendsRepository,
-  DEMO_USER_ID,
 } from "../services/repositories/friends";
 import { TravelVideoPlayer } from "./TravelVideoPlayer";
 import { LoadingState } from "./ui/LoadingState";
@@ -39,14 +41,15 @@ interface UserProfileModalProps {
 
 export function UserProfileModal({
   userId,
-  currentUserId = DEMO_USER_ID,
+  currentUserId,
   onClose,
   onStartChat,
   onStartCall,
 }: UserProfileModalProps) {
-  if (!userId) return null;
-
-  const isSelf = userId === currentUserId;
+  const { colors, isDark } = useTheme();
+  const authUserId = useAuthStore((s) => s.user?.id);
+  const effectiveCurrentUserId = currentUserId || authUserId || "";
+  const isSelf = !!userId && userId === effectiveCurrentUserId;
 
   const [profile, setProfile] = useState<FriendProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,11 +64,21 @@ export function UserProfileModal({
   const [isActionLoading, setIsActionLoading] = useState(false);
 
   useEffect(() => {
+    if (!userId) {
+      setProfile(null);
+      setFriendship({ status: "none" });
+      setUserPosts([]);
+      setUserFriends([]);
+      setActiveTab("posts");
+      return;
+    }
+
     let isMounted = true;
 
     async function loadProfileData() {
       if (!userId) return;
       setLoading(true);
+      setActiveTab("posts");
       try {
         // 1. Fetch Profile
         const { data: pData } = await supabase
@@ -79,8 +92,8 @@ export function UserProfileModal({
         }
 
         // 2. Fetch Friendship Status
-        if (!isSelf) {
-          const status = await friendsRepository.getFriendshipStatus(currentUserId, userId);
+        if (!isSelf && effectiveCurrentUserId) {
+          const status = await friendsRepository.getFriendshipStatus(effectiveCurrentUserId, userId);
           if (isMounted) setFriendship(status);
         }
 
@@ -112,15 +125,21 @@ export function UserProfileModal({
     return () => {
       isMounted = false;
     };
-  }, [userId, currentUserId, isSelf]);
+  }, [userId, effectiveCurrentUserId, isSelf]);
+
+  if (!userId) return null;
 
   // Friend Request Actions
   const handleSendFriendRequest = async () => {
     if (!profile) return;
+    if (!effectiveCurrentUserId) {
+      Alert.alert("Sign In Required", "Please sign in to send friend requests.");
+      return;
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setIsActionLoading(true);
     try {
-      const { data } = await friendsRepository.sendFriendRequest(currentUserId, profile.id);
+      const { data } = await friendsRepository.sendFriendRequest(effectiveCurrentUserId, profile.id);
       setFriendship({ status: "pending_sent", requestId: data?.id });
       Alert.alert("Request Sent", `Friend request sent to ${profile.display_name}!`);
     } catch (e) {
@@ -160,7 +179,7 @@ export function UserProfileModal({
   };
 
   const handleUnfriend = async () => {
-    if (!profile) return;
+    if (!profile || !effectiveCurrentUserId) return;
     Alert.alert("Unfriend", `Are you sure you want to remove ${profile.display_name} as a friend?`, [
       { text: "Cancel", style: "cancel" },
       {
@@ -169,7 +188,7 @@ export function UserProfileModal({
         onPress: async () => {
           setIsActionLoading(true);
           try {
-            await friendsRepository.unfriend(currentUserId, profile.id);
+            await friendsRepository.unfriend(effectiveCurrentUserId, profile.id);
             setFriendship({ status: "none" });
           } catch (e) {
             Alert.alert("Error", "Could not remove friend");
@@ -188,13 +207,20 @@ export function UserProfileModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={styles.shell}>
+      <View style={[styles.shell, { backgroundColor: colors.background }]}>
         {/* Header bar */}
-        <View style={styles.navBar}>
+        <View
+          style={[
+            styles.navBar,
+            { backgroundColor: colors.card, borderBottomColor: colors.border },
+          ]}
+        >
           <Pressable style={styles.backBtn} onPress={onClose}>
-            <Ionicons name="arrow-back" size={22} color="#1e293b" />
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
           </Pressable>
-          <Text style={styles.navTitle}>{profile?.display_name || "Traveler Profile"}</Text>
+          <Text style={[styles.navTitle, { color: colors.text }]}>
+            {profile?.display_name || "Traveler Profile"}
+          </Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -223,24 +249,30 @@ export function UserProfileModal({
             </View>
 
             {/* Profile Avatar & Info Card */}
-            <View style={styles.profileCard}>
+            <View style={[styles.profileCard, { backgroundColor: colors.card }]}>
               <View style={styles.avatarRow}>
-                <View style={styles.avatarBorder}>
+                <View style={[styles.avatarBorder, { borderColor: colors.card }]}>
                   <AppImage source={{ uri: profile.avatar_url }} placeholderCategory="avatar" style={styles.bigAvatar} />
-                  <View style={styles.onlineBadge} />
+                  <View style={[styles.onlineBadge, { borderColor: colors.card }]} />
                 </View>
 
                 {/* Quick Call shortcuts if friends */}
                 {!isSelf && onStartCall && (
                   <View style={styles.quickCallRow}>
                     <Pressable
-                      style={styles.callCircleBtn}
+                      style={[
+                        styles.callCircleBtn,
+                        { backgroundColor: isDark ? "rgba(56, 189, 248, 0.16)" : "#EFF6FF" },
+                      ]}
                       onPress={() => onStartCall(profile, "audio")}
                     >
                       <Ionicons name="call" size={18} color={TRIP_BLUE} />
                     </Pressable>
                     <Pressable
-                      style={styles.callCircleBtn}
+                      style={[
+                        styles.callCircleBtn,
+                        { backgroundColor: isDark ? "rgba(56, 189, 248, 0.16)" : "#EFF6FF" },
+                      ]}
                       onPress={() => onStartCall(profile, "video")}
                     >
                       <Ionicons name="videocam" size={18} color={TRIP_BLUE} />
@@ -252,10 +284,14 @@ export function UserProfileModal({
               {/* Names & Badges */}
               <View style={styles.nameSection}>
                 <View style={styles.displayNameRow}>
-                  <Text style={styles.displayName}>{profile.display_name}</Text>
+                  <Text style={[styles.displayName, { color: colors.text }]}>
+                    {profile.display_name}
+                  </Text>
                   <Ionicons name="checkmark-circle" size={20} color={TRIP_BLUE} />
                 </View>
-                <Text style={styles.handleText}>@{profile.username || "traveler"}</Text>
+                <Text style={[styles.handleText, { color: colors.textSecondary }]}>
+                  @{profile.username || "traveler"}
+                </Text>
 
                 {profile.is_influencer && (
                   <View style={styles.influencerBadge}>
@@ -266,12 +302,18 @@ export function UserProfileModal({
                   </View>
                 )}
 
-                {profile.bio && <Text style={styles.bioText}>{profile.bio}</Text>}
+                {profile.bio && (
+                  <Text style={[styles.bioText, { color: colors.textSecondary }]}>
+                    {profile.bio}
+                  </Text>
+                )}
 
                 {profile.location && (
                   <View style={styles.metaRow}>
-                    <Ionicons name="location-outline" size={14} color="#64748B" />
-                    <Text style={styles.metaText}>{profile.location}</Text>
+                    <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
+                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                      {profile.location}
+                    </Text>
                   </View>
                 )}
               </View>
@@ -279,7 +321,13 @@ export function UserProfileModal({
               {/* Action Buttons Row */}
               <View style={styles.mainActionsRow}>
                 {isSelf ? (
-                  <Pressable style={styles.primaryActionBtn} onPress={() => Alert.alert("Profile", "Edit Profile")}>
+                  <Pressable
+                    style={styles.primaryActionBtn}
+                    onPress={() => {
+                      onClose();
+                      router.push("/screens/profile" as any);
+                    }}
+                  >
                     <Ionicons name="create-outline" size={18} color="#fff" />
                     <Text style={styles.primaryActionText}>Edit Profile</Text>
                   </Pressable>
@@ -299,12 +347,18 @@ export function UserProfileModal({
 
                     {friendship.status === "pending_sent" && (
                       <Pressable
-                        style={[styles.secondaryActionBtn, isActionLoading && { opacity: 0.6 }]}
+                        style={[
+                          styles.secondaryActionBtn,
+                          { backgroundColor: isDark ? "#1E293B" : "#F1F5F9" },
+                          isActionLoading && { opacity: 0.6 },
+                        ]}
                         onPress={handleCancelRequest}
                         disabled={isActionLoading}
                       >
-                        <Ionicons name="time-outline" size={18} color="#475569" />
-                        <Text style={styles.secondaryActionText}>Requested</Text>
+                        <Ionicons name="time-outline" size={18} color={colors.textSecondary} />
+                        <Text style={[styles.secondaryActionText, { color: colors.textSecondary }]}>
+                          Requested
+                        </Text>
                       </Pressable>
                     )}
 
@@ -321,7 +375,10 @@ export function UserProfileModal({
 
                     {friendship.status === "accepted" && (
                       <Pressable
-                        style={styles.secondaryActionBtn}
+                        style={[
+                          styles.secondaryActionBtn,
+                          { backgroundColor: isDark ? "#1E293B" : "#F1F5F9" },
+                        ]}
                         onPress={handleUnfriend}
                         disabled={isActionLoading}
                       >
@@ -347,49 +404,84 @@ export function UserProfileModal({
               </View>
 
               {/* Stats Bar */}
-              <View style={styles.statsBar}>
+              <View style={[styles.statsBar, { borderTopColor: colors.border }]}>
                 <View style={styles.statCol}>
-                  <Text style={styles.statNum}>{userFriends.length}</Text>
-                  <Text style={styles.statLabel}>Friends</Text>
+                  <Text style={[styles.statNum, { color: colors.text }]}>{userFriends.length}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Friends</Text>
                 </View>
-                <View style={styles.statDivider} />
+                <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
                 <View style={styles.statCol}>
-                  <Text style={styles.statNum}>{userPosts.length}</Text>
-                  <Text style={styles.statLabel}>Posts</Text>
+                  <Text style={[styles.statNum, { color: colors.text }]}>{userPosts.length}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Posts</Text>
                 </View>
-                <View style={styles.statDivider} />
+                <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
                 <View style={styles.statCol}>
-                  <Text style={styles.statNum}>{profile.followers_count || 124}</Text>
-                  <Text style={styles.statLabel}>Followers</Text>
+                  <Text style={[styles.statNum, { color: colors.text }]}>
+                    {profile.followers_count || 0}
+                  </Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Followers</Text>
                 </View>
               </View>
             </View>
 
             {/* Profile Tabs */}
-            <View style={styles.tabsRow}>
+            <View style={[styles.tabsRow, { backgroundColor: colors.card }]}>
               <Pressable
-                style={[styles.tabBtn, activeTab === "posts" && styles.tabBtnActive]}
+                style={[
+                  styles.tabBtn,
+                  activeTab === "posts" && {
+                    backgroundColor: isDark ? "rgba(56, 189, 248, 0.16)" : "#EFF6FF",
+                  },
+                ]}
                 onPress={() => setActiveTab("posts")}
               >
-                <Text style={[styles.tabBtnText, activeTab === "posts" && styles.tabBtnTextActive]}>
+                <Text
+                  style={[
+                    styles.tabBtnText,
+                    { color: colors.textSecondary },
+                    activeTab === "posts" && styles.tabBtnTextActive,
+                  ]}
+                >
                   Posts ({userPosts.length})
                 </Text>
               </Pressable>
 
               <Pressable
-                style={[styles.tabBtn, activeTab === "friends" && styles.tabBtnActive]}
+                style={[
+                  styles.tabBtn,
+                  activeTab === "friends" && {
+                    backgroundColor: isDark ? "rgba(56, 189, 248, 0.16)" : "#EFF6FF",
+                  },
+                ]}
                 onPress={() => setActiveTab("friends")}
               >
-                <Text style={[styles.tabBtnText, activeTab === "friends" && styles.tabBtnTextActive]}>
+                <Text
+                  style={[
+                    styles.tabBtnText,
+                    { color: colors.textSecondary },
+                    activeTab === "friends" && styles.tabBtnTextActive,
+                  ]}
+                >
                   Friends ({userFriends.length})
                 </Text>
               </Pressable>
 
               <Pressable
-                style={[styles.tabBtn, activeTab === "about" && styles.tabBtnActive]}
+                style={[
+                  styles.tabBtn,
+                  activeTab === "about" && {
+                    backgroundColor: isDark ? "rgba(56, 189, 248, 0.16)" : "#EFF6FF",
+                  },
+                ]}
                 onPress={() => setActiveTab("about")}
               >
-                <Text style={[styles.tabBtnText, activeTab === "about" && styles.tabBtnTextActive]}>
+                <Text
+                  style={[
+                    styles.tabBtnText,
+                    { color: colors.textSecondary },
+                    activeTab === "about" && styles.tabBtnTextActive,
+                  ]}
+                >
                   About
                 </Text>
               </Pressable>
@@ -400,17 +492,22 @@ export function UserProfileModal({
               <View style={styles.tabContent}>
                 {userPosts.length === 0 ? (
                   <View style={styles.emptyBox}>
-                    <Ionicons name="images-outline" size={36} color="#94a3b8" />
-                    <Text style={styles.emptyText}>No posts shared yet</Text>
+                    <Ionicons name="images-outline" size={36} color={colors.textSecondary} />
+                    <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                      No posts shared yet
+                    </Text>
                   </View>
                 ) : (
                   userPosts.map((post) => {
                     const media = post.post_media?.[0];
                     const isVideo = media?.media_type === "video";
                     return (
-                      <View key={post.id} style={styles.postTimelineCard}>
+                      <View
+                        key={post.id}
+                        style={[styles.postTimelineCard, { backgroundColor: colors.card }]}
+                      >
                         <View style={styles.postHeader}>
-                          <Text style={styles.postTitle}>{post.title}</Text>
+                          <Text style={[styles.postTitle, { color: colors.text }]}>{post.title}</Text>
                           {post.location && (
                             <View style={styles.postLocRow}>
                               <Ionicons name="location-outline" size={12} color={TRIP_BLUE} />
@@ -420,7 +517,9 @@ export function UserProfileModal({
                         </View>
 
                         {post.content && (
-                          <Text style={styles.postBodyText}>{post.content}</Text>
+                          <Text style={[styles.postBodyText, { color: colors.textSecondary }]}>
+                            {post.content}
+                          </Text>
                         )}
 
                         {media && isVideo ? (
@@ -436,13 +535,13 @@ export function UserProfileModal({
                         <View style={styles.postFooterRow}>
                           <View style={styles.postSocialStat}>
                             <Ionicons name="heart" size={14} color="#EF4444" />
-                            <Text style={styles.postSocialText}>
+                            <Text style={[styles.postSocialText, { color: colors.textSecondary }]}>
                               {post.likes_count || 0} likes
                             </Text>
                           </View>
                           <View style={styles.postSocialStat}>
-                            <Ionicons name="chatbubble" size={14} color="#64748B" />
-                            <Text style={styles.postSocialText}>
+                            <Ionicons name="chatbubble" size={14} color={colors.textSecondary} />
+                            <Text style={[styles.postSocialText, { color: colors.textSecondary }]}>
                               {post.comments_count || 0} comments
                             </Text>
                           </View>
@@ -459,18 +558,23 @@ export function UserProfileModal({
               <View style={styles.tabContent}>
                 {userFriends.length === 0 ? (
                   <View style={styles.emptyBox}>
-                    <Ionicons name="people-outline" size={36} color="#94a3b8" />
-                    <Text style={styles.emptyText}>No friends yet</Text>
+                    <Ionicons name="people-outline" size={36} color={colors.textSecondary} />
+                    <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                      No friends yet
+                    </Text>
                   </View>
                 ) : (
                   <View style={styles.friendsGrid}>
                     {userFriends.map((friend) => (
-                      <View key={friend.id} style={styles.friendGridCard}>
+                      <View
+                        key={friend.id}
+                        style={[styles.friendGridCard, { backgroundColor: colors.card }]}
+                      >
                         <AppImage source={{ uri: friend.avatar_url }} placeholderCategory="avatar" style={styles.friendGridAvatar} />
-                        <Text style={styles.friendGridName} numberOfLines={1}>
+                        <Text style={[styles.friendGridName, { color: colors.text }]} numberOfLines={1}>
                           {friend.display_name}
                         </Text>
-                        <Text style={styles.friendGridHandle} numberOfLines={1}>
+                        <Text style={[styles.friendGridHandle, { color: colors.textSecondary }]} numberOfLines={1}>
                           @{friend.username || "traveler"}
                         </Text>
                       </View>
@@ -483,22 +587,24 @@ export function UserProfileModal({
             {/* Tab 3: About */}
             {activeTab === "about" && (
               <View style={styles.tabContent}>
-                <View style={styles.aboutCard}>
-                  <Text style={styles.aboutHeading}>Travel Bio</Text>
-                  <Text style={styles.aboutBody}>
+                <View style={[styles.aboutCard, { backgroundColor: colors.card }]}>
+                  <Text style={[styles.aboutHeading, { color: colors.text }]}>Travel Bio</Text>
+                  <Text style={[styles.aboutBody, { color: colors.textSecondary }]}>
                     {profile.bio || "Enthusiastic explorer wandering through nature and culture."}
                   </Text>
 
                   <View style={styles.aboutInfoRow}>
-                    <Ionicons name="globe-outline" size={18} color="#64748B" />
-                    <Text style={styles.aboutInfoText}>
+                    <Ionicons name="globe-outline" size={18} color={colors.textSecondary} />
+                    <Text style={[styles.aboutInfoText, { color: colors.text }]}>
                       Member since {new Date(profile.created_at || Date.now()).getFullYear()}
                     </Text>
                   </View>
 
                   <View style={styles.aboutInfoRow}>
                     <Ionicons name="shield-checkmark-outline" size={18} color="#10B981" />
-                    <Text style={styles.aboutInfoText}>Verified Community Profile</Text>
+                    <Text style={[styles.aboutInfoText, { color: colors.text }]}>
+                      Verified Community Profile
+                    </Text>
                   </View>
                 </View>
               </View>

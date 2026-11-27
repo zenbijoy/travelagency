@@ -15,6 +15,25 @@ import {
 } from "../groupTripService";
 import { supabase } from "../../../utils/supabase";
 
+// Mock groupTripNotificationService
+jest.mock("../groupTripNotificationService", () => ({
+  groupTripNotificationService: {
+    notifyNewProposal: jest.fn().mockResolvedValue(undefined),
+    notifyProposalAccepted: jest.fn().mockResolvedValue(undefined),
+    notifyExpenseRecorded: jest.fn().mockResolvedValue(undefined),
+    notifyVoteResult: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
+// Mock expo-notifications
+jest.mock("expo-notifications", () => ({
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
+  getExpoPushTokenAsync: jest.fn().mockResolvedValue({ data: "mock-expo-push-token" }),
+  setNotificationHandler: jest.fn(),
+  addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+}));
+
 // Mock Supabase
 jest.mock("../../../utils/supabase", () => {
   return {

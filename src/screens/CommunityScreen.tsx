@@ -302,10 +302,20 @@ export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
   const [loading, setLoading] = useState(false);
 
   // Modals & User Input Form States
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams<{
+    composer?: string;
+    createPost?: string;
+    postId?: string;
+  }>();
   const [showCreatePostModal, setShowCreatePostModal] = useState(
     params?.composer === "open" || params?.createPost === "true"
   );
+
+  useEffect(() => {
+    if (params?.composer === "open" || params?.createPost === "true") {
+      setShowCreatePostModal(true);
+    }
+  }, [params?.composer, params?.createPost]);
   const [postTitle, setPostTitle] = useState("");
   const [postContent, setPostContent] = useState("");
   const [postImage, setPostImage] = useState("");
@@ -1403,7 +1413,7 @@ export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
           numColumns={isDesktop ? 2 : 1}
           getItemLayout={isDesktop ? undefined : getItemLayout}
           ListHeaderComponent={renderFeedHeader}
-          contentContainerStyle={{ paddingBottom: 100, ...(isDesktop ? { padding: 16, gap: 12 } : {}) }}
+          contentContainerStyle={{ paddingBottom: 150, ...(isDesktop ? { padding: 16, gap: 12 } : {}) }}
           columnWrapperStyle={isDesktop ? { gap: 12 } : undefined}
           initialNumToRender={4}
           maxToRenderPerBatch={4}
@@ -1467,7 +1477,7 @@ export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
           keyExtractor={(item) => item.id}
           key={isDesktop ? "inf-3col" : "inf-1col"}
           numColumns={isDesktop ? 3 : 1}
-          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 150 }}
           columnWrapperStyle={isDesktop ? { gap: 12 } : undefined}
           ListHeaderComponent={
             <View>
@@ -1567,7 +1577,7 @@ export function CommunitySpecializedScreen({ screen }: { screen: UIScreen }) {
       {/* TAB 3: GROUPS & LIVE CHAT */}
       {/* =================================================================== */}
       {activeTab === "groups" && (
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 150 }}>
           <View style={styles.groupsHeaderRow}>
             <View>
               <Text style={styles.sectionHeading}>Travel Tribes & Communities</Text>

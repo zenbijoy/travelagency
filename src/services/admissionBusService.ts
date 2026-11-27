@@ -203,6 +203,10 @@ export const admissionBusService = {
   async bookAdmissionTicket(
     booking: Omit<AdmissionTicketBooking, "id" | "status" | "created_at">
   ): Promise<AdmissionTicketBooking> {
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData?.user?.id;
+    const refCode = `SJ-ADM-${Date.now().toString(36).toUpperCase()}`;
+
     const newBooking: AdmissionTicketBooking = {
       ...booking,
       id: `adm-ticket-${Date.now()}`,
@@ -210,17 +214,25 @@ export const admissionBusService = {
       created_at: new Date().toISOString(),
     };
 
-    try {
-      await supabase.from("bookings").insert([
-        {
-          booking_type: "admission_bus",
-          total_price: booking.total_fare,
-          status: "confirmed",
-          metadata: newBooking,
-        },
-      ]);
-    } catch (syncErr) {
-      console.warn("[admissionBusService] Remote booking sync failed, saving locally:", syncErr);
+    if (userId) {
+      try {
+        await supabase.from("bookings").insert([
+          {
+            user_id: userId,
+            booking_reference: refCode,
+            product_type: "admission_bus",
+            booking_type: "admission_bus",
+            destination_city: booking.drop_point || "Dhaka",
+            total_price: booking.total_fare,
+            final_price: booking.total_fare,
+            currency: "BDT",
+            status: "confirmed",
+            metadata: newBooking,
+          },
+        ]);
+      } catch (syncErr) {
+        console.warn("[admissionBusService] Remote booking sync error:", syncErr);
+      }
     }
 
     const raw = await AsyncStorage.getItem(ADMISSION_BOOKINGS_KEY);
@@ -236,6 +248,27 @@ export const admissionBusService = {
    */
   async getMyAdmissionTickets(): Promise<AdmissionTicketBooking[]> {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+
+      if (userId) {
+        const { data: remoteRows, error } = await supabase
+          .from("bookings")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("product_type", "admission_bus")
+          .order("created_at", { ascending: false });
+
+        if (!error && remoteRows && remoteRows.length > 0) {
+          return remoteRows.map((r: any) => ({
+            ...(r.metadata || {}),
+            id: r.id || r.metadata?.id,
+            status: r.status || "confirmed",
+            created_at: r.created_at,
+          }));
+        }
+      }
+
       const raw = await AsyncStorage.getItem(ADMISSION_BOOKINGS_KEY);
       return raw ? JSON.parse(raw) : [];
     } catch {

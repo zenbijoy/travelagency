@@ -168,26 +168,10 @@ class DeviceSessionService {
       // Offline fallback
     }
 
-    // If no remote records found, ensure we at least have current device + simulated secondary session for demonstration
+    // If no remote records found, ensure we at least represent the current verified device
     if (sessions.length === 0) {
       const currentSession = await this.getCurrentSessionLocal(userId);
-      const secondarySession: DeviceSession = {
-        id: "sess_secondary_ipad",
-        userId,
-        deviceId: "dev_ipad_pro_air",
-        deviceName: "Apple iPad Air (5th Gen)",
-        platform: "ios",
-        osVersion: "iPadOS 17.5",
-        appVersion: "1.1.0",
-        ipAddress: "103.145.118.45",
-        location: "Chittagong, Bangladesh",
-        lastActiveAt: new Date(Date.now() - 3600000 * 4).toISOString(), // 4 hours ago
-        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-        isCurrentDevice: false,
-        isRevoked: false,
-      };
-
-      sessions = [currentSession, secondarySession];
+      sessions = [currentSession];
     } else {
       // Ensure current device is explicitly flagged
       const hasCurrent = sessions.some((s) => s.isCurrentDevice);

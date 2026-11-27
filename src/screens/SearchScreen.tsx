@@ -30,7 +30,7 @@ import { TopBar } from "./TopBar";
 import { screens, type UIScreen } from "../data/screens";
 import { savedItemsService } from "../services/savedItemsService";
 import { SearchAutocompleteDropdown } from "../components/search/SearchAutocompleteDropdown";
-import { formatPrice } from "../utils/currency";
+import { formatPrice, formatSourcePrice } from "../utils/currency";
 import { trendingSearchService } from "../services/trendingSearchService";
 
 const PRIMARY = "#0055F2";
@@ -820,13 +820,20 @@ export function SearchScreen({ screen }: { screen?: UIScreen } = {}) {
                       {/* Upfront Price Transparency (Problem 6) */}
                       <View style={s.priceBox}>
                         <Text style={s.basePriceText}>
-                          {formatPrice(basePrice)}
+                          {formatSourcePrice(
+                            basePrice,
+                            item.currency || (activeType === "hotels" || activeType === "tours" ? "USD" : "BDT")
+                          )}
                           <Text style={s.priceUnitText}>
                             {activeType === "hotels" ? " / রাত" : " / জন"}
                           </Text>
                         </Text>
                         <Text style={s.taxTotalText}>
-                          ট্যাক্স ও ফিসহ মোট: {formatPrice(totalWithTax)}
+                          ট্যাক্স ও ফিসহ মোট:{" "}
+                          {formatSourcePrice(
+                            totalWithTax,
+                            item.currency || (activeType === "hotels" || activeType === "tours" ? "USD" : "BDT")
+                          )}
                         </Text>
                       </View>
                     </View>

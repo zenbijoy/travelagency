@@ -30,13 +30,15 @@ import { KYCDocumentType, UserVerificationStatus } from "../types/admin";
 import {
   FriendProfile,
   friendsRepository,
-  DEMO_USER_ID,
 } from "../services/repositories/friends";
 import { TravelVideoPlayer } from "../components/TravelVideoPlayer";
 import { useTheme } from "../context/ThemeContext";
 import { FONTS } from "../theme/typography";
 import { ProfileCompletenessBar } from "../components/profile/ProfileCompletenessBar";
 import { TravelerStatsRow } from "../components/profile/TravelerStatsRow";
+import { ROUTES } from "../constants/routes";
+import { usePersonalizationStore } from "../store/personalizationStore";
+import { useNotificationStore } from "../store/notificationStore";
 
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -104,8 +106,11 @@ const DIETARY_OPTIONS = [
 
 export function UserProfileScreen() {
   const { colors, isDark } = useTheme();
-  const params = useLocalSearchParams<{ userId?: string }>();
-  const [currentAuthUserId, setCurrentAuthUserId] = useState<string>(DEMO_USER_ID);
+  const params = useLocalSearchParams<{
+    userId?: string;
+    tab?: "posts" | "identity" | "travel_info" | "friends" | "about";
+  }>();
+  const [currentAuthUserId, setCurrentAuthUserId] = useState<string>("");
   const [isSelf, setIsSelf] = useState(true);
 
   const [profile, setProfile] = useState<any>(null);
@@ -114,6 +119,8 @@ export function UserProfileScreen() {
   const [kycStatus, setKycStatus] = useState<string>("unverified");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const personalizationPrefs = usePersonalizationStore((s) => s.preferences);
+  const unreadNotifsCount = useNotificationStore((s) => s.unreadCount);
 
   // Friendship & Social State
   const [friendship, setFriendship] = useState<{
@@ -124,8 +131,20 @@ export function UserProfileScreen() {
   const [userFriends, setUserFriends] = useState<FriendProfile[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
 
+  const VALID_TABS = ["posts", "identity", "travel_info", "friends", "about"] as const;
+  const initialTab =
+    params.tab && (VALID_TABS as readonly string[]).includes(params.tab)
+      ? params.tab
+      : "posts";
+
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"posts" | "identity" | "travel_info" | "friends" | "about">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "identity" | "travel_info" | "friends" | "about">(initialTab);
+
+  useEffect(() => {
+    if (params.tab && (VALID_TABS as readonly string[]).includes(params.tab)) {
+      setActiveTab(params.tab);
+    }
+  }, [params.tab]);
 
   // Modals
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
@@ -155,7 +174,7 @@ export function UserProfileScreen() {
   const [isUploadingKyc, setIsUploadingKyc] = useState(false);
 
   // Referral Code calculation
-  const referralCode = `TRIP-${(profile?.id || currentAuthUserId || "REF").slice(0, 6).toUpperCase()}`;
+  const referralCode = `SJ-${(profile?.id || currentAuthUserId || "REF").slice(0, 6).toUpperCase()}`;
 
   useEffect(() => {
     let isMounted = true;
@@ -165,10 +184,14 @@ export function UserProfileScreen() {
       try {
         // Resolve current auth user
         const { data: authData } = await supabase.auth.getUser();
-        const authUid = authData?.user?.id || DEMO_USER_ID;
+        const authUid = authData?.user?.id || "";
         if (isMounted) setCurrentAuthUserId(authUid);
 
         const targetId = params.userId || authUid;
+        if (!targetId) {
+          if (isMounted) setLoading(false);
+          return;
+        }
         const viewingSelf = targetId === authUid;
         if (isMounted) setIsSelf(viewingSelf);
 
@@ -193,21 +216,21 @@ export function UserProfileScreen() {
           cover_url:
             commProfile?.cover_url ||
             "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800",
-          bio: commProfile?.bio || "Passionate globetrotter & verified traveler.",
-          location: commProfile?.location || (userProf?.city ? `${userProf.city}, ${userProf.country || ""}` : "Dhaka, Bangladesh"),
-          email: userProf?.email || authData?.user?.email || "user@example.com",
-          phone: userProf?.phone || "+880 1712 345678",
-          // Extended travel details
-          emergency_contact_name: (userProf as any)?.emergency_contact_name || "Ayesha Rahman",
-          emergency_contact_phone: (userProf as any)?.emergency_contact_phone || "+880 1819 987654",
-          emergency_contact_relationship: (userProf as any)?.emergency_contact_relationship || "Spouse",
-          passport_number: (userProf as any)?.passport_number || "A09876543",
-          passport_country: (userProf as any)?.passport_country || "Bangladesh",
-          passport_expiry: (userProf as any)?.passport_expiry || "2032-12-31",
-          frequent_flyer_airline: (userProf as any)?.frequent_flyer_airline || "Emirates Skywards",
-          frequent_flyer_number: (userProf as any)?.frequent_flyer_number || "EK-987654321",
+          bio: commProfile?.bio || "",
+          location: commProfile?.location || (userProf?.city ? [userProf.city, userProf.country].filter(Boolean).join(", ") : ""),
+          email: userProf?.email || authData?.user?.email || "",
+          phone: userProf?.phone || "",
+          // Extended travel details (empty unless provided by user)
+          emergency_contact_name: (userProf as any)?.emergency_contact_name || "",
+          emergency_contact_phone: (userProf as any)?.emergency_contact_phone || "",
+          emergency_contact_relationship: (userProf as any)?.emergency_contact_relationship || "",
+          passport_number: (userProf as any)?.passport_number || "",
+          passport_country: (userProf as any)?.passport_country || "",
+          passport_expiry: (userProf as any)?.passport_expiry || "",
+          frequent_flyer_airline: (userProf as any)?.frequent_flyer_airline || "",
+          frequent_flyer_number: (userProf as any)?.frequent_flyer_number || "",
           created_at: userProf?.created_at || new Date().toISOString(),
-          followers_count: commProfile?.followers_count || 142,
+          followers_count: commProfile?.followers_count || 0,
         };
 
         if (isMounted) {
@@ -872,6 +895,90 @@ export function UserProfileScreen() {
             </View>
           )}
 
+          {/* Travel Preferences & Notification Intelligence Entry Card */}
+          {isSelf && (
+            <View
+              style={[
+                styles.referralBannerCard,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <View style={styles.referralBannerLeft}>
+                <View
+                  style={[
+                    styles.giftIconBox,
+                    { backgroundColor: colors.primary },
+                  ]}
+                >
+                  <Ionicons name="sparkles" size={20} color="#FFFFFF" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.referralBannerTitle,
+                      { color: colors.text },
+                    ]}
+                  >
+                    Travel Preferences & Notification Intelligence
+                  </Text>
+                  <Text
+                    style={[
+                      styles.referralBannerSubtitle,
+                      { color: colors.textMuted },
+                    ]}
+                  >
+                    {personalizationPrefs.personalization_enabled
+                      ? `${personalizationPrefs.favorite_destinations.length} favorite destinations • ${personalizationPrefs.digest_frequency} digest`
+                      : "Personalization paused • Essential alerts active"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.referralBannerActions}>
+                <Pressable
+                  style={[
+                    styles.referralCopyBtn,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  onPress={() =>
+                    router.push(ROUTES.SCREENS.NOTIFICATIONS as any)
+                  }
+                >
+                  <Ionicons
+                    name="notifications-outline"
+                    size={15}
+                    color={colors.primary}
+                  />
+                  <Text
+                    style={[styles.referralCopyText, { color: colors.text }]}
+                  >
+                    Inbox{unreadNotifsCount > 0 ? ` (${unreadNotifsCount})` : ""}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.referralShareBtn,
+                    { backgroundColor: colors.primary },
+                  ]}
+                  onPress={() =>
+                    router.push(ROUTES.SCREENS.TRAVEL_PREFERENCES as any)
+                  }
+                >
+                  <Ionicons name="options-outline" size={15} color="#FFFFFF" />
+                  <Text style={styles.referralShareText}>
+                    Customize Preferences
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
           {/* Profile Completeness Guidance Bar */}
           {isSelf && (
             <ProfileCompletenessBar
@@ -1057,41 +1164,53 @@ export function UserProfileScreen() {
               </View>
 
               {/* Passport Details */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                 <View style={styles.infoHeader}>
                   <Ionicons name="airplane-outline" size={20} color={TRIP_BLUE} />
-                  <Text style={styles.infoTitle}>Passport Details</Text>
+                  <Text style={[styles.infoTitle, { color: colors.text }]}>Passport Details</Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Passport Number</Text>
-                  <Text style={styles.infoValue}>
-                    {revealPII ? profile.passport_number : maskPassport(profile.passport_number)}
+                  <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Passport Number</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {!profile.passport_number
+                      ? "Not provided"
+                      : revealPII
+                      ? profile.passport_number
+                      : maskPassport(profile.passport_number)}
                   </Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Issuing Country</Text>
-                  <Text style={styles.infoValue}>{profile.passport_country || "Bangladesh"}</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Issuing Country</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {profile.passport_country || "Not provided"}
+                  </Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Expiration Date</Text>
-                  <Text style={styles.infoValue}>{profile.passport_expiry || "2032-12-31"}</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Expiration Date</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {profile.passport_expiry || "Not provided"}
+                  </Text>
                 </View>
               </View>
 
               {/* Frequent Flyer Details */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                 <View style={styles.infoHeader}>
                   <Ionicons name="ribbon-outline" size={20} color="#8B5CF6" />
-                  <Text style={styles.infoTitle}>Frequent Flyer Membership</Text>
+                  <Text style={[styles.infoTitle, { color: colors.text }]}>Frequent Flyer Membership</Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Airline Program</Text>
-                  <Text style={styles.infoValue}>{profile.frequent_flyer_airline || "Emirates Skywards"}</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Airline Program</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {profile.frequent_flyer_airline || "Not linked"}
+                  </Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Membership Number</Text>
-                  <Text style={styles.infoValue}>
-                    {revealPII
+                  <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Membership Number</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {!profile.frequent_flyer_number
+                      ? "Not linked"
+                      : revealPII
                       ? profile.frequent_flyer_number
                       : maskFrequentFlyer(profile.frequent_flyer_number)}
                   </Text>
@@ -1099,13 +1218,13 @@ export function UserProfileScreen() {
               </View>
 
               {/* Dietary Preferences */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                 <View style={styles.infoHeader}>
                   <Ionicons name="restaurant-outline" size={20} color="#10B981" />
-                  <Text style={styles.infoTitle}>Dietary Preferences</Text>
+                  <Text style={[styles.infoTitle, { color: colors.text }]}>Dietary Preferences</Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>In-Flight / Hotel Diet</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textMuted }]}>In-Flight / Hotel Diet</Text>
                   <View style={styles.dietPill}>
                     <Text style={styles.dietPillText}>{preferences?.dietary_requirements || editDietary}</Text>
                   </View>
@@ -1113,23 +1232,29 @@ export function UserProfileScreen() {
               </View>
 
               {/* Emergency Contacts */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                 <View style={styles.infoHeader}>
                   <Ionicons name="medical-outline" size={20} color="#EF4444" />
-                  <Text style={styles.infoTitle}>Emergency Contact</Text>
+                  <Text style={[styles.infoTitle, { color: colors.text }]}>Emergency Contact</Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Contact Name</Text>
-                  <Text style={styles.infoValue}>{profile.emergency_contact_name || "Ayesha Rahman"}</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Contact Name</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {profile.emergency_contact_name || "Not added"}
+                  </Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Relationship</Text>
-                  <Text style={styles.infoValue}>{profile.emergency_contact_relationship || "Spouse"}</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Relationship</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {profile.emergency_contact_relationship || "Not added"}
+                  </Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Emergency Phone</Text>
-                  <Text style={styles.infoValue}>
-                    {revealPII
+                  <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Emergency Phone</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {!profile.emergency_contact_phone
+                      ? "Not added"
+                      : revealPII
                       ? profile.emergency_contact_phone
                       : maskPhone(profile.emergency_contact_phone)}
                   </Text>
@@ -1142,6 +1267,21 @@ export function UserProfileScreen() {
               >
                 <Ionicons name="pencil" size={16} color="#FFFFFF" />
                 <Text style={styles.editSectionBtnText}>Update Preferences & Details</Text>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.editSectionBtn,
+                  { backgroundColor: colors.primary, marginTop: 10 },
+                ]}
+                onPress={() =>
+                  router.push(ROUTES.SCREENS.TRAVEL_PREFERENCES as any)
+                }
+              >
+                <Ionicons name="sparkles-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.editSectionBtnText}>
+                  Travel Preferences & Notification Intelligence
+                </Text>
               </Pressable>
             </View>
           )}

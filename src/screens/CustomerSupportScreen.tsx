@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Platform,
   ActivityIndicator,
+  Linking,
   Modal,
   Pressable,
   ScrollView,
@@ -17,6 +18,8 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { chat } from "../services/ai/llm";
 import { supabase } from "../utils/supabase";
 import { RTLIcon } from "../components/ui";
+import { BRAND } from "../constants/brand";
+import { useTheme } from "../context/ThemeContext";
 
 // Question Item interface
 interface ServiceQuestion {
@@ -32,7 +35,7 @@ const CATEGORY_QUESTIONS: Record<string, ServiceQuestion[]> = {
     {
       id: "q1",
       question: "Are there any flight ticket promotions going on?",
-      answer: "Yes! Currently we offer up to 15% discount on international flight bookings with code TRIP2026.",
+      answer: "Yes! Currently we offer up to 15% discount on international flight bookings with code SHOPNO2026.",
       icon: "headset-outline",
     },
     {
@@ -454,20 +457,20 @@ export function CustomerSupportScreen() {
           </View>
 
           <Text style={styles.guaranteeText}>
-            Thanks to our extensive Trip.com Service Guarantee, your booking is
+            Thanks to our extensive {BRAND.name.en} Service Guarantee, your booking is
             protected against unexpected issues which might come up.{" "}
             <Text
               style={styles.learnMoreLink}
-              onPress={() => alert("Trip.com Service Guarantee protects 100% of flight & hotel bookings against cancellations, delays, or emergency refunds.")}
+              onPress={() => alert(`${BRAND.name.en} Service Guarantee protects 100% of flight & hotel bookings against cancellations, delays, or emergency refunds.`)}
             >
               Learn More
             </Text>
           </Text>
         </View>
 
-        {/* ─── Video Guide Card ("It's easy to get help on Trip.com") ──────── */}
+        {/* ─── Video Guide Card ──────── */}
         <View style={styles.videoHelpCard}>
-          <Text style={styles.videoHelpTitle}>It's easy to get help on Trip.com</Text>
+          <Text style={styles.videoHelpTitle}>It's easy to get help on {BRAND.name.en}</Text>
 
           <TouchableOpacity
             style={styles.videoPlayerContainer}
@@ -475,7 +478,7 @@ export function CustomerSupportScreen() {
             onPress={() => alert("Playing Help & Support Video Walkthrough...")}
           >
             <View style={styles.videoLogoRow}>
-              <Text style={styles.videoLogoText}>Trip.com</Text>
+              <Text style={styles.videoLogoText}>{BRAND.name.en}</Text>
               <View style={styles.videoYellowDot} />
             </View>
 
@@ -605,9 +608,10 @@ export function CustomerSupportScreen() {
                 router.push({
                   pathname: "/screens/call",
                   params: {
-                    isVideo: "false",
-                    name: "Customer Support Desk",
-                    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300",
+                    callType: "audio",
+                    targetUserId: "shopnojatra-support-desk",
+                    targetName: `${BRAND.name.en} Support Desk`,
+                    targetAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300",
                   },
                 });
               }}
@@ -620,20 +624,34 @@ export function CustomerSupportScreen() {
               <RTLIcon name="chevron-forward" size={18} color="#2563EB" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.phoneOptionRow}>
+            <TouchableOpacity
+              style={styles.phoneOptionRow}
+              onPress={() => {
+                setShowCallModal(false);
+                Linking.openURL(`tel:${BRAND.contact.phone.replace(/[^\d+]/g, "")}`).catch(() => {});
+              }}
+            >
               <Ionicons name="call-outline" size={20} color="#2563EB" />
               <View style={{ flex: 1, marginStart: 12 }}>
-                <Text style={styles.phoneOptionLabel}>International Toll-Free</Text>
-                <Text style={styles.phoneOptionNumber}>+1 (800) 874-7326</Text>
+                <Text style={styles.phoneOptionLabel}>{BRAND.name.en} Hotline (24/7)</Text>
+                <Text style={styles.phoneOptionNumber}>{BRAND.contact.phone}</Text>
               </View>
+              <RTLIcon name="chevron-forward" size={18} color="#94A3B8" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.phoneOptionRow}>
-              <Ionicons name="globe-outline" size={20} color="#2563EB" />
+            <TouchableOpacity
+              style={styles.phoneOptionRow}
+              onPress={() => {
+                setShowCallModal(false);
+                Linking.openURL(`mailto:${BRAND.contact.supportEmail}`).catch(() => {});
+              }}
+            >
+              <Ionicons name="mail-outline" size={20} color="#2563EB" />
               <View style={{ flex: 1, marginStart: 12 }}>
-                <Text style={styles.phoneOptionLabel}>Asia-Pacific Direct Line</Text>
-                <Text style={styles.phoneOptionNumber}>+852 3008 3268</Text>
+                <Text style={styles.phoneOptionLabel}>Direct Priority Email</Text>
+                <Text style={styles.phoneOptionNumber}>{BRAND.contact.supportEmail}</Text>
               </View>
+              <RTLIcon name="chevron-forward" size={18} color="#94A3B8" />
             </TouchableOpacity>
           </View>
         </View>
@@ -666,9 +684,10 @@ export function CustomerSupportScreen() {
                 router.push({
                   pathname: "/screens/call",
                   params: {
-                    isVideo: "false",
-                    name: "Emergency Response Desk",
-                    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300",
+                    callType: "audio",
+                    targetUserId: "shopnojatra-sos-desk",
+                    targetName: "Emergency Response Desk",
+                    targetAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300",
                   },
                 });
               }}

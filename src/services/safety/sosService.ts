@@ -2126,6 +2126,22 @@ class SOSService {
    * 5. Logs to backend/Supabase audit_logs
    * 6. Returns transparent recipient status
    */
+  async dispatchEmergencyAlert(payload: {
+    emergencyType?: string;
+    coordinates?: GeoCoordinates;
+    batteryLevel?: number;
+    medicalNotes?: string;
+  }): Promise<boolean> {
+    try {
+      const note = `[EMERGENCY ${payload.emergencyType?.toUpperCase() || "ALERT"}] Battery: ${payload.batteryLevel ?? "N/A"}%. ${payload.medicalNotes || ""}`;
+      await this.triggerOneTapSOS(note);
+      return true;
+    } catch (err) {
+      logger.error("Failed to dispatch emergency alert from mesh relay:", err);
+      return false;
+    }
+  }
+
   async triggerOneTapSOS(customNote?: string, overrideCountryCode?: string): Promise<SOSDispatchResult> {
     try {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});

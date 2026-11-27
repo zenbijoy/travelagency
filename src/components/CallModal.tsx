@@ -34,9 +34,9 @@ interface CallModalProps {
 }
 
 export function CallModal({ callState, onClose }: CallModalProps) {
-  if (!callState) return null;
-
-  const { callType, otherUser, status: initialStatus } = callState;
+  const callType = callState?.callType ?? "video";
+  const otherUser = callState?.otherUser;
+  const initialStatus = callState?.status ?? "outgoing";
 
   const [callStatus, setCallStatus] = useState<"incoming" | "outgoing" | "connected">(
     initialStatus
@@ -49,8 +49,20 @@ export function CallModal({ callState, onClose }: CallModalProps) {
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
+  // Reset call UI state whenever a new callState session starts
+  useEffect(() => {
+    if (!callState) return;
+    setCallStatus(callState.status);
+    setDurationSeconds(0);
+    setIsMuted(false);
+    setIsSpeakerOn(true);
+    setIsVideoEnabled(callState.callType === "video");
+    setShowPermissionModal(false);
+  }, [callState?.callId, callState?.status, callState?.callType, !!callState]);
+
   // Verify Audio and Video permissions
   useEffect(() => {
+    if (!callState) return;
     let isMounted = true;
     async function checkPermissions() {
       try {
@@ -67,55 +79,54 @@ export function CallModal({ callState, onClose }: CallModalProps) {
     return () => {
       isMounted = false;
     };
-  }, [callType, permission?.granted]);
+  }, [!!callState, callType, permission?.granted]);
 
   // Animation for ringing pulse
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   // Ringing / pulsing loop
   useEffect(() => {
-    if (callStatus !== "connected") {
-      const pulseLoop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.25,
-            duration: 900,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 900,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      pulseLoop.start();
-      return () => pulseLoop.stop();
+    if (!callState || callStatus === "connected" || process.env.NODE_ENV === "test") {
+      return;
     }
-  }, [callStatus]);
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.25,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulseLoop.start();
+    return () => pulseLoop.stop();
+  }, [!!callState, callStatus, pulseAnim]);
 
   // If outgoing, automatically simulate answer after 3 seconds for smooth interactive demo
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (callStatus === "outgoing") {
-      timeout = setTimeout(() => {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setCallStatus("connected");
-      }, 3000);
-    }
+    if (!callState || callStatus !== "outgoing") return;
+    const timeout = setTimeout(() => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setCallStatus("connected");
+    }, 3000);
     return () => clearTimeout(timeout);
-  }, [callStatus]);
+  }, [!!callState, callStatus]);
 
   // Duration timer
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (callStatus === "connected") {
-      interval = setInterval(() => {
-        setDurationSeconds((prev) => prev + 1);
-      }, 1000);
-    }
+    if (!callState || callStatus !== "connected") return;
+    const interval = setInterval(() => {
+      setDurationSeconds((prev) => prev + 1);
+    }, 1000);
     return () => clearInterval(interval);
-  }, [callStatus]);
+  }, [!!callState, callStatus]);
+
+  if (!callState || !otherUser) return null;
 
   const formatDuration = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);

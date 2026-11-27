@@ -17,6 +17,7 @@ import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import { useContract } from "@/hooks/useContract";
 import type { ContractData, Contract, ContractType, ContractStatus } from "@/services/contract/contractService";
+import { useHotelPmsStore, useHotelPmsComputed, HotelContractRecord } from "@/features/hotel";
 
 const NAVY = "#0F172A";
 const NAVY_LIGHT = "#1E293B";
@@ -38,12 +39,6 @@ const CONTRACT_TYPES: { value: ContractType; label: string }[] = [
   { value: "booking_agreement", label: "Booking Agreement" },
   { value: "maintenance_agreement", label: "Maintenance Agreement" },
   { value: "agency_commission", label: "Agency Commission Contract" },
-];
-
-const MOCK_CONTRACTS: Contract[] = [
-  { id: "1", type: "booking_agreement", title: "Booking Agreement", party: { name: "Rahman Khan", phone: "+8801711234567", email: "rahman@email.com" }, terms: "Standard booking terms apply.", ownerId: "hotel1", status: "signed", createdAt: new Date("2026-10-01"), updatedAt: new Date("2026-10-05"), signatureBase64: "signed" },
-  { id: "2", type: "maintenance_agreement", title: "Maintenance Agreement", party: { name: "Fix-It Ltd.", phone: "+8801811234567", email: "fixit@email.com" }, terms: "Monthly maintenance contract.", ownerId: "hotel1", status: "sent", createdAt: new Date("2026-10-15"), updatedAt: new Date("2026-10-15") },
-  { id: "3", type: "agency_commission", title: "Agency Commission Contract", party: { name: "ShopnoJatra Agency", phone: "+8801911234567", email: "agency@shopnojatra.com" }, terms: "12% commission on all bookings.", ownerId: "hotel1", status: "draft", createdAt: new Date("2026-11-01"), updatedAt: new Date("2026-11-01") },
 ];
 
 interface SignatureCanvasProps {
@@ -317,24 +312,47 @@ function ContractCard({ contract }: { contract: Contract }) {
 }
 
 export default function ContractScreen() {
-  const [contracts, setContracts] = useState<Contract[]>(MOCK_CONTRACTS);
+  const { workspace, patchWorkspace } = useHotelPmsStore();
+  const { currentProperty } = useHotelPmsComputed();
   const [modalVisible, setModalVisible] = useState(false);
 
+  const contracts: Contract[] = workspace.contracts
+    .filter((c) => c.hotelId === currentProperty.id)
+    .map((c) => ({
+      ...c,
+      createdAt: new Date(c.createdAt),
+      updatedAt: new Date(c.updatedAt),
+    }));
+
   const handleSave = (data: ContractData) => {
-    const newContract: Contract = {
-      id: String(Date.now()),
-      ...data,
-      status: "draft",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const nowIso = new Date().toISOString();
+    const newRecord: HotelContractRecord = {
+      id: `cnt_${Date.now()}`,
+      hotelId: currentProperty.id,
+      type: data.type,
+      title: data.title,
+      party: data.party,
+      terms: data.terms,
+      ownerId: currentProperty.id,
+      status: "sent",
+      createdAt: nowIso,
+      updatedAt: nowIso,
     };
-    setContracts((prev) => [newContract, ...prev]);
+    patchWorkspace((draft) => ({
+      ...draft,
+      contracts: [newRecord, ...draft.contracts],
+    }));
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Contracts</Text>
+        <View>
+          <Text style={styles.title}>Partner Contracts</Text>
+          <Text style={{ color: "#94A3B8", fontSize: 11, marginTop: 2 }}>
+            {currentProperty.name} • {contracts.length} Agreements
+          </Text>
+        </View>
         <Pressable style={styles.addBtn} onPress={() => setModalVisible(true)}>
           <Ionicons name="add" size={18} color={NAVY} />
           <Text style={styles.addBtnText}>New Contract</Text>

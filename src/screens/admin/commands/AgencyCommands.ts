@@ -3,6 +3,22 @@ import { AdminUser, AgencyVerificationStatus } from "@/types/admin";
 import { AdminCommand } from "./AdminCommand";
 import { AdminPermission } from "../rbac/rbacTypes";
 
+async function upsertAgencyAdminDetails(agencyId: string, payload: Record<string, any>) {
+  const { data: existing } = await supabase
+    .from("agency_admin_details")
+    .select("id")
+    .eq("agency_id", agencyId)
+    .maybeSingle();
+
+  const res = existing
+    ? await supabase.from("agency_admin_details").update(payload).eq("agency_id", agencyId)
+    : await supabase.from("agency_admin_details").insert({ agency_id: agencyId, ...payload });
+
+  if (res.error) {
+    throw new Error(res.error.message || "Failed to persist agency_admin_details.");
+  }
+}
+
 export class VerifyAgencyCommand implements AdminCommand<{ id: string; status: string }> {
   readonly id = `cmd-agency-verify-${Date.now()}`;
   readonly action = "AGENCY_VERIFY";
@@ -17,25 +33,30 @@ export class VerifyAgencyCommand implements AdminCommand<{ id: string; status: s
 
   async execute(admin: AdminUser) {
     const timestamp = new Date().toISOString();
-    try {
-      await supabase
-        .from("agencies")
-        .update({ is_verified: true })
-        .eq("id", this.entityId);
+    const { error: agencyErr } = await supabase
+      .from("agencies")
+      .update({
+        is_verified: true,
+        verification_status: "verified",
+        status: "active",
+        verified_at: timestamp,
+        verified_by: admin.user_id,
+        updated_at: timestamp,
+      })
+      .eq("id", this.entityId);
 
-      await supabase
-        .from("agency_admin_details")
-        .upsert({
-          agency_id: this.entityId,
-          verification_status: AgencyVerificationStatus.VERIFIED,
-          is_certified: true,
-          verified_by: admin.id,
-          verified_at: timestamp,
-          updated_at: timestamp,
-        });
-    } catch (e) {
-      console.warn("Supabase agency verify update (handled):", e);
+    if (agencyErr) {
+      throw new Error(agencyErr.message || "Failed to verify agency.");
     }
+
+    await upsertAgencyAdminDetails(this.entityId, {
+      verification_status: AgencyVerificationStatus.VERIFIED,
+      is_certified: true,
+      is_suspended: false,
+      verified_by: admin.id,
+      verified_at: timestamp,
+      updated_at: timestamp,
+    });
 
     return { id: this.entityId, status: "Verified" };
   }
@@ -65,24 +86,25 @@ export class SuspendAgencyCommand implements AdminCommand<{ id: string; status: 
 
   async execute(admin: AdminUser) {
     const timestamp = new Date().toISOString();
-    try {
-      await supabase
-        .from("agencies")
-        .update({ is_verified: false })
-        .eq("id", this.entityId);
+    const { error: agencyErr } = await supabase
+      .from("agencies")
+      .update({
+        is_verified: false,
+        status: "suspended",
+        updated_at: timestamp,
+      })
+      .eq("id", this.entityId);
 
-      await supabase
-        .from("agency_admin_details")
-        .upsert({
-          agency_id: this.entityId,
-          is_suspended: true,
-          suspension_reason: this.reason,
-          suspension_date: timestamp,
-          updated_at: timestamp,
-        });
-    } catch (e) {
-      console.warn("Supabase agency suspend update (handled):", e);
+    if (agencyErr) {
+      throw new Error(agencyErr.message || "Failed to suspend agency.");
     }
+
+    await upsertAgencyAdminDetails(this.entityId, {
+      is_suspended: true,
+      suspension_reason: this.reason,
+      suspension_date: timestamp,
+      updated_at: timestamp,
+    });
 
     return { id: this.entityId, status: "Suspended" };
   }
@@ -112,23 +134,25 @@ export class ReactivateAgencyCommand implements AdminCommand<{ id: string; statu
 
   async execute(admin: AdminUser) {
     const timestamp = new Date().toISOString();
-    try {
-      await supabase
-        .from("agencies")
-        .update({ is_verified: true })
-        .eq("id", this.entityId);
+    const { error: agencyErr } = await supabase
+      .from("agencies")
+      .update({
+        is_verified: true,
+        status: "active",
+        updated_at: timestamp,
+      })
+      .eq("id", this.entityId);
 
-      await supabase
-        .from("agency_admin_details")
-        .upsert({
-          agency_id: this.entityId,
-          is_suspended: false,
-          verification_status: AgencyVerificationStatus.REACTIVATED,
-          updated_at: timestamp,
-        });
-    } catch (e) {
-      console.warn("Supabase agency reactivate update (handled):", e);
+    if (agencyErr) {
+      throw new Error(agencyErr.message || "Failed to reactivate agency.");
     }
+
+    await upsertAgencyAdminDetails(this.entityId, {
+      is_suspended: false,
+      verification_status: AgencyVerificationStatus.REACTIVATED,
+      reactivation_date: timestamp,
+      updated_at: timestamp,
+    });
 
     return { id: this.entityId, status: "Verified" };
   }

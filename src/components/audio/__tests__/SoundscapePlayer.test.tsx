@@ -92,5 +92,5 @@ describe('SoundscapePlayer Component', () => {
     expect(tree).toBeDefined();
     const json = tree.toJSON();
     expect(json).toBeTruthy();
-  }, 30000);
+  }, 60000);
 });

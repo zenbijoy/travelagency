@@ -1,12 +1,16 @@
 import { Platform } from "react-native";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 import { supabase } from "../utils/supabase";
 import { logger } from "../utils/logger";
-import { DEMO_USER_ID } from "./repositories/friends";
 import { useSettingsStore, isQuietHourActive } from "../store/settingsStore";
+import { personalizationService } from "./personalizationService";
+import { resolveNotificationTapRoute } from "./navigation/notificationDeepLinkRegistry";
+
+const PUSH_DEVICE_ID_STORAGE_KEY = "@shopnojatra_push_device_id";
 
 // Configure default notification presentation behavior
 Notifications.setNotificationHandler({
@@ -98,12 +102,19 @@ export const fcmNotificationService = {
    * @param forcePrompt If false, only checks if already granted (won't pop OS dialog unprompted)
    */
   async registerForPushNotifications(
-    userId: string = DEMO_USER_ID,
+    userId?: string,
     forcePrompt: boolean = false
   ): Promise<string | null> {
     try {
       if (Platform.OS === "web") {
         return null;
+      }
+
+      // Resolve authenticated user if userId not explicitly provided
+      let effectiveUserId = userId;
+      if (!effectiveUserId) {
+        const { data } = await supabase.auth.getUser();
+        effectiveUserId = data?.user?.id;
       }
 
       // Configure channels on Android
@@ -137,8 +148,8 @@ export const fcmNotificationService = {
 
       const token = tokenData?.data || null;
 
-      if (token && userId) {
-        await this.saveTokenToDatabase(userId, token);
+      if (token && effectiveUserId) {
+        await this.saveTokenToDatabase(effectiveUserId, token);
       }
 
       return token;
@@ -149,9 +160,91 @@ export const fcmNotificationService = {
   },
 
   /**
-   * Save or update token in Supabase
+   * Stable per-install device ID used for idempotent FastAPI /notifications/devices registration.
+   */
+  async getOrCreateDeviceId(): Promise<string> {
+    try {
+      const existing = await AsyncStorage.getItem(PUSH_DEVICE_ID_STORAGE_KEY);
+      if (existing) return existing;
+      const generated = `dev_${Platform.OS}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      await AsyncStorage.setItem(PUSH_DEVICE_ID_STORAGE_KEY, generated);
+      return generated;
+    } catch {
+      return `dev_${Platform.OS}_${Device.modelId || "mobile"}`;
+    }
+  },
+
+  /**
+   * Explicit user-triggered permission request + token sync to both FastAPI and Supabase.
+   */
+  async requestPushPermissionsAndSync(userId?: string): Promise<{
+    status: Notifications.PermissionStatus;
+    token: string | null;
+    syncedBackend: boolean;
+    deviceId: string;
+  }> {
+    const deviceId = await this.getOrCreateDeviceId();
+    if (Platform.OS === "web") {
+      return {
+        status: Notifications.PermissionStatus.UNDETERMINED,
+        token: null,
+        syncedBackend: false,
+        deviceId,
+      };
+    }
+
+    await this.setupAndroidChannels();
+    let finalStatus = await this.checkPermissionStatus();
+    if (finalStatus !== "granted") {
+      try {
+        const res = await Notifications.requestPermissionsAsync();
+        finalStatus = res.status;
+      } catch {
+        finalStatus = Notifications.PermissionStatus.DENIED;
+      }
+    }
+
+    if (finalStatus !== "granted") {
+      return { status: finalStatus, token: null, syncedBackend: false, deviceId };
+    }
+
+    const token = await this.registerForPushNotifications(userId, false);
+    const syncedBackend = token ? await this.registerTokenWithBackend(token, deviceId) : false;
+    return { status: finalStatus, token, syncedBackend, deviceId };
+  },
+
+  /**
+   * Sync Expo push token to FastAPI POST /api/v1/notifications/devices
+   */
+  async registerTokenWithBackend(token: string, deviceId?: string): Promise<boolean> {
+    try {
+      const resolvedDeviceId = deviceId || (await this.getOrCreateDeviceId());
+      const platform =
+        Platform.OS === "ios"
+          ? "ios"
+          : Platform.OS === "android"
+          ? "android"
+          : "web";
+      await personalizationService.registerDevice({
+        device_id: resolvedDeviceId,
+        push_token: token,
+        token_type: "expo",
+        platform,
+        device_name: Device.deviceName || Device.modelName || undefined,
+        os_version: Device.osVersion || undefined,
+      });
+      return true;
+    } catch (e) {
+      logger.warn("[FCM] FastAPI /notifications/devices sync notice:", e);
+      return false;
+    }
+  },
+
+  /**
+   * Save or update token in both FastAPI backend & Supabase fallback table
    */
   async saveTokenToDatabase(userId: string, token: string) {
+    await this.registerTokenWithBackend(token);
     try {
       await supabase.from("user_device_tokens").upsert(
         {
@@ -168,62 +261,17 @@ export const fcmNotificationService = {
   },
 
   /**
-   * Attach listener for when user taps on a notification, routing directly to the relevant screen.
+   * Attach listener for when user taps on a notification, routing safely through typed registry.
    */
   setupNotificationResponseListener() {
     try {
       const subscription = Notifications.addNotificationResponseReceivedListener(
         (response) => {
-          const data = response.notification.request.content.data;
+          const data = response.notification.request.content.data as Record<string, any> | undefined;
           if (!data) return;
 
-          // Direct deep-link routing on notification click
-          if (data.route) {
-            router.push(data.route as any);
-            return;
-          }
-
-          const type = data.type || "";
-          switch (type) {
-            case "booking":
-            case "flight_alert":
-            case "flight":
-              router.push("/(tabs)/trips" as any);
-              break;
-            case "price_alert": {
-              const service = data.service_type || "flight";
-              const date = data.travel_date || data.date || "";
-              const from = data.origin || "";
-              const to = data.destination || "";
-              if (service === "train") {
-                router.push(`/screens/trains?from=${from}&to=${to}&date=${date}` as any);
-              } else if (service === "bus" || service === "launch") {
-                router.push(`/screens/bus-launch?from=${from}&to=${to}&date=${date}` as any);
-              } else {
-                router.push(`/screens/flights?from=${from}&to=${to}&date=${date}` as any);
-              }
-              break;
-            }
-            case "promo":
-            case "offer":
-            case "discount":
-              router.push("/screens/rewards" as any);
-              break;
-            case "community":
-            case "travel_match":
-              router.push("/screens/community" as any);
-              break;
-            case "chat":
-            case "message":
-              router.push("/(tabs)/messages" as any);
-              break;
-            case "profile":
-              router.push("/(tabs)/account" as any);
-              break;
-            default:
-              router.push("/(tabs)/messages" as any);
-              break;
-          }
+          const safeTarget = resolveNotificationTapRoute(data);
+          router.push(safeTarget as any);
         }
       );
 

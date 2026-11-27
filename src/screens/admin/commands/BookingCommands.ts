@@ -21,13 +21,15 @@ export class CancelBookingCommand implements AdminCommand<{ id: string; status: 
       .from("bookings")
       .update({
         status: "cancelled",
+        flow_step: "cancelled",
+        cancelled_at: timestamp,
         updated_at: timestamp,
         notes: `Cancelled by admin (${admin.name || admin.user_id}): ${this.reason}`,
       })
       .eq("id", this.entityId);
 
     if (error) {
-      console.warn("Supabase booking cancellation error (handled):", error);
+      throw new Error(error.message || "Failed to cancel booking.");
     }
 
     return { id: this.entityId, status: "cancelled" };
@@ -62,13 +64,15 @@ export class ConfirmBookingCommand implements AdminCommand<{ id: string; status:
       .from("bookings")
       .update({
         status: "confirmed",
+        flow_step: "confirmed",
+        confirmed_at: timestamp,
         updated_at: timestamp,
         notes: `Confirmed by admin (${admin.name || admin.user_id}): ${this.notes}`,
       })
       .eq("id", this.entityId);
 
     if (error) {
-      console.warn("Supabase booking confirmation error (handled):", error);
+      throw new Error(error.message || "Failed to confirm booking.");
     }
 
     return { id: this.entityId, status: "confirmed" };

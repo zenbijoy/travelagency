@@ -8,6 +8,7 @@ import logging
 import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -55,10 +56,17 @@ class BookingService:
         db: AsyncSession,
         user_id: uuid.UUID,
         request: BookingCreateRequest,
+        tenant_id: Optional[uuid.UUID] = None,
+        idempotency_key: Optional[str] = None,
     ) -> BookingResponse:
         """
         Atomically reserve hotel rooms or flight seats with row-level locks (FOR UPDATE).
         Prevents concurrency race conditions and double-booking.
+
+        Idempotency: when an idempotency_key is supplied, a prior booking created
+        by the same user with the same key is returned instead of duplicating.
+        Tenant isolation: tenant_id is set server-side from the resolved tenant
+        context and never accepted blindly from the client.
         """
         hotel_repo = HotelRepository(db)
         flight_repo = FlightRepository(db)
@@ -122,12 +130,36 @@ class BookingService:
         service_fee = settings.BOOKING_SERVICE_FEE if total_price > 0 else 0.0
         final_price = total_price - discount + tax + service_fee
 
+        # ------------------------------------------------------------------
+        # Idempotency: return an existing booking created by this user with the
+        # same idempotency_key instead of duplicating (all critical operations
+        # must be idempotent).
+        # ------------------------------------------------------------------
+        if idempotency_key:
+            existing_stmt = select(Booking).where(
+                Booking.user_id == user_id,
+                Booking.idempotency_key == idempotency_key,
+            )
+            existing_res = await db.execute(existing_stmt)
+            existing_booking = existing_res.scalar_one_or_none()
+            if existing_booking:
+                logger.info(
+                    f"[Booking] Idempotent create: returning existing booking "
+                    f"{existing_booking.booking_reference} for key {idempotency_key}"
+                )
+                full_booking = await booking_repo.get_booking_with_details(
+                    existing_booking.id
+                )
+                return BookingResponse.model_validate(full_booking)
+
         booking_id = uuid.uuid4()
         booking = Booking(
             id=booking_id,
             user_id=user_id,
             agency_id=request.agency_id,
+            tenant_id=tenant_id,
             booking_reference=generate_booking_reference(),
+            idempotency_key=idempotency_key,
             product_type=request.product_type.value,
             status=BookingStatus.PENDING_PAYMENT.value,
             flow_step="payment",

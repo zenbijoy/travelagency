@@ -1170,7 +1170,11 @@ export class WeatherService {
     }
 
     // 4. No cache available: Generate high-fidelity physical/seasonal offline heuristics
-    return createSyntheticOfflineWeather(coords, locationName);
+    const fallback = createSyntheticOfflineWeather(coords, locationName);
+    // Cache the deterministic offline forecast too, so repeated offline
+    // requests stay fast and report cache provenance on subsequent reads.
+    await this.saveToCache(cacheKey, fallback);
+    return fallback;
   }
 
   /**

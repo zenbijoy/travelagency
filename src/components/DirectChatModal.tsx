@@ -17,7 +17,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { FriendProfile, DEMO_USER_ID } from "../services/repositories/friends";
+import * as ImagePicker from "expo-image-picker";
+import { useTheme } from "../context/ThemeContext";
+import { useAuthStore } from "../store/authStore";
+import { FriendProfile } from "../services/repositories/friends";
 import {
   messengerRepository,
   DirectMessage,
@@ -37,14 +40,15 @@ interface DirectChatModalProps {
 
 export function DirectChatModal({
   conversation,
-  currentUserId = DEMO_USER_ID,
+  currentUserId,
   onClose,
   onOpenProfile,
   onStartCall,
 }: DirectChatModalProps) {
-  if (!conversation) return null;
-
-  const otherUser = conversation.other_participant;
+  const { colors, isDark } = useTheme();
+  const authUserId = useAuthStore((s) => s.user?.id);
+  const effectiveUserId = currentUserId || authUserId || "";
+  const otherUser = conversation?.other_participant;
   const flatListRef = useRef<FlatList>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -64,6 +68,15 @@ export function DirectChatModal({
 
   // Load messages and subscribe to realtime updates
   useEffect(() => {
+    if (!conversation) {
+      setMessages([]);
+      setSelectedMediaUrl(null);
+      setSelectedMediaType(null);
+      setReplyingToMessage(null);
+      setSelectedContextMenuMsg(null);
+      return;
+    }
+
     let isMounted = true;
     let subscription: any;
 
@@ -105,18 +118,24 @@ export function DirectChatModal({
   // Auto-scroll to bottom on new message
   useEffect(() => {
     if (messages.length > 0) {
-      setTimeout(() => {
+      scrollTimerRef.current = setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
     }
   }, [messages.length]);
 
+  if (!conversation) return null;
+
   const handleSend = async () => {
     if ((!inputText.trim() && !selectedMediaUrl) || !conversation) return;
+    if (!effectiveUserId) {
+      Alert.alert("Sign In Required", "Please sign in to send messages.");
+      return;
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setIsSending(true);
 
-    let textToSend = inputText.trim() || (selectedMediaType === "video" ? "Shared a travel video clip 🎥" : "Shared a photo 📷");
+    let textToSend = inputText.trim() || (selectedMediaType === "video" ? "Shared a travel video clip" : "Shared a photo");
     if (replyingToMessage) {
       textToSend = `[রিপ্লাই: "${replyingToMessage.content.slice(0, 35)}..."]\n${textToSend}`;
       setReplyingToMessage(null);
@@ -129,7 +148,7 @@ export function DirectChatModal({
     const optimisticMsg: DirectMessage = {
       id: tempId,
       conversation_id: conversation.id,
-      sender_id: currentUserId,
+      sender_id: effectiveUserId,
       content: textToSend,
       media_url: mediaUrl,
       media_type: mediaType,
@@ -146,7 +165,7 @@ export function DirectChatModal({
     try {
       const savedMsg = await messengerRepository.sendMessage(
         conversation.id,
-        currentUserId,
+        effectiveUserId,
         textToSend,
         mediaUrl,
         mediaType
@@ -165,6 +184,7 @@ export function DirectChatModal({
   };
 
   const handleRetryFailedMessage = async (msg: DirectMessage) => {
+    if (!effectiveUserId || !conversation) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setMessages((prev) =>
       prev.map((m) => (m.id === msg.id ? { ...m, status: "sending" } : m))
@@ -172,7 +192,7 @@ export function DirectChatModal({
     try {
       const savedMsg = await messengerRepository.sendMessage(
         conversation.id,
-        currentUserId,
+        effectiveUserId,
         msg.content,
         msg.media_url,
         msg.media_type
@@ -213,20 +233,34 @@ export function DirectChatModal({
     }
   };
 
-  const attachPhotoPreset = () => {
+  const pickMedia = async (type: "image" | "video") => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedMediaUrl("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800");
-    setSelectedMediaType("image");
-  };
-
-  const attachVideoPreset = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedMediaUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
-    setSelectedMediaType("video");
+    try {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert(
+          "Media Permission Needed",
+          "Please allow photo library access to attach photos or videos."
+        );
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: type === "video" ? ["videos"] : ["images"],
+        allowsEditing: type === "image",
+        quality: type === "video" ? 0.7 : 0.8,
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedMediaUrl(result.assets[0].uri);
+        setSelectedMediaType(type);
+      }
+    } catch (e) {
+      console.warn("Pick media error:", e);
+      Alert.alert("Attachment Failed", "Could not open media library.");
+    }
   };
 
   const renderMessageItem = ({ item }: { item: DirectMessage }) => {
-    const isMe = item.sender_id === currentUserId;
+    const isMe = item.sender_id === effectiveUserId;
 
     return (
       <View style={[styles.msgRow, isMe ? styles.msgRowMe : styles.msgRowThem]}>
@@ -251,7 +285,12 @@ export function DirectChatModal({
           delayLongPress={280}
           style={({ pressed }) => [
             styles.bubble,
-            isMe ? styles.bubbleMe : styles.bubbleThem,
+            isMe
+              ? styles.bubbleMe
+              : [
+                  styles.bubbleThem,
+                  { backgroundColor: isDark ? "#1E293B" : "#F1F5F9" },
+                ],
             pressed && { opacity: 0.9 },
           ]}
         >
@@ -272,7 +311,14 @@ export function DirectChatModal({
           )}
 
           {item.content && (
-            <Text style={[styles.bubbleText, isMe ? styles.bubbleTextMe : styles.bubbleTextThem]}>
+            <Text
+              style={[
+                styles.bubbleText,
+                isMe
+                  ? styles.bubbleTextMe
+                  : [styles.bubbleTextThem, { color: colors.text }],
+              ]}
+            >
               {item.content}
             </Text>
           )}
@@ -294,13 +340,18 @@ export function DirectChatModal({
   return (
     <Modal visible={!!conversation} animationType="slide" presentationStyle="fullScreen">
       <KeyboardAvoidingView
-        style={styles.shell}
+        style={[styles.shell, { backgroundColor: colors.background }]}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         {/* Messenger Header */}
-        <View style={styles.header}>
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: colors.card, borderBottomColor: colors.border },
+          ]}
+        >
           <Pressable style={styles.backBtn} onPress={onClose}>
-            <Ionicons name="arrow-back" size={24} color="#0F172A" />
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
 
           <Pressable
@@ -317,11 +368,11 @@ export function DirectChatModal({
                 }}
                 style={styles.headerAvatar}
               />
-              <View style={styles.headerOnlineDot} />
+              <View style={[styles.headerOnlineDot, { borderColor: colors.card }]} />
             </View>
 
             <View style={{ flex: 1 }}>
-              <Text style={styles.headerTitle} numberOfLines={1}>
+              <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
                 {otherUser?.display_name || conversation.title}
               </Text>
               <Text style={styles.headerSub}>Active now</Text>
@@ -331,14 +382,20 @@ export function DirectChatModal({
           {/* Audio & Video Call Buttons */}
           <View style={styles.callBtnsRow}>
             <Pressable
-              style={styles.callIconBtn}
+              style={[
+                styles.callIconBtn,
+                { backgroundColor: isDark ? "rgba(56, 189, 248, 0.16)" : "#EFF6FF" },
+              ]}
               onPress={() => otherUser && onStartCall(otherUser, "audio")}
             >
               <Ionicons name="call" size={20} color={TRIP_BLUE} />
             </Pressable>
 
             <Pressable
-              style={styles.callIconBtn}
+              style={[
+                styles.callIconBtn,
+                { backgroundColor: isDark ? "rgba(56, 189, 248, 0.16)" : "#EFF6FF" },
+              ]}
               onPress={() => otherUser && onStartCall(otherUser, "video")}
             >
               <Ionicons name="videocam" size={22} color={TRIP_BLUE} />
@@ -364,7 +421,15 @@ export function DirectChatModal({
 
         {/* Attached Media Preview */}
         {selectedMediaUrl && (
-          <View style={styles.attachmentPreviewBar}>
+          <View
+            style={[
+              styles.attachmentPreviewBar,
+              {
+                backgroundColor: isDark ? "#0F172A" : "#EFF6FF",
+                borderTopColor: colors.border,
+              },
+            ]}
+          >
             <View style={styles.attachmentTag}>
               <Ionicons
                 name={selectedMediaType === "video" ? "videocam" : "image"}
@@ -381,45 +446,79 @@ export function DirectChatModal({
                 setSelectedMediaType(null);
               }}
             >
-              <Ionicons name="close-circle" size={18} color="#64748B" />
+              <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
             </Pressable>
           </View>
         )}
 
         {/* Reply Preview Bar */}
         {replyingToMessage && (
-          <View style={styles.replyPreviewBar}>
+          <View
+            style={[
+              styles.replyPreviewBar,
+              { backgroundColor: isDark ? "#0F172A" : "#F0F7FF" },
+            ]}
+          >
             <View style={styles.replyBarLeft}>
               <Ionicons name="arrow-undo" size={16} color={TRIP_BLUE} />
               <View style={{ flex: 1, marginStart: 8 }}>
                 <Text style={styles.replySenderText}>
-                  {replyingToMessage.sender_id === currentUserId ? "আপনাকে" : (otherUser?.display_name || "বার্তা")} রিপ্লাই করছেন
+                  {replyingToMessage.sender_id === effectiveUserId
+                    ? "আপনাকে"
+                    : otherUser?.display_name || "বার্তা"}{" "}
+                  রিপ্লাই করছেন
                 </Text>
-                <Text style={styles.replySnippetText} numberOfLines={1}>
+                <Text
+                  style={[styles.replySnippetText, { color: colors.textSecondary }]}
+                  numberOfLines={1}
+                >
                   {replyingToMessage.content}
                 </Text>
               </View>
             </View>
             <Pressable onPress={() => setReplyingToMessage(null)} hitSlop={8}>
-              <Ionicons name="close-circle" size={18} color="#94A3B8" />
+              <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
             </Pressable>
           </View>
         )}
 
         {/* Composer Bar */}
-        <View style={styles.composerBar}>
-          <Pressable style={styles.mediaPickerBtn} onPress={attachPhotoPreset}>
+        <View
+          style={[
+            styles.composerBar,
+            { backgroundColor: colors.card, borderTopColor: colors.border },
+          ]}
+        >
+          <Pressable
+            style={[
+              styles.mediaPickerBtn,
+              { backgroundColor: isDark ? "#1E293B" : "#F8FAFC" },
+            ]}
+            onPress={() => pickMedia("image")}
+          >
             <Ionicons name="image-outline" size={22} color={TRIP_BLUE} />
           </Pressable>
 
-          <Pressable style={styles.mediaPickerBtn} onPress={attachVideoPreset}>
+          <Pressable
+            style={[
+              styles.mediaPickerBtn,
+              { backgroundColor: isDark ? "#1E293B" : "#F8FAFC" },
+            ]}
+            onPress={() => pickMedia("video")}
+          >
             <Ionicons name="videocam-outline" size={22} color={TRIP_BLUE} />
           </Pressable>
 
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
+                color: colors.text,
+              },
+            ]}
             placeholder="Aa"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textSecondary}
             value={inputText}
             onChangeText={setInputText}
             multiline
@@ -451,16 +550,20 @@ export function DirectChatModal({
             onPress={() => setSelectedContextMenuMsg(null)}
           >
             {selectedContextMenuMsg && (
-              <View style={styles.contextModalCard}>
-                <View style={styles.contextModalHeader}>
-                  <Text style={styles.contextModalTitle}>বার্তার বিকল্প</Text>
-                  <Text style={styles.contextModalSnippet} numberOfLines={1}>
+              <View style={[styles.contextModalCard, { backgroundColor: colors.card }]}>
+                <View
+                  style={[styles.contextModalHeader, { borderBottomColor: colors.border }]}
+                >
+                  <Text style={[styles.contextModalTitle, { color: colors.textSecondary }]}>
+                    বার্তার বিকল্প
+                  </Text>
+                  <Text style={[styles.contextModalSnippet, { color: colors.text }]} numberOfLines={1}>
                     "{selectedContextMenuMsg.content}"
                   </Text>
                 </View>
 
                 <Pressable
-                  style={styles.contextActionRow}
+                  style={[styles.contextActionRow, { borderBottomColor: colors.border }]}
                   onPress={() => {
                     Clipboard.setString(selectedContextMenuMsg.content);
                     setSelectedContextMenuMsg(null);
@@ -468,12 +571,14 @@ export function DirectChatModal({
                     Alert.alert("কপি সম্পন্ন", "বার্তা ক্লিপবোর্ডে কপি করা হয়েছে 📋");
                   }}
                 >
-                  <Ionicons name="copy-outline" size={18} color="#0F172A" />
-                  <Text style={styles.contextActionText}>কপি করুন (Copy)</Text>
+                  <Ionicons name="copy-outline" size={18} color={colors.text} />
+                  <Text style={[styles.contextActionText, { color: colors.text }]}>
+                    কপি করুন (Copy)
+                  </Text>
                 </Pressable>
 
                 <Pressable
-                  style={styles.contextActionRow}
+                  style={[styles.contextActionRow, { borderBottomColor: colors.border }]}
                   onPress={() => {
                     setReplyingToMessage(selectedContextMenuMsg);
                     setSelectedContextMenuMsg(null);
@@ -481,7 +586,9 @@ export function DirectChatModal({
                   }}
                 >
                   <Ionicons name="arrow-undo-outline" size={18} color={TRIP_BLUE} />
-                  <Text style={[styles.contextActionText, { color: TRIP_BLUE }]}>রিপ্লাই দিন (Reply)</Text>
+                  <Text style={[styles.contextActionText, { color: TRIP_BLUE }]}>
+                    রিপ্লাই দিন (Reply)
+                  </Text>
                 </Pressable>
 
                 {selectedContextMenuMsg.status === "failed" && (

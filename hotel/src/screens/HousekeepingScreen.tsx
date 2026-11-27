@@ -1,125 +1,170 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { hotelService, HotelHousekeepingTaskRecord } from '../services/hotelService';
+import { HousekeepingTaskStatus } from '@shopnojatra/shared';
 
-export function HousekeepingScreen() {
-  const OverviewCard = ({ label, value, color, borderColor }: any) => (
-    <View className={`bg-[#1e293b]/40 border-l-4 rounded-xl p-2 h-16 justify-between flex-1 mx-0.5`} style={{ borderLeftColor: borderColor }}>
-      <Text className={`text-[9px] font-medium ${color}`}>{label}</Text>
-      <Text className="text-xl font-bold text-white">{value}</Text>
-    </View>
-  );
+export function HousekeepingScreen({ navigation }: any) {
+  const [tasks, setTasks] = useState<HotelHousekeepingTaskRecord[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const TaskItem = ({ room, type, status, time, statusColor, statusBg, icon, iconBg, iconColor }: any) => (
-    <TouchableOpacity className="bg-[#1e293b]/40 border border-white/5 rounded-2xl p-4 flex-row items-center space-x-4 mb-3">
-      <View className={`w-10 h-10 ${iconBg} rounded-xl items-center justify-center`}>
-        <MaterialIcons name={icon} size={20} color={iconColor} />
-      </View>
-      <View className="flex-1">
-        <View className="flex-row justify-between items-start">
-          <View>
-            <Text className="text-xs font-bold text-white">{room}</Text>
-            <Text className="text-[10px] text-slate-400">{type}</Text>
-          </View>
-          <View className="items-end space-y-1">
-            <View className={`px-2 py-0.5 rounded ${statusBg} flex-row items-center`}>
-              <Text className={`text-[9px] font-bold ${statusColor}`}>{status}</Text>
-              <MaterialIcons name="keyboard-arrow-down" size={10} color={statusColor} />
-            </View>
-            <Text className="text-[9px] text-slate-500">{time}</Text>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+  const loadTasks = async () => {
+    try {
+      const data = await hotelService.getHousekeepingTasks();
+      setTasks(data);
+    } catch {
+      // Handled
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  const handleAdvanceStatus = async (task: HotelHousekeepingTaskRecord) => {
+    let nextStatus: HousekeepingTaskStatus | null = null;
+    if (task.status === 'dirty') nextStatus = 'cleaning';
+    else if (task.status === 'cleaning') nextStatus = 'inspection';
+    else if (task.status === 'inspection') nextStatus = 'ready';
+
+    if (!nextStatus) {
+      Alert.alert('Status Info', `Room ${task.roomNumber} is already in Ready condition.`);
+      return;
+    }
+
+    const res = await hotelService.updateHousekeepingStatus(task.id, nextStatus);
+    if (res.success) {
+      setTasks((prev) =>
+        prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus!, updatedAt: new Date().toISOString() } : t))
+      );
+      Alert.alert('Turnaround Updated', `Room ${task.roomNumber} transitioned to ${nextStatus.toUpperCase()}`);
+    } else {
+      Alert.alert('Transition Error', 'Invalid transition for current housekeeping state.');
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'ready':
+        return { text: 'Ready', bg: 'bg-emerald-500/10', color: 'text-emerald-400', nextAction: 'Done' };
+      case 'inspection':
+        return { text: 'In Inspection', bg: 'bg-indigo-500/10', color: 'text-indigo-400', nextAction: 'Approve Ready' };
+      case 'cleaning':
+        return { text: 'Cleaning', bg: 'bg-amber-500/10', color: 'text-amber-400', nextAction: 'Request Inspect' };
+      default:
+        return { text: 'Dirty', bg: 'bg-rose-500/10', color: 'text-rose-400', nextAction: 'Start Clean' };
+    }
+  };
+
+  const dirtyCount = tasks.filter((t) => t.status === 'dirty').length;
+  const cleaningCount = tasks.filter((t) => t.status === 'cleaning').length;
+  const inspectionCount = tasks.filter((t) => t.status === 'inspection').length;
+  const readyCount = tasks.filter((t) => t.status === 'ready').length;
 
   return (
     <SafeAreaView className="flex-1 bg-[#020617]">
       <StatusBar barStyle="light-content" />
 
       {/* Header */}
-      <View className="px-6 py-4 flex-row justify-between items-center">
+      <View className="px-6 py-4 flex-row justify-between items-center border-b border-slate-800/80">
         <View className="flex-row items-center space-x-3">
-          <TouchableOpacity className="p-2 bg-slate-800/50 rounded-lg">
+          <TouchableOpacity className="p-2 bg-slate-800/50 rounded-lg" onPress={() => navigation?.goBack?.()}>
             <MaterialIcons name="arrow-back" size={20} color="#cbd5e1" />
           </TouchableOpacity>
-          <Text className="text-lg font-bold text-white">Housekeeping</Text>
+          <Text className="text-base font-bold text-white ms-2">Housekeeping Turnaround</Text>
         </View>
-        <TouchableOpacity className="relative">
-          <View className="p-2 bg-slate-800/50 rounded-lg">
-            <MaterialIcons name="notifications-none" size={20} color="#cbd5e1" />
-          </View>
-          <View className="absolute -top-1 -right-1 bg-red-500 text-[10px] w-4 h-4 flex items-center justify-center rounded-full border-2 border-[#020617]">
-            <Text className="text-white text-[8px] font-bold">3</Text>
-          </View>
+        <TouchableOpacity className="p-2 bg-slate-800/50 rounded-lg" onPress={loadTasks}>
+          <MaterialIcons name="refresh" size={20} color="#cbd5e1" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
-        {/* Today Overview */}
-        <View className="mt-4">
-          <View className="flex-row justify-between items-end mb-4">
-            <Text className="text-sm font-semibold text-white">Today Overview</Text>
-            <Text className="text-[10px] text-slate-400">01 June, 2024</Text>
+      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+        {/* KPI Strip */}
+        <View className="flex-row justify-between mt-4">
+          <View className="bg-rose-950/30 border border-rose-500/20 rounded-xl p-3 flex-1 mx-1 items-center">
+            <Text className="text-[10px] text-rose-400 font-semibold">Dirty</Text>
+            <Text className="text-xl font-bold text-white mt-1">{dirtyCount}</Text>
           </View>
-          <View className="flex-row justify-between">
-            <OverviewCard label="Total Rooms" value="70" color="text-blue-400" borderColor="#3b82f6" />
-            <OverviewCard label="Cleaned" value="32" color="text-emerald-400" borderColor="#10b981" />
-            <OverviewCard label="In Progress" value="18" color="text-orange-400" borderColor="#f59e0b" />
-            <OverviewCard label="Pending" value="20" color="text-purple-400" borderColor="#8b5cf6" />
+          <View className="bg-amber-950/30 border border-amber-500/20 rounded-xl p-3 flex-1 mx-1 items-center">
+            <Text className="text-[10px] text-amber-400 font-semibold">Cleaning</Text>
+            <Text className="text-xl font-bold text-white mt-1">{cleaningCount}</Text>
+          </View>
+          <View className="bg-indigo-950/30 border border-indigo-500/20 rounded-xl p-3 flex-1 mx-1 items-center">
+            <Text className="text-[10px] text-indigo-400 font-semibold">Inspect</Text>
+            <Text className="text-xl font-bold text-white mt-1">{inspectionCount}</Text>
+          </View>
+          <View className="bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-3 flex-1 mx-1 items-center">
+            <Text className="text-[10px] text-emerald-400 font-semibold">Ready</Text>
+            <Text className="text-xl font-bold text-white mt-1">{readyCount}</Text>
           </View>
         </View>
 
-        {/* Cleaning Tasks */}
-        <View className="mt-8">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-sm font-semibold text-white">Cleaning Tasks</Text>
-            <TouchableOpacity>
-              <Text className="text-[11px] text-indigo-400 font-medium">View All</Text>
-            </TouchableOpacity>
-          </View>
+        {/* Task Turnaround List */}
+        <View className="mt-6 mb-24">
+          <Text className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Room Cleaning Queue ({tasks.length})
+          </Text>
 
-          <View className="space-y-3 pb-24">
-            <TaskItem
-              room="101 Deluxe Room" type="Stayover" status="Cleaned" time="09:30 AM"
-              statusColor="text-emerald-400" statusBg="bg-emerald-500/10"
-              icon="apartment" iconBg="bg-blue-500/10" iconColor="#3b82f6"
-            />
-            <TaskItem
-              room="102 Standard Room" type="Check-out" status="In Progress" time="10:15 AM"
-              statusColor="text-orange-400" statusBg="bg-orange-500/10"
-              icon="bed" iconBg="bg-purple-500/10" iconColor="#a855f7"
-            />
-            <TaskItem
-              room="103 Suite Room" type="Stayover" status="Pending" time="11:00 AM"
-              statusColor="text-purple-400" statusBg="bg-purple-500/10"
-              icon="access-time" iconBg="bg-orange-500/10" iconColor="#f97316"
-            />
-            <TaskItem
-              room="104 Family Room" type="Check-out" status="Pending" time="11:30 AM"
-              statusColor="text-purple-400" statusBg="bg-purple-500/10"
-              icon="people" iconBg="bg-orange-500/10" iconColor="#f97316"
-            />
-             <TaskItem
-              room="105 Executive Room" type="Stayover" status="Cleaned" time="09:45 AM"
-              statusColor="text-emerald-400" statusBg="bg-emerald-500/10"
-              icon="check" iconBg="bg-green-500/10" iconColor="#10b981"
-            />
-          </View>
+          {loading ? (
+            <ActivityIndicator size="small" color="#6366f1" className="py-8" />
+          ) : (
+            tasks.map((task) => {
+              const badge = getStatusBadge(task.status);
+              return (
+                <View
+                  key={task.id}
+                  className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 mb-3"
+                >
+                  <View className="flex-row justify-between items-start">
+                    <View>
+                      <View className="flex-row items-center">
+                        <Text className="text-sm font-bold text-white">Room {task.roomNumber}</Text>
+                        <Text className="text-xs text-slate-400 ms-2">• {task.roomType}</Text>
+                      </View>
+                      <Text className="text-[11px] text-slate-500 mt-0.5">
+                        Type: {task.taskType.replace('_', ' ')} • Priority: {task.priority.toUpperCase()}
+                      </Text>
+                      {task.assignedStaffName && (
+                        <Text className="text-[11px] text-indigo-400 mt-1">
+                          Attendant: {task.assignedStaffName}
+                        </Text>
+                      )}
+                    </View>
+
+                    <View className={`px-2.5 py-1 rounded-full ${badge.bg}`}>
+                      <Text className={`text-[10px] font-bold ${badge.color}`}>{badge.text}</Text>
+                    </View>
+                  </View>
+
+                  <View className="flex-row justify-between items-center mt-3 pt-3 border-t border-slate-800/80">
+                    <Text className="text-[10px] text-slate-500">Scheduled: {task.scheduledTime || 'Today'}</Text>
+                    {task.status !== 'ready' && (
+                      <TouchableOpacity
+                        className="bg-indigo-600 px-3 py-1.5 rounded-xl flex-row items-center"
+                        onPress={() => handleAdvanceStatus(task)}
+                      >
+                        <Text className="text-white text-xs font-bold me-1">{badge.nextAction}</Text>
+                        <MaterialIcons name="chevron-right" size={14} color="white" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              );
+            })
+          )}
         </View>
       </ScrollView>
-
-      {/* FAB */}
-      <TouchableOpacity className="absolute bottom-24 right-6 w-12 h-12 bg-indigo-600 rounded-2xl items-center justify-center shadow-lg">
-        <MaterialIcons name="add" size={24} color="white" />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }

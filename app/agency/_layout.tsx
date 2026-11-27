@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { supabase } from "@/utils/supabase";
 
 export default function AgencyLayout() {
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        router.replace("/login" as any);
+      }
+    });
+  }, [router]);
+
   return (
     <View style={styles.container}>
       <Stack

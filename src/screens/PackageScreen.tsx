@@ -33,6 +33,7 @@ import { TopBar } from "./TopBar";
 import { savedItemsService } from "../services/savedItemsService";
 import { screens, type UIScreen } from "../data/screens";
 import { WeatherWidget } from "../components/weather/WeatherWidget";
+import { formatSourcePrice } from "../utils/currency";
 import { ErrorStateCard, EmptyStateView, StickyHeader, ResultsSummaryHeader, ComparisonModal, ComparisonItem } from "../components/common";
 
 import { useResponsive } from "../hooks/useResponsive";
@@ -213,14 +214,7 @@ export function calculateGroupTierPricing(baseRatePerPerson: number, groupSize: 
 }
 
 export function formatCurrency(amount: number, currency = "USD"): string {
-  const code = (currency || "USD").toUpperCase();
-  const sym =
-    code === "BDT" ? "৳" :
-    code === "EUR" ? "€" :
-    code === "GBP" ? "£" :
-    code === "JPY" ? "¥" :
-    code === "INR" ? "₹" : "$";
-  return `${sym}${Math.round(amount).toLocaleString()}`;
+  return formatSourcePrice(amount, currency);
 }
 
 // Ensure travelRepository.getTourPackages() is cleanly available on travelRepository
@@ -547,7 +541,7 @@ function mapTourToPackage(t: any, defaultOriginCity = "Dhaka"): VacationPackage 
     ],
     cancellationPolicy: t.cancellation_policy || "100% Free Cancellation up to 7 days before departure. Instant automated refund.",
     seatsLeft: typeof t.seats_left === "number" ? Math.max(0, t.seats_left) : t.max_participants ? Math.max(0, t.max_participants - (t.current_participants || 0)) : (t.is_available === false ? 0 : 8),
-    provider: t.guide_name ? `${t.guide_name} Holidays` : "Trip.com Certified Luxury Partner",
+    provider: t.guide_name ? `${t.guide_name} Holidays` : "Shopno Jatra Certified Partner",
   };
 }
 
@@ -1528,7 +1522,7 @@ export function PackageScreen({ screen }: { screen?: UIScreen } = {}) {
     Haptics.selectionAsync();
     try {
       await Share.share({
-        message: `🌴 Check out this Flight + Hotel Bundle: "${pkg.name}" for ${formatCurrency(pkg.pricePerPerson, pkg.currency)}/person on Trip.com!\nIncludes ${pkg.flight.airline} flights & 5-Star ${pkg.hotel.name}. Group discounts available!`,
+        message: `🌴 Check out this Flight + Hotel Bundle: "${pkg.name}" for ${formatCurrency(pkg.pricePerPerson, pkg.currency)}/person on Shopno Jatra!\nIncludes ${pkg.flight.airline} flights & 5-Star ${pkg.hotel.name}. Group discounts available!`,
         title: pkg.name,
       });
     } catch (shareErr) {
@@ -2843,6 +2837,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: 6,
     marginBottom: 8,
   },
   heroBadgePill: {
@@ -2865,6 +2861,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
+    flexShrink: 1,
   },
   saveBadgeText: {
     color: "#1E1B4B",

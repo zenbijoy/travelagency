@@ -57,6 +57,8 @@ import { savedPaymentMethodService, SavedPaymentMethod } from "../../src/service
 import { useLanguage } from "../../src/context/LanguageContext";
 import { BRAND } from "../../src/constants/brand";
 import { RTLIcon } from "../../src/components/ui";
+import { CurrencyCode } from "../../src/store/settingsStore";
+import { convertCurrency, CURRENCY_METADATA } from "../../src/utils/currency";
 
 
 
@@ -230,6 +232,11 @@ export default function EnhancedPaymentScreen() {
   const { t, formatPrice, formatNumber } = useLanguage();
   const params = useLocalSearchParams<{
     amount?: string;
+    currency?: string;
+    title?: string;
+    subtitle?: string;
+    bookingType?: string;
+    itemId?: string;
     reference?: string;
     hotelName?: string;
     roomType?: string;
@@ -262,6 +269,18 @@ export default function EnhancedPaymentScreen() {
     roomCount?: string;
   }>();
 
+  const normalizedInitialAmount = useMemo(() => {
+    if (!params.amount) return "";
+    const parsed = parseFloat(params.amount);
+    if (!Number.isFinite(parsed) || parsed <= 0) return params.amount;
+    const rawCurr = (params.currency || "BDT").toUpperCase();
+    const srcCurr: CurrencyCode =
+      rawCurr in CURRENCY_METADATA ? (rawCurr as CurrencyCode) : "BDT";
+    if (srcCurr === "BDT") return String(Math.round(parsed));
+    const bdt = convertCurrency(parsed, srcCurr, "BDT");
+    return String(Math.round(bdt));
+  }, [params.amount, params.currency]);
+
   // Screen States
   const [loading, setLoading] = useState(false);
   const [payments, setPayments] = useState<any[]>([]);
@@ -283,7 +302,7 @@ export default function EnhancedPaymentScreen() {
   const [splitSecondaryProvider, setSplitSecondaryProvider] = useState<ProviderId>("bkash");
 
   // Form Fields (Zero-Trust: PINs and CVVs are strictly excluded from state)
-  const [amount, setAmount] = useState(params.amount || "");
+  const [amount, setAmount] = useState(normalizedInitialAmount || params.amount || "");
   const [phone, setPhone] = useState(user?.phone ? sanitizeBdPhone(user.phone) : "");
   const [email, setEmail] = useState(user?.email || "");
   const [cardholderName, setCardholderName] = useState("");
@@ -291,6 +310,7 @@ export default function EnhancedPaymentScreen() {
   const [bankAccountRef, setBankAccountRef] = useState("");
   const [reference, setReference] = useState(
     params.reference ||
+      params.title ||
       (params.packageTitle
         ? `Package: ${params.packageTitle}`
         : params.vehicleName

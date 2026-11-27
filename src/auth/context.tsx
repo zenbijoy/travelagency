@@ -75,6 +75,10 @@ export function AuthProvider({
   const isAuthenticated = !!user;
 
   const loginAsDemo = useCallback(async (role: UserRole = "user") => {
+    if (process.env.NODE_ENV !== "test") {
+      console.warn("[Security] loginAsDemo is disabled in non-test environments.");
+      return null;
+    }
     const demoUser: AuthUser = {
       id: "demo-user-12345",
       email:
@@ -127,18 +131,7 @@ export function AuthProvider({
     let mounted = true;
 
     (async () => {
-      try {
-        const demoMode = await AsyncStorage.getItem("@app:demo_mode");
-        if (demoMode === "true") {
-          const demoRole = ((await AsyncStorage.getItem("@app:demo_role")) as UserRole) || "user";
-          await loginAsDemo(demoRole);
-          if (mounted) setLoading(false);
-          return;
-        }
-      } catch (e) {
-        console.warn("Demo mode read error:", e);
-      }
-
+      // Secure initialization: Always resolve authentic Supabase session
       const {
         data: { session },
         error,
@@ -320,7 +313,7 @@ export function AuthProvider({
   const getUserRole = useCallback(async (): Promise<UserRole | null> => {
     if (!user) return null;
 
-    if (user.id === "demo-user-12345" || user.app_metadata?.provider === "demo") {
+    if (process.env.NODE_ENV === "test" && (user.id === "demo-user-12345" || user.app_metadata?.provider === "demo")) {
       const demoRole = (user.user_metadata?.role || user.app_metadata?.role || "user") as string;
       if (demoRole === "admin") return "admin";
       if (demoRole === "agency" || demoRole === "business") return "business";

@@ -17,14 +17,23 @@ export class UpdateSystemSettingCommand implements AdminCommand<{ key: string; v
   ) {}
 
   async execute(admin: AdminUser) {
-    try {
-      await supabase.from("system_settings").upsert({
-        setting_key: this.settingKey,
-        setting_value: typeof this.settingValue === "string" ? this.settingValue : JSON.stringify(this.settingValue),
-        updated_at: new Date().toISOString(),
-      });
-    } catch (e) {
-      console.warn("Supabase setting error (handled):", e);
+    const { error } = await supabase
+      .from("system_settings")
+      .upsert(
+        {
+          setting_key: this.settingKey,
+          setting_value:
+            typeof this.settingValue === "string"
+              ? this.settingValue
+              : JSON.stringify(this.settingValue),
+          updated_by: admin.id,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "setting_key" }
+      );
+
+    if (error) {
+      throw new Error(error.message || `Failed to persist setting '${this.settingKey}'.`);
     }
 
     return { key: this.settingKey, value: this.settingValue };

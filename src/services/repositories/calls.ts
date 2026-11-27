@@ -1,5 +1,5 @@
 import { supabase } from "../../utils/supabase";
-import { DEMO_USER_ID, FriendProfile } from "./friends";
+import { FriendProfile } from "./friends";
 
 export interface CallLog {
   id: string;
@@ -30,7 +30,8 @@ export const callsRepository = {
   /**
    * Fetch call logs for a user
    */
-  async getCallLogs(userId: string = DEMO_USER_ID): Promise<CallLog[]> {
+  async getCallLogs(userId: string): Promise<CallLog[]> {
+    if (!userId) throw new Error("Authenticated user is required");
     try {
       const { data, error } = await supabase
         .from("call_logs")

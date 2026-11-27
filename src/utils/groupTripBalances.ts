@@ -108,6 +108,22 @@ export function splitExpenseWithLargestRemainder(
     return resultMap;
   }
 
+  // Never allocate expense shares to users outside the trip. Invalid or empty
+  // participant selections fall back to an equal split across trip members.
+  const allowedMembers = Array.from(new Set(allMembers)).filter(Boolean);
+  const validMembers = (ids: string[]) =>
+    Array.from(new Set(ids)).filter((id) => allowedMembers.includes(id));
+  const equalFallback = () => {
+    const targets = allowedMembers;
+    if (targets.length === 0) return resultMap;
+    const sorted = [...targets].sort();
+    const count = BigInt(sorted.length);
+    const floorShare = amountPaisa / count;
+    const remainder = Number(amountPaisa % count);
+    sorted.forEach((id, index) => resultMap.set(id, floorShare + (index < remainder ? ONE : ZERO)));
+    return resultMap;
+  };
+
   // 1. Equal Split
   if (
     typeof split === "object" &&
@@ -115,9 +131,9 @@ export function splitExpenseWithLargestRemainder(
     "type" in split &&
     split.type === "equal"
   ) {
-    const participants = Array.from(new Set(split.participants)).filter(Boolean);
-    const count = BigInt(participants.length > 0 ? participants.length : allMembers.length);
-    const targetList = participants.length > 0 ? participants : allMembers;
+    const participants = validMembers(split.participants);
+    const targetList = participants.length > 0 ? participants : allowedMembers;
+    const count = BigInt(targetList.length);
 
     if (count === ZERO) return resultMap;
 
@@ -143,18 +159,23 @@ export function splitExpenseWithLargestRemainder(
     "type" in split &&
     split.type === "exact"
   ) {
-    let sumAssigned = ZERO;
-    for (const [userId, val] of Object.entries(split.amounts_paisa)) {
+    const exactShares: Record<string, bigint> = {};
+    for (const [userId, val] of Object.entries(split.amounts_paisa || {})) {
+      if (!allowedMembers.includes(userId)) continue;
       const share = BigInt(val || 0);
-      resultMap.set(userId, share);
-      sumAssigned += share;
+      if (share < ZERO) throw new RangeError("Expense shares cannot be negative");
+      exactShares[userId] = (exactShares[userId] || ZERO) + share;
     }
-    // If exact shares don't sum to amountPaisa, adjust remainder on first member
-    if (sumAssigned !== amountPaisa && resultMap.size > 0) {
-      const diff = amountPaisa - sumAssigned;
-      const firstUser = Array.from(resultMap.keys())[0];
-      resultMap.set(firstUser, (resultMap.get(firstUser) || ZERO) + diff);
+    if (allowedMembers.length === 0) return resultMap;
+    const assigned = Object.values(exactShares).reduce((sum, share) => sum + share, ZERO);
+    if (assigned > amountPaisa) throw new RangeError("Expense shares cannot exceed the total amount");
+    const remaining = amountPaisa - assigned;
+    if (remaining > ZERO) {
+      const recipients = Object.keys(exactShares).sort();
+      if (recipients.length === 0) return equalFallback();
+      exactShares[recipients[0]] += remaining;
     }
+    for (const [userId, share] of Object.entries(exactShares)) resultMap.set(userId, share);
     return resultMap;
   }
 
@@ -165,13 +186,18 @@ export function splitExpenseWithLargestRemainder(
       let sumAssigned = ZERO;
       for (const item of split) {
         const share = BigInt(item.share_paisa || 0);
-        resultMap.set(item.user_id, share);
+        if (share < ZERO) throw new RangeError("Expense shares cannot be negative");
+        if (!allowedMembers.includes(item.user_id)) continue;
+        resultMap.set(item.user_id, (resultMap.get(item.user_id) || ZERO) + share);
         sumAssigned += share;
       }
-      if (sumAssigned !== amountPaisa && resultMap.size > 0) {
-        const diff = amountPaisa - sumAssigned;
-        const firstUser = split[0].user_id;
-        resultMap.set(firstUser, (resultMap.get(firstUser) || ZERO) + diff);
+      const validAssigned = Array.from(resultMap.values()).reduce((sum, share) => sum + share, ZERO);
+      if (validAssigned > amountPaisa) throw new RangeError("Expense shares cannot exceed the total amount");
+      if (validAssigned < amountPaisa) {
+        if (allowedMembers.length === 0) return resultMap;
+        if (resultMap.size === 0) return equalFallback();
+        const firstUser = Array.from(resultMap.keys()).sort()[0];
+        resultMap.set(firstUser, (resultMap.get(firstUser) || ZERO) + amountPaisa - validAssigned);
       }
       return resultMap;
     }
@@ -179,7 +205,7 @@ export function splitExpenseWithLargestRemainder(
     // Weight based from array
     const weights: Record<string, bigint> = {};
     for (const item of split) {
-      weights[item.user_id] = BigInt(item.weight || 1);
+      if (allowedMembers.includes(item.user_id)) weights[item.user_id] = BigInt(item.weight || 1);
     }
     return splitWeighted(amountPaisa, weights);
   }
@@ -193,6 +219,7 @@ export function splitExpenseWithLargestRemainder(
   const weights: Record<string, bigint> = {};
   for (const [userId, w] of Object.entries(weightRecord)) {
     if (userId === "type") continue;
+    if (!allowedMembers.includes(userId)) continue;
     const weightVal = BigInt(w || 1);
     if (weightVal > ZERO) {
       weights[userId] = weightVal;
@@ -220,7 +247,8 @@ function splitWeighted(
 ): Map<string, bigint> {
   const resultMap = new Map<string, bigint>();
   const entries = Object.entries(weights);
-  const totalWeight = entries.reduce((acc, [, w]) => acc + w, ZERO);
+  const validEntries = entries.filter(([userId, weight]) => Boolean(userId) && weight > ZERO);
+  const totalWeight = validEntries.reduce((acc, [, w]) => acc + w, ZERO);
 
   if (totalWeight <= ZERO) return resultMap;
 
@@ -231,7 +259,7 @@ function splitWeighted(
   }
 
   let totalFloor = ZERO;
-  const candidates: Candidate[] = entries.map(([userId, weight]) => {
+  const candidates: Candidate[] = validEntries.map(([userId, weight]) => {
     const unscaled = amountPaisa * weight;
     const floorShare = unscaled / totalWeight;
     const remainder = unscaled % totalWeight;
@@ -276,7 +304,10 @@ export function compute_balances(
     const payer = expense.paid_by;
     const totalAmount = BigInt(expense.amount_paisa);
 
-    if (totalAmount <= ZERO) continue;
+    // Expenses from a non-member cannot be reconciled against this trip's
+    // member balances. Ignore the invalid row instead of creating a phantom
+    // creditor and breaking the zero-sum invariant.
+    if (totalAmount <= ZERO || !balances.has(payer)) continue;
 
     // Credit payer
     balances.set(payer, (balances.get(payer) || ZERO) + totalAmount);

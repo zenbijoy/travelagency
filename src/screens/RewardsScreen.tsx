@@ -78,7 +78,12 @@ export default function RewardsScreen() {
             <Pressable style={styles.iconButton} onPress={() => router.back()}>
               <Ionicons name="arrow-back" size={24} color="#1e293b" />
             </Pressable>
-            <Pressable style={styles.iconButton}>
+            <Pressable
+              style={styles.iconButton}
+              onPress={() => {
+                alert("Shopno Jatra Rewards\n\nEarn points on every flight, hotel, and bus booking. 100 points = ৳10 cash discount at checkout!");
+              }}
+            >
               <Ionicons name="help-circle-outline" size={24} color="#1e293b" />
             </Pressable>
           </View>
@@ -86,7 +91,7 @@ export default function RewardsScreen() {
           <View style={styles.tierInfoRow}>
             <View>
               <View style={styles.badgeRow}>
-                <Text style={styles.tripDotCom}>Trip.com</Text>
+                <Text style={styles.tripDotCom}>Shopno Jatra</Text>
                 <View style={styles.rewardsBadge}>
                   <Text style={styles.rewardsBadgeText}>REWARDS</Text>
                 </View>
@@ -123,13 +128,13 @@ export default function RewardsScreen() {
                   />
                   <SvgText
                     x="50"
-                    y="36"
-                    fontSize="32"
+                    y="35"
+                    fontSize="24"
                     fontWeight="bold"
                     fill="#4A6B9E"
                     textAnchor="middle"
                   >
-                    T
+                    SJ
                   </SvgText>
                 </Svg>
               </View>
@@ -140,12 +145,12 @@ export default function RewardsScreen() {
           <View style={styles.timelineContainer}>
             <View style={styles.timelineLine} />
             <View style={styles.timelineDotsRow}>
-              <TimelineDot label="T" active color="#fff" borderColor={TRIP_BLUE} textColor={TRIP_BLUE} />
-              <TimelineDot label="T" color="#C59D5F" />
-              <TimelineDot label="T" color="#1B8097" />
-              <TimelineDot label="T" color="#7232B3" />
-              <TimelineDot label="T" color="#253B80" />
-              <TimelineDot label="T" color="#000" />
+              <TimelineDot label="B" active color="#fff" borderColor={TRIP_BLUE} textColor={TRIP_BLUE} />
+              <TimelineDot label="S" color="#C59D5F" />
+              <TimelineDot label="G" color="#1B8097" />
+              <TimelineDot label="P" color="#7232B3" />
+              <TimelineDot label="D" color="#253B80" />
+              <TimelineDot label="V" color="#000" />
             </View>
           </View>
         </View>
@@ -165,7 +170,10 @@ export default function RewardsScreen() {
           </View>
 
           {/* Profile Update Banner */}
-          <Pressable style={styles.profileBanner}>
+          <Pressable
+            style={styles.profileBanner}
+            onPress={() => router.push("/screens/profile" as any)}
+          >
             <View style={styles.avatarIconContainer}>
               <Ionicons name="person" size={24} color="#94a3b8" />
               <View style={styles.notificationDot} />
@@ -239,14 +247,14 @@ export default function RewardsScreen() {
                 <Text style={styles.pointsBalanceLabel}>মোট সংগৃহীত পয়েন্ট ব্যালেন্স</Text>
                 <View style={styles.pointsNumberRow}>
                   <Text style={styles.pointsLargeNumber}>
-                    {((loyaltyAccount?.points_balance && loyaltyAccount.points_balance > 0) ? loyaltyAccount.points_balance : 1200).toLocaleString()}
+                    {((user && loyaltyAccount?.points_balance) ? loyaltyAccount.points_balance : 0).toLocaleString()}
                   </Text>
                   <Text style={styles.pointsUnitText}>পয়েন্ট</Text>
                 </View>
                 <View style={styles.cashEquivalentRow}>
                   <Text style={styles.cashEquivalentPrefix}>সরাসরি নগদ সমমূল্য:</Text>
                   <Text style={styles.cashEquivalentAmount}>
-                    ৳{Math.round(((loyaltyAccount?.points_balance && loyaltyAccount.points_balance > 0) ? loyaltyAccount.points_balance : 1200) * 0.1)}
+                    ৳{Math.round(((user && loyaltyAccount?.points_balance) ? loyaltyAccount.points_balance : 0) * 0.1)}
                   </Text>
                 </View>
               </View>
@@ -254,7 +262,7 @@ export default function RewardsScreen() {
               <View style={styles.coinVisual}>
                 <View style={styles.coinGlow} />
                 <View style={styles.coinCircle}>
-                  <Text style={styles.coinT}>T</Text>
+                  <Text style={styles.coinT}>৳</Text>
                 </View>
               </View>
             </View>
@@ -347,7 +355,15 @@ function CouponCard({ discount, label, title, category, showInfo }: any) {
         <Text style={styles.couponLabel}>{label}</Text>
         <Text style={styles.couponDiscount}>{discount}</Text>
         {title && <Text style={styles.couponTitle} numberOfLines={1}>{title}</Text>}
-        <Pressable style={styles.useNowBtn}>
+        <Pressable
+          style={styles.useNowBtn}
+          onPress={() => {
+            if (Platform.OS === "web") {
+              navigator?.clipboard?.writeText(label);
+            }
+            router.push("/screens/hotels-homes" as any);
+          }}
+        >
           <Text style={styles.useNowText}>Use Now</Text>
         </Pressable>
       </View>

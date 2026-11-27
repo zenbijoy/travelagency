@@ -1,155 +1,83 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LocalProduct, NewProductListing, ProductOrder } from "../types/localMarketplace";
+import {
+  BargainOfferRecord,
+  DeliveryTier,
+  EnrichedProduct,
+  GiCertificateVerificationResult,
+  LocalProduct,
+  NewProductListing,
+  ProductOrder,
+} from "../types/localMarketplace";
+import {
+  CURATED_ENRICHED_PRODUCTS,
+  DEFAULT_SELLER_PROFILE,
+} from "../features/marketplace/constants/catalog";
+import { evaluateLocalBargainProposal } from "../features/marketplace/engines/bargainEngine";
+import { verifyGiCodeLocally } from "../features/marketplace/engines/giVerifierEngine";
+import { apiClient } from "./apiClient";
 import { supabase } from "../utils/supabase";
 
-const PRODUCTS_STORAGE_KEY = "@local_products_catalog_v1";
-const ORDERS_STORAGE_KEY = "@local_product_orders_v1";
+const PRODUCTS_STORAGE_KEY = "@local_products_catalog_v2";
+const ORDERS_STORAGE_KEY = "@local_product_orders_v2";
+const BARGAINS_STORAGE_KEY = "@local_product_bargains_v2";
 
-export const INITIAL_PRODUCTS: LocalProduct[] = [
-  {
-    id: "prod-honey-1",
-    name: "Pure Sundarbans Wild Honey",
-    bangla_name: "সুন্দরবনের খাঁটি বুনো খলিশা ফুলের মধু",
-    region: "সুন্দরবন",
-    category: "tea_honey",
-    price: 1100,
-    original_price: 1350,
-    weight_or_unit: "১ কেজি কাঁচের জার",
-    image_url: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600",
-    rating: 4.95,
-    reviews_count: 248,
-    seller_name: "মোংলা মৌয়াল সমবায় সমিতি",
-    seller_phone: "+8801711224466",
-    seller_verified: true,
-    in_stock: true,
-    stock_quantity: 45,
-    description: "সুন্দরবনের গহীন অরণ্য থেকে মৌয়ালদের দ্বারা সরাসরি চাক কেটে সংগৃহীত ১০০% নির্ভেজাল খলিশা ফুলের প্রাকৃতিক মধু। কোনো কৃত্রিম মিষ্টি বা প্রিজারভেটিভ নেই।",
-    features: ["১০০% ন্যাচারাল", "ল্যাব টেস্টেড", "সুন্দরবন ফরেস্ট পারমিট সংগৃহীত"],
-  },
-  {
-    id: "prod-shutki-1",
-    name: "Cox's Bazar Sea Rupchanda Shutki",
-    bangla_name: "কক্সবাজারের সামুদ্রিক রূপচাঁদা শুঁটকি",
-    region: "কক্সবাজার",
-    category: "food",
-    price: 850,
-    original_price: 980,
-    weight_or_unit: "৫০০ গ্রাম প্রিমিয়াম প্যাক",
-    image_url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600",
-    rating: 4.88,
-    reviews_count: 180,
-    seller_name: "নাজিরারটেক ড্রাই ফিশ হাফিজ ট্রেডার্স",
-    seller_phone: "+8801819887766",
-    seller_verified: true,
-    in_stock: true,
-    stock_quantity: 30,
-    description: "কক্সবাজারের বিখ্যাত নাজিরারটেক শুঁটকি মহাল থেকে সংগ্রহ করা বিষমুক্ত রোদে শুকানো ফ্রেশ সামুদ্রিক রূপচাঁদা শুঁটকি। সুস্বাদু ঝাল চাটনি ও রান্নায় অতুলনীয়।",
-    features: ["কীটনাশক মুক্ত", "প্রাকৃতিক সূর্যালোক শুকানো", "অ্যারোমা সিল ভ্যাকুয়াম প্যাক"],
-  },
-  {
-    id: "prod-tea-1",
-    name: "Sreemangal First Flush Black Tea",
-    bangla_name: "শ্রীমঙ্গলের অরগানিক ব্ল্যাক টি পাতা",
-    region: "সিলেট",
-    category: "tea_honey",
-    price: 450,
-    original_price: 520,
-    weight_or_unit: "৪০০ গ্রাম ফয়েল প্যাক",
-    image_url: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=600",
-    rating: 4.9,
-    reviews_count: 165,
-    seller_name: "মৌলভীবাজার টি গার্ডেন ডিরেক্ট",
-    seller_phone: "+8801733556677",
-    seller_verified: true,
-    in_stock: true,
-    stock_quantity: 60,
-    description: "শ্রীমঙ্গলের পাহাড়ি বাগানের কোমল দুটি পাতা ও একটি কুঁড়ি থেকে প্রস্তুতকৃত কড়া লিকার ও মনমাতানো সুগন্ধযুক্ত প্রিমিয়াম চা।",
-    features: ["অরগানিক বাগান", "তাজা সুবাস", "গাঢ় সোনালী লিকার"],
-  },
-  {
-    id: "prod-saree-1",
-    name: "Authentic Tangail Handloom Cotton Saree",
-    bangla_name: "ঐতিহ্যবাহী টাঙ্গাইল সুতি তাঁতের শাড়ি",
-    region: "টাঙ্গাইল",
-    category: "clothing",
-    price: 2400,
-    original_price: 2850,
-    weight_or_unit: "১২ হাত শাড়ি + ব্লাউজ পিস",
-    image_url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600",
-    rating: 4.92,
-    reviews_count: 95,
-    seller_name: "বাজিতপুর তাঁতী সমিতি, টাঙ্গাইল",
-    seller_phone: "+8801911443322",
-    seller_verified: true,
-    in_stock: true,
-    stock_quantity: 18,
-    description: "টাঙ্গাইলের দক্ষ কারিগরদের হাতে বোনা নরম সুতি সুতার মনোরম জাকার্ড পাড়ের আকর্ষণীয় তাঁতের শাড়ি। গরমে দারুণ আরামদায়ক ও রুচিশীল।",
-    features: ["১০০% পিওর কটন", "হাতে বোনা সুতা", "রং পাকা গ্যারান্টি"],
-  },
-  {
-    id: "prod-doi-1",
-    name: "Traditional Bogura Special Shahi Doi",
-    bangla_name: "বগুড়ার ঐতিহ্যবাহী আসল শাহী দই",
-    region: "বগুড়া",
-    category: "food",
-    price: 360,
-    original_price: 400,
-    weight_or_unit: "১ কেজি পোড়ামাটির সরা",
-    image_url: "https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=600",
-    rating: 4.96,
-    reviews_count: 310,
-    seller_name: "আকবরিয়া দই ঘর, বগুড়া",
-    seller_phone: "+8801712998855",
-    seller_verified: true,
-    in_stock: true,
-    stock_quantity: 25,
-    description: "খাঁটি গাভীর দুধ জ্বাল দিয়ে ঘন ক্ষীরসা বানিয়ে মাটির সরায় পাতা বগুড়ার শতবর্ষী ঐতিহাসিক ঐতিহ্যবাহী মিষ্টি দই। বিশেষ কুলিং বক্সে হোম ডেলিভারি।",
-    features: ["গাভীর খাঁটি দুধ", "ঐতিহ্যবাহী মাটির সরা", "কুলিং প্রটেকশন শিপিং"],
-  },
-  {
-    id: "prod-kanchagolla-1",
-    name: "Natore Bonolota Kanchagolla",
-    bangla_name: "নাটোরের আদি বনলতা কাঁচাগোল্লা",
-    region: "নাটোর",
-    category: "food",
-    price: 520,
-    original_price: 580,
-    weight_or_unit: "১ কেজি বক্স",
-    image_url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600",
-    rating: 4.85,
-    reviews_count: 140,
-    seller_name: "নাটোর রাজবাড়ি মিষ্টান্ন ভান্ডার",
-    seller_phone: "+8801822339900",
-    seller_verified: true,
-    in_stock: true,
-    stock_quantity: 20,
-    description: "তাজা ছানা ও খাঁটি এলাচের সুবাসে তৈরি নাটোরের বিখ্যাত জিভে জল আনা নরম কাঁচাগোল্লা।",
-    features: ["তাজা ছানা", "হালকা মিষ্টি", "এয়ার টাইট প্যাকেজিং"],
-  },
-];
+export const INITIAL_PRODUCTS: LocalProduct[] = CURATED_ENRICHED_PRODUCTS;
+
+export interface CheckoutPayload {
+  customerName: string;
+  customerPhone: string;
+  shippingAddress: string;
+  deliveryDistrict: string;
+  deliveryTier: DeliveryTier;
+  paymentMethod: "cod" | "bkash" | "nagad" | "wallet" | "rocket" | "card";
+  items: Array<{
+    productId: string;
+    quantity: number;
+    negotiatedPriceBdt?: number;
+  }>;
+  deliveryNotes?: string;
+}
 
 export const localMarketplaceService = {
   /**
-   * Fetch products with optional filtering
+   * Fetch products with optional filtering and online sync
    */
-  async getProducts(filters?: { region?: string; category?: string; query?: string }): Promise<LocalProduct[]> {
-    let list = INITIAL_PRODUCTS;
+  async getProducts(filters?: {
+    region?: string;
+    category?: string;
+    query?: string;
+  }): Promise<EnrichedProduct[]> {
+    let list: EnrichedProduct[] = CURATED_ENRICHED_PRODUCTS;
 
     try {
-      const raw = await AsyncStorage.getItem(PRODUCTS_STORAGE_KEY);
-      if (raw) {
-        list = JSON.parse(raw);
-      } else {
-        await AsyncStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(INITIAL_PRODUCTS));
+      const response = await apiClient.get<EnrichedProduct[]>("/local-commerce/products");
+      if (response && Array.isArray(response) && response.length > 0) {
+        list = response;
       }
-    } catch (storageErr) {
-      console.warn("[localMarketplaceService] Error reading products cache:", storageErr);
+    } catch {
+      try {
+        const raw = await AsyncStorage.getItem(PRODUCTS_STORAGE_KEY);
+        if (raw) {
+          list = JSON.parse(raw);
+        } else {
+          await AsyncStorage.setItem(
+            PRODUCTS_STORAGE_KEY,
+            JSON.stringify(CURATED_ENRICHED_PRODUCTS)
+          );
+        }
+      } catch (storageErr) {
+        console.warn("[localMarketplaceService] Storage read error:", storageErr);
+      }
     }
 
     let result = [...list];
 
     if (filters?.region && filters.region !== "All") {
-      result = result.filter((p) => p.region.includes(filters.region!));
+      result = result.filter(
+        (p) =>
+          p.region.includes(filters.region!) ||
+          p.district.toLowerCase().includes(filters.region!.toLowerCase())
+      );
     }
 
     if (filters?.category && filters.category !== "all") {
@@ -163,7 +91,9 @@ export const localMarketplaceService = {
           p.name.toLowerCase().includes(q) ||
           p.bangla_name.toLowerCase().includes(q) ||
           p.region.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q)
+          p.description.toLowerCase().includes(q) ||
+          p.giTag?.toLowerCase().includes(q) ||
+          p.seller_name.toLowerCase().includes(q)
       );
     }
 
@@ -171,74 +101,342 @@ export const localMarketplaceService = {
   },
 
   /**
-   * Add a new product listing (স্থানীয় সেলাররা পণ্য বিক্রি করতে পারবে)
+   * Add a new product listing (local artisan seller studio)
    */
-  async createProductListing(listing: NewProductListing): Promise<LocalProduct> {
-    const newProduct: LocalProduct = {
-      id: `prod-${Date.now()}`,
+  async createProductListing(listing: NewProductListing): Promise<EnrichedProduct> {
+    const id = listing.id || `prod-artisan-${Date.now()}`;
+    const price = Number(listing.price) || 500;
+    const weightGrams = listing.weight_grams ?? 500;
+
+    const newProduct: EnrichedProduct = {
+      id,
+      sellerId: listing.seller_id || DEFAULT_SELLER_PROFILE.id,
+      slug: id,
       name: listing.name,
       bangla_name: listing.bangla_name,
       region: listing.region,
+      district: listing.district || listing.region,
       category: listing.category,
-      price: Number(listing.price) || 500,
-      original_price: Math.round(Number(listing.price) * 1.15),
-      weight_or_unit: listing.weight_or_unit,
-      image_url: listing.image_url || "https://images.unsplash.com/photo-1544816155-12df9643f363?w=600",
+      price,
+      original_price: listing.original_price ?? Math.round(price * 1.15),
+      minBargainPriceBdt: listing.min_bargain_price_bdt ?? Math.round(price * 0.85),
+      bargainEnabled: listing.bargain_enabled ?? true,
+      weight_or_unit: listing.weight_or_unit || "১ পিস",
+      weightKg: Number((weightGrams / 1000).toFixed(2)),
+      weightGrams,
+      image_url:
+        listing.image_url ||
+        "https://images.unsplash.com/photo-1544816155-12df9643f363?w=600",
       rating: 5.0,
-      reviews_count: 1,
+      reviews_count: 0,
       seller_name: listing.seller_name,
       seller_phone: listing.seller_phone,
       seller_verified: true,
       in_stock: true,
-      stock_quantity: 20,
+      stock_quantity: listing.stock_quantity ?? 15,
+      reservedQuantity: 0,
+      isPerishable: listing.is_perishable ?? false,
+      isFragile: listing.is_fragile ?? false,
       description: listing.description,
-      features: ["১০০% স্থানীয় পণ্য", "ভেরিফাইড সেলার", "ফ্রেশ কোয়ালিটি"],
+      features: listing.features ?? ["১০০% স্থানীয় পণ্য", "ভেরিফাইড সেলার", "ফ্রেশ কোয়ালিটি"],
+      giTag: listing.gi_code ? `GI Registered: ${listing.gi_code}` : "Artisan Direct Guild",
+      giCertified: Boolean(listing.gi_code),
+      giCode: listing.gi_code || "SJ-ART-DIRECT",
+      galleryImages: [
+        listing.image_url ||
+          "https://images.unsplash.com/photo-1544816155-12df9643f363?w=600",
+      ],
+      dimensionsMeta: {
+        dimensions: "Artisan Standard Handcraft",
+        weightGrams,
+        weightFormatted: listing.weight_or_unit || "৫০০ গ্রাম",
+        materials: "Natural Heritage Fibers & Elements",
+        craftMethod: "Traditional Handcrafting",
+        packaging: "Eco-friendly handmade jute/kraft carton",
+      },
+      artisan: {
+        name: listing.seller_name,
+        banglaName: listing.seller_name,
+        role: "Heritage Artisan",
+        experienceYears: 12,
+        location: listing.region,
+        district: listing.district || listing.region,
+        avatar:
+          "https://images.unsplash.com/photo-1544816155-12df9643f363?w=300",
+        story: "Handcrafted regional treasures preserving timeless Bangladeshi heritage.",
+        cooperative: "Local Artisan Cooperative Guild",
+        contactPhone: listing.seller_phone,
+      },
+      certificates: [],
+      customerReviews: [],
+      vendorPayout: {
+        sellerId: DEFAULT_SELLER_PROFILE.id,
+        merchantName: listing.seller_name,
+        merchantAccount: listing.seller_phone,
+        payoutChannel: "bkash",
+        cooperativeGuild: "Artisan Cooperative Guild",
+        artisanSharePct: 92,
+        paymentGatewayNotice: "Automated bKash Escrow Split",
+      },
     };
 
-    const raw = await AsyncStorage.getItem(PRODUCTS_STORAGE_KEY);
-    const existing: LocalProduct[] = raw ? JSON.parse(raw) : INITIAL_PRODUCTS;
-    const updated = [newProduct, ...existing];
-    await AsyncStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+    try {
+      await apiClient.post("/local-commerce/products", newProduct);
+    } catch {
+      try {
+        await supabase.from("marketplace_products").insert([
+          {
+            title: newProduct.name,
+            bangla_title: newProduct.bangla_name,
+            region: newProduct.region,
+            category: newProduct.category,
+            base_price_paisa: newProduct.price * 100,
+            stock_quantity: newProduct.stock_quantity,
+            gi_code: newProduct.giCode,
+            is_active: true,
+          },
+        ]);
+      } catch (dbErr) {
+        console.warn("[localMarketplaceService] Remote product insert failed:", dbErr);
+      }
+    }
+
+    try {
+      const raw = await AsyncStorage.getItem(PRODUCTS_STORAGE_KEY);
+      const existing: EnrichedProduct[] = raw
+        ? JSON.parse(raw)
+        : CURATED_ENRICHED_PRODUCTS;
+      const updated = [newProduct, ...existing];
+      await AsyncStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+    } catch (saveErr) {
+      console.warn("[localMarketplaceService] Cache save error:", saveErr);
+    }
 
     return newProduct;
   },
 
   /**
-   * Place an order for a local product
+   * Place an order with atomic checkout RPC & live delivery bridge
    */
   async placeProductOrder(
     orderData: Omit<ProductOrder, "id" | "status" | "created_at">
   ): Promise<ProductOrder> {
+    const orderId = `ord-${Date.now()}`;
     const newOrder: ProductOrder = {
       ...orderData,
-      id: `ord-${Date.now()}`,
-      status: "order_placed",
+      id: orderId,
+      status: "confirmed",
       created_at: new Date().toISOString(),
     };
 
     try {
-      await supabase.from("bookings").insert([
-        {
-          booking_type: "marketplace_product",
-          total_price: newOrder.total_price,
-          status: "confirmed",
-          metadata: newOrder,
-        },
-      ]);
-    } catch (syncErr) {
-      console.warn("[localMarketplaceService] Remote order sync failed, saving locally:", syncErr);
+      await apiClient.post("/local-commerce/orders/checkout", {
+        customer_name: orderData.customer_name,
+        contact_phone: orderData.customer_phone,
+        shipping_address: orderData.delivery_address,
+        delivery_district: orderData.delivery_district,
+        payment_method: orderData.payment_method,
+        items: [
+          {
+            product_id: orderData.product_id,
+            quantity: orderData.quantity,
+            unit_price_paisa: orderData.unit_price * 100,
+          },
+        ],
+      });
+    } catch {
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        const userId = authData?.user?.id;
+
+        if (userId) {
+          const idempotencyKey = `idemp-${orderId}`;
+          const itemsJsonb = [
+            {
+              product_id: orderData.product_id,
+              quantity: orderData.quantity,
+              unit_price_paisa: orderData.unit_price * 100,
+            },
+          ];
+
+          await supabase.rpc("checkout_marketplace_cart_atomic", {
+            p_customer_id: userId,
+            p_shipping_address: orderData.delivery_address,
+            p_contact_phone: orderData.customer_phone,
+            p_items_jsonb: itemsJsonb,
+            p_payment_method: orderData.payment_method,
+            p_idempotency_key: idempotencyKey,
+          });
+        }
+      } catch (err) {
+        console.warn("[localMarketplaceService] Remote atomic checkout RPC error:", err);
+      }
     }
 
-    const raw = await AsyncStorage.getItem(ORDERS_STORAGE_KEY);
-    const existing: ProductOrder[] = raw ? JSON.parse(raw) : [];
-    const updated = [newOrder, ...existing];
-    await AsyncStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updated));
+    try {
+      const raw = await AsyncStorage.getItem(ORDERS_STORAGE_KEY);
+      const existing: ProductOrder[] = raw ? JSON.parse(raw) : [];
+      const updated = [newOrder, ...existing];
+      await AsyncStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updated));
+    } catch (storageErr) {
+      console.warn("[localMarketplaceService] Orders storage error:", storageErr);
+    }
 
     return newOrder;
   },
 
+  /**
+   * Submit a direct bargain offer to an artisan
+   */
+  async submitBargainOffer(
+    productId: string,
+    offeredPriceBdt: number,
+    quantity = 1,
+    buyerNote?: string
+  ): Promise<BargainOfferRecord> {
+    const products = await this.getProducts();
+    const product = products.find((p) => p.id === productId);
+    if (!product) {
+      throw new Error(`Product ${productId} not found`);
+    }
+
+    const record = evaluateLocalBargainProposal({
+      product,
+      offeredUnitPriceBdt: offeredPriceBdt,
+      quantity,
+      buyerMessage: buyerNote,
+    });
+
+    try {
+      await apiClient.post("/local-commerce/bargains", {
+        product_id: productId,
+        offered_price_paisa: offeredPriceBdt * 100,
+        quantity,
+        buyer_note: buyerNote,
+      });
+    } catch {
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        const userId = authData?.user?.id;
+        if (userId) {
+          await supabase.rpc("submit_bargain_offer", {
+            p_product_id: productId,
+            p_buyer_id: userId,
+            p_offered_price_paisa: offeredPriceBdt * 100,
+            p_quantity: quantity,
+            p_counter_offer_id: null,
+          });
+        }
+      } catch (rpcErr) {
+        console.warn("[localMarketplaceService] Bargain RPC sync error:", rpcErr);
+      }
+    }
+
+    try {
+      const raw = await AsyncStorage.getItem(BARGAINS_STORAGE_KEY);
+      const existing: Record<string, BargainOfferRecord> = raw ? JSON.parse(raw) : {};
+      existing[productId] = record;
+      await AsyncStorage.setItem(BARGAINS_STORAGE_KEY, JSON.stringify(existing));
+    } catch (saveErr) {
+      console.warn("[localMarketplaceService] Bargain cache save error:", saveErr);
+    }
+
+    return record;
+  },
+
+  /**
+   * Verify Geographical Indication (GI) certificate
+   */
+  async verifyGiCertificate(
+    codeOrQr: string,
+    productId?: string
+  ): Promise<GiCertificateVerificationResult> {
+    try {
+      const { data, error } = await supabase.rpc("verify_gi_certificate", {
+        p_certificate_id_or_code: codeOrQr,
+        p_product_id: productId || null,
+      });
+
+      if (!error && data) {
+        return {
+          valid: Boolean(data.is_valid),
+          certificateCode: codeOrQr,
+          giRegistrationNumber: data.gi_registration_number,
+          originDistrict: data.district || "Bangladesh",
+          issuerAuthority:
+            data.issuer ||
+            "Department of Patents, Designs and Trademarks (DPDT), Bangladesh",
+          qrPayload: `SJ-GI-VERIFY|${codeOrQr}`,
+          linkedProductsCount: data.linked_products_count || 1,
+          provenanceStory: data.verification_message,
+          source: "supabase_rpc",
+        };
+      }
+    } catch {
+      // Fallback to local registry
+    }
+
+    return verifyGiCodeLocally(codeOrQr, CURATED_ENRICHED_PRODUCTS);
+  },
+
+  /**
+   * Get OTP code for delivery/pickup verification
+   */
+  async getMyOtpCode(
+    entityType: "ride_trip" | "delivery_job" | "order",
+    entityId: string
+  ): Promise<string | null> {
+    try {
+      const { data, error } = await supabase.rpc("get_my_otp_code", {
+        p_entity_type: entityType,
+        p_entity_id: entityId,
+      });
+      if (!error && data?.otp_code) {
+        return data.otp_code;
+      }
+    } catch (err) {
+      console.warn("[localMarketplaceService] OTP code fetch failed:", err);
+    }
+    return null;
+  },
+
+  /**
+   * Get user orders from remote or local storage
+   */
   async getMyOrders(): Promise<ProductOrder[]> {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+
+      if (userId) {
+        const { data: remoteRows, error } = await supabase
+          .from("marketplace_orders")
+          .select("*")
+          .eq("customer_id", userId)
+          .order("created_at", { ascending: false });
+
+        if (!error && remoteRows && remoteRows.length > 0) {
+          return remoteRows.map((r: any) => ({
+            id: r.id,
+            product_id: r.primary_product_id || "prod-mkt",
+            product_name: r.order_number || "Artisan Craft Order",
+            product_image:
+              r.image_url ||
+              "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600",
+            quantity: r.total_items_count || 1,
+            unit_price: Math.round((r.total_amount_paisa || 0) / 100),
+            total_price: Math.round((r.total_amount_paisa || 0) / 100),
+            customer_name: r.shipping_address?.name || "Customer",
+            customer_phone: r.contact_phone || "",
+            delivery_address: r.shipping_address?.address || "",
+            delivery_district: r.shipping_address?.district || "Dhaka",
+            payment_method: r.payment_method || "cod",
+            status: r.order_status || "confirmed",
+            created_at: r.created_at,
+          }));
+        }
+      }
+
       const raw = await AsyncStorage.getItem(ORDERS_STORAGE_KEY);
       return raw ? JSON.parse(raw) : [];
     } catch {

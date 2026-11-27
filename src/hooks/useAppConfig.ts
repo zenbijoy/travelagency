@@ -25,7 +25,7 @@ export interface AppConfigState {
 const STORAGE_KEY = "@shopno_app_dynamic_config_v1";
 
 const DEFAULT_CONFIG = {
-  heroTitle: "Trip.com",
+  heroTitle: "Shopno Jatra",
   heroSubtitle: "Your global travel partner ✈",
   announcementTicker: "🔥 FLASH SALE: 20% off all Cox's Bazar hotels this weekend with code SUMMER20!",
   announcementEnabled: true,

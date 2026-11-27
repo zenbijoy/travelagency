@@ -28,7 +28,7 @@ export function AuthScreenShell({
   return (
     <SafeAreaView className="flex-1 bg-trip-bg">
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : Platform.OS === "android" ? "height" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? insets.top + 16 : 0}
         className="flex-1"
       >

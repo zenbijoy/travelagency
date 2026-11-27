@@ -190,6 +190,14 @@ export const AdminSettingsScreen: React.FC<{ admin: AdminUser | null }> = ({
   };
 
   const handleToggleSetting = async (key: keyof typeof settings) => {
+    if (!activeAdmin) {
+      showLocalizedAlert("Governance Block", "No verified administrator session found.");
+      return;
+    }
+    if (!hasPermission("settings.manage")) {
+      showLocalizedAlert("Access Denied", "You lack 'settings.manage' permission to modify system settings.");
+      return;
+    }
     const nextVal = !settings[key];
     const prevVal = settings[key];
     setSettings((prev) => ({
@@ -197,16 +205,17 @@ export const AdminSettingsScreen: React.FC<{ admin: AdminUser | null }> = ({
       [key]: nextVal,
     }));
     try {
-      if (activeAdmin) {
-        const command = new UpdateSystemSettingCommand(
-          String(key),
-          nextVal
-        );
-        await executeAdminCommand(command, activeAdmin);
+      const command = new UpdateSystemSettingCommand(String(key), nextVal);
+      const cmdRes = await executeAdminCommand(command, activeAdmin);
+      if (!cmdRes.success) {
+        setSettings((prev) => ({
+          ...prev,
+          [key]: prevVal,
+        }));
+        showLocalizedAlert("Permission Error", cmdRes.error || "Failed to update setting due to RBAC policy.");
       }
     } catch (err: any) {
       console.warn("Failed to persist and audit system setting:", err);
-      // Rollback on failure
       setSettings((prev) => ({
         ...prev,
         [key]: prevVal,
@@ -216,25 +225,71 @@ export const AdminSettingsScreen: React.FC<{ admin: AdminUser | null }> = ({
   };
 
   const handleBackup = async () => {
+    if (!activeAdmin || !hasPermission("settings.manage")) {
+      showLocalizedAlert("Access Denied", "Only authorized super administrators can initiate backups.");
+      return;
+    }
     setLoading(true);
     try {
-      showLocalizedAlert("Success", "Database backup initiated successfully");
+      const { error } = await supabase.from("system_backup").insert({
+        backup_name: `manual_snapshot_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`,
+        backup_type: "full",
+        backup_date: new Date().toISOString(),
+        created_by: activeAdmin.id,
+      });
+      if (error) throw error;
+      await adminService.logActivity({
+        admin_id: activeAdmin.id,
+        action: "MANUAL_BACKUP_REQUESTED",
+        module: "settings",
+        entity_type: "system_backup",
+        details: { description: "Logged manual backup request in system_backup registry" },
+      });
+      showLocalizedAlert(
+        "Backup Request Recorded",
+        "Backup snapshot job queued in system_backup. Point-in-time managed snapshots remain controlled by Supabase."
+      );
       setBackupModalVisible(false);
-    } catch (error) {
-      showLocalizedAlert("Error", "Failed to create backup");
+    } catch (error: any) {
+      showLocalizedAlert("Error", error?.message || "Failed to record backup request.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleGenerateApiKey = async () => {
+    if (!activeAdmin || !hasPermission("settings.manage")) {
+      showLocalizedAlert("Access Denied", "Missing 'settings.manage' permission.");
+      return;
+    }
+    if (typeof globalThis.crypto === "undefined" || typeof globalThis.crypto.getRandomValues !== "function") {
+      showLocalizedAlert("Security Restriction", "Cryptographic CSPRNG unavailable on this runtime. Generate keys on backend.");
+      return;
+    }
     setLoading(true);
     try {
-      const apiKey = `sk_${Math.random().toString(36).substr(2, 20).toUpperCase()}`;
-      setNewApiKey(apiKey);
-      showLocalizedAlert("Success", "New API key generated");
-    } catch (error) {
-      showLocalizedAlert("Error", "Failed to generate API key");
+      const bytes = new Uint8Array(24);
+      globalThis.crypto.getRandomValues(bytes);
+      const entropyHex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+      const generatedKey = `snj_live_${entropyHex.substring(0, 36)}`;
+      const maskedPrefix = `${generatedKey.slice(0, 12)}••••••••${generatedKey.slice(-4)}`;
+
+      const { error } = await supabase.from("api_keys_admin").insert({
+        api_key_name: `Admin Key (${new Date().toISOString().slice(0, 10)})`,
+        api_key_secret: maskedPrefix,
+        created_by: activeAdmin.id,
+        is_active: true,
+        rate_limit: 1000,
+      });
+      if (error) throw error;
+
+      setNewApiKey(generatedKey);
+      showLocalizedAlert(
+        "API Key Registered",
+        "Copy your key now. Only a masked reference is stored in the registry."
+      );
+    } catch (error: any) {
+      showLocalizedAlert("Error", error?.message || "Failed to generate API key");
     } finally {
       setLoading(false);
     }
@@ -374,7 +429,7 @@ export const AdminSettingsScreen: React.FC<{ admin: AdminUser | null }> = ({
               label="API Documentation"
               icon="book-open"
               onPress={() =>
-                showLocalizedAlert("API Documentation", "Visit: api.luxestay.com/docs")
+                showLocalizedAlert("API Documentation", `FastAPI OpenAPI Docs: ${process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:8000"}/docs`)
               }
             />
           </SettingsSection>
@@ -456,9 +511,9 @@ export const AdminSettingsScreen: React.FC<{ admin: AdminUser | null }> = ({
             <View style={styles.divider} />
             <SettingsRow
               label="Timezone"
-              value="UTC-5 (EST)"
+              value="UTC+6 (BST - Dhaka)"
               icon="clock"
-              onPress={() => showLocalizedAlert("Timezone", "Set your timezone")}
+              onPress={() => showLocalizedAlert("Timezone", "Primary operations timezone set to Asia/Dhaka (UTC+6)")}
             />
             <View style={styles.divider} />
             <SettingsRow
@@ -528,8 +583,8 @@ export const AdminSettingsScreen: React.FC<{ admin: AdminUser | null }> = ({
               icon="help-circle"
               onPress={() =>
                 showLocalizedAlert(
-                  "Support",
-                  "Contact: support@luxestay.com\nPhone: +1 (555) 123-4567",
+                  "Platform Operations Support",
+                  "Support: operations@shopnojatra.com\nEmergency NOC: +880 1700-000000\nInternal Slack: #ops-shopnojatra",
                 )
               }
             />

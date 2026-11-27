@@ -32,6 +32,8 @@ import * as Brightness from "expo-brightness";
 import { ticketLocalCache, CachedTicket } from "../../src/services/ticketLocalCache";
 import { supabase } from "../../src/utils/supabase";
 import { calendarService } from "../../src/services/calendarService";
+import { ticketService } from "../../src/services/payment/ticketService";
+import { BRAND } from "../../src/constants/brand";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -137,11 +139,35 @@ export default function ETicketScreen() {
         }
       }
     } catch {
+      // Check offline ticketService first
+      try {
+        const svcTicket = await ticketService.getTicketByBookingReference(bookingId);
+        if (svcTicket) {
+          const mapped: CachedTicket = {
+            id: svcTicket.id,
+            booking_id: svcTicket.bookingReference || bookingId,
+            passenger_name: svcTicket.passengerName,
+            service_type: (svcTicket.type as any) || "flight",
+            valid_from: svcTicket.travelDate,
+            valid_to: svcTicket.travelDate,
+            seat: svcTicket.seatOrRoom || "Unassigned",
+            status: "active",
+            signature: "verified_digital_pass",
+            qr_payload: svcTicket.qrData,
+            created_at: svcTicket.cachedAt,
+            cached_at: svcTicket.cachedAt,
+          };
+          setTicket(mapped);
+          setIsOfflineMode(true);
+          return;
+        }
+      } catch {}
+
       // Offline fallback
       if (cached.length > 0) {
         setIsOfflineMode(true);
-      } else {
-        // Demo fallback ticket for testing preview
+      } else if (!params.bookingId && !params.ticketId) {
+        // Demo fallback ticket for testing preview only when no explicit ID requested
         const demoTicket: CachedTicket = {
           id: ticketId || "demo-ticket-uuid-001",
           booking_id: bookingId,
@@ -168,6 +194,8 @@ export default function ETicketScreen() {
         await ticketLocalCache.saveTickets([demoTicket]);
         setTicket(demoTicket);
         setIsOfflineMode(true);
+      } else {
+        setTicket(null);
       }
     } finally {
       setLoading(false);
@@ -258,7 +286,7 @@ export default function ETicketScreen() {
 
             <div class="footer">
               Valid for offline verification by authorized gate agents and hotels.<br/>
-              Support Helpline: +880 9612-000000 | concierge@shopnojatra.com
+              Support Helpline: ${BRAND.contact.phone} | ${BRAND.contact.supportEmail}
             </div>
           </div>
         </body>

@@ -37,7 +37,7 @@ import {
 import { ListSkeleton, ResultsSummaryHeader } from "../components/common";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PrecisionSlider } from "../components/ui/PrecisionSlider";
-import { formatPrice as utilsFormatPrice } from "../utils/currency";
+import { formatPrice as utilsFormatPrice, formatSourcePrice } from "../utils/currency";
 import { useTravelStore } from "../store/travelStore";
 import { travelRepository, HotelSearchResult, HotelSearchFilters } from "../repositories";
 import { getLocalizedTabLabel } from "./Navigation";
@@ -94,10 +94,14 @@ export const POPULAR_DESTINATIONS = [
 
 export function formatPrice(
   amount: number | string,
-  _currencySymbol: string = HOSPITALITY_CONFIG.DEFAULT_CURRENCY_SYMBOL
+  sourceCurrencyOrSymbol: string = "USD"
 ): string {
   const numeric = typeof amount === "string" ? parseFloat(amount) || 0 : amount;
-  return utilsFormatPrice(numeric);
+  const src =
+    sourceCurrencyOrSymbol === "BDT" || sourceCurrencyOrSymbol === "৳"
+      ? "BDT"
+      : "USD";
+  return formatSourcePrice(numeric, src);
 }
 
 export function formatDateShort(date: Date): string {

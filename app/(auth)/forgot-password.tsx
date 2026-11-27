@@ -205,7 +205,7 @@ export default function ForgotPasswordScreen() {
           <Text style={styles.backButtonText}>Back</Text>
         </Pressable>
         <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>Trip.com</Text>
+          <Text style={styles.logoText}>Shopno Jatra</Text>
         </View>
         <View style={styles.headerRightSpacer} />
       </View>

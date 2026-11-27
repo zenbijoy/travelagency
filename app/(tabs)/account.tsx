@@ -24,9 +24,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "../../src/hooks/useAuth";
+import { useTheme } from "../../src/context/ThemeContext";
+import { BRAND } from "../../src/constants/brand";
 import { userRepository } from "../../src/services/repositories/user";
 import { supabase } from "../../src/utils/supabase";
-import { BottomNav, AiPill } from "../../src/screens/Navigation";
 import { ProfileCompletenessBar } from "../../src/components/profile/ProfileCompletenessBar";
 import { ActiveDevicesModal } from "../../src/components/settings/ActiveDevicesModal";
 import { AccountDeletionModal } from "../../src/components/settings/AccountDeletionModal";
@@ -50,6 +51,7 @@ interface SettingsState {
 
 export default function ProfileScreen() {
   const { isDesktop } = useResponsive();
+  const { colors, isDark } = useTheme();
   const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -81,6 +83,10 @@ export default function ProfileScreen() {
   const [showActiveDevicesModal, setShowActiveDevicesModal] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
   const [isExportingData, setIsExportingData] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [ratingStars, setRatingStars] = useState(5);
 
   const handleDownloadData = async () => {
     try {
@@ -225,7 +231,7 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.shell}>
+      <SafeAreaView style={[styles.shell, { backgroundColor: colors.background }]}>
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={PRIMARY} />
         </View>
@@ -233,290 +239,474 @@ export default function ProfileScreen() {
     );
   }
 
+  const postTabMeta =
+    activePostTab === "Reviews"
+      ? {
+          icon: "star-outline" as const,
+          title: "Share a verified travel review",
+          sub: "Help fellow travelers pick the best stays & tours",
+          route: "/screens/reviews",
+        }
+      : activePostTab === "Travel Buddies"
+      ? {
+          icon: "people-outline" as const,
+          title: "Connect with travel buddies",
+          sub: "Message friends and plan group adventures",
+          route: "/(tabs)/messages",
+        }
+      : {
+          icon: "image-outline" as const,
+          title: "Post your first Moment",
+          sub: "Earn 25 Shopno Coins on your first story",
+          route: "/(tabs)/community?composer=open",
+        };
+
+  const handleVerify2FA = async () => {
+    if (verificationCode.trim().length < 6) {
+      Alert.alert("Invalid Code", "Please enter the 6-digit verification code.");
+      return;
+    }
+    await saveSetting("twoFactorAuth", true);
+    setShow2FAModal(false);
+    setShow2FACode(false);
+    setVerificationCode("");
+    Alert.alert("2FA Enabled", "Two-factor authentication is now active on your account.");
+  };
+
   return (
-    <SafeAreaView style={styles.shell}>
+    <SafeAreaView style={[styles.shell, { backgroundColor: colors.background }]}>
       <View style={isDesktop ? { maxWidth: 960, width: "100%", alignSelf: "center", flex: 1 } : { flex: 1 }}>
         {/* BEGIN: TopHeader */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <View style={styles.headerLeft}>
-          <View style={styles.headerAvatarWrap}>
-            <Ionicons name="person" size={32} color="#818cf8" />
+          <View
+            style={[
+              styles.headerAvatarWrap,
+              isDark && { backgroundColor: "#1E293B", borderColor: colors.border },
+            ]}
+          >
+            <Ionicons name="person" size={30} color={user ? "#818cf8" : colors.textSecondary} />
           </View>
           <View>
-            <Text style={styles.headerName}>
-              {profile?.full_name || user?.email?.split("@")[0] || "Member"}
+            <Text style={[styles.headerName, { color: colors.text }]}>
+              {user
+                ? profile?.full_name || user?.email?.split("@")[0] || "Traveler"
+                : `Welcome to ${BRAND.name.en}`}
             </Text>
-            <Pressable style={styles.manageBtn}>
-              <Text style={styles.manageBtnText}>Manage account</Text>
-              <RTLIcon name="chevron-forward" size={12} color="#94a3b8" />
-            </Pressable>
+            {user ? (
+              <Pressable
+                style={styles.manageBtn}
+                onPress={() => router.push("/screens/profile" as any)}
+                hitSlop={6}
+              >
+                <Text style={[styles.manageBtnText, { color: colors.textSecondary }]}>
+                  Manage account
+                </Text>
+                <RTLIcon name="chevron-forward" size={12} color={colors.textSecondary} />
+              </Pressable>
+            ) : (
+              <Text style={[styles.manageBtnText, { color: colors.textSecondary }]}>
+                Sign in to sync trips, coins & saved stays
+              </Text>
+            )}
           </View>
         </View>
         <View style={styles.headerRight}>
-          <Pressable onPress={() => router.push("/screens/customer-support")}><Ionicons name="help-buoy-outline" size={24} color="#475569" /></Pressable>
-          <Pressable onPress={() => router.push("/screens/settings")} style={styles.settingBtnWrap}>
-            <Ionicons name="settings-outline" size={24} color="#475569" />
-            <View style={styles.notificationDot} />
+          <Pressable onPress={() => router.push("/screens/customer-support" as any)} hitSlop={8}>
+            <Ionicons name="help-buoy-outline" size={24} color={colors.textSecondary} />
+          </Pressable>
+          <Pressable onPress={() => router.push("/screens/settings" as any)} style={styles.settingBtnWrap} hitSlop={8}>
+            <Ionicons name="settings-outline" size={24} color={colors.textSecondary} />
+            {!!user && <View style={[styles.notificationDot, { borderColor: colors.card }]} />}
           </Pressable>
         </View>
       </View>
       {/* END: TopHeader */}
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Profile Completeness Bar & Guidance */}
-        <ProfileCompletenessBar
-          profile={profile}
-          onAddPassportPress={() => router.push("/screens/profile?tab=identity" as any)}
-        />
+      <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: 140 }]} showsVerticalScrollIndicator={false}>
+        {!user ? (
+          <View
+            style={{
+              margin: 16,
+              padding: 20,
+              borderRadius: 20,
+              backgroundColor: colors.card,
+              borderWidth: 1,
+              borderColor: colors.border,
+              gap: 12,
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "700", color: colors.text }}>
+              Unlock Member Rewards & Synced Trips
+            </Text>
+            <Text style={{ fontSize: 13.5, lineHeight: 20, color: colors.textSecondary }}>
+              Sign in or create a free {BRAND.name.en} account to earn Shopno Coins, access e-tickets offline, and save favorite stays.
+            </Text>
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 4 }}>
+              <Pressable
+                onPress={() => router.push("/(auth)/login" as any)}
+                style={{
+                  flex: 1,
+                  backgroundColor: "#2563EB",
+                  paddingVertical: 13,
+                  borderRadius: 12,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "700" }}>Sign In</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => router.push("/(auth)/register" as any)}
+                style={{
+                  flex: 1,
+                  backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
+                  paddingVertical: 13,
+                  borderRadius: 12,
+                  alignItems: "center",
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}
+              >
+                <Text style={{ color: colors.text, fontSize: 14, fontWeight: "700" }}>
+                  Create Account
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          <>
+            {/* Profile Completeness Bar & Guidance */}
+            <ProfileCompletenessBar
+              profile={profile}
+              onAddPassportPress={() => router.push("/screens/profile?tab=identity" as any)}
+            />
 
-        {/* BEGIN: MembershipSection */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tierScroll}>
-          <Pressable onPress={() => router.push("/screens/rewards")}>
-            <LinearGradient
-              colors={["rgba(240, 244, 255, 0.8)", "rgba(224, 231, 255, 0.8)"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.silverCard}
-            >
-              <Ionicons name="shield-checkmark" size={100} color="rgba(40, 125, 250, 0.1)" style={styles.tierWatermark} />
-              <View style={styles.tierBadgeRow}>
-                <View style={styles.tierIconBox}>
-                  <Ionicons name="shield-checkmark" size={16} color="#fff" />
+            {/* BEGIN: MembershipSection */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tierScroll}>
+              <Pressable onPress={() => router.push("/screens/rewards" as any)}>
+                <LinearGradient
+                  colors={
+                    isDark
+                      ? ["rgba(30, 58, 138, 0.55)", "rgba(30, 41, 59, 0.9)"]
+                      : ["rgba(240, 244, 255, 0.9)", "rgba(224, 231, 255, 0.9)"]
+                  }
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={[styles.silverCard, isDark && { borderColor: colors.border }]}
+                >
+                  <Ionicons name="shield-checkmark" size={100} color="rgba(40, 125, 250, 0.12)" style={styles.tierWatermark} />
+                  <View style={styles.tierBadgeRow}>
+                    <View style={styles.tierIconBox}>
+                      <Ionicons name="shield-checkmark" size={16} color="#fff" />
+                    </View>
+                    <Text style={[styles.tierTitle, isDark && { color: "#93C5FD" }]}>
+                      {loyaltyAccount?.tier || "Explorer"}
+                    </Text>
+                  </View>
+                  <Text style={[styles.tierPromo, isDark && { color: "#E2E8F0" }]}>
+                    Your exclusive member{"\n"}travel perks & rewards
+                  </Text>
+                </LinearGradient>
+              </Pressable>
+
+              <Pressable onPress={() => router.push("/screens/rewards" as any)}>
+                <View style={[styles.promoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <View style={[styles.perforated, { backgroundColor: colors.background }]} />
+                  <View style={styles.promoIconBox}>
+                    <Ionicons name="bed" size={24} color="#f43f5e" />
+                  </View>
+                  <Text style={[styles.promoValue, { color: colors.text }]}>10% off</Text>
+                  <Text style={[styles.promoLabel, { color: colors.textSecondary }]}>hotel bookings</Text>
                 </View>
-                <Text style={styles.tierTitle}>Silver</Text>
-              </View>
-              <Text style={styles.tierPromo}>Your exclusive new-user{"\n"}special discounts</Text>
-            </LinearGradient>
-          </Pressable>
+              </Pressable>
+            </ScrollView>
+            {/* END: MembershipSection */}
 
-          <Pressable onPress={() => router.push("/screens/rewards")}>
-            <View style={styles.promoCard}>
-              <View style={styles.perforated} />
-              <View style={styles.promoIconBox}>
-                <Ionicons name="bed" size={24} color="#f43f5e" />
+            {/* BEGIN: RewardsSummary */}
+            <Pressable
+              onPress={() => router.push("/screens/rewards" as any)}
+              style={[styles.rewardsRow, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
+              <View style={[styles.rewardBlock, { borderRightWidth: 1, borderRightColor: colors.border }]}>
+                <View style={styles.rewardTop}>
+                  <View style={styles.tripCoinIcon}><Text style={styles.tripCoinText}>S</Text></View>
+                  <Text style={[styles.rewardValue, { color: colors.text }]}>
+                    ≈৳{Math.round(((loyaltyAccount?.points_balance ?? 0) * 0.1))}
+                  </Text>
+                  <Text style={[styles.rewardMeta, { color: colors.textSecondary }]}>
+                    ({(loyaltyAccount?.points_balance ?? 0).toLocaleString()} কয়েন)
+                  </Text>
+                </View>
+                <Text style={[styles.rewardSub, { color: colors.textSecondary }]}>
+                  ১০০ পয়েন্ট = ৳১০ • বুকিংয়ে ক্যাশ সাশ্রয়
+                </Text>
               </View>
-              <Text style={styles.promoValue}>10% off</Text>
-              <Text style={styles.promoLabel}>hotel bookings</Text>
-            </View>
-          </Pressable>
-        </ScrollView>
-        {/* END: MembershipSection */}
-
-        {/* BEGIN: RewardsSummary */}
-        <Pressable onPress={() => router.push("/screens/rewards")} style={styles.rewardsRow}>
-          <View style={[styles.rewardBlock, { borderRightWidth: 1, borderRightColor: "#f1f5f9" }]}>
-            <View style={styles.rewardTop}>
-              <View style={styles.tripCoinIcon}><Text style={styles.tripCoinText}>T</Text></View>
-              <Text style={styles.rewardValue}>≈৳{Math.round(((loyaltyAccount?.points_balance || 1200) * 0.1))}</Text>
-              <Text style={styles.rewardMeta}>({(loyaltyAccount?.points_balance || 1200).toLocaleString()} কয়েন)</Text>
-            </View>
-            <Text style={styles.rewardSub}>১০০ পয়েন্ট = ৳১০ • বুকিংয়ে ক্যাশ সাশ্রয়</Text>
-          </View>
-          <View style={styles.rewardBlockSmall}>
-            <View style={styles.rewardTop}>
-              <View style={styles.percentBadge}><Text style={styles.percentText}>%</Text></View>
-              <Text style={styles.rewardValue}>{promoCount}</Text>
-            </View>
-            <Text style={styles.rewardSub}>Promo Codes</Text>
-          </View>
-        </Pressable>
-        {/* END: RewardsSummary */}
+              <View style={styles.rewardBlockSmall}>
+                <View style={styles.rewardTop}>
+                  <View style={styles.percentBadge}><Text style={styles.percentText}>%</Text></View>
+                  <Text style={[styles.rewardValue, { color: colors.text }]}>{promoCount}</Text>
+                </View>
+                <Text style={[styles.rewardSub, { color: colors.textSecondary }]}>Promo Codes</Text>
+              </View>
+            </Pressable>
+            {/* END: RewardsSummary */}
+          </>
+        )}
 
         {/* BEGIN: MainNavList */}
-        <View style={styles.navList}>
+        <View style={[styles.navList, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <NavListItem
             icon="calendar"
             label="All bookings"
-            color="#eff6ff"
+            color={isDark ? "rgba(37,99,235,0.18)" : "#eff6ff"}
             iconColor="#2563eb"
+            colors={colors}
             onPress={() => router.push("/(tabs)/trips" as any)}
           />
           <NavListItem
             icon="time"
             label="Upcoming"
-            color="#eef2ff"
+            color={isDark ? "rgba(79,70,229,0.18)" : "#eef2ff"}
             iconColor="#4f46e5"
+            colors={colors}
             onPress={() => router.push("/(tabs)/trips" as any)}
           />
           <NavListItem
             icon="eye"
             label="Recently viewed"
-            color="#f0f9ff"
+            color={isDark ? "rgba(14,165,233,0.18)" : "#f0f9ff"}
             iconColor="#0ea5e9"
             badge="L"
-            onPress={() => router.push("/screens/search-stays")}
+            colors={colors}
+            onPress={() => router.push("/screens/search-stays" as any)}
           />
-          <View style={styles.navDivider} />
+          <View style={[styles.navDivider, { backgroundColor: colors.border }]} />
           <NavListItem
             icon="card-outline"
             label="My cards"
             isOutline
+            colors={colors}
             onPress={() => router.push("/screens/payments-enhanced" as any)}
           />
           <NavListItem
             icon="business-outline"
             label="Partner Agencies & Hotels"
             isOutline
-            onPress={() => router.push("/screens/agencies")}
+            colors={colors}
+            onPress={() => router.push("/screens/agencies" as any)}
           />
           <NavListItem
             icon="heart-outline"
             label="Saved"
             isOutline
-            onPress={() => router.push("/screens/search-stays")}
+            colors={colors}
+            onPress={() => router.push("/screens/saved" as any)}
           />
         </View>
         {/* END: MainNavList */}
 
         {/* BEGIN: PerksSection */}
         <View style={styles.perksSection}>
-          <Text style={styles.sectionHeading}>Perks</Text>
+          <Text style={[styles.sectionHeading, { color: colors.text }]}>Perks</Text>
           <NavListItem
             icon="person-add-outline"
             label="Invite & Earn"
             isOutline
-            onPress={() => router.push("/screens/invite-earn")}
+            colors={colors}
+            onPress={() => router.push("/screens/invite-earn" as any)}
           />
           <NavListItem
             icon="refresh-outline"
-            label="Redeem Trip Coins"
+            label="Redeem Shopno Coins"
             isOutline
-            onPress={() => router.push("/screens/rewards")}
+            colors={colors}
+            onPress={() => router.push("/screens/rewards" as any)}
           />
           <NavListItem
             icon="gift-outline"
             label="Rewards Tier & Perks"
             isOutline
-            onPress={() => router.push("/screens/rewards")}
+            colors={colors}
+            onPress={() => router.push("/screens/rewards" as any)}
           />
         </View>
         {/* END: PerksSection */}
 
         {/* BEGIN: MyPostsSection */}
-        <View style={styles.perksSection}>
-          <View style={styles.sectionHeadingRow}>
-            <Text style={styles.sectionHeading}>My posts</Text>
-            <RTLIcon name="chevron-forward" size={20} color="#cbd5e1" />
-          </View>
+        {!!user && (
+          <View style={styles.perksSection}>
+            <View style={styles.sectionHeadingRow}>
+              <Text style={[styles.sectionHeading, { color: colors.text }]}>My posts</Text>
+              <RTLIcon name="chevron-forward" size={20} color={colors.textSecondary} />
+            </View>
 
-          <View style={styles.tabContainer}>
-            {["Moments", "Reviews", "Travel Buddies"].map((t) => (
-              <Pressable
-                key={t}
-                onPress={() => setActivePostTab(t)}
-                style={[styles.postTab, activePostTab === t && styles.postTabActive]}
-              >
-                <Text style={[styles.postTabText, activePostTab === t && styles.postTabTextActive]}>
-                  {t}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+            <View style={styles.tabContainer}>
+              {["Moments", "Reviews", "Travel Buddies"].map((t) => (
+                <Pressable
+                  key={t}
+                  onPress={() => setActivePostTab(t)}
+                  style={[
+                    styles.postTab,
+                    { backgroundColor: isDark ? "#1E293B" : "#f1f5f9" },
+                    activePostTab === t && styles.postTabActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.postTabText,
+                      { color: colors.textSecondary },
+                      activePostTab === t && styles.postTabTextActive,
+                    ]}
+                  >
+                    {t}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
 
-          <View style={styles.momentCta}>
-            <View style={styles.momentCtaLeft}>
-              <View style={styles.momentIconBox}>
-                <Ionicons name="image-outline" size={24} color="#3b82f6" />
-                <View style={styles.momentAddBadge}>
-                  <Ionicons name="add" size={10} color="#fff" />
+            <View
+              style={[
+                styles.momentCta,
+                isDark && { backgroundColor: "rgba(37, 99, 235, 0.14)", borderColor: colors.border },
+              ]}
+            >
+              <View style={[styles.momentCtaLeft, { flex: 1, paddingRight: 10 }]}>
+                <View
+                  style={[
+                    styles.momentIconBox,
+                    isDark && { backgroundColor: colors.card, borderColor: colors.border },
+                  ]}
+                >
+                  <Ionicons name={postTabMeta.icon} size={24} color="#3b82f6" />
+                  <View style={styles.momentAddBadge}>
+                    <Ionicons name="add" size={10} color="#fff" />
+                  </View>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.momentTitle, { color: colors.text }]}>
+                    {postTabMeta.title}
+                  </Text>
+                  <Text style={[styles.momentMeta, { color: colors.textSecondary }]}>
+                    {postTabMeta.sub}
+                  </Text>
                 </View>
               </View>
-              <View>
-                <Text style={styles.momentTitle}>Post your first Moment</Text>
-                <Text style={styles.momentMeta}>earn <Text style={styles.momentHighlight}>25 Trip Coins</Text></Text>
-              </View>
+              <Pressable
+                style={styles.momentGoBtn}
+                onPress={() => router.push(postTabMeta.route as any)}
+              >
+                <Text style={styles.momentGoText}>Go</Text>
+              </Pressable>
             </View>
-            <Pressable style={styles.momentGoBtn}><Text style={styles.momentGoText}>Go</Text></Pressable>
-          </View>
 
-          <NavListItem
-            icon="pencil-outline"
-            label="Creator center"
-            isOutline
-            onPress={() => router.push("/screens/community" as any)}
-          />
-        </View>
+            <NavListItem
+              icon="pencil-outline"
+              label="Creator center"
+              isOutline
+              colors={colors}
+              onPress={() => router.push("/(tabs)/community" as any)}
+            />
+          </View>
+        )}
         {/* END: MyPostsSection */}
 
         {/* BEGIN: AboutTermsSection */}
         <View style={styles.perksSection}>
-          <Text style={styles.sectionHeading}>About & terms</Text>
+          <Text style={[styles.sectionHeading, { color: colors.text }]}>About & terms</Text>
           <NavListItem
             icon="information-circle-outline"
-            label="About Trip.com"
+            label={`About ${BRAND.name.en}`}
             isOutline
-            onPress={() => router.push("/screens/settings")}
+            colors={colors}
+            onPress={() => setShowAboutModal(true)}
           />
           <NavListItem
             icon="star-outline"
             label="Rate This App"
             isOutline
-            onPress={() => Alert.alert("App Review", "Thank you for rating our Travel platform 5 stars!")}
+            colors={colors}
+            onPress={() => setShowRateModal(true)}
           />
           <NavListItem
             icon="document-text-outline"
             label="Terms & conditions"
             isOutline
-            onPress={() => router.push("/screens/settings")}
+            colors={colors}
+            onPress={() => setShowTermsModal(true)}
           />
         </View>
         {/* END: AboutTermsSection */}
 
+        {!!user && (
+          <>
+            <View style={{ height: 24 }} />
+
+            {/* Account Security & Privacy Section */}
+            <View style={styles.perksSection}>
+              <Text style={[styles.sectionHeading, { color: colors.text }]}>Account & Security</Text>
+              <NavListItem
+                icon="hardware-chip-outline"
+                label="Logged-in Devices (লগইন করা ডিভাইস)"
+                isOutline
+                badge="Active"
+                colors={colors}
+                onPress={() => setShowActiveDevicesModal(true)}
+              />
+              <NavListItem
+                icon="cloud-download-outline"
+                label={isExportingData ? "Preparing Data..." : "Download My Data (আমার ডাটা ডাউনলোড করুন)"}
+                isOutline
+                colors={colors}
+                onPress={handleDownloadData}
+              />
+            </View>
+
+            {/* Original Action Buttons for context accessibility */}
+            <View style={styles.dangerZone}>
+              <Pressable
+                style={[styles.settingItem, { backgroundColor: colors.card }]}
+                onPress={() => setChangePasswordModal(true)}
+              >
+                <View style={[styles.settingIcon, { backgroundColor: isDark ? "#1E293B" : "#f1f5f9" }]}>
+                  <Ionicons name="key-outline" size={20} color={colors.textSecondary} />
+                </View>
+                <Text style={[styles.settingLabel, { color: colors.text }]}>Change Password</Text>
+                <RTLIcon name="chevron-forward" size={20} color={colors.textSecondary} />
+              </Pressable>
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+              <Pressable
+                style={[styles.settingItem, { backgroundColor: colors.card }]}
+                onPress={handleLogout}
+              >
+                <View style={[styles.settingIcon, { backgroundColor: "#ef444415" }]}>
+                  <Ionicons name="log-out-outline" size={20} color="#ef4444" />
+                </View>
+                <Text style={[styles.settingLabel, { color: "#ef4444" }]}>Logout</Text>
+                <RTLIcon name="chevron-forward" size={20} color={colors.textSecondary} />
+              </Pressable>
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+              <Pressable
+                style={[styles.settingItem, { backgroundColor: colors.card }]}
+                onPress={() => setShowDeleteAccountModal(true)}
+              >
+                <View style={[styles.settingIcon, { backgroundColor: isDark ? "rgba(220,38,38,0.18)" : "#fee2e2" }]}>
+                  <Ionicons name="trash-outline" size={20} color="#dc2626" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.settingLabel, { color: "#dc2626", fontWeight: "700" }]}>
+                    Delete Account (অ্যাকাউন্ট মুছুন)
+                  </Text>
+                  <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                    Apple & Google Play compliance
+                  </Text>
+                </View>
+                <RTLIcon name="chevron-forward" size={20} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+          </>
+        )}
+
         <View style={{ height: 40 }} />
-
-        {/* Account Security & Privacy Section */}
-        <View style={styles.perksSection}>
-          <Text style={styles.sectionHeading}>Account & Security</Text>
-          <NavListItem
-            icon="hardware-chip-outline"
-            label="Logged-in Devices (লগইন করা ডিভাইস)"
-            isOutline
-            badge="Active"
-            onPress={() => setShowActiveDevicesModal(true)}
-          />
-          <NavListItem
-            icon="cloud-download-outline"
-            label={isExportingData ? "Preparing Data..." : "Download My Data (আমার ডাটা ডাউনলোড করুন)"}
-            isOutline
-            onPress={handleDownloadData}
-          />
-        </View>
-
-        {/* Original Action Buttons for context accessibility */}
-        <View style={styles.dangerZone}>
-          <Pressable style={styles.settingItem} onPress={() => setChangePasswordModal(true)}>
-            <View style={[styles.settingIcon, { backgroundColor: "#f1f5f9" }]}>
-              <Ionicons name="key-outline" size={20} color={SLATE_600} />
-            </View>
-            <Text style={styles.settingLabel}>Change Password</Text>
-            <RTLIcon name="chevron-forward" size={20} color="#cbd5e1" />
-          </Pressable>
-          <View style={styles.divider} />
-          <Pressable style={styles.settingItem} onPress={handleLogout}>
-            <View style={[styles.settingIcon, { backgroundColor: "#ef444415" }]}>
-              <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-            </View>
-            <Text style={[styles.settingLabel, { color: "#ef4444" }]}>Logout</Text>
-            <RTLIcon name="chevron-forward" size={20} color="#cbd5e1" />
-          </Pressable>
-          <View style={styles.divider} />
-          <Pressable style={styles.settingItem} onPress={() => setShowDeleteAccountModal(true)}>
-            <View style={[styles.settingIcon, { backgroundColor: "#fee2e2" }]}>
-              <Ionicons name="trash-outline" size={20} color="#dc2626" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.settingLabel, { color: "#dc2626", fontWeight: "700" }]}>
-                Delete Account (অ্যাকাউন্ট মুছুন)
-              </Text>
-              <Text style={{ fontSize: 11, color: "#94a3b8" }}>
-                Apple & Google Play compliance
-              </Text>
-            </View>
-            <RTLIcon name="chevron-forward" size={20} color="#cbd5e1" />
-          </Pressable>
-        </View>
-
-        <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* Modals remain same as original for functionality */}
@@ -535,7 +725,9 @@ export default function ProfileScreen() {
           newPassword, setNewPassword,
           confirmPassword, setConfirmPassword,
           handleChangePassword,
-          verificationCode, setVerificationCode
+          verificationCode, setVerificationCode,
+          handleVerify2FA,
+          colors,
         }}
       />
 
@@ -548,39 +740,142 @@ export default function ProfileScreen() {
         onClose={() => setShowDeleteAccountModal(false)}
       />
 
-      {!isDesktop && <AiPill color={PRIMARY} />}
-      {!isDesktop && <BottomNav active="Account" color={PRIMARY} />}
+      {/* About Modal */}
+      <Modal visible={showAboutModal} transparent animationType="fade" onRequestClose={() => setShowAboutModal(false)}>
+        <Pressable
+          style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.5)", justifyContent: "center", padding: 24 }}
+          onPress={() => setShowAboutModal(false)}
+        >
+          <View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 22, gap: 10 }}>
+            <Text style={{ fontSize: 19, fontWeight: "800", color: colors.text }}>
+              {BRAND.name.en} ({BRAND.name.bn})
+            </Text>
+            <Text style={{ fontSize: 13.5, lineHeight: 20, color: colors.textSecondary }}>
+              Your complete Bangladesh & global travel companion — flights, stays, trains, buses, tour guides, digital passport, and off-grid emergency safety.
+            </Text>
+            <Text style={{ fontSize: 12.5, color: colors.textSecondary }}>
+              Hotline: {BRAND.contact.phone} • {BRAND.contact.supportEmail}
+            </Text>
+            <Pressable
+              onPress={() => setShowAboutModal(false)}
+              style={{ backgroundColor: "#2563EB", paddingVertical: 12, borderRadius: 12, alignItems: "center", marginTop: 6 }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Close</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Terms Modal */}
+      <Modal visible={showTermsModal} transparent animationType="fade" onRequestClose={() => setShowTermsModal(false)}>
+        <Pressable
+          style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.5)", justifyContent: "center", padding: 24 }}
+          onPress={() => setShowTermsModal(false)}
+        >
+          <View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 22, gap: 10, maxHeight: "75%" }}>
+            <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>
+              Terms & Conditions
+            </Text>
+            <ScrollView style={{ maxHeight: 260 }}>
+              <Text style={{ fontSize: 13, lineHeight: 20, color: colors.textSecondary }}>
+                1. Bookings made on {BRAND.name.en} are subject to carrier, hotel, and tour operator cancellation policies shown at checkout.{"\n\n"}
+                2. Shopno Coins earned from completed bookings and referrals can be redeemed toward eligible stays, flights, and packages.{"\n\n"}
+                3. Personal identity & passport details are encrypted and used strictly for verified ticketing and travel safety.
+              </Text>
+            </ScrollView>
+            <Pressable
+              onPress={() => setShowTermsModal(false)}
+              style={{ backgroundColor: "#2563EB", paddingVertical: 12, borderRadius: 12, alignItems: "center" }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700" }}>I Understand</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Rate App Modal */}
+      <Modal visible={showRateModal} transparent animationType="fade" onRequestClose={() => setShowRateModal(false)}>
+        <Pressable
+          style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.5)", justifyContent: "center", padding: 24 }}
+          onPress={() => setShowRateModal(false)}
+        >
+          <View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 22, gap: 14, alignItems: "center" }}>
+            <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>
+              Rate {BRAND.name.en}
+            </Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary, textAlign: "center" }}>
+              Tap a star to let us know how your travel planning experience feels!
+            </Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Pressable key={star} onPress={() => setRatingStars(star)} hitSlop={6}>
+                  <Ionicons
+                    name={star <= ratingStars ? "star" : "star-outline"}
+                    size={32}
+                    color="#F59E0B"
+                  />
+                </Pressable>
+              ))}
+            </View>
+            <Pressable
+              onPress={() => {
+                setShowRateModal(false);
+                Alert.alert("Thank You!", `You rated ${BRAND.name.en} ${ratingStars}/5 stars.`);
+              }}
+              style={{ backgroundColor: "#2563EB", paddingVertical: 12, paddingHorizontal: 28, borderRadius: 12, width: "100%", alignItems: "center" }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Submit Rating</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
       </View>
     </SafeAreaView>
   );
 }
 
-function NavListItem({ icon, label, color, iconColor, badge, isOutline, onPress }: any) {
+function NavListItem({ icon, label, color, iconColor, badge, isOutline, onPress, colors }: any) {
   return (
     <Pressable style={styles.navItem} onPress={onPress}>
       <View style={[styles.navIconBox, { backgroundColor: color || "transparent" }]}>
-        <Ionicons name={icon} size={isOutline ? 28 : 24} color={iconColor || "#475569"} />
+        <Ionicons name={icon} size={isOutline ? 28 : 24} color={iconColor || colors?.textSecondary || "#475569"} />
         {badge && (
           <View style={styles.navBadge}><Text style={styles.navBadgeText}>{badge}</Text></View>
         )}
       </View>
-      <Text style={[styles.navLabel, isOutline && { fontWeight: "500", color: "#334155" }]}>{label}</Text>
-      <RTLIcon name="chevron-forward" size={20} color="#cbd5e1" />
+      <Text
+        style={[
+          styles.navLabel,
+          { color: colors?.text || "#0f172a" },
+          isOutline && { fontWeight: "500" },
+        ]}
+      >
+        {label}
+      </Text>
+      <RTLIcon name="chevron-forward" size={20} color={colors?.textSecondary || "#cbd5e1"} />
     </Pressable>
   );
 }
 
 function SettingsModals({ modals, state }: any) {
+  const modalBg = state.colors?.card || "#fff";
+  const modalText = state.colors?.text || "#111827";
+  const modalBorder = state.colors?.border || "#f1f5f9";
   return (
     <>
       {/* Language Modal */}
       <Modal visible={modals.showLanguageModal} transparent animationType="slide" onRequestClose={() => modals.setShowLanguageModal(false)}>
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>Select Language</Text><Pressable onPress={() => modals.setShowLanguageModal(false)}><Ionicons name="close" size={24} color="#111827" /></Pressable></View>
+        <SafeAreaView style={[styles.modalContainer, { backgroundColor: modalBg }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: modalBorder }]}>
+            <Text style={[styles.modalTitle, { color: modalText }]}>Select Language</Text>
+            <Pressable onPress={() => modals.setShowLanguageModal(false)}>
+              <Ionicons name="close" size={24} color={modalText} />
+            </Pressable>
+          </View>
           <ScrollView style={styles.modalContent}>
             {state.languages.map((lang: string) => (
-              <Pressable key={lang} style={styles.modalOption} onPress={() => { state.saveSetting("language", lang); modals.setShowLanguageModal(false); }}>
-                <Text style={[styles.modalOptionText, state.settings.language === lang && { color: PRIMARY, fontWeight: "700" }]}>{lang}</Text>
+              <Pressable key={lang} style={[styles.modalOption, { borderBottomColor: modalBorder }]} onPress={() => { state.saveSetting("language", lang); modals.setShowLanguageModal(false); }}>
+                <Text style={[styles.modalOptionText, { color: modalText }, state.settings.language === lang && { color: PRIMARY, fontWeight: "700" }]}>{lang}</Text>
                 {state.settings.language === lang && <Ionicons name="checkmark" size={20} color={PRIMARY} />}
               </Pressable>
             ))}
@@ -590,12 +885,17 @@ function SettingsModals({ modals, state }: any) {
 
       {/* Currency Modal */}
       <Modal visible={modals.showCurrencyModal} transparent animationType="slide" onRequestClose={() => modals.setShowCurrencyModal(false)}>
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>Select Currency</Text><Pressable onPress={() => modals.setShowCurrencyModal(false)}><Ionicons name="close" size={24} color="#111827" /></Pressable></View>
+        <SafeAreaView style={[styles.modalContainer, { backgroundColor: modalBg }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: modalBorder }]}>
+            <Text style={[styles.modalTitle, { color: modalText }]}>Select Currency</Text>
+            <Pressable onPress={() => modals.setShowCurrencyModal(false)}>
+              <Ionicons name="close" size={24} color={modalText} />
+            </Pressable>
+          </View>
           <ScrollView style={styles.modalContent}>
             {state.currencies.map((curr: any) => (
-              <Pressable key={curr.code} style={styles.modalOption} onPress={() => { state.saveSetting("currency", curr.code); modals.setShowCurrencyModal(false); }}>
-                <View><Text style={[styles.modalOptionText, state.settings.currency === curr.code && { color: PRIMARY, fontWeight: "700" }]}>{curr.name}</Text><Text style={styles.modalOptionSubtitle}>{curr.code}</Text></View>
+              <Pressable key={curr.code} style={[styles.modalOption, { borderBottomColor: modalBorder }]} onPress={() => { state.saveSetting("currency", curr.code); modals.setShowCurrencyModal(false); }}>
+                <View><Text style={[styles.modalOptionText, { color: modalText }, state.settings.currency === curr.code && { color: PRIMARY, fontWeight: "700" }]}>{curr.name}</Text><Text style={styles.modalOptionSubtitle}>{curr.code}</Text></View>
                 {state.settings.currency === curr.code && <Ionicons name="checkmark" size={20} color={PRIMARY} />}
               </Pressable>
             ))}
@@ -605,12 +905,17 @@ function SettingsModals({ modals, state }: any) {
 
       {/* Change Password Modal */}
       <Modal visible={modals.changePasswordModal} transparent animationType="slide" onRequestClose={() => modals.setChangePasswordModal(false)}>
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>Change Password</Text><Pressable onPress={() => modals.setChangePasswordModal(false)}><Ionicons name="close" size={24} color="#111827" /></Pressable></View>
+        <SafeAreaView style={[styles.modalContainer, { backgroundColor: modalBg }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: modalBorder }]}>
+            <Text style={[styles.modalTitle, { color: modalText }]}>Change Password</Text>
+            <Pressable onPress={() => modals.setChangePasswordModal(false)}>
+              <Ionicons name="close" size={24} color={modalText} />
+            </Pressable>
+          </View>
           <View style={styles.modalContent}>
-            <TextInput style={styles.input} placeholder="Current Password" secureTextEntry value={state.currentPassword} onChangeText={state.setCurrentPassword} placeholderTextColor="#9ca3af" />
-            <TextInput style={styles.input} placeholder="New Password" secureTextEntry value={state.newPassword} onChangeText={state.setNewPassword} placeholderTextColor="#9ca3af" />
-            <TextInput style={styles.input} placeholder="Confirm Password" secureTextEntry value={state.confirmPassword} onChangeText={state.setConfirmPassword} placeholderTextColor="#9ca3af" />
+            <TextInput style={[styles.input, { color: modalText, borderColor: modalBorder, backgroundColor: state.colors?.background || "#f8fafc" }]} placeholder="Current Password" secureTextEntry value={state.currentPassword} onChangeText={state.setCurrentPassword} placeholderTextColor="#9ca3af" />
+            <TextInput style={[styles.input, { color: modalText, borderColor: modalBorder, backgroundColor: state.colors?.background || "#f8fafc" }]} placeholder="New Password" secureTextEntry value={state.newPassword} onChangeText={state.setNewPassword} placeholderTextColor="#9ca3af" />
+            <TextInput style={[styles.input, { color: modalText, borderColor: modalBorder, backgroundColor: state.colors?.background || "#f8fafc" }]} placeholder="Confirm Password" secureTextEntry value={state.confirmPassword} onChangeText={state.setConfirmPassword} placeholderTextColor="#9ca3af" />
             <Pressable style={styles.primaryButton} onPress={state.handleChangePassword}><Text style={styles.primaryButtonText}>Change Password</Text></Pressable>
           </View>
         </SafeAreaView>
@@ -618,16 +923,21 @@ function SettingsModals({ modals, state }: any) {
 
       {/* 2FA Modal */}
       <Modal visible={modals.show2FAModal} transparent animationType="slide" onRequestClose={() => modals.setShow2FAModal(false)}>
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>Two-Factor Authentication</Text><Pressable onPress={() => modals.setShow2FAModal(false)}><Ionicons name="close" size={24} color="#111827" /></Pressable></View>
+        <SafeAreaView style={[styles.modalContainer, { backgroundColor: modalBg }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: modalBorder }]}>
+            <Text style={[styles.modalTitle, { color: modalText }]}>Two-Factor Authentication</Text>
+            <Pressable onPress={() => modals.setShow2FAModal(false)}>
+              <Ionicons name="close" size={24} color={modalText} />
+            </Pressable>
+          </View>
           <View style={styles.modalContent}>
             {!modals.show2FACode ? (
               <><Text style={styles.description}>Two-factor authentication adds an extra layer of security to your account</Text>
                 <Pressable style={styles.primaryButton} onPress={() => modals.setShow2FACode(true)}><Text style={styles.primaryButtonText}>Enable 2FA</Text></Pressable></>
             ) : (
               <><Text style={styles.description}>Enter the verification code from your authenticator app</Text>
-                <TextInput style={styles.input} placeholder="000000" keyboardType="number-pad" maxLength={6} value={state.verificationCode} onChangeText={state.setVerificationCode} placeholderTextColor="#9ca3af" />
-                <Pressable style={styles.primaryButton}><Text style={styles.primaryButtonText}>Verify & Enable</Text></Pressable></>
+                <TextInput style={[styles.input, { color: modalText, borderColor: modalBorder, backgroundColor: state.colors?.background || "#f8fafc" }]} placeholder="000000" keyboardType="number-pad" maxLength={6} value={state.verificationCode} onChangeText={state.setVerificationCode} placeholderTextColor="#9ca3af" />
+                <Pressable style={styles.primaryButton} onPress={state.handleVerify2FA}><Text style={styles.primaryButtonText}>Verify & Enable</Text></Pressable></>
             )}
           </View>
         </SafeAreaView>

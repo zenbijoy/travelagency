@@ -19,6 +19,7 @@
   "include": [
     "src",
     "App.tsx",
+    "nativewind-env.d.ts",
     "../nativewind-env.d.ts"
   ],
   "exclude": [

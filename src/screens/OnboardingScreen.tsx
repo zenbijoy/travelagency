@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
@@ -81,6 +82,7 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const data = ONBOARDING_DATA[step];
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
   const { isDark, isOled } = useTheme();
 
   const themeBg = isOled ? "#000000" : isDark ? "#0f172a" : "#ffffff";
@@ -228,7 +230,15 @@ export default function OnboardingScreen() {
       </Animated.View>
 
       {/* Action Area */}
-      <View style={[styles.footer, { backgroundColor: themeCardBg }]}>
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor: themeCardBg,
+            paddingBottom: Math.max(insets.bottom + 12, 24),
+          },
+        ]}
+      >
         {/* Progress Indicator Dots */}
         <View style={styles.paginationDots}>
           {ONBOARDING_DATA.map((_, index) => (
@@ -252,13 +262,6 @@ export default function OnboardingScreen() {
             {step === ONBOARDING_DATA.length - 1 ? "শুরু করুন (Get Started)" : "পরবর্তী (Next)"}
           </Text>
         </TouchableOpacity>
-      </View>
-
-      {/* System Nav Bar */}
-      <View style={[styles.systemNav, { borderTopColor: isDark ? "#1e293b" : "#F3F4F6", backgroundColor: themeCardBg }]}>
-        <View style={styles.backIndicator} />
-        <View style={styles.homeIndicator} />
-        <View style={styles.recentIndicator} />
       </View>
     </View>
   );

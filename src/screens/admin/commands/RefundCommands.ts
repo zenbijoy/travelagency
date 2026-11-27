@@ -24,11 +24,12 @@ export class ApproveRefundCommand implements AdminCommand<{ id: string; status: 
         approved_by: admin.id,
         approved_at: timestamp,
         approval_notes: this.notes,
+        updated_at: timestamp,
       })
       .eq("id", this.entityId);
 
     if (error) {
-      console.warn("Supabase refund approve error (handled):", error);
+      throw new Error(error.message || "Failed to approve refund request.");
     }
 
     return { id: this.entityId, status: RefundStatus.APPROVED };
@@ -66,11 +67,12 @@ export class ProcessRefundCommand implements AdminCommand<{ id: string; status: 
         approved_by: admin.id,
         approved_at: timestamp,
         approval_notes: this.notes,
+        updated_at: timestamp,
       })
       .eq("id", this.entityId);
 
     if (error) {
-      console.warn("Supabase refund process error (handled):", error);
+      throw new Error(error.message || "Failed to process refund request.");
     }
 
     return { id: this.entityId, status: RefundStatus.PROCESSING };
@@ -108,11 +110,12 @@ export class RejectRefundCommand implements AdminCommand<{ id: string; status: s
         rejected_by: admin.id,
         rejected_at: timestamp,
         rejection_notes: this.reason,
+        updated_at: timestamp,
       })
       .eq("id", this.entityId);
 
     if (error) {
-      console.warn("Supabase refund reject error (handled):", error);
+      throw new Error(error.message || "Failed to reject refund request.");
     }
 
     return { id: this.entityId, status: RefundStatus.REJECTED };
@@ -142,17 +145,19 @@ export class HoldRefundCommand implements AdminCommand<{ id: string; status: str
   ) {}
 
   async execute(admin: AdminUser) {
+    const timestamp = new Date().toISOString();
     const { error } = await supabase
       .from("refund_requests")
       .update({
         status: "on_hold" as any,
         rejected_by: admin.id,
         rejection_notes: this.reason,
+        updated_at: timestamp,
       })
       .eq("id", this.entityId);
 
     if (error) {
-      console.warn("Supabase refund hold error (handled):", error);
+      throw new Error(error.message || "Failed to place refund request on hold.");
     }
 
     return { id: this.entityId, status: "on_hold" };

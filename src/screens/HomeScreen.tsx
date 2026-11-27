@@ -20,6 +20,8 @@ import { router } from "expo-router";
 
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../hooks/useAuth";
+import { BRAND } from "../constants/brand";
+import { useNotificationStore } from "../store/notificationStore";
 import { FONTS } from "../theme/typography";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -58,7 +60,7 @@ const ROW_2_SERVICES: ServiceItem[] = [
   { id: "attractions_tours", label: "Attractions\n& Tours", icon: "people", route: "/screens/recommended-tours" },
   { id: "car_rentals", label: "Car Rentals", icon: "car", route: "/screens/car-rentals" },
   { id: "package_tours", label: "Package\nTours", icon: "earth", route: "/screens/packages" },
-  { id: "more", label: "+7 more", icon: "apps", route: "modal" },
+  { id: "more", label: "More", icon: "apps", route: "modal" },
 ];
 
 const MORE_SERVICES: Array<{
@@ -97,6 +99,13 @@ const MORE_SERVICES: Array<{
     route: "/screens/abroad-agency",
   },
   {
+    id: "ride-hailing",
+    title: "Ride-Hailing & Mobility",
+    subtitle: "Instant bike, CNG, sedan & airport chauffeur",
+    icon: "car-sport-outline",
+    route: "/screens/car-rentals",
+  },
+  {
     id: "local-marketplace",
     title: "Local Marketplace",
     subtitle: "Authentic artisan goods & gear",
@@ -104,11 +113,32 @@ const MORE_SERVICES: Array<{
     route: "/screens/local-marketplace",
   },
   {
+    id: "rider-portal",
+    title: "Rider & Delivery Partner",
+    subtitle: "Driver shift cockpit & earnings radar",
+    icon: "bicycle-outline",
+    route: "/rider",
+  },
+  {
+    id: "hotel-pms",
+    title: "Hotel PMS & Partner Portal",
+    subtitle: "Tape chart, room matrix, housekeeping & folios",
+    icon: "business-outline",
+    route: "/hotel",
+  },
+  {
     id: "digital-passport",
     title: "Digital Passport",
     subtitle: "Secure encrypted travel wallet",
     icon: "card-outline",
     route: "/screens/digital-passport",
+  },
+  {
+    id: "off-grid-mesh",
+    title: "Off-Grid Mesh",
+    subtitle: "P2P BLE trail radar & zero-net chat",
+    icon: "radio-outline",
+    route: "/screens/off-grid-mesh",
   },
   {
     id: "emergency",
@@ -170,11 +200,11 @@ interface ActionIconItem {
 const ACTION_ICONS: ActionIconItem[] = [
   { id: "deals", label: "Deals", icon: "pricetag", route: "/screens/rewards" },
   { id: "events", label: "Events", icon: "calendar", route: "/screens/events" },
-  { id: "planner", label: "Trip.Planner", icon: "flash", route: "/screens/trip-planner" },
+  { id: "planner", label: "Shopno Planner", icon: "flash", route: "/screens/trip-planner" },
   { id: "trending", label: "Trending", icon: "trending-up", route: "/screens/recommended-tours" },
 ];
 
-// ─── DISCOVER CARDS ──────────────────────────────────────────────────────────
+// ─── DISCOVER CARDS ──────────────────────────────────────────────────
 interface DiscoverCard {
   id: string;
   badge?: string;
@@ -185,9 +215,7 @@ interface DiscoverCard {
   subtitle: string;
   promoTag?: string;
   buttonLabel: string;
-  imageUrl?: string;
-  imageLight?: any;
-  imageDark?: any;
+  imageUrl: string;
   route: string;
 }
 
@@ -198,41 +226,68 @@ const DISCOVER_CARDS: DiscoverCard[] = [
     pageIndicator: "1/3",
     titlePrimary: "Explore",
     titleAccent: "Asia",
-    subtitle: "Unforgettable journeys\nacross Asia",
+    subtitle: "Unforgettable journeys across Asia",
     promoTag: "🎁 Special Offers & Deals",
     buttonLabel: "View Deals →",
-    imageLight: require("../../assets/images/discover_asia_light.png"),
-    imageDark: require("../../assets/images/discover_asia_dark.png"),
+    imageUrl: "https://images.unsplash.com/photo-1528127269322-539801943592?w=600&auto=format&fit=crop&q=80",
     route: "/screens/packages",
   },
   {
-    id: "trip_tuesday",
+    id: "tuesday_deals",
     verified: true,
-    titlePrimary: "Trip.Tuesday",
-    subtitle: "Trip.Tuesday – $99 Flights to Canada & Asia ($40 Cou...",
-    buttonLabel: "SPECIAL PROMO",
-    imageLight: require("../../assets/images/discover_tuesday_light.png"),
-    imageDark: require("../../assets/images/discover_tuesday_dark.png"),
+    badge: "WEEKLY DROP",
+    pageIndicator: "2/3",
+    titlePrimary: "Tuesday",
+    titleAccent: "Deals",
+    subtitle: "Up to 35% off regional flights & getaways",
+    promoTag: "✈ Limited Fare Alert",
+    buttonLabel: "Explore Flights →",
+    imageUrl: "https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?w=600&auto=format&fit=crop&q=80",
     route: "/screens/flights",
+  },
+  {
+    id: "curated_bengal",
+    badge: "LOCAL PICK",
+    pageIndicator: "3/3",
+    titlePrimary: "Cox's Bazar",
+    titleAccent: "& Sylhet",
+    subtitle: "Curated boutique villas & tea-garden retreats",
+    promoTag: "🏝 Instant Confirmation",
+    buttonLabel: "Discover Stays →",
+    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80",
+    route: "/screens/hotels-homes",
   },
 ];
 
 // ─── MAIN HOMESCREEN COMPONENT ───────────────────────────────────────────────
 export function HomeScreen() {
   const { colors, isDark } = useTheme();
-  const { user } = useAuth();
+  const { user, refreshSession } = useAuth();
+  const unreadNotifs = useNotificationStore((s) => s.unreadCount);
+  const fetchNotifications = useNotificationStore((s) => s.fetchNotifications);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
+
+  const displayName =
+    user?.user_metadata?.full_name ||
+    (user?.email ? user.email.split("@")[0] : "");
+  const userInitial = displayName ? displayName.trim()[0].toUpperCase() : "";
 
   const onRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      await new Promise((resolve) => setTimeout(resolve, 800));
+    } catch {}
+    try {
+      const tasks: Array<Promise<any>> = [refreshSession()];
+      if (user?.id) {
+        tasks.push(fetchNotifications(user.id));
+      }
+      await Promise.allSettled(tasks);
     } finally {
       setIsRefreshing(false);
     }
-  }, []);
+  }, [user?.id, refreshSession, fetchNotifications]);
 
   const handleServicePress = (route: string) => {
     try {
@@ -263,18 +318,17 @@ export function HomeScreen() {
     router.push(route as any);
   };
 
-  const shellBg = isDark ? "#0A0A0C" : "#F8F9FA";
-  const headerBrandColor = isDark ? "#FFFFFF" : "#111827";
-  const headerSubtitleColor = isDark ? "#9CA3AF" : "#64748B";
+  const shellBg = isDark ? colors.background : "#F8F9FA";
 
   // Service grid card styling
-  const serviceCardBg = isDark ? GOLD.champagneBg : "#FFFFFF";
-  const serviceCardBorder = isDark ? "#F0E3CA" : "#FFFFFF";
+  const serviceCardBg = isDark ? colors.card : "#FFFFFF";
+  const serviceCardBorder = isDark ? colors.border : "#FFFFFF";
+  const serviceLabelColor = isDark ? colors.text : "#1F2937";
 
   return (
     <SafeAreaView style={[styles.shell, { backgroundColor: shellBg }]} edges={["top"]}>
       <StatusBar
-        barStyle={isDark ? "light-content" : "dark-content"}
+        barStyle="light-content"
         backgroundColor="transparent"
         translucent
       />
@@ -292,40 +346,152 @@ export function HomeScreen() {
         }
       >
         {/* ================================================================== */}
-        {/* 1. HERO HEADER WITH PASSENGER PLANE & COSMIC/SKY BACKDROP          */}
+        {/* 1. NATIVE ATMOSPHERIC HERO HEADER                                  */}
         {/* ================================================================== */}
-        <View style={styles.heroContainer}>
-          <Image
-            source={
-              isDark
-                ? require("../../assets/images/hero_header_full_dark.png")
-                : require("../../assets/images/hero_header_full_light.png")
-            }
-            style={StyleSheet.absoluteFillObject}
-            resizeMode="cover"
-          />
+        <LinearGradient
+          colors={
+            isDark
+              ? ["#0A1229", "#111C3D", "#1E293B"]
+              : ["#0B3B8C", "#185ADB", "#38BDF8"]
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.heroContainer, { height: 118, paddingHorizontal: 18, paddingBottom: 18 }]}
+        >
+          <View style={[styles.headerRow, { justifyContent: "space-between", alignItems: "center" }]}>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Ionicons name="airplane" size={18} color={GOLD.light} />
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontSize: 20,
+                    fontWeight: "800",
+                    letterSpacing: -0.3,
+                  }}
+                >
+                  {BRAND.name.en}
+                </Text>
+                <View
+                  style={{
+                    backgroundColor: "rgba(255,230,153,0.22)",
+                    paddingHorizontal: 7,
+                    paddingVertical: 2,
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: "rgba(255,230,153,0.4)",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: GOLD.light,
+                      fontSize: 10,
+                      fontWeight: "700",
+                      fontFamily: FONTS.bengali.semiBold,
+                    }}
+                  >
+                    {BRAND.name.bn}
+                  </Text>
+                </View>
+              </View>
+              <Text
+                style={{
+                  color: "rgba(255,255,255,0.86)",
+                  fontSize: 12.5,
+                  fontWeight: "500",
+                  marginTop: 4,
+                }}
+                numberOfLines={1}
+              >
+                {displayName
+                  ? `Welcome back, ${displayName.split(" ")[0]} — Ready for takeoff`
+                  : "Discover flights, boutique stays & curated journeys"}
+              </Text>
+            </View>
 
-          {/* Header Row touch overlay for Avatar "T" */}
-          <View style={styles.headerRow}>
-            <View style={{ flex: 1 }} />
-            <Pressable
-              style={styles.avatarButton}
-              onPress={() => {
-                try {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                } catch {}
-                router.push("/(tabs)/account" as any);
-              }}
-              accessibilityLabel="Account Profile"
-              accessibilityRole="button"
-            />
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <Pressable
+                onPress={() => {
+                  try {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  } catch {}
+                  router.push("/screens/notifications" as any);
+                }}
+                accessibilityLabel="Notifications"
+                accessibilityRole="button"
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  backgroundColor: "rgba(255,255,255,0.16)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                }}
+              >
+                <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
+                {unreadNotifs > 0 && (
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 5,
+                      minWidth: 15,
+                      height: 15,
+                      borderRadius: 8,
+                      backgroundColor: "#EF4444",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      paddingHorizontal: 3,
+                    }}
+                  >
+                    <Text style={{ color: "#FFFFFF", fontSize: 9, fontWeight: "800" }}>
+                      {unreadNotifs > 9 ? "9+" : unreadNotifs}
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+
+              <Pressable
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  overflow: "hidden",
+                  borderWidth: 1.5,
+                  borderColor: GOLD.light,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(212, 175, 55, 0.25)",
+                }}
+                onPress={() => {
+                  try {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  } catch {}
+                  router.push("/(tabs)/account" as any);
+                }}
+                accessibilityLabel="Account Profile"
+                accessibilityRole="button"
+              >
+                {user?.user_metadata?.avatar_url ? (
+                  <Image
+                    source={{ uri: user.user_metadata.avatar_url }}
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                ) : userInitial ? (
+                  <Text style={styles.avatarText}>{userInitial}</Text>
+                ) : (
+                  <Ionicons name="person-outline" size={19} color="#FFFFFF" />
+                )}
+              </Pressable>
+            </View>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* ================================================================== */}
         {/* 2. PRIMARY SERVICES CARD (DUAL ROW: 4 + 5 SERVICES)                */}
         {/* ================================================================== */}
-        <View style={styles.sectionWrapper}>
+        <View style={[styles.sectionWrapper, { marginTop: -12 }]}>
           <View
             style={[
               styles.primaryCard,
@@ -345,10 +511,22 @@ export function HomeScreen() {
                   onPress={() => handleServicePress(item.route)}
                   hitSlop={6}
                 >
-                  <View style={styles.serviceIconCircle1}>
-                    <Ionicons name={item.icon} size={24} color={GOLD.iconDark} />
+                  <View
+                    style={[
+                      styles.serviceIconCircle1,
+                      isDark && { backgroundColor: "rgba(212, 175, 55, 0.16)" },
+                    ]}
+                  >
+                    <Ionicons
+                      name={item.icon}
+                      size={24}
+                      color={isDark ? GOLD.accent : GOLD.iconDark}
+                    />
                   </View>
-                  <Text style={styles.serviceLabel1} numberOfLines={2}>
+                  <Text
+                    style={[styles.serviceLabel1, { color: serviceLabelColor }]}
+                    numberOfLines={2}
+                  >
                     {item.label}
                   </Text>
                 </Pressable>
@@ -364,14 +542,22 @@ export function HomeScreen() {
                   onPress={() => handleServicePress(item.route)}
                   hitSlop={6}
                 >
-                  <View style={styles.serviceIconCircle2}>
+                  <View
+                    style={[
+                      styles.serviceIconCircle2,
+                      isDark && { backgroundColor: "rgba(212, 175, 55, 0.14)" },
+                    ]}
+                  >
                     <Ionicons
                       name={item.icon}
                       size={item.id === "more" ? 18 : 20}
-                      color={GOLD.iconDark}
+                      color={isDark ? GOLD.accent : GOLD.iconDark}
                     />
                   </View>
-                  <Text style={styles.serviceLabel2} numberOfLines={2}>
+                  <Text
+                    style={[styles.serviceLabel2, { color: serviceLabelColor }]}
+                    numberOfLines={2}
+                  >
                     {item.label}
                   </Text>
                 </Pressable>
@@ -381,14 +567,14 @@ export function HomeScreen() {
         </View>
 
         {/* ================================================================== */}
-        {/* 3. SEARCH PILL BAR ("Bali")                                        */}
+        {/* 3. SEARCH PILL BAR                                                 */}
         {/* ================================================================== */}
         <View style={styles.sectionWrapper}>
           <Pressable
             style={({ pressed }) => [
               styles.searchBarContainer,
               {
-                backgroundColor: isDark ? "#FFFDF8" : "#FFFFFF",
+                backgroundColor: isDark ? colors.card : "#FFFFFF",
                 borderColor: isDark ? GOLD.primary : GOLD.champagneBorder,
               },
               isDark ? styles.searchBarShadowDark : styles.searchBarShadowLight,
@@ -400,11 +586,13 @@ export function HomeScreen() {
           >
             {/* Left: Bronze Chat Icon with Dots */}
             <View style={styles.searchLeftIconWrap}>
-              <Ionicons name="chatbubble-ellipses" size={20} color="#B8860B" />
+              <Ionicons name="chatbubble-ellipses" size={20} color={GOLD.primary} />
             </View>
 
             {/* Middle: Destination Placeholder / Query */}
-            <Text style={styles.searchQueryText}>Bali</Text>
+            <Text style={[styles.searchQueryText, { color: colors.text }]}>
+              Search Bali, Cox's Bazar, Flights...
+            </Text>
 
             {/* Right: Golden Circular Search Button with Magnifying Glass */}
             <View style={styles.searchCircleButton}>
@@ -433,8 +621,8 @@ export function HomeScreen() {
                 style={({ pressed }) => [
                   styles.chipPill,
                   {
-                    backgroundColor: isDark ? "#FFFDF7" : "#FFFFFF",
-                    borderColor: isDark ? "#EADBBA" : "#E5E7EB",
+                    backgroundColor: isDark ? colors.card : "#FFFFFF",
+                    borderColor: isDark ? colors.border : "#E5E7EB",
                   },
                   pressed && { opacity: 0.88 },
                 ]}
@@ -445,14 +633,14 @@ export function HomeScreen() {
                   style={styles.chipThumbnail}
                   resizeMode="cover"
                 />
-                <Text style={styles.chipText}>{chip.name}</Text>
+                <Text style={[styles.chipText, { color: colors.text }]}>{chip.name}</Text>
               </Pressable>
             ))}
           </ScrollView>
         </View>
 
         {/* ================================================================== */}
-        {/* 5. SECONDARY ACTION ICONS (Deals | Events | Trip.Planner | Trending) */}
+        {/* 5. SECONDARY ACTION ICONS (Deals | Events | Shopno Planner | Trending) */}
         {/* ================================================================== */}
         <View style={styles.sectionWrapper}>
           <View style={styles.actionIconsRow}>
@@ -492,7 +680,7 @@ export function HomeScreen() {
         </View>
 
         {/* ================================================================== */}
-        {/* 6. "DISCOVER ✨" SECTION (HORIZONTAL CARDS)                       */}
+        {/* 6. "DISCOVER ✨" SECTION (HORIZONTAL NATIVE CARDS)                 */}
         {/* ================================================================== */}
         <View style={styles.discoverSectionWrapper}>
           {/* Section Header */}
@@ -526,28 +714,72 @@ export function HomeScreen() {
             </Pressable>
           </View>
 
-          {/* Discover Cards Scroll */}
+          {/* Native Discover Cards Scroll (no clipped PNG screenshots) */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.discoverScrollContent}
           >
-            {DISCOVER_CARDS.map((card) => {
-              const cardImg = isDark ? card.imageDark : card.imageLight;
-              return (
-                <Pressable
-                  key={card.id}
-                  style={styles.discoverCardContainer}
-                  onPress={() => handleActionPress(card.route)}
+            {DISCOVER_CARDS.map((card) => (
+              <Pressable
+                key={card.id}
+                style={styles.discoverCardContainer}
+                onPress={() => handleActionPress(card.route)}
+              >
+                <Image
+                  source={{ uri: card.imageUrl }}
+                  style={StyleSheet.absoluteFillObject}
+                  resizeMode="cover"
+                />
+                <LinearGradient
+                  colors={["rgba(15,23,42,0.28)", "rgba(15,23,42,0.88)"]}
+                  style={{
+                    flex: 1,
+                    padding: 12,
+                    justifyContent: "space-between",
+                  }}
                 >
-                  <Image
-                    source={cardImg}
-                    style={styles.discoverCardImage}
-                    resizeMode="cover"
-                  />
-                </Pressable>
-              );
-            })}
+                  <View style={styles.cardHeaderRow}>
+                    {card.badge ? (
+                      <View style={styles.cardBadgeFeatured}>
+                        <Text style={styles.cardBadgeFeaturedText}>{card.badge}</Text>
+                      </View>
+                    ) : (
+                      <View />
+                    )}
+                    {card.pageIndicator && (
+                      <View style={styles.cardPageBadge}>
+                        <Text style={styles.cardPageBadgeText}>{card.pageIndicator}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.cardBottomWrap}>
+                    <Text style={styles.cardMainTitle} numberOfLines={2}>
+                      {card.titlePrimary}{" "}
+                      {card.titleAccent ? (
+                        <Text style={{ color: GOLD.light }}>{card.titleAccent}</Text>
+                      ) : null}
+                    </Text>
+                    <Text style={styles.cardSubtitle} numberOfLines={2}>
+                      {card.subtitle}
+                    </Text>
+                    {card.promoTag && (
+                      <View style={styles.cardPromoPill}>
+                        <Text style={styles.cardPromoText} numberOfLines={1}>
+                          {card.promoTag}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={styles.cardCtaButton}>
+                      <Text style={{ color: "#0F172A", fontSize: 11.5, fontWeight: "700" }}>
+                        {card.buttonLabel}
+                      </Text>
+                    </View>
+                  </View>
+                </LinearGradient>
+              </Pressable>
+            ))}
           </ScrollView>
         </View>
 
@@ -587,7 +819,7 @@ export function HomeScreen() {
                     { color: isDark ? "#FFFFFF" : "#111827" },
                   ]}
                 >
-                  +7 More Travel Services
+                  More Travel & Partner Services
                 </Text>
                 <Text
                   style={[

@@ -40,12 +40,11 @@ export class RocketProvider implements IPaymentProvider {
   }
 
   async verify(transactionId: string): Promise<PaymentStatus> {
-    // In production, verify with Rocket API
-    return "completed";
+    // Zero-Trust Security: Never return "completed" without authoritative gateway verification
+    return "pending";
   }
 
   async refund(request: RefundRequest): Promise<boolean> {
-    // In production, process refund through Rocket
-    return true;
+    return false; // Strictly restricted to backend admin microservice
   }
 }

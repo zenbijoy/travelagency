@@ -3,7 +3,7 @@ import * as Haptics from "expo-haptics";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase } from "../utils/supabase";
 import { callsRepository, CallLog } from "./repositories/calls";
-import { DEMO_USER_ID, FriendProfile } from "./repositories/friends";
+import { FriendProfile } from "./repositories/friends";
 
 export interface IceCandidatePayload {
   candidate: string;
@@ -156,7 +156,8 @@ class CallService {
     callId: string,
     targetUserId: string,
     onTimeout: () => void,
-    timeoutMs: number = 45000
+    timeoutMs: number = 45000,
+    callerUserId?: string
   ) {
     this.clearCallTimeout();
     this.currentCallId = callId;
@@ -169,7 +170,7 @@ class CallService {
       await this.sendSignal({
         type: "call_timeout",
         callId,
-        callerId: DEMO_USER_ID,
+        callerId: callerUserId || "",
         callerName: "Caller",
         callerAvatar: "",
         receiverId: targetUserId,
@@ -326,14 +327,21 @@ class CallService {
   /**
    * Simulate an incoming call for testing and demonstration
    */
-  public triggerTestIncomingCall(callType: "audio" | "video" = "video") {
+  public triggerTestIncomingCall(
+    callType: "audio" | "video" = "video",
+    receiverUserId?: string
+  ) {
+    if (!receiverUserId) {
+      console.warn("Incoming call test requires an authenticated receiver user ID");
+      return;
+    }
     const testSignal: CallSignal = {
       type: "call_request",
       callId: `test-call-${Date.now()}`,
       callerId: "0ce5b7b9-7d51-4942-91c0-4b9b8d0132c9",
       callerName: "Rahat Galiv",
       callerAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-      receiverId: DEMO_USER_ID,
+      receiverId: receiverUserId,
       callType,
     };
 

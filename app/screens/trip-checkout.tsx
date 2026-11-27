@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -29,15 +29,30 @@ export default function TripCheckoutScreen() {
   const itineraryTitle = (params.itineraryTitle as string) || "Customized Bangladesh Tour";
   const destination = (params.destination as string) || "Cox's Bazar";
   const travelerCount = parseInt((params.travelerCount as string) || "2", 10);
-  const travelStartDate = (params.travelStartDate as string) || "2026-12-05";
+  const hotelCategory = (params.hotelCategory as string) || "Deluxe";
+
+  const fallbackDate = useMemo(() => {
+    return new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
+  }, []);
+  const travelStartDate = (params.travelStartDate as string) || fallbackDate;
+  const checkoutDate = useMemo(() => {
+    const d = new Date(travelStartDate);
+    d.setDate(d.getDate() + 3);
+    return isNaN(d.getTime()) ? "Flexible" : d.toISOString().split("T")[0];
+  }, [travelStartDate]);
+  const day2Date = useMemo(() => {
+    const d = new Date(travelStartDate);
+    d.setDate(d.getDate() + 1);
+    return isNaN(d.getTime()) ? "Flexible" : d.toISOString().split("T")[0];
+  }, [travelStartDate]);
 
   // Multi-service booking components
   const [services, setServices] = useState([
     {
       id: "svc-transport",
       service_type: "flight",
-      provider: "Biman Bangladesh Airlines (BG-433)",
-      title: "Dhaka (DAC) ➔ Cox's Bazar (CXB)",
+      provider: "Biman Bangladesh Airlines Express",
+      title: `Dhaka (DAC) ➔ ${destination}`,
       departure_time: `${travelStartDate} 08:00 AM`,
       arrival_time: `${travelStartDate} 09:15 AM`,
       unit_price: 4200,
@@ -47,10 +62,10 @@ export default function TripCheckoutScreen() {
     {
       id: "svc-hotel",
       service_type: "hotel",
-      provider: "Sayeman Beach Resort",
-      title: "Superior Sea View Deluxe Room",
+      provider: `${destination} Resort & Suites`,
+      title: `${hotelCategory} Room (${destination})`,
       checkin: `${travelStartDate} 02:00 PM`,
-      checkout: "2026-12-08 11:00 AM",
+      checkout: `${checkoutDate} 11:00 AM`,
       unit_price: 6500,
       quantity: 1,
       status: "verified",
@@ -58,9 +73,9 @@ export default function TripCheckoutScreen() {
     {
       id: "svc-transfer",
       service_type: "transport",
-      provider: "Marine Drive Chander Gari",
-      title: "Himchari & Inani Beach 4x4 Jeep",
-      departure_time: "2026-12-06 09:00 AM",
+      provider: "Local Sightseeing & Transfer Express",
+      title: `${destination} Scenic Tour & Transfer`,
+      departure_time: `${day2Date} 09:00 AM`,
       unit_price: 1500,
       quantity: 1,
       status: "verified",
@@ -68,8 +83,8 @@ export default function TripCheckoutScreen() {
     {
       id: "svc-guide",
       service_type: "guide",
-      provider: "TravelBD Certified Guide",
-      title: "Tariqul Islam (Local Guide & Cultural Translator)",
+      provider: "Certified Local Guide",
+      title: `Local Guide & Cultural Companion (${destination})`,
       unit_price: 1200,
       quantity: 1,
       status: "verified",

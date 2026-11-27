@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 
 import { useAuth } from "../../src/hooks/useAuth";
 import { userRepository } from "../../src/services/repositories/user";
+import { useTheme } from "../../src/context/ThemeContext";
 
 const PRIMARY = "#287dfa";
 
@@ -27,6 +28,7 @@ type StatusFilter = "all" | "pending" | "completed" | "failed";
 
 export default function TransactionHistoryScreen() {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [payments, setPayments] = useState<any[]>([]);
   const [filteredPayments, setFilteredPayments] = useState<any[]>([]);
@@ -102,7 +104,7 @@ export default function TransactionHistoryScreen() {
 
   const calculateStats = () => {
     const totalTransactions = payments.length;
-    const totalAmount = payments.reduce((sum, p) => sum + p.original_amount, 0);
+    const totalAmount = payments.reduce((sum, p) => sum + (p.original_amount ?? p.amount ?? 0), 0);
     const completedCount = payments.filter((p) => p.status === "completed").length;
 
     return { totalTransactions, totalAmount, completedCount };
@@ -112,7 +114,7 @@ export default function TransactionHistoryScreen() {
 
   const renderPaymentItem = ({ item }: { item: any }) => (
     <Pressable
-      style={styles.paymentItem}
+      style={[styles.paymentItem, { backgroundColor: colors.card, borderColor: colors.border }]}
       onPress={() => router.push(`/screens/payment-details?id=${item.id}` as any)}
     >
       <View style={[styles.statusIcon, { backgroundColor: `${getStatusColor(item.status)}20` }]}>
@@ -124,15 +126,15 @@ export default function TransactionHistoryScreen() {
       </View>
 
       <View style={styles.paymentInfo}>
-        <Text style={styles.paymentMethod}>{item.method.toUpperCase()}</Text>
-        <Text style={styles.paymentDate}>
+        <Text style={[styles.paymentMethod, { color: colors.text }]}>{item.method.toUpperCase()}</Text>
+        <Text style={[styles.paymentDate, { color: colors.textSecondary }]}>
           {new Date(item.created_at).toLocaleDateString()}
         </Text>
-        <Text style={styles.paymentReference}>{item.reference}</Text>
+        <Text style={[styles.paymentReference, { color: colors.textSecondary }]}>{item.reference}</Text>
       </View>
 
       <View style={styles.paymentAmount}>
-        <Text style={styles.amount}>{item.original_amount.toFixed(2)} BDT</Text>
+        <Text style={[styles.amount, { color: colors.text }]}>{(item.original_amount ?? item.amount ?? 0).toFixed(2)} {item.currency || "BDT"}</Text>
         <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
           {item.status}
         </Text>
@@ -141,7 +143,7 @@ export default function TransactionHistoryScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.shell}>
+    <SafeAreaView style={[styles.shell, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={PRIMARY} />
@@ -230,7 +232,8 @@ export default function TransactionHistoryScreen() {
               data={filteredPayments}
               renderItem={renderPaymentItem}
               keyExtractor={(item) => item.id}
-              scrollEnabled={false}
+              scrollEnabled={true}
+              style={{ flex: 1 }}
               contentContainerStyle={styles.listContainer}
             />
           )}

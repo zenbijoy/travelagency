@@ -75,9 +75,17 @@ class BookingRepository(BaseRepository[Booking]):
         status: Optional[str] = None,
         offset: int = 0,
         limit: int = 20,
+        tenant_id: Optional[uuid.UUID] = None,
     ) -> Tuple[Sequence[Booking], int]:
-        """List user bookings with optional status filter and pagination."""
+        """List user bookings with optional status filter and pagination.
+
+        When tenant_id is supplied, results are strictly scoped to that tenant
+        (tenant isolation). This is enforced server-side and cannot be bypassed
+        by the client.
+        """
         filters = [Booking.user_id == user_id]
+        if tenant_id is not None:
+            filters.append(Booking.tenant_id == tenant_id)
         if status:
             filters.append(Booking.status == status)
 
@@ -97,3 +105,27 @@ class BookingRepository(BaseRepository[Booking]):
         bookings = res.scalars().all()
 
         return bookings, total
+
+    async def get_booking_for_tenant(
+        self,
+        booking_id: uuid.UUID,
+        tenant_id: uuid.UUID,
+    ) -> Optional[Booking]:
+        """Fetch a booking scoped to a specific tenant (tenant isolation).
+
+        Returns None if the booking does not exist or does not belong to the
+        given tenant, so callers can uniformly treat it as not-found.
+        """
+        stmt = (
+            select(Booking)
+            .where(Booking.id == booking_id, Booking.tenant_id == tenant_id)
+            .options(
+                selectinload(Booking.items),
+                selectinload(Booking.passengers),
+                selectinload(Booking.payments),
+                selectinload(Booking.events),
+            )
+            .execution_options(populate_existing=True)
+        )
+        res = await self.db.execute(stmt)
+        return res.scalar_one_or_none()

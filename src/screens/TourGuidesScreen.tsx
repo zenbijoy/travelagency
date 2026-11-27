@@ -36,11 +36,11 @@ const BORDER_COLOR = "#E2E8F0";
 
 // Supported Regions
 export const REGIONS = [
-  { id: "All", label: "All Regions", bn: "à¦¸à¦•à¦² à¦…à¦žà§à¦šà¦²" },
-  { id: "Sylhet", label: "Sylhet", bn: "à¦¸à¦¿à¦²à§‡à¦Ÿ" },
-  { id: "Cox's Bazar", label: "Cox's Bazar", bn: "à¦•à¦•à§à¦¸à¦¬à¦¾à¦œà¦¾à¦°" },
-  { id: "Sundarbans", label: "Sundarbans", bn: "à¦¸à§à¦¨à§à¦¦à¦°à¦¬à¦¨" },
-  { id: "Dhaka Heritage", label: "Dhaka Heritage", bn: "à¦¢à¦¾à¦•à¦¾ à¦¹à§‡à¦°à¦¿à¦Ÿà§‡à¦œ" },
+  { id: "All", label: "All Regions", bn: "সকল অঞ্চল" },
+  { id: "Sylhet", label: "Sylhet", bn: "সিলেট" },
+  { id: "Cox's Bazar", label: "Cox's Bazar", bn: "কক্সবাজার" },
+  { id: "Sundarbans", label: "Sundarbans", bn: "সুন্দরবন" },
+  { id: "Dhaka Heritage", label: "Dhaka Heritage", bn: "ঢাকা হেরিটেজ" },
 ] as const;
 
 // Supported Tour Types / Specializations
@@ -54,12 +54,12 @@ export const TOUR_TYPES = [
 
 // Spoken Languages Filter
 export const LANGUAGE_OPTIONS = [
-  { id: "All", label: "All Languages", flag: "ðŸŒ" },
-  { id: "Bengali", label: "Bengali (à¦¬à¦¾à¦‚à¦²à¦¾)", flag: "ðŸ‡§ðŸ‡©" },
-  { id: "English", label: "English", flag: "ðŸ‡¬ðŸ‡§" },
-  { id: "Chinese", label: "Chinese (ä¸­æ–‡)", flag: "ðŸ‡¨ðŸ‡³" },
-  { id: "Arabic", label: "Arabic (Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©)", flag: "ðŸ‡¸ðŸ‡¦" },
-  { id: "French", label: "French (FranÃ§ais)", flag: "ðŸ‡«ðŸ‡·" },
+  { id: "All", label: "All Languages", flag: "🌐" },
+  { id: "Bengali", label: "Bengali (বাংলা)", flag: "🇧🇩" },
+  { id: "English", label: "English", flag: "🇬🇧" },
+  { id: "Chinese", label: "Chinese (中文)", flag: "🇨🇳" },
+  { id: "Arabic", label: "Arabic (العربية)", flag: "🇸🇦" },
+  { id: "French", label: "French (Français)", flag: "🇫🇷" },
 ] as const;
 
 // Spoken Language Proficiency
@@ -135,47 +135,47 @@ export const bookingValidationSchema = z.object({
   touristName: z
     .string()
     .trim()
-    .min(2, "à¦¦à§Ÿà¦¾ à¦•à¦°à§‡ à¦ªà§‚à¦°à§à¦£ à¦¨à¦¾à¦® à¦²à¦¿à¦–à§à¦¨ (à¦•à¦®à¦ªà¦•à§à¦·à§‡ à§¨ à¦…à¦•à§à¦·à¦°)")
-    .max(60, "à¦¨à¦¾à¦® à§¬à§¦ à¦…à¦•à§à¦·à¦°à§‡à¦° à¦¬à§‡à¦¶à¦¿ à¦—à§à¦°à¦¹à¦£à¦¯à§‹à¦—à§à¦¯ à¦¨à§Ÿ"),
+    .min(2, "দয়া করে পূর্ণ নাম লিখুন (কমপক্ষে ২ অক্ষর)")
+    .max(60, "নাম ৬০ অক্ষরের বেশি গ্রহণযোগ্য নয়"),
   touristPhone: z
     .string()
     .trim()
-    .min(10, "à¦®à§‹à¦¬à¦¾à¦‡à¦² à¦¨à¦®à§à¦¬à¦° à¦•à¦®à¦ªà¦•à§à¦·à§‡ à§§à§¦ à¦¡à¦¿à¦œà¦¿à¦Ÿ à¦¹à¦¤à§‡ à¦¹à¦¬à§‡")
+    .min(10, "মোবাইল নম্বর কমপক্ষে ১০ ডিজিট হতে হবে")
     .regex(
       /^(?:\+?88)?01[3-9]\d{8}$/,
-      "à¦¸à¦ à¦¿à¦• à¦¬à¦¾à¦‚à¦²à¦¾à¦¦à§‡à¦¶à§€ à¦®à§‹à¦¬à¦¾à¦‡à¦² à¦¨à¦®à§à¦¬à¦° à¦¦à¦¿à¦¨ (à¦¯à§‡à¦®à¦¨: 01712345678)"
+      "সঠিক বাংলাদেশী মোবাইল নম্বর দিন (যেমন: 01712345678)"
     ),
   touristEmail: z
     .string()
     .trim()
-    .email("à¦¸à¦ à¦¿à¦• à¦‡à¦®à§‡à¦‡à¦² à¦à¦¡à§à¦°à§‡à¦¸ à¦²à¦¿à¦–à§à¦¨")
+    .email("সঠিক ইমেইল এড্রেস লিখুন")
     .optional()
     .or(z.literal("")),
   rateType: z.enum(["hourly", "daily"]),
   tourDate: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "à¦¤à¦¾à¦°à¦¿à¦– à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨ (YYYY-MM-DD)")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "তারিখ নির্বাচন করুন (YYYY-MM-DD)")
     .refine((val) => {
       const selected = new Date(val);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       return !isNaN(selected.getTime()) && selected >= today;
-    }, "à¦…à¦¤à§€à¦¤à§‡à¦° à¦•à§‹à¦¨à§‹ à¦¤à¦¾à¦°à¦¿à¦– à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à¦¾ à¦¯à¦¾à¦¬à§‡ à¦¨à¦¾"),
+    }, "অতীতের কোনো তারিখ নির্বাচন করা যাবে না"),
   timeSlot: z.string().optional(),
   duration: z
-    .number({ message: "à¦¸à¦®à§Ÿà¦•à¦¾à¦² à¦¬à¦¾ à¦¦à¦¿à¦¨ à¦¸à¦‚à¦–à§à¦¯à¦¾ à¦¨à¦¿à¦°à§à¦§à¦¾à¦°à¦£ à¦•à¦°à§à¦¨" })
+    .number({ message: "সময়কাল বা দিন সংখ্যা নির্ধারণ করুন" })
     .int()
-    .min(1, "à¦•à¦®à¦ªà¦•à§à¦·à§‡ à§§ à¦¦à¦¿à¦¨ à¦¬à¦¾ à§§ à¦˜à¦¨à§à¦Ÿà¦¾ à¦¹à¦¤à§‡ à¦¹à¦¬à§‡")
-    .max(30, "à¦¸à¦°à§à¦¬à§‹à¦šà§à¦š à§©à§¦ à¦ªà¦°à§à¦¯à¦¨à§à¦¤ à¦¹à¦¤à§‡ à¦ªà¦¾à¦°à§‡"),
+    .min(1, "কমপক্ষে ১ দিন বা ১ ঘন্টা হতে হবে")
+    .max(30, "সর্বোচ্চ ৩০ পর্যন্ত হতে পারে"),
   guestsCount: z
-    .number({ message: "à¦­à§à¦°à¦®à¦£à¦•à¦¾à¦°à§€ à¦¸à¦‚à¦–à§à¦¯à¦¾ à¦¨à¦¿à¦°à§à¦§à¦¾à¦°à¦£ à¦•à¦°à§à¦¨" })
+    .number({ message: "ভ্রমণকারী সংখ্যা নির্ধারণ করুন" })
     .int()
-    .min(1, "à¦•à¦®à¦ªà¦•à§à¦·à§‡ à§§ à¦œà¦¨ à¦­à§à¦°à¦®à¦£à¦•à¦¾à¦°à§€ à¦¹à¦¤à§‡ à¦¹à¦¬à§‡")
-    .max(30, "à¦¸à¦°à§à¦¬à§‹à¦šà§à¦š à§©à§¦ à¦œà¦¨ à¦­à§à¦°à¦®à¦£à¦•à¦¾à¦°à§€ à¦—à§à¦°à¦¹à¦£à¦¯à§‹à¦—à§à¦¯"),
+    .min(1, "কমপক্ষে ১ জন ভ্রমণকারী হতে হবে")
+    .max(30, "সর্বোচ্চ ৩০ জন ভ্রমণকারী গ্রহণযোগ্য"),
   meetingPoint: z
     .string()
     .trim()
-    .min(3, "à¦®à¦¿à¦Ÿà¦¿à¦‚ à¦ªà§Ÿà§‡à¦¨à§à¦Ÿ à¦¬à¦¾ à¦ªà¦¿à¦•à¦†à¦ª à¦²à§‹à¦•à§‡à¦¶à¦¨ à¦²à¦¿à¦–à§à¦¨ (à¦•à¦®à¦ªà¦•à§à¦·à§‡ à§© à¦…à¦•à§à¦·à¦°)"),
+    .min(3, "মিটিং পয়েন্ট বা পিকআপ লোকেশন লিখুন (কমপক্ষে ৩ অক্ষর)"),
   specialRequests: z.string().trim().optional(),
 });
 
@@ -218,8 +218,8 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
   let certifiedSince = new Date().getFullYear() - guide.experience_years;
 
   let spokenLanguagesProficiency: LanguageProficiency[] = [
-    { language: "Bengali", level: "Native", flag: "ðŸ‡§ðŸ‡©" },
-    { language: "English", level: "Fluent", flag: "ðŸ‡¬ðŸ‡§" },
+    { language: "Bengali", level: "Native", flag: "🇧🇩" },
+    { language: "English", level: "Fluent", flag: "🇬🇧" },
   ];
 
   let primarySpecializations: ("Historical" | "Wildlife" | "Culinary" | "Photography")[] = [];
@@ -230,7 +230,7 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
       reviewerName: "Farhan Kabir",
       rating: 5,
       date: getRelativeMonthYear(0),
-      comment: "à¦…à¦¸à¦¾à¦§à¦¾à¦°à¦£ à¦—à¦¾à¦‡à¦¡! à¦¸à§à¦¨à§à¦¦à¦° à¦à¦¬à¦‚ à¦¨à¦¿à¦°à¦¾à¦ªà¦¦à¦­à¦¾à¦¬à§‡ à¦ªà§à¦°à§‹ à¦à¦²à¦¾à¦•à¦¾ à¦˜à§à¦°à§‡ à¦¦à§‡à¦–à¦¿à§Ÿà§‡à¦›à§‡à¦¨à¥¤",
+      comment: "অসাধারণ গাইড! সুন্দর এবং নিরাপদভাবে পুরো এলাকা ঘুরে দেখিয়েছেন।",
       tourType: "Scenic Explorer",
     },
     {
@@ -248,9 +248,9 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
     licenseIssuer = "Govt. Tourism Board & Coast Guard Safety";
     licenseNumber = "BPC-TG-COX-8821";
     spokenLanguagesProficiency = [
-      { language: "Bengali", level: "Native", flag: "ðŸ‡§ðŸ‡©" },
-      { language: "English", level: "Fluent", flag: "ðŸ‡¬ðŸ‡§" },
-      { language: "Arabic", level: "Conversational", flag: "ðŸ‡¸ðŸ‡¦" },
+      { language: "Bengali", level: "Native", flag: "🇧🇩" },
+      { language: "English", level: "Fluent", flag: "🇬🇧" },
+      { language: "Arabic", level: "Conversational", flag: "🇸🇦" },
     ];
     primarySpecializations = ["Photography", "Culinary", "Historical"];
     sampleReviews = [
@@ -259,7 +259,7 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
         reviewerName: "Dr. Asif Mahmud",
         rating: 5,
         date: getRelativeMonthYear(0),
-        comment: "à¦‡à¦¨à¦¾à¦¨à§€ à¦“ à¦¸à§‡à¦¨à§à¦Ÿà¦®à¦¾à¦°à§à¦Ÿà¦¿à¦¨à§‡à¦° à¦¸à§‡à¦°à¦¾ à¦¸à§à¦ªà¦Ÿà¦—à§à¦²à§‹ à¦“ à¦¸à§à¦¸à§à¦¬à¦¾à¦¦à§ à¦¸à¦¾à¦®à§à¦¦à§à¦°à¦¿à¦• à¦®à¦¾à¦›à§‡à¦° à¦œà¦¾à§Ÿà¦—à¦¾à¦—à§à¦²à§‹ à¦¦à§‡à¦–à¦¿à§Ÿà§‡à¦›à§‡à¦¨à¥¤",
+        comment: "ইনানী ও সেন্টমার্টিনের সেরা স্পটগুলো ও সুস্বাদু সামুদ্রিক মাছের জায়গাগুলো দেখিয়েছেন।",
         tourType: "Culinary & Beach",
       },
       {
@@ -275,9 +275,9 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
     licenseIssuer = "Forest Dept. & Eco-Naturalist Guild";
     licenseNumber = "BPC-TG-SYL-5514";
     spokenLanguagesProficiency = [
-      { language: "Bengali", level: "Native", flag: "ðŸ‡§ðŸ‡©" },
-      { language: "English", level: "Fluent", flag: "ðŸ‡¬ðŸ‡§" },
-      { language: "French", level: "Conversational", flag: "ðŸ‡«ðŸ‡·" },
+      { language: "Bengali", level: "Native", flag: "🇧🇩" },
+      { language: "English", level: "Fluent", flag: "🇬🇧" },
+      { language: "French", level: "Conversational", flag: "🇫🇷" },
     ];
     primarySpecializations = ["Wildlife", "Photography", "Historical"];
     sampleReviews = [
@@ -286,7 +286,7 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
         reviewerName: "Julien Moreau",
         rating: 5,
         date: getRelativeMonthYear(0),
-        comment: "Superbe expÃ©rience dans la forÃªt marÃ©cageuse de Ratargul. TrÃ¨s attentif!",
+        comment: "Superbe expérience dans la forêt marécageuse de Ratargul. Très attentif!",
         tourType: "Wildlife",
       },
       {
@@ -294,7 +294,7 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
         reviewerName: "Nusrat Jahan",
         rating: 5,
         date: getRelativeMonthYear(1),
-        comment: "à¦°à¦¾à¦¤à¦¾à¦°à¦—à§à¦² à¦“ à¦œà¦¾à¦«à¦²à¦‚-à¦ à¦«à¦Ÿà§‹à¦—à§à¦°à¦¾à¦«à¦¿à¦° à¦¸à§‡à¦°à¦¾ à¦à¦™à§à¦—à§‡à¦²à¦—à§à¦²à§‹ à¦–à§à¦¬ à¦¸à§à¦¨à§à¦¦à¦° à¦¦à§‡à¦–à¦¿à§Ÿà§‡à¦›à§‡à¦¨à¥¤",
+        comment: "রাতারগুল ও জাফলং-এ ফটোগ্রাফির সেরা এঙ্গেলগুলো খুব সুন্দর দেখিয়েছেন।",
         tourType: "Photography",
       },
     ];
@@ -302,9 +302,9 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
     licenseIssuer = "Bangladesh Forest Dept. Wildlife Authority";
     licenseNumber = "BFD-WL-SUN-3310";
     spokenLanguagesProficiency = [
-      { language: "Bengali", level: "Native", flag: "ðŸ‡§ðŸ‡©" },
-      { language: "English", level: "Professional", flag: "ðŸ‡¬ðŸ‡§" },
-      { language: "Chinese", level: "Conversational", flag: "ðŸ‡¨ðŸ‡³" },
+      { language: "Bengali", level: "Native", flag: "🇧🇩" },
+      { language: "English", level: "Professional", flag: "🇬🇧" },
+      { language: "Chinese", level: "Conversational", flag: "🇨🇳" },
     ];
     primarySpecializations = ["Wildlife", "Photography"];
     sampleReviews = [
@@ -313,7 +313,7 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
         reviewerName: "Zhang Wei",
         rating: 5,
         date: getRelativeMonthYear(0),
-        comment: "éžå¸¸æ£’çš„å‘å¯¼ï¼æˆ‘ä»¬åœ¨çº¢æ ‘æž—çœ‹åˆ°äº†å­ŸåŠ æ‹‰è™Žè¶³è¿¹å’Œçç¨€æ°´é¸Ÿï¼Œå®‰å…¨ä¿éšœéžå¸¸åˆ°ä½ã€‚",
+        comment: "非常棒的向导！我们在红树林看到了孟加拉虎足迹和珍稀水鸟，安全保障非常到位。",
         tourType: "Wildlife Safari",
       },
       {
@@ -321,7 +321,7 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
         reviewerName: "Kamrul Hasan",
         rating: 5,
         date: getRelativeMonthYear(1),
-        comment: "à¦¸à§à¦¨à§à¦¦à¦°à¦¬à¦¨à§‡à¦° à¦¬à¦¾à¦“à¦¯à¦¼à¦¾à¦²à¦¿ à¦à¦¤à¦¿à¦¹à§à¦¯ à¦à¦¬à¦‚ à¦–à¦¾à¦²à§‡à¦° à¦­à§‡à¦¤à¦° à¦¨à§Œà¦•à¦¾à¦° à¦¯à¦¾à¦¤à§à¦°à¦¾ à¦šà¦¿à¦°à¦¸à§à¦®à¦°à¦£à§€à§Ÿ à¦¹à§Ÿà§‡ à¦¥à¦¾à¦•à¦¬à§‡à¥¤",
+        comment: "সুন্দরবনের বাওয়ালি ঐতিহ্য এবং খালের ভেতর নৌকার যাত্রা চিরস্মরণীয় হয়ে থাকবে।",
         tourType: "Wildlife",
       },
     ];
@@ -329,10 +329,10 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
     licenseIssuer = "Ministry of Cultural Heritage & Archaeology";
     licenseNumber = "ARCH-TG-DHK-9941";
     spokenLanguagesProficiency = [
-      { language: "Bengali", level: "Native", flag: "ðŸ‡§ðŸ‡©" },
-      { language: "English", level: "Fluent", flag: "ðŸ‡¬ðŸ‡§" },
-      { language: "Arabic", level: "Fluent", flag: "ðŸ‡¸ðŸ‡¦" },
-      { language: "French", level: "Conversational", flag: "ðŸ‡«ðŸ‡·" },
+      { language: "Bengali", level: "Native", flag: "🇧🇩" },
+      { language: "English", level: "Fluent", flag: "🇬🇧" },
+      { language: "Arabic", level: "Fluent", flag: "🇸🇦" },
+      { language: "French", level: "Conversational", flag: "🇫🇷" },
     ];
     primarySpecializations = ["Historical", "Culinary", "Photography"];
     sampleReviews = [
@@ -341,7 +341,7 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
         reviewerName: "Ahmed Al-Ghamdi",
         rating: 5,
         date: getRelativeMonthYear(0),
-        comment: "Ø¬ÙˆÙ„Ø© ØªØ§Ø±ÙŠØ®ÙŠØ© Ù…Ù…ØªØ¹Ø© Ù„Ù„ØºØ§ÙŠØ© ÙÙŠ Ù‚Ù„Ø¹Ø© Ù„Ø§Ù„Ø¨Ø§Øº ÙˆØ®Ø§Ù† Ù…Ø±Ø¬Ø§Ù†. Ù…Ø±Ø´Ø¯Ø© Ù…Ù…ØªØ§Ø²Ø© ÙˆÙ…Ø«Ù‚ÙØ© Ø¬Ø¯Ø§Ù‹.",
+        comment: "جولة تاريخية ممتعة للغاية في قلعة لالباغ وخان مرجان. مرشدة ممتازة ومثقفة جداً.",
         tourType: "Historical",
       },
       {
@@ -349,7 +349,7 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
         reviewerName: "Rifat Chowdhury",
         rating: 5,
         date: getRelativeMonthYear(1),
-        comment: "à¦ªà§à¦°à¦¾à¦¨ à¦¢à¦¾à¦•à¦¾à¦° à¦¬à¦¾à¦•à¦°à¦–à¦¾à¦¨à¦¿, à¦¬à¦¿à¦°à¦¿à§Ÿà¦¾à¦¨à¦¿ à¦†à¦° à¦à¦¤à¦¿à¦¹à¦¾à¦¸à¦¿à¦• à¦…à¦²à¦¿à¦—à¦²à¦¿à¦° à¦šà¦®à§Žà¦•à¦¾à¦° à¦—à¦²à§à¦ª à¦¶à§à¦¨à§‡ à¦®à§à¦—à§à¦§ à¦¹à§Ÿà§‡à¦›à¦¿à¥¤",
+        comment: "পুরান ঢাকার বাকরখানি, বিরিয়ানি আর ঐতিহাসিক অলিগলির চমৎকার গল্প শুনে মুগ্ধ হয়েছি।",
         tourType: "Culinary & Heritage",
       },
     ];
@@ -357,16 +357,16 @@ function enrichGuideProfile(guide: TourGuide): CertifiedGuideProfile {
     licenseIssuer = "Chittagong Hill Tracts Eco-Guide Council";
     licenseNumber = "CHT-TG-SAJ-7712";
     spokenLanguagesProficiency = [
-      { language: "Bengali", level: "Native", flag: "ðŸ‡§ðŸ‡©" },
-      { language: "English", level: "Fluent", flag: "ðŸ‡¬ðŸ‡§" },
-      { language: "Chinese", level: "Professional", flag: "ðŸ‡¨ðŸ‡³" },
+      { language: "Bengali", level: "Native", flag: "🇧🇩" },
+      { language: "English", level: "Fluent", flag: "🇬🇧" },
+      { language: "Chinese", level: "Professional", flag: "🇨🇳" },
     ];
     primarySpecializations = ["Photography", "Historical", "Wildlife"];
   } else {
     spokenLanguagesProficiency = [
-      { language: "Bengali", level: "Native", flag: "ðŸ‡§ðŸ‡©" },
-      { language: "English", level: "Fluent", flag: "ðŸ‡¬ðŸ‡§" },
-      { language: "Chinese", level: "Conversational", flag: "ðŸ‡¨ðŸ‡³" },
+      { language: "Bengali", level: "Native", flag: "🇧🇩" },
+      { language: "English", level: "Fluent", flag: "🇬🇧" },
+      { language: "Chinese", level: "Conversational", flag: "🇨🇳" },
     ];
     primarySpecializations = ["Historical", "Photography"];
   }
@@ -628,12 +628,12 @@ export default function TourGuidesScreen() {
   const handleStartAudioCall = (guide: CertifiedGuideProfile | { id: string; full_name: string; avatar_url?: string }) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
-      "à¦œà¦°à§à¦°à¦¿ à¦…à¦¡à¦¿à¦“ à¦•à¦¨à¦¸à¦¾à¦²à¦Ÿà§‡à¦¶à¦¨ (Emergency Audio Call)",
-      `à¦†à¦ªà¦¨à¦¿ à¦•à¦¿ à¦—à¦¾à¦‡à¦¡ ${guide.full_name}-à¦à¦° à¦¸à¦¾à¦¥à§‡ à¦¸à¦°à¦¾à¦¸à¦°à¦¿ à¦œà¦°à§à¦°à¦¿ à¦…à¦¡à¦¿à¦“ à¦ªà¦°à¦¾à¦®à¦°à§à¦¶ à¦¶à§à¦°à§ à¦•à¦°à¦¤à§‡ à¦šà¦¾à¦¨?`,
+      "জরুরি অডিও কনসালটেশন (Emergency Audio Call)",
+      `আপনি কি গাইড ${guide.full_name}-এর সাথে সরাসরি জরুরি অডিও পরামর্শ শুরু করতে চান?`,
       [
-        { text: "à¦¬à¦¾à¦¤à¦¿à¦²", style: "cancel" },
+        { text: "বাতিল", style: "cancel" },
         {
-          text: "à¦•à¦² à¦¶à§à¦°à§ à¦•à¦°à§à¦¨",
+          text: "কল শুরু করুন",
           onPress: () => {
             router.push({
               pathname: "/screens/call" as any,
@@ -710,8 +710,8 @@ export default function TourGuidesScreen() {
       });
       setFormErrors(errors);
 
-      const firstError = validationResult.error.issues[0]?.message || "à¦¤à¦¥à§à¦¯ à¦¯à¦¾à¦šà¦¾à¦‡ à¦•à¦°à§à¦¨";
-      Alert.alert("à¦¤à¦¥à§à¦¯ à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦¬à¦¾ à¦¤à§à¦°à§à¦Ÿà¦¿à¦ªà§‚à¦°à§à¦£", firstError);
+      const firstError = validationResult.error.issues[0]?.message || "তথ্য যাচাই করুন";
+      Alert.alert("তথ্য অসম্পূর্ণ বা ত্রুটিপূর্ণ", firstError);
       return;
     }
 
@@ -748,15 +748,15 @@ export default function TourGuidesScreen() {
           : `${tourDate} (${duration} Days)`;
 
       Alert.alert(
-        "ðŸŽ‰ à¦¬à§à¦•à¦¿à¦‚ à¦¸à¦«à¦² à¦“ à¦¯à¦¾à¦šà¦¾à¦‡à¦•à§ƒà¦¤!",
-        `à¦—à¦¾à¦‡à¦¡: ${bookingGuide.full_name}\nà¦ªà§à¦¯à¦¾à¦•à§‡à¦œ: ${
-          rateType === "hourly" ? `${duration} à¦˜à¦¨à§à¦Ÿà¦¾` : `${duration} à¦¦à¦¿à¦¨`
-        }\nà¦¤à¦¾à¦°à¦¿à¦–: ${tourDate}\nà¦®à¦¿à¦Ÿà¦¿à¦‚ à¦ªà§Ÿà§‡à¦¨à§à¦Ÿ: ${meetingPoint}\nà¦¸à¦°à§à¦¬à¦®à§‹à¦Ÿ à¦«à¦¿: à§³${calculatedTotal.toLocaleString(
+        "🎉 বুকিং সফল ও যাচাইকৃত!",
+        `গাইড: ${bookingGuide.full_name}\nপ্যাকেজ: ${
+          rateType === "hourly" ? `${duration} ঘন্টা` : `${duration} দিন`
+        }\nতারিখ: ${tourDate}\nমিটিং পয়েন্ট: ${meetingPoint}\nসর্বমোট ফি: ৳${calculatedTotal.toLocaleString(
           "en-BD"
-        )}\n\nà¦¨à¦¿à¦°à¦¾à¦ªà¦¦ à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦•à¦°à¦¤à§‡ à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦šà§‡à¦•à¦†à¦‰à¦Ÿ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨ à¦…à¦¥à¦¬à¦¾ à¦¸à¦¾à¦•à§à¦·à¦¾à¦¤à§‡ à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦•à¦°à§à¦¨à¥¤`,
+        )}\n\nনিরাপদ পেমেন্ট করতে অনলাইন চেকআউট নির্বাচন করুন অথবা সাক্ষাতে পেমেন্ট করুন।`,
         [
           {
-            text: "à¦ªà§‡ à¦…à§à¦¯à¦¾à¦Ÿ à¦®à¦¿à¦Ÿà¦¿à¦‚ (Pay at Meeting)",
+            text: "পে অ্যাট মিটিং (Pay at Meeting)",
             style: "default",
             onPress: () => {
               setBookingGuide(null);
@@ -767,13 +767,13 @@ export default function TourGuidesScreen() {
               loadMyBookings();
               setMainTab("my-bookings");
               Alert.alert(
-                "à¦¬à§à¦•à¦¿à¦‚ à¦¸à¦‚à¦°à¦•à§à¦·à¦¿à¦¤ à¦¹à§Ÿà§‡à¦›à§‡!",
-                `à¦†à¦ªà¦¨à¦¾à¦° à¦¬à§à¦•à¦¿à¦‚ à¦†à¦‡à¦¡à¦¿: ${bookingRecord.id}à¥¤ à¦—à¦¾à¦‡à¦¡ à¦¸à¦°à¦¾à¦¸à¦°à¦¿ à¦†à¦ªà¦¨à¦¾à¦° à¦¸à¦¾à¦¥à§‡ à¦«à§‹à¦¨à§‡ à¦¯à§‹à¦—à¦¾à¦¯à§‹à¦— à¦•à¦°à¦¬à§‡à¦¨à¥¤`
+                "বুকিং সংরক্ষিত হয়েছে!",
+                `আপনার বুকিং আইডি: ${bookingRecord.id}। গাইড সরাসরি আপনার সাথে ফোনে যোগাযোগ করবেন।`
               );
             },
           },
           {
-            text: "à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦šà§‡à¦•à¦†à¦‰à¦Ÿ (Instant Pay)",
+            text: "অনলাইন চেকআউট (Instant Pay)",
             style: "default",
             onPress: () => {
               const currentBookingId = bookingRecord.id;
@@ -801,7 +801,7 @@ export default function TourGuidesScreen() {
         ]
       );
     } catch {
-      Alert.alert("à¦¤à§à¦°à§à¦Ÿà¦¿", "à¦¬à§à¦•à¦¿à¦‚ à¦ªà§à¦°à¦•à§à¦°à¦¿à¦¯à¦¼à¦¾ à¦¸à¦®à§à¦ªà¦¨à§à¦¨ à¦•à¦°à¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿à¥¤ à¦†à¦¬à¦¾à¦° à¦šà§‡à¦·à§à¦Ÿà¦¾ à¦•à¦°à§à¦¨à¥¤");
+      Alert.alert("ত্রুটি", "বুকিং প্রক্রিয়া সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।");
     } finally {
       setBookingSubmitting(false);
     }
@@ -816,8 +816,8 @@ export default function TourGuidesScreen() {
       !applyBio.trim()
     ) {
       Alert.alert(
-        "à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦¤à¦¥à§à¦¯",
-        "à¦¦à§Ÿà¦¾ à¦•à¦°à§‡ à¦¨à¦¾à¦®, à¦®à§‹à¦¬à¦¾à¦‡à¦², à¦à¦¨à¦†à¦‡à¦¡à¦¿ à¦à¦¬à¦‚ à¦…à¦­à¦¿à¦œà§à¦žà¦¤à¦¾ à¦¸à¦®à§à¦ªà¦°à§à¦•à§‡ à¦¬à¦¿à¦¸à§à¦¤à¦¾à¦°à¦¿à¦¤ à¦²à¦¿à¦–à§à¦¨à¥¤"
+        "অসম্পূর্ণ তথ্য",
+        "দয়া করে নাম, মোবাইল, এনআইডি এবং অভিজ্ঞতা সম্পর্কে বিস্তারিত লিখুন।"
       );
       return;
     }
@@ -845,11 +845,11 @@ export default function TourGuidesScreen() {
       });
 
       Alert.alert(
-        "à¦…à¦­à¦¿à¦¨à¦¨à§à¦¦à¦¨ à¦¨à¦¤à§à¦¨ à¦—à¦¾à¦‡à¦¡!",
-        `à¦—à¦¾à¦‡à¦¡ ${newGuide.full_name}-à¦à¦° à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦²à¦¾à¦‡à¦­ à¦¡à¦¿à¦°à§‡à¦•à§à¦Ÿà¦°à¦¿à¦¤à§‡ à¦¤à¦¾à¦²à¦¿à¦•à¦¾à¦­à§à¦•à§à¦¤ à¦¹à§Ÿà§‡à¦›à§‡à¥¤`,
+        "অভিনন্দন নতুন গাইড!",
+        `গাইড ${newGuide.full_name}-এর প্রোফাইল লাইভ ডিরেক্টরিতে তালিকাভুক্ত হয়েছে।`,
         [
           {
-            text: "à¦ à¦¿à¦• à¦†à¦›à§‡",
+            text: "ঠিক আছে",
             onPress: () => {
               setShowApplyModal(false);
               loadGuides();
@@ -862,7 +862,7 @@ export default function TourGuidesScreen() {
         ]
       );
     } catch {
-      Alert.alert("à¦¤à§à¦°à§à¦Ÿà¦¿", "à¦¨à¦¿à¦¬à¦¨à§à¦§à¦¨ à¦¸à¦®à§à¦ªà¦¨à§à¦¨ à¦•à¦°à¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿à¥¤");
+      Alert.alert("ত্রুটি", "নিবন্ধন সম্পন্ন করা যায়নি।");
     } finally {
       setApplySubmitting(false);
     }
@@ -926,7 +926,7 @@ export default function TourGuidesScreen() {
               </View>
             </View>
             <Text style={styles.headerSubtitle}>
-              à¦²à¦¾à¦‡à¦¸à§‡à¦¨à§à¦¸à¦§à¦¾à¦°à§€ à¦“ à¦¸à¦¾à¦°à§à¦Ÿà¦¿à¦«à¦¾à¦‡à¦¡ à¦²à§‹à¦•à¦¾à¦² à¦Ÿà§à¦¯à§à¦° à¦—à¦¾à¦‡à¦¡ à¦¡à¦¿à¦°à§‡à¦•à§à¦Ÿà¦°à¦¿
+              লাইসেন্সধারী ও সার্টিফাইড লোকাল ট্যুর গাইড ডিরেক্টরি
             </Text>
           </View>
           <TouchableOpacity
@@ -935,7 +935,7 @@ export default function TourGuidesScreen() {
             activeOpacity={0.85}
           >
             <Ionicons name="person-add" size={14} color={PRIMARY_BLUE} />
-            <Text style={styles.joinGuideBtnText}>à¦—à¦¾à¦‡à¦¡ à¦œà§Ÿà§‡à¦¨</Text>
+            <Text style={styles.joinGuideBtnText}>গাইড জয়েন</Text>
           </TouchableOpacity>
         </View>
 
@@ -944,7 +944,7 @@ export default function TourGuidesScreen() {
           <Ionicons name="search" size={19} color="#64748B" />
           <TextInput
             style={styles.searchInput}
-            placeholder="à¦—à¦¾à¦‡à¦¡, à¦¸à§à¦ªà¦Ÿ à¦¬à¦¾ à¦­à¦¾à¦·à¦¾ à¦¦à¦¿à§Ÿà§‡ à¦–à§à¦à¦œà§à¦¨ (à¦¯à§‡à¦®à¦¨: à¦šà§€à¦¨à¦¾ à¦­à¦¾à¦·à¦¾, à¦¸à¦¾à¦œà§‡à¦•)..."
+            placeholder="গাইড, স্পট বা ভাষা দিয়ে খুঁজুন (যেমন: চীনা ভাষা, সাজেক)..."
             placeholderTextColor="#94A3B8"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -979,7 +979,7 @@ export default function TourGuidesScreen() {
                 mainTab === "directory" && styles.topSegmentTextActive,
               ]}
             >
-              à¦—à¦¾à¦‡à¦¡ à¦¡à¦¿à¦°à§‡à¦•à§à¦Ÿà¦°à¦¿ ({filteredAndSortedGuides.length})
+              গাইড ডিরেক্টরি ({filteredAndSortedGuides.length})
             </Text>
           </TouchableOpacity>
 
@@ -1004,7 +1004,7 @@ export default function TourGuidesScreen() {
                 mainTab === "my-bookings" && styles.topSegmentTextActive,
               ]}
             >
-              à¦†à¦®à¦¾à¦° à¦¬à§à¦•à¦¿à¦‚à¦¸à¦®à§‚à¦¹ {myBookings.length > 0 ? `(${myBookings.length})` : ""}
+              আমার বুকিংসমূহ {myBookings.length > 0 ? `(${myBookings.length})` : ""}
             </Text>
           </TouchableOpacity>
         </View>
@@ -1015,7 +1015,7 @@ export default function TourGuidesScreen() {
           {/* Filter 1: Region Filters */}
           <View style={styles.filterSection}>
             <View style={styles.filterHeaderRow}>
-              <Text style={styles.filterLabel}>à¦…à¦žà§à¦šà¦² à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ (Region):</Text>
+              <Text style={styles.filterLabel}>অঞ্চল নির্বাচন (Region):</Text>
             </View>
             <ScrollView
               horizontal
@@ -1056,7 +1056,7 @@ export default function TourGuidesScreen() {
           {/* Filter 2: Tour Type Specialization Filters */}
           <View style={styles.specializationSection}>
             <View style={styles.filterHeaderRow}>
-              <Text style={styles.filterLabel}>à¦Ÿà§à¦¯à§à¦° à¦¸à§à¦ªà§‡à¦¶à¦¾à¦²à¦¾à¦‡à¦œà§‡à¦¶à¦¨ (Tour Type):</Text>
+              <Text style={styles.filterLabel}>ট্যুর স্পেশালাইজেশন (Tour Type):</Text>
             </View>
             <ScrollView
               horizontal
@@ -1097,7 +1097,7 @@ export default function TourGuidesScreen() {
           {/* Filter 3: Spoken Language Filter Row */}
           <View style={styles.languageFilterSection}>
             <View style={styles.filterHeaderRow}>
-              <Text style={styles.filterLabel}>à¦­à¦¾à¦·à¦¾à¦° à¦«à¦¿à¦²à§à¦Ÿà¦¾à¦° (Languages):</Text>
+              <Text style={styles.filterLabel}>ভাষার ফিল্টার (Languages):</Text>
             </View>
             <ScrollView
               horizontal
@@ -1133,17 +1133,17 @@ export default function TourGuidesScreen() {
 
           {/* Sort Bar */}
           <View style={styles.sortBar}>
-            <Text style={styles.sortBarLabel}>à¦¸à¦¾à¦œà¦¾à¦¨ (Sort):</Text>
+            <Text style={styles.sortBarLabel}>সাজান (Sort):</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.sortChipsRow}
             >
               {[
-                { id: "rating", label: "à¦¸à§‡à¦°à¦¾ à¦°à§‡à¦Ÿà¦¿à¦‚ (Top Rated)" },
-                { id: "experience", label: "à¦…à¦­à¦¿à¦œà§à¦žà¦¤à¦¾ (Experience)" },
-                { id: "price_low", label: "à¦•à¦® à¦«à¦¿ (Lowest Rate)" },
-                { id: "price_high", label: "à¦¬à§‡à¦¶à¦¿ à¦«à¦¿ (Highest Rate)" },
+                { id: "rating", label: "সেরা রেটিং (Top Rated)" },
+                { id: "experience", label: "অভিজ্ঞতা (Experience)" },
+                { id: "price_low", label: "কম ফি (Lowest Rate)" },
+                { id: "price_high", label: "বেশি ফি (Highest Rate)" },
               ].map((s) => (
                 <TouchableOpacity
                   key={s.id}
@@ -1169,7 +1169,7 @@ export default function TourGuidesScreen() {
           {/* View Mode Toggle: List vs Sonar Radar (Image 1 UX Pattern) */}
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginHorizontal: 16, marginTop: 8, marginBottom: 6 }}>
             <Text style={{ fontSize: 13, fontWeight: "700", color: DARK_NAVY }}>
-              {viewMode === "list" ? `à¦‰à¦ªà¦²à¦¬à§à¦§ à¦—à¦¾à¦‡à¦¡à¦—à¦£ (${filteredAndSortedGuides.length})` : "à¦†à¦¶à§‡à¦ªà¦¾à¦¶à§‡à¦° à¦—à¦¾à¦‡à¦¡ à¦¸à§‹à¦¨à¦¾à¦° à¦¸à§à¦•à§à¦¯à¦¾à¦¨ (Sonar Radar)"}
+              {viewMode === "list" ? `উপলব্ধ গাইডগণ (${filteredAndSortedGuides.length})` : "আশেপাশের গাইড সোনার স্ক্যান (Sonar Radar)"}
             </Text>
             <View style={{ flexDirection: "row", backgroundColor: "#E2E8F0", borderRadius: 10, padding: 2 }}>
               <TouchableOpacity
@@ -1185,7 +1185,7 @@ export default function TourGuidesScreen() {
               >
                 <Ionicons name="list" size={13} color={viewMode === "list" ? PRIMARY_BLUE : "#64748B"} />
                 <Text style={{ fontSize: 11, fontWeight: "700", marginLeft: 4, color: viewMode === "list" ? PRIMARY_BLUE : "#64748B" }}>
-                  à¦¤à¦¾à¦²à¦¿à¦•à¦¾
+                  তালিকা
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -1204,7 +1204,7 @@ export default function TourGuidesScreen() {
               >
                 <Ionicons name="radio" size={13} color={viewMode === "radar" ? PRIMARY_BLUE : "#64748B"} />
                 <Text style={{ fontSize: 11, fontWeight: "700", marginLeft: 4, color: viewMode === "radar" ? PRIMARY_BLUE : "#64748B" }}>
-                  à¦°à¦¾à¦¡à¦¾à¦°
+                  রাডার
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1227,8 +1227,8 @@ export default function TourGuidesScreen() {
                   const g = filteredAndSortedGuides.find((x) => x.id === node.id);
                   if (g) setSelectedGuide(g);
                 }}
-                centerLabel="à¦†à¦ªà¦¨à¦¿ (You)"
-                scanningText="à¦†à¦¶à§‡à¦ªà¦¾à¦¶à§‡à¦° à¦¸à¦¾à¦°à§à¦Ÿà¦¿à¦«à¦¾à¦¯à¦¼à§‡à¦¡ à¦¸à§à¦¥à¦¾à¦¨à§€à¦¯à¦¼ à¦—à¦¾à¦‡à¦¡à¦¦à§‡à¦° à¦¸à¦¨à§à¦§à¦¾à¦¨ à¦šà¦²à¦›à§‡..."
+                centerLabel="আপনি (You)"
+                scanningText="আশেপাশের সার্টিফায়েড স্থানীয় গাইডদের সন্ধান চলছে..."
               />
             </ScrollView>
           ) : (
@@ -1241,14 +1241,14 @@ export default function TourGuidesScreen() {
             {loading ? (
               <View style={styles.loadingBox}>
                 <ActivityIndicator size="large" color={PRIMARY_BLUE} />
-                <Text style={styles.loadingText}>à¦Ÿà§à¦¯à§à¦° à¦—à¦¾à¦‡à¦¡ à¦²à§‹à¦¡ à¦¹à¦šà§à¦›à§‡...</Text>
+                <Text style={styles.loadingText}>ট্যুর গাইড লোড হচ্ছে...</Text>
               </View>
             ) : filteredAndSortedGuides.length === 0 ? (
               <View style={styles.emptyBox}>
                 <Ionicons name="person-remove-outline" size={48} color="#94A3B8" />
-                <Text style={styles.emptyTitle}>à¦•à§‹à¦¨à§‹ à¦—à¦¾à¦‡à¦¡ à¦ªà¦¾à¦“à§Ÿà¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿</Text>
+                <Text style={styles.emptyTitle}>কোনো গাইড পাওয়া যায়নি</Text>
                 <Text style={styles.emptySubtitle}>
-                  à¦…à¦¨à§à¦¯ à¦•à§‹à¦¨à§‹ à¦…à¦žà§à¦šà¦², à¦¸à§à¦ªà§‡à¦¶à¦¾à¦²à¦¾à¦‡à¦œà§‡à¦¶à¦¨ à¦¬à¦¾ à¦­à¦¾à¦·à¦¾ à¦«à¦¿à¦²à§à¦Ÿà¦¾à¦° à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦•à¦°à§‡ à¦¦à§‡à¦–à§à¦¨à¥¤
+                  অন্য কোনো অঞ্চল, স্পেশালাইজেশন বা ভাষা ফিল্টার পরিবর্তন করে দেখুন।
                 </Text>
                 <TouchableOpacity
                   style={styles.resetFilterBtn}
@@ -1259,7 +1259,7 @@ export default function TourGuidesScreen() {
                     setSearchQuery("");
                   }}
                 >
-                  <Text style={styles.resetFilterBtnText}>à¦¸à¦¬ à¦«à¦¿à¦²à§à¦Ÿà¦¾à¦° à¦°à¦¿à¦¸à§‡à¦Ÿ à¦•à¦°à§à¦¨</Text>
+                  <Text style={styles.resetFilterBtnText}>সব ফিল্টার রিসেট করুন</Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -1297,7 +1297,7 @@ export default function TourGuidesScreen() {
                           color="#0F766E"
                         />
                         <Text style={styles.licensePillText} numberOfLines={1}>
-                          {guide.licenseNumber} â€¢ {guide.licenseIssuer}
+                          {guide.licenseNumber} • {guide.licenseIssuer}
                         </Text>
                       </View>
 
@@ -1309,10 +1309,10 @@ export default function TourGuidesScreen() {
                             {guide.rating.toFixed(1)}
                           </Text>
                           <Text style={styles.reviewsCount}>
-                            ({guide.reviews_count} à¦°à¦¿à¦­à¦¿à¦‰)
+                            ({guide.reviews_count} রিভিউ)
                           </Text>
                         </View>
-                        <Text style={styles.metaSeparator}>â€¢</Text>
+                        <Text style={styles.metaSeparator}>•</Text>
                         <View style={styles.expBadge}>
                           <Ionicons
                             name="ribbon-outline"
@@ -1320,7 +1320,7 @@ export default function TourGuidesScreen() {
                             color="#475569"
                           />
                           <Text style={styles.expBadgeText}>
-                            {guide.experience_years}+ à¦¬à¦›à¦° à¦…à¦­à¦¿à¦œà§à¦žà¦¤à¦¾
+                            {guide.experience_years}+ বছর অভিজ্ঞতা
                           </Text>
                         </View>
                       </View>
@@ -1330,9 +1330,9 @@ export default function TourGuidesScreen() {
                         <Text style={styles.locationMetaText}>
                           {guide.primary_area}
                         </Text>
-                        <Text style={styles.metaSeparator}>â€¢</Text>
+                        <Text style={styles.metaSeparator}>•</Text>
                         <Text style={styles.toursCountText}>
-                          {guide.total_tours}à¦Ÿà¦¿ à¦¸à¦«à¦² à¦Ÿà§à¦¯à§à¦°
+                          {guide.total_tours}টি সফল ট্যুর
                         </Text>
                       </View>
                     </View>
@@ -1346,7 +1346,7 @@ export default function TourGuidesScreen() {
                   {/* Requirement 1: Spoken Languages with Proficiency Tags */}
                   <View style={styles.languagesContainer}>
                     <Text style={styles.sectionSmallLabel}>
-                      à¦­à¦¾à¦·à¦¾à¦° à¦¦à¦•à§à¦·à¦¤à¦¾ (Spoken Languages):
+                      ভাষার দক্ষতা (Spoken Languages):
                     </Text>
                     <View style={styles.langPillsRow}>
                       {guide.spokenLanguagesProficiency.map((lang, lIdx) => (
@@ -1384,7 +1384,7 @@ export default function TourGuidesScreen() {
                       ))}
                       {guide.specialties.slice(0, 2).map((s, idx) => (
                         <View key={`subspec-${idx}`} style={styles.generalSpecBadge}>
-                          <Text style={styles.generalSpecText}>âœ“ {s}</Text>
+                          <Text style={styles.generalSpecText}>✓ {s}</Text>
                         </View>
                       ))}
                     </View>
@@ -1393,18 +1393,18 @@ export default function TourGuidesScreen() {
                   {/* Requirement 3: Dual Pricing options (Hourly & Full-Day) */}
                   <View style={styles.pricingRow}>
                     <View style={styles.priceColumn}>
-                      <Text style={styles.priceHeaderLabel}>à¦˜à¦¨à§à¦Ÿà¦¾à¦¯à¦¼ (Hourly)</Text>
+                      <Text style={styles.priceHeaderLabel}>ঘন্টায় (Hourly)</Text>
                       <Text style={styles.priceAmount}>
-                        à§³{guide.hourlyRateCalculated}
-                        <Text style={styles.priceUnit}> / à¦˜à¦£à§à¦Ÿà¦¾</Text>
+                        ৳{guide.hourlyRateCalculated}
+                        <Text style={styles.priceUnit}> / ঘণ্টা</Text>
                       </Text>
                     </View>
                     <View style={styles.priceDivider} />
                     <View style={styles.priceColumn}>
-                      <Text style={styles.priceHeaderLabel}>à¦¸à¦¾à¦°à¦¾à¦¦à¦¿à¦¨ (Full-Day)</Text>
+                      <Text style={styles.priceHeaderLabel}>সারাদিন (Full-Day)</Text>
                       <Text style={styles.priceAmount}>
-                        à§³{guide.daily_rate.toLocaleString("en-BD")}
-                        <Text style={styles.priceUnit}> / à¦¦à¦¿à¦¨</Text>
+                        ৳{guide.daily_rate.toLocaleString("en-BD")}
+                        <Text style={styles.priceUnit}> / দিন</Text>
                       </Text>
                     </View>
                   </View>
@@ -1422,7 +1422,7 @@ export default function TourGuidesScreen() {
                         size={16}
                         color={PRIMARY_BLUE}
                       />
-                      <Text style={styles.chatActionBtnText}>à¦‡à¦¨à¦•à§‹à¦¯à¦¼à¦¾à¦°à¦¿ à¦šà§à¦¯à¦¾à¦Ÿ</Text>
+                      <Text style={styles.chatActionBtnText}>ইনকোয়ারি চ্যাট</Text>
                     </TouchableOpacity>
 
                     {/* Emergency Audio Consultation (CallScreen) */}
@@ -1432,7 +1432,7 @@ export default function TourGuidesScreen() {
                       activeOpacity={0.8}
                     >
                       <Ionicons name="call-outline" size={16} color="#DC2626" />
-                      <Text style={styles.callActionBtnText}>à¦œà¦°à§à¦°à¦¿ à¦•à¦²</Text>
+                      <Text style={styles.callActionBtnText}>জরুরি কল</Text>
                     </TouchableOpacity>
 
                     {/* Instant Hire Booking Button */}
@@ -1446,7 +1446,7 @@ export default function TourGuidesScreen() {
                         style={styles.hireActionGradient}
                       >
                         <Ionicons name="flash" size={15} color="#FBBF24" />
-                        <Text style={styles.hireActionBtnText}>à¦¹à¦¾à§Ÿà¦¾à¦° à¦•à¦°à§à¦¨</Text>
+                        <Text style={styles.hireActionBtnText}>হায়ার করুন</Text>
                       </LinearGradient>
                     </TouchableOpacity>
                   </View>
@@ -1457,7 +1457,7 @@ export default function TourGuidesScreen() {
                     onPress={() => setSelectedGuide(guide)}
                   >
                     <Text style={styles.viewProfileText}>
-                      à¦ªà§‚à¦°à§à¦£ à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦“ à¦Ÿà§à¦¯à§à¦°à¦¿à¦¸à§à¦Ÿ à¦°à¦¿à¦­à¦¿à¦‰ à¦¦à§‡à¦–à§à¦¨ â†’
+                      পূর্ণ প্রোফাইল ও ট্যুরিস্ট রিভিউ দেখুন →
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1476,34 +1476,34 @@ export default function TourGuidesScreen() {
         >
           <View style={styles.listHeaderRow}>
             <Text style={styles.listTitle}>
-              à¦†à¦ªà¦¨à¦¾à¦° à¦…à¦¨à§à¦®à§‹à¦¦à¦¿à¦¤ à¦—à¦¾à¦‡à¦¡ à¦¬à§à¦•à¦¿à¦‚à¦¸à¦®à§‚à¦¹ ({myBookings.length})
+              আপনার অনুমোদিত গাইড বুকিংসমূহ ({myBookings.length})
             </Text>
             <TouchableOpacity
               style={styles.refreshBookingsBtn}
               onPress={loadMyBookings}
             >
               <Ionicons name="refresh" size={14} color={PRIMARY_BLUE} />
-              <Text style={styles.refreshBookingsText}>à¦°à¦¿à¦«à§à¦°à§‡à¦¶</Text>
+              <Text style={styles.refreshBookingsText}>রিফ্রেশ</Text>
             </TouchableOpacity>
           </View>
 
           {loadingBookings ? (
             <View style={styles.loadingBox}>
               <ActivityIndicator size="large" color={PRIMARY_BLUE} />
-              <Text style={styles.loadingText}>à¦¬à§à¦•à¦¿à¦‚ à¦¤à¦¥à§à¦¯ à¦²à§‹à¦¡ à¦¹à¦šà§à¦›à§‡...</Text>
+              <Text style={styles.loadingText}>বুকিং তথ্য লোড হচ্ছে...</Text>
             </View>
           ) : myBookings.length === 0 ? (
             <View style={styles.emptyBox}>
               <Ionicons name="calendar-outline" size={48} color="#94A3B8" />
-              <Text style={styles.emptyTitle}>à¦•à§‹à¦¨à§‹ à¦¬à§à¦•à¦¿à¦‚ à¦ªà¦¾à¦“à§Ÿà¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿</Text>
+              <Text style={styles.emptyTitle}>কোনো বুকিং পাওয়া যায়নি</Text>
               <Text style={styles.emptySubtitle}>
-                à¦†à¦ªà¦¨à¦¿ à¦à¦–à¦¨à¦“ à¦•à§‹à¦¨à§‹ à¦Ÿà§à¦¯à§à¦° à¦—à¦¾à¦‡à¦¡ à¦¹à¦¾à§Ÿà¦¾à¦° à¦•à¦°à§‡à¦¨à¦¨à¦¿à¥¤ à¦—à¦¾à¦‡à¦¡ à¦¡à¦¿à¦°à§‡à¦•à§à¦Ÿà¦°à¦¿ à¦¥à§‡à¦•à§‡ à¦¸à¦¹à¦œà§‡ à¦¹à¦¾à§Ÿà¦¾à¦° à¦•à¦°à§à¦¨à¥¤
+                আপনি এখনও কোনো ট্যুর গাইড হায়ার করেননি। গাইড ডিরেক্টরি থেকে সহজে হায়ার করুন।
               </Text>
               <TouchableOpacity
                 style={styles.resetFilterBtn}
                 onPress={() => setMainTab("directory")}
               >
-                <Text style={styles.resetFilterBtnText}>à¦—à¦¾à¦‡à¦¡ à¦¡à¦¿à¦°à§‡à¦•à§à¦Ÿà¦°à¦¿ à¦¦à§‡à¦–à§à¦¨</Text>
+                <Text style={styles.resetFilterBtnText}>গাইড ডিরেক্টরি দেখুন</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -1532,7 +1532,7 @@ export default function TourGuidesScreen() {
                       </View>
                     </View>
                     <Text style={styles.bookingCardArea}>
-                      ðŸ“ {b.destination}
+                      📍 {b.destination}
                     </Text>
                     <Text style={styles.bookingRefText}>ID: {b.id}</Text>
                   </View>
@@ -1540,21 +1540,21 @@ export default function TourGuidesScreen() {
 
                 <View style={styles.bookingDetailsGrid}>
                   <View style={styles.bookingGridItem}>
-                    <Text style={styles.bookingGridLabel}>à¦¤à¦¾à¦°à¦¿à¦–</Text>
+                    <Text style={styles.bookingGridLabel}>তারিখ</Text>
                     <Text style={styles.bookingGridVal}>{b.tour_date}</Text>
                   </View>
                   <View style={styles.bookingGridItem}>
-                    <Text style={styles.bookingGridLabel}>à¦¸à¦®à§Ÿà¦•à¦¾à¦² / à¦¦à¦¿à¦¨</Text>
-                    <Text style={styles.bookingGridVal}>{b.duration_days} à¦¦à¦¿à¦¨</Text>
+                    <Text style={styles.bookingGridLabel}>সময়কাল / দিন</Text>
+                    <Text style={styles.bookingGridVal}>{b.duration_days} দিন</Text>
                   </View>
                   <View style={styles.bookingGridItem}>
-                    <Text style={styles.bookingGridLabel}>à¦ªà¦°à§à¦¯à¦Ÿà¦•</Text>
-                    <Text style={styles.bookingGridVal}>{b.guests_count} à¦œà¦¨</Text>
+                    <Text style={styles.bookingGridLabel}>পর্যটক</Text>
+                    <Text style={styles.bookingGridVal}>{b.guests_count} জন</Text>
                   </View>
                   <View style={styles.bookingGridItem}>
-                    <Text style={styles.bookingGridLabel}>à¦¸à¦°à§à¦¬à¦®à§‹à¦Ÿ à¦«à¦¿</Text>
+                    <Text style={styles.bookingGridLabel}>সর্বমোট ফি</Text>
                     <Text style={[styles.bookingGridVal, { color: SUCCESS_GREEN }]}>
-                      à§³{b.total_amount?.toLocaleString("en-BD") || b.daily_rate}
+                      ৳{b.total_amount?.toLocaleString("en-BD") || b.daily_rate}
                     </Text>
                   </View>
                 </View>
@@ -1562,7 +1562,7 @@ export default function TourGuidesScreen() {
                 <View style={styles.bookingMeetingBox}>
                   <Ionicons name="pin" size={14} color="#EF4444" />
                   <Text style={styles.bookingMeetingText} numberOfLines={1}>
-                    à¦®à¦¿à¦Ÿà¦¿à¦‚ à¦ªà§Ÿà§‡à¦¨à§à¦Ÿ: {b.meeting_point}
+                    মিটিং পয়েন্ট: {b.meeting_point}
                   </Text>
                 </View>
 
@@ -1584,7 +1584,7 @@ export default function TourGuidesScreen() {
                       size={15}
                       color={PRIMARY_BLUE}
                     />
-                    <Text style={styles.bookingChatBtnText}>à¦šà§à¦¯à¦¾à¦Ÿ à¦•à¦°à§à¦¨</Text>
+                    <Text style={styles.bookingChatBtnText}>চ্যাট করুন</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1598,7 +1598,7 @@ export default function TourGuidesScreen() {
                     }
                   >
                     <Ionicons name="call" size={15} color="#DC2626" />
-                    <Text style={styles.bookingCallBtnText}>à¦œà¦°à§à¦°à¦¿ à¦•à¦²</Text>
+                    <Text style={styles.bookingCallBtnText}>জরুরি কল</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1622,10 +1622,10 @@ export default function TourGuidesScreen() {
                 <View style={styles.modalSheetHeader}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.modalSheetTitle}>
-                      à¦—à¦¾à¦‡à¦¡ à¦¹à¦¾à§Ÿà¦¾à¦° à¦“ à¦¬à§à¦•à¦¿à¦‚ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤à¦•à¦°à¦£
+                      গাইড হায়ার ও বুকিং নিশ্চিতকরণ
                     </Text>
                     <Text style={styles.modalSheetSubtitle}>
-                      {bookingGuide.full_name} â€¢ {bookingGuide.licenseNumber}
+                      {bookingGuide.full_name} • {bookingGuide.licenseNumber}
                     </Text>
                   </View>
                   <TouchableOpacity
@@ -1651,12 +1651,12 @@ export default function TourGuidesScreen() {
                         {bookingGuide.full_name}
                       </Text>
                       <Text style={styles.miniGuideArea}>
-                        ðŸ“ à¦ªà§à¦°à¦§à¦¾à¦¨ à¦à¦²à¦¾à¦•à¦¾: {bookingGuide.primary_area}
+                        📍 প্রধান এলাকা: {bookingGuide.primary_area}
                       </Text>
                       <View style={styles.miniMetaRow}>
                         <Ionicons name="star" size={12} color={ACCENT_GOLD} />
                         <Text style={styles.miniRatingText}>
-                          {bookingGuide.rating.toFixed(1)} ({bookingGuide.reviews_count} à¦°à¦¿à¦­à¦¿à¦‰)
+                          {bookingGuide.rating.toFixed(1)} ({bookingGuide.reviews_count} রিভিউ)
                         </Text>
                       </View>
                     </View>
@@ -1664,7 +1664,7 @@ export default function TourGuidesScreen() {
 
                   {/* Requirement 3: Support Hourly Rate and Full-Day Rate hiring */}
                   <Text style={styles.sectionInputHeading}>
-                    à¦¹à¦¾à§Ÿà¦¾à¦°à¦¿à¦‚ à¦ªà§à¦¯à¦¾à¦•à§‡à¦œ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨ (Rate Option) *
+                    হায়ারিং প্যাকেজ নির্বাচন করুন (Rate Option) *
                   </Text>
                   <View style={styles.rateToggleWrap}>
                     <TouchableOpacity
@@ -1689,7 +1689,7 @@ export default function TourGuidesScreen() {
                           rateType === "hourly" && styles.rateToggleTextActive,
                         ]}
                       >
-                        â±ï¸ à¦˜à¦¨à§à¦Ÿà¦¾ à¦­à¦¿à¦¤à§à¦¤à¦¿à¦• (Hourly)
+                        ⏱️ ঘন্টা ভিত্তিক (Hourly)
                       </Text>
                       <Text
                         style={[
@@ -1697,7 +1697,7 @@ export default function TourGuidesScreen() {
                           rateType === "hourly" && styles.rateTogglePriceActive,
                         ]}
                       >
-                        à§³{bookingGuide.hourlyRateCalculated}/à¦˜à¦¨à§à¦Ÿà¦¾
+                        ৳{bookingGuide.hourlyRateCalculated}/ঘন্টা
                       </Text>
                     </TouchableOpacity>
 
@@ -1723,7 +1723,7 @@ export default function TourGuidesScreen() {
                           rateType === "daily" && styles.rateToggleTextActive,
                         ]}
                       >
-                        â˜€ï¸ à¦ªà§‚à¦°à§à¦£ à¦¦à¦¿à¦¨ (Full-Day)
+                        ☀️ পূর্ণ দিন (Full-Day)
                       </Text>
                       <Text
                         style={[
@@ -1731,7 +1731,7 @@ export default function TourGuidesScreen() {
                           rateType === "daily" && styles.rateTogglePriceActive,
                         ]}
                       >
-                        à§³{bookingGuide.daily_rate}/à¦¦à¦¿à¦¨
+                        ৳{bookingGuide.daily_rate}/দিন
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -1740,12 +1740,12 @@ export default function TourGuidesScreen() {
                   <View style={styles.durationCard}>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.durationCardTitle}>
-                        {rateType === "hourly" ? "à¦•à¦¤ à¦˜à¦¨à§à¦Ÿà¦¾ à¦ªà§à¦°à¦¯à¦¼à§‹à¦œà¦¨?" : "à¦•à¦¤ à¦¦à¦¿à¦¨ à¦¥à¦¾à¦•à¦¬à§‡à¦¨?"}
+                        {rateType === "hourly" ? "কত ঘন্টা প্রয়োজন?" : "কত দিন থাকবেন?"}
                       </Text>
                       <Text style={styles.durationCardSub}>
                         {rateType === "hourly"
-                          ? "à§§ à¦¥à§‡à¦•à§‡ à§§à§¨ à¦˜à¦¨à§à¦Ÿà¦¾ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨"
-                          : "à§§ à¦¥à§‡à¦•à§‡ à§©à§¦ à¦¦à¦¿à¦¨ à¦ªà¦°à§à¦¯à¦¨à§à¦¤ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨"}
+                          ? "১ থেকে ১২ ঘন্টা নির্বাচন করুন"
+                          : "১ থেকে ৩০ দিন পর্যন্ত নির্বাচন করুন"}
                       </Text>
                     </View>
                     <View style={styles.stepperContainer}>
@@ -1759,7 +1759,7 @@ export default function TourGuidesScreen() {
                         <Ionicons name="remove" size={18} color="#0F172A" />
                       </TouchableOpacity>
                       <Text style={styles.stepperValue}>
-                        {duration} {rateType === "hourly" ? "à¦˜à¦¨à§à¦Ÿà¦¾" : "à¦¦à¦¿à¦¨"}
+                        {duration} {rateType === "hourly" ? "ঘন্টা" : "দিন"}
                       </Text>
                       <TouchableOpacity
                         style={styles.stepperBtn}
@@ -1776,20 +1776,20 @@ export default function TourGuidesScreen() {
 
                   {/* Requirement 3: Date Picker & Calendar */}
                   <Text style={styles.sectionInputHeading}>
-                    à¦­à§à¦°à¦®à¦£à§‡à¦° à¦¤à¦¾à¦°à¦¿à¦– à¦¨à¦¿à¦°à§à¦§à¦¾à¦°à¦£ (Date Picker) *
+                    ভ্রমণের তারিখ নির্ধারণ (Date Picker) *
                   </Text>
                   <View style={styles.datePickerCard}>
                     <View style={styles.dateDisplayRow}>
                       <Ionicons name="calendar" size={19} color={PRIMARY_BLUE} />
                       <Text style={styles.dateDisplayText}>
-                        à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¿à¦¤ à¦¤à¦¾à¦°à¦¿à¦–: {tourDate}
+                        নির্বাচিত তারিখ: {tourDate}
                       </Text>
                       <TouchableOpacity
                         style={styles.calendarToggleBtn}
                         onPress={() => setShowCalendarView(!showCalendarView)}
                       >
                         <Text style={styles.calendarToggleBtnText}>
-                          {showCalendarView ? "à¦²à§à¦•à¦¾à¦¨" : "à¦•à§à¦¯à¦¾à¦²à§‡à¦¨à§à¦¡à¦¾à¦°"}
+                          {showCalendarView ? "লুকান" : "ক্যালেন্ডার"}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -1797,10 +1797,10 @@ export default function TourGuidesScreen() {
                     {/* Quick Date Chips */}
                     <View style={styles.quickDateChipsRow}>
                       {[
-                        { label: "à¦†à¦œà¦•à§‡", days: 0 },
-                        { label: "à¦†à¦—à¦¾à¦®à§€à¦•à¦¾à¦²", days: 1 },
-                        { label: "à¦ªà¦°à¦¶à§", days: 2 },
-                        { label: "à¦à¦‡ à¦¸à¦ªà§à¦¤à¦¾à¦¹à¦¾à¦¨à§à¦¤à§‡", days: 3 },
+                        { label: "আজকে", days: 0 },
+                        { label: "আগামীকাল", days: 1 },
+                        { label: "পরশু", days: 2 },
+                        { label: "এই সপ্তাহান্তে", days: 3 },
                       ].map((item, idx) => {
                         const target = new Date();
                         target.setDate(target.getDate() + item.days);
@@ -1860,7 +1860,7 @@ export default function TourGuidesScreen() {
                         </View>
 
                         <View style={styles.calWeekdaysRow}>
-                          {["à¦°à¦¬à¦¿", "à¦¸à§‹à¦®", "à¦®à¦™à§à¦—à¦²", "à¦¬à§à¦§", "à¦¬à§ƒà¦¹à¦ƒ", "à¦¶à§à¦•à§à¦°", "à¦¶à¦¨à¦¿"].map(
+                          {["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহঃ", "শুক্র", "শনি"].map(
                             (day, dIdx) => (
                               <Text key={dIdx} style={styles.calWeekdayText}>
                                 {day}
@@ -1913,7 +1913,7 @@ export default function TourGuidesScreen() {
                   {rateType === "hourly" && (
                     <View style={styles.timeSlotSection}>
                       <Text style={styles.sectionInputHeading}>
-                        à¦Ÿà§à¦¯à§à¦° à¦¶à§à¦°à§à¦° à¦¸à¦®à§Ÿ à¦¨à¦¿à¦°à§à¦§à¦¾à¦°à¦£ (Start Time)
+                        ট্যুর শুরুর সময় নির্ধারণ (Start Time)
                       </Text>
                       <View style={styles.timeSlotChipsRow}>
                         {bookingGuide.availableTimeSlots.map((slot, tIdx) => (
@@ -1949,10 +1949,10 @@ export default function TourGuidesScreen() {
 
                   {/* Requirement 3: Meeting Point Selection */}
                   <Text style={styles.sectionInputHeading}>
-                    à¦®à¦¿à¦Ÿà¦¿à¦‚ à¦ªà§Ÿà§‡à¦¨à§à¦Ÿ à¦¬à¦¾ à¦ªà¦¿à¦•à¦†à¦ª à¦²à§à¦¯à¦¾à¦¨à§à¦¡à¦®à¦¾à¦°à§à¦• (Meeting Point) *
+                    মিটিং পয়েন্ট বা পিকআপ ল্যান্ডমার্ক (Meeting Point) *
                   </Text>
                   <Text style={styles.inputHelperText}>
-                    à¦ªà§à¦°à¦¸à§à¦¤à¦¾à¦¬à¦¿à¦¤ à¦ªà§Ÿà§‡à¦¨à§à¦Ÿ à¦¥à§‡à¦•à§‡ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨ à¦¬à¦¾ à¦¨à¦¿à¦°à§à¦¦à¦¿à¦·à§à¦Ÿ à¦¹à§‹à¦Ÿà§‡à¦²à§‡à¦° à¦ à¦¿à¦•à¦¾à¦¨à¦¾ à¦²à¦¿à¦–à§à¦¨:
+                    প্রস্তাবিত পয়েন্ট থেকে নির্বাচন করুন বা নির্দিষ্ট হোটেলের ঠিকানা লিখুন:
                   </Text>
                   <View style={styles.meetingPointChipsRow}>
                     {bookingGuide.recommendedMeetingPoints.map((point, pIdx) => {
@@ -1992,7 +1992,7 @@ export default function TourGuidesScreen() {
                       styles.inputField,
                       formErrors.meetingPoint && styles.inputFieldError,
                     ]}
-                    placeholder="à¦¹à§‹à¦Ÿà§‡à¦² à¦²à¦¬à¦¿ à¦¬à¦¾ à¦¨à¦¿à¦°à§à¦¦à¦¿à¦·à§à¦Ÿ à¦ªà¦¿à¦•à¦†à¦ª à¦ªà§Ÿà§‡à¦¨à§à¦Ÿ à¦²à¦¿à¦–à§à¦¨..."
+                    placeholder="হোটেল লবি বা নির্দিষ্ট পিকআপ পয়েন্ট লিখুন..."
                     placeholderTextColor="#94A3B8"
                     value={meetingPoint}
                     onChangeText={setMeetingPoint}
@@ -2004,15 +2004,15 @@ export default function TourGuidesScreen() {
                   )}
 
                   {/* Tourist Information Fields */}
-                  <Text style={styles.sectionInputHeading}>à¦­à§à¦°à¦®à¦£à¦•à¦¾à¦°à§€à¦° à¦¤à¦¥à§à¦¯ *</Text>
+                  <Text style={styles.sectionInputHeading}>ভ্রমণকারীর তথ্য *</Text>
                   <View style={styles.inputRow}>
-                    <Text style={styles.fieldLabel}>à¦†à¦ªà¦¨à¦¾à¦° à¦ªà§à¦°à§‹ à¦¨à¦¾à¦® *</Text>
+                    <Text style={styles.fieldLabel}>আপনার পুরো নাম *</Text>
                     <TextInput
                       style={[
                         styles.inputField,
                         formErrors.touristName && styles.inputFieldError,
                       ]}
-                      placeholder="à¦¯à§‡à¦®à¦¨: à¦¤à¦¾à¦¨à¦­à§€à¦° à¦†à¦¹à¦®à§‡à¦¦"
+                      placeholder="যেমন: তানভীর আহমেদ"
                       placeholderTextColor="#94A3B8"
                       value={touristName}
                       onChangeText={setTouristName}
@@ -2025,13 +2025,13 @@ export default function TourGuidesScreen() {
                   </View>
 
                   <View style={styles.inputRow}>
-                    <Text style={styles.fieldLabel}>à¦®à§‹à¦¬à¦¾à¦‡à¦² à¦¨à¦®à§à¦¬à¦° *</Text>
+                    <Text style={styles.fieldLabel}>মোবাইল নম্বর *</Text>
                     <TextInput
                       style={[
                         styles.inputField,
                         formErrors.touristPhone && styles.inputFieldError,
                       ]}
-                      placeholder="à¦¯à§‡à¦®à¦¨: 01712345678"
+                      placeholder="যেমন: 01712345678"
                       placeholderTextColor="#94A3B8"
                       keyboardType="phone-pad"
                       value={touristPhone}
@@ -2045,13 +2045,13 @@ export default function TourGuidesScreen() {
                   </View>
 
                   <View style={styles.inputRow}>
-                    <Text style={styles.fieldLabel}>à¦‡à¦®à§‡à¦‡à¦² à¦à¦¡à§à¦°à§‡à¦¸ (à¦à¦šà§à¦›à¦¿à¦•)</Text>
+                    <Text style={styles.fieldLabel}>ইমেইল এড্রেস (ঐচ্ছিক)</Text>
                     <TextInput
                       style={[
                         styles.inputField,
                         formErrors.touristEmail && styles.inputFieldError,
                       ]}
-                      placeholder="à¦¯à§‡à¦®à¦¨: tourist@example.com"
+                      placeholder="যেমন: tourist@example.com"
                       placeholderTextColor="#94A3B8"
                       keyboardType="email-address"
                       autoCapitalize="none"
@@ -2068,9 +2068,9 @@ export default function TourGuidesScreen() {
                   {/* Guests Stepper */}
                   <View style={styles.guestCounterRow}>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.fieldLabel}>à¦­à§à¦°à¦®à¦£à¦•à¦¾à¦°à§€ à¦¸à¦‚à¦–à§à¦¯à¦¾</Text>
+                      <Text style={styles.fieldLabel}>ভ্রমণকারী সংখ্যা</Text>
                       <Text style={styles.guestHelperText}>
-                        à¦†à¦ªà¦¨à¦¾à¦° à¦¸à¦¾à¦¥à§‡ à¦®à§‹à¦Ÿ à¦•à¦¤ à¦œà¦¨ à¦ªà¦°à§à¦¯à¦Ÿà¦• à¦¥à¦¾à¦•à¦¬à§‡à¦¨?
+                        আপনার সাথে মোট কত জন পর্যটক থাকবেন?
                       </Text>
                     </View>
                     <View style={styles.stepperContainer}>
@@ -2083,7 +2083,7 @@ export default function TourGuidesScreen() {
                       >
                         <Ionicons name="remove" size={18} color="#0F172A" />
                       </TouchableOpacity>
-                      <Text style={styles.stepperValue}>{guestsCount} à¦œà¦¨</Text>
+                      <Text style={styles.stepperValue}>{guestsCount} জন</Text>
                       <TouchableOpacity
                         style={styles.stepperBtn}
                         onPress={() => {
@@ -2098,10 +2098,10 @@ export default function TourGuidesScreen() {
 
                   {/* Special Requests */}
                   <View style={styles.inputRow}>
-                    <Text style={styles.fieldLabel}>à¦¬à¦¿à¦¶à§‡à¦· à¦…à¦¨à§à¦°à§‹à¦§ à¦¬à¦¾ à¦¨à§‹à¦Ÿ (à¦à¦šà§à¦›à¦¿à¦•)</Text>
+                    <Text style={styles.fieldLabel}>বিশেষ অনুরোধ বা নোট (ঐচ্ছিক)</Text>
                     <TextInput
                       style={[styles.inputField, { height: 60 }]}
-                      placeholder="à¦¯à§‡à¦®à¦¨: à¦«à§à¦¯à¦¾à¦®à¦¿à¦²à¦¿ à¦«à¦Ÿà§‹à¦—à§à¦°à¦¾à¦«à¦¿ à¦¬à¦¾ à¦¶à¦¿à¦¶à§ à¦¸à¦¹à¦¾à¦¯à¦¼à¦• à¦Ÿà§à¦°à¦¾à¦­à§‡à¦²..."
+                      placeholder="যেমন: ফ্যামিলি ফটোগ্রাফি বা শিশু সহায়ক ট্রাভেল..."
                       placeholderTextColor="#94A3B8"
                       multiline
                       value={specialRequests}
@@ -2112,40 +2112,40 @@ export default function TourGuidesScreen() {
                   {/* Dynamic Pricing Calculation Card */}
                   <View style={styles.priceBreakdownCard}>
                     <Text style={styles.priceBreakdownTitle}>
-                      à¦­à¦¾à¦¡à¦¼à¦¾ à¦“ à¦«à¦¿ à¦¹à¦¿à¦¸à¦¾à¦¬ (Price Breakdown)
+                      ভাড়া ও ফি হিসাব (Price Breakdown)
                     </Text>
                     <View style={styles.calcLine}>
                       <Text style={styles.calcLineLabel}>
                         {rateType === "hourly"
-                          ? `à¦˜à¦¨à§à¦Ÿà¦¾à¦­à¦¿à¦¤à§à¦¤à¦¿à¦• à¦«à¦¿ (à§³${bookingGuide.hourlyRateCalculated} Ã— ${duration} à¦˜à¦¨à§à¦Ÿà¦¾)`
-                          : `à¦¦à§ˆà¦¨à¦¿à¦• à¦«à¦¿ (à§³${bookingGuide.daily_rate} Ã— ${duration} à¦¦à¦¿à¦¨)`}
+                          ? `ঘন্টাভিত্তিক ফি (৳${bookingGuide.hourlyRateCalculated} × ${duration} ঘন্টা)`
+                          : `দৈনিক ফি (৳${bookingGuide.daily_rate} × ${duration} দিন)`}
                       </Text>
                       <Text style={styles.calcLineVal}>
-                        à§³{calculatedTotal.toLocaleString("en-BD")}
+                        ৳{calculatedTotal.toLocaleString("en-BD")}
                       </Text>
                     </View>
                     <View style={styles.calcLine}>
                       <Text style={styles.calcLineLabel}>
-                        à¦Ÿà§à¦¯à§à¦°à¦¿à¦¸à§à¦Ÿ à¦¨à¦¿à¦°à¦¾à¦ªà¦¤à§à¦¤à¦¾ à¦—à§à¦¯à¦¾à¦°à¦¾à¦¨à§à¦Ÿà¦¿ à¦“ à¦Ÿà§à¦°à¦¾à¦­à§‡à¦²à¦¾à¦° à¦‡à¦¨à§à¦¸à§à¦°à§‡à¦¨à§à¦¸
+                        ট্যুরিস্ট নিরাপত্তা গ্যারান্টি ও ট্রাভেলার ইন্সুরেন্স
                       </Text>
                       <Text style={[styles.calcLineVal, { color: SUCCESS_GREEN }]}>
-                        à¦«à§à¦°à¦¿ (à§¦%)
+                        ফ্রি (০%)
                       </Text>
                     </View>
                     <View style={styles.calcLine}>
-                      <Text style={styles.calcLineLabel}>à¦ªà§à¦²à§à¦¯à¦¾à¦Ÿà¦«à¦°à§à¦® à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸ à¦«à¦¿</Text>
+                      <Text style={styles.calcLineLabel}>প্ল্যাটফর্ম সার্ভিস ফি</Text>
                       <Text style={[styles.calcLineVal, { color: SUCCESS_GREEN }]}>
-                        à§³à§¦
+                        ৳০
                       </Text>
                     </View>
                     <View style={styles.calcDivider} />
                     <View style={styles.calcTotalLine}>
                       <View>
-                        <Text style={styles.calcTotalLabel}>à¦¸à¦°à§à¦¬à¦®à§‹à¦Ÿ à¦ªà§à¦°à¦¦à§‡à¦¯à¦¼</Text>
-                        <Text style={styles.calcTaxNote}>à¦¸à¦•à¦² à¦Ÿà§à¦¯à¦¾à¦•à§à¦¸ à¦…à¦¨à§à¦¤à¦°à§à¦­à§à¦•à§à¦¤</Text>
+                        <Text style={styles.calcTotalLabel}>সর্বমোট প্রদেয়</Text>
+                        <Text style={styles.calcTaxNote}>সকল ট্যাক্স অন্তর্ভুক্ত</Text>
                       </View>
                       <Text style={styles.calcTotalVal}>
-                        à§³{calculatedTotal.toLocaleString("en-BD")}
+                        ৳{calculatedTotal.toLocaleString("en-BD")}
                       </Text>
                     </View>
                   </View>
@@ -2167,7 +2167,7 @@ export default function TourGuidesScreen() {
                         <View style={styles.checkoutBtnContent}>
                           <Ionicons name="card-outline" size={20} color="#FFFFFF" />
                           <Text style={styles.checkoutBtnText}>
-                            à¦¬à§à¦•à¦¿à¦‚ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤ à¦“ à¦šà§‡à¦•à¦†à¦‰à¦Ÿ à¦•à¦°à§à¦¨ (Proceed to Checkout)
+                            বুকিং নিশ্চিত ও চেকআউট করুন (Proceed to Checkout)
                           </Text>
                         </View>
                       )}
@@ -2195,7 +2195,7 @@ export default function TourGuidesScreen() {
               <>
                 <View style={styles.modalSheetHeader}>
                   <Text style={styles.modalSheetTitle}>
-                    à¦¸à¦¾à¦°à§à¦Ÿà¦¿à¦«à¦¾à¦‡à¦¡ à¦—à¦¾à¦‡à¦¡ à¦ªà¦°à¦¿à¦šà¦¿à¦¤à¦¿
+                    সার্টিফাইড গাইড পরিচিতি
                   </Text>
                   <TouchableOpacity
                     style={styles.modalCloseCircle}
@@ -2230,12 +2230,12 @@ export default function TourGuidesScreen() {
                         </Text>
                       </View>
                       <Text style={styles.profileAreaText}>
-                        ðŸ“ {selectedGuide.primary_area}
+                        📍 {selectedGuide.primary_area}
                       </Text>
                       <View style={styles.profileStarRow}>
                         <Ionicons name="star" size={14} color={ACCENT_GOLD} />
                         <Text style={styles.profileStarText}>
-                          {selectedGuide.rating.toFixed(1)} ({selectedGuide.reviews_count} à¦°à¦¿à¦­à¦¿à¦‰)
+                          {selectedGuide.rating.toFixed(1)} ({selectedGuide.reviews_count} রিভিউ)
                         </Text>
                       </View>
                     </View>
@@ -2245,28 +2245,28 @@ export default function TourGuidesScreen() {
                   <View style={styles.certBadgesContainer}>
                     <View style={styles.certBadgeItem}>
                       <Ionicons name="shield-checkmark" size={18} color="#0284C7" />
-                      <Text style={styles.certBadgeTitle}>à¦¸à¦°à¦•à¦¾à¦°à¦¿ à¦²à¦¾à¦‡à¦¸à§‡à¦¨à§à¦¸</Text>
+                      <Text style={styles.certBadgeTitle}>সরকারি লাইসেন্স</Text>
                       <Text style={styles.certBadgeSub}>Verified Guide</Text>
                     </View>
                     <View style={styles.certBadgeItem}>
                       <Ionicons name="card-outline" size={18} color="#059669" />
-                      <Text style={styles.certBadgeTitle}>à¦à¦¨à¦†à¦‡à¦¡à¦¿ à¦­à§‡à¦°à¦¿à¦«à¦¾à¦‡à¦¡</Text>
+                      <Text style={styles.certBadgeTitle}>এনআইডি ভেরিফাইড</Text>
                       <Text style={styles.certBadgeSub}>Govt NID Checked</Text>
                     </View>
                     <View style={styles.certBadgeItem}>
                       <Ionicons name="medkit-outline" size={18} color="#D97706" />
-                      <Text style={styles.certBadgeTitle}>à¦ªà§à¦°à¦¾à¦¥à¦®à¦¿à¦• à¦šà¦¿à¦•à¦¿à§Žà¦¸à¦¾</Text>
+                      <Text style={styles.certBadgeTitle}>প্রাথমিক চিকিৎসা</Text>
                       <Text style={styles.certBadgeSub}>First-Aid Trained</Text>
                     </View>
                   </View>
 
                   {/* About & Bio */}
-                  <Text style={styles.sheetSectionTitle}>à¦—à¦¾à¦‡à¦¡ à¦¸à¦®à§à¦ªà¦°à§à¦•à§‡ (About)</Text>
+                  <Text style={styles.sheetSectionTitle}>গাইড সম্পর্কে (About)</Text>
                   <Text style={styles.sheetBioText}>{selectedGuide.bio}</Text>
 
                   {/* Languages Proficiency */}
                   <Text style={styles.sheetSectionTitle}>
-                    à¦­à¦¾à¦·à¦¾à¦° à¦¦à¦•à§à¦·à¦¤à¦¾ à¦“ à¦¦à¦–à¦² (Spoken Languages)
+                    ভাষার দক্ষতা ও দখল (Spoken Languages)
                   </Text>
                   <View style={styles.langPillsRow}>
                     {selectedGuide.spokenLanguagesProficiency.map((l, idx) => (
@@ -2275,7 +2275,7 @@ export default function TourGuidesScreen() {
                         <View style={{ marginStart: 6 }}>
                           <Text style={styles.languageNameLarge}>{l.language}</Text>
                           <Text style={styles.languageLevelLarge}>
-                            à¦¦à¦•à§à¦·à¦¤à¦¾: {l.level}
+                            দক্ষতা: {l.level}
                           </Text>
                         </View>
                       </View>
@@ -2284,7 +2284,7 @@ export default function TourGuidesScreen() {
 
                   {/* Covered Tourist Spots */}
                   <Text style={styles.sheetSectionTitle}>
-                    à¦•à¦­à¦¾à¦° à¦•à¦°à¦¾ à¦¦à¦°à§à¦¶à¦¨à§€à§Ÿ à¦¸à§à¦ªà¦Ÿà¦¸à¦®à§‚à¦¹ (Covered Spots)
+                    কভার করা দর্শনীয় স্পটসমূহ (Covered Spots)
                   </Text>
                   <View style={styles.coveredSpotsRow}>
                     {selectedGuide.covered_areas.map((area, aIdx) => (
@@ -2297,7 +2297,7 @@ export default function TourGuidesScreen() {
 
                   {/* Tourist Reviews Section */}
                   <Text style={styles.sheetSectionTitle}>
-                    à¦ªà¦°à§à¦¯à¦Ÿà¦•à¦¦à§‡à¦° à¦°à¦¿à¦­à¦¿à¦‰ à¦“ à¦…à¦­à¦¿à¦œà§à¦žà¦¤à¦¾ (Reviews)
+                    পর্যটকদের রিভিউ ও অভিজ্ঞতা (Reviews)
                   </Text>
                   {selectedGuide.sampleReviews.map((rev) => (
                     <View key={rev.id} style={styles.reviewCardItem}>
@@ -2310,7 +2310,7 @@ export default function TourGuidesScreen() {
                       </View>
                       <Text style={styles.reviewComment}>{rev.comment}</Text>
                       <Text style={styles.reviewDateText}>
-                        {rev.tourType} â€¢ {rev.date}
+                        {rev.tourType} • {rev.date}
                       </Text>
                     </View>
                   ))}
@@ -2330,7 +2330,7 @@ export default function TourGuidesScreen() {
                         size={17}
                         color={PRIMARY_BLUE}
                       />
-                      <Text style={styles.profileChatBtnText}>à¦šà§à¦¯à¦¾à¦Ÿ</Text>
+                      <Text style={styles.profileChatBtnText}>চ্যাট</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -2342,7 +2342,7 @@ export default function TourGuidesScreen() {
                       }}
                     >
                       <Ionicons name="call" size={17} color="#DC2626" />
-                      <Text style={styles.profileCallBtnText}>à¦œà¦°à§à¦°à¦¿ à¦•à¦²</Text>
+                      <Text style={styles.profileCallBtnText}>জরুরি কল</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -2354,7 +2354,7 @@ export default function TourGuidesScreen() {
                       }}
                     >
                       <Text style={styles.profileHireBtnText}>
-                        à¦—à¦¾à¦‡à¦¡ à¦¹à¦¾à§Ÿà¦¾à¦° à¦•à¦°à§à¦¨
+                        গাইড হায়ার করুন
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -2378,10 +2378,10 @@ export default function TourGuidesScreen() {
             <View style={styles.modalSheetHeader}>
               <View>
                 <Text style={styles.modalSheetTitle}>
-                  à¦Ÿà§à¦¯à§à¦° à¦—à¦¾à¦‡à¦¡ à¦¹à¦¿à¦¸à§‡à¦¬à§‡ à¦¯à§à¦•à§à¦¤ à¦¹à¦¨
+                  ট্যুর গাইড হিসেবে যুক্ত হন
                 </Text>
                 <Text style={styles.modalSheetSubtitle}>
-                  à¦²à¦¾à¦‡à¦¸à§‡à¦¨à§à¦¸à¦¯à§à¦•à§à¦¤ à¦—à¦¾à¦‡à¦¡ à¦ªà§à¦²à§à¦¯à¦¾à¦Ÿà¦«à¦°à§à¦®à§‡ à¦¤à¦¾à¦²à¦¿à¦•à¦¾à¦­à§à¦•à§à¦¤ à¦¹à§Ÿà§‡ à¦†à§Ÿ à¦•à¦°à§à¦¨
+                  লাইসেন্সযুক্ত গাইড প্ল্যাটফর্মে তালিকাভুক্ত হয়ে আয় করুন
                 </Text>
               </View>
               <TouchableOpacity
@@ -2396,16 +2396,16 @@ export default function TourGuidesScreen() {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.bookingScrollContent}
             >
-              <Text style={styles.fieldLabel}>à¦†à¦ªà¦¨à¦¾à¦° à¦ªà§à¦°à§‹ à¦¨à¦¾à¦® *</Text>
+              <Text style={styles.fieldLabel}>আপনার পুরো নাম *</Text>
               <TextInput
                 style={styles.inputField}
-                placeholder="à¦à¦¨à¦†à¦‡à¦¡à¦¿ à¦…à¦¨à§à¦¯à¦¾à§Ÿà§€ à¦¨à¦¾à¦®"
+                placeholder="এনআইডি অনুযায়ী নাম"
                 placeholderTextColor="#94A3B8"
                 value={applyFullName}
                 onChangeText={setApplyFullName}
               />
 
-              <Text style={styles.fieldLabel}>à¦®à§‹à¦¬à¦¾à¦‡à¦² à¦¨à¦®à§à¦¬à¦° *</Text>
+              <Text style={styles.fieldLabel}>মোবাইল নম্বর *</Text>
               <TextInput
                 style={styles.inputField}
                 placeholder="01XXXXXXXXX"
@@ -2415,19 +2415,19 @@ export default function TourGuidesScreen() {
                 onChangeText={setApplyPhone}
               />
 
-              <Text style={styles.fieldLabel}>à¦œà¦¾à¦¤à§€à¦¯à¦¼ à¦ªà¦°à¦¿à¦šà¦¯à¦¼à¦ªà¦¤à§à¦° / à¦²à¦¾à¦‡à¦¸à§‡à¦¨à§à¦¸ à¦¨à¦®à§à¦¬à¦° *</Text>
+              <Text style={styles.fieldLabel}>জাতীয় পরিচয়পত্র / লাইসেন্স নম্বর *</Text>
               <TextInput
                 style={styles.inputField}
-                placeholder="à¦à¦¨à¦†à¦‡à¦¡à¦¿ à¦¬à¦¾ à¦Ÿà§à¦¯à§à¦°à¦¿à¦œà¦® à¦²à¦¾à¦‡à¦¸à§‡à¦¨à§à¦¸ à¦¨à¦®à§à¦¬à¦°"
+                placeholder="এনআইডি বা ট্যুরিজম লাইসেন্স নম্বর"
                 placeholderTextColor="#94A3B8"
                 value={applyNid}
                 onChangeText={setApplyNid}
               />
 
-              <Text style={styles.fieldLabel}>à¦ªà§à¦°à¦§à¦¾à¦¨ à¦ªà¦°à§à¦¯à¦Ÿà¦¨ à¦à¦²à¦¾à¦•à¦¾ *</Text>
+              <Text style={styles.fieldLabel}>প্রধান পর্যটন এলাকা *</Text>
               <TextInput
                 style={styles.inputField}
-                placeholder="à¦¯à§‡à¦®à¦¨: Cox's Bazar / Sylhet / Sundarbans / Dhaka"
+                placeholder="যেমন: Cox's Bazar / Sylhet / Sundarbans / Dhaka"
                 placeholderTextColor="#94A3B8"
                 value={applyArea}
                 onChangeText={setApplyArea}
@@ -2435,10 +2435,10 @@ export default function TourGuidesScreen() {
 
               <View style={styles.dualFieldRow}>
                 <View style={{ flex: 1, marginEnd: 8 }}>
-                  <Text style={styles.fieldLabel}>à¦…à¦­à¦¿à¦œà§à¦žà¦¤à¦¾ (à¦¬à¦›à¦°)</Text>
+                  <Text style={styles.fieldLabel}>অভিজ্ঞতা (বছর)</Text>
                   <TextInput
                     style={styles.inputField}
-                    placeholder="à¦¯à§‡à¦®à¦¨: 4"
+                    placeholder="যেমন: 4"
                     placeholderTextColor="#94A3B8"
                     keyboardType="numeric"
                     value={applyExperience}
@@ -2446,10 +2446,10 @@ export default function TourGuidesScreen() {
                   />
                 </View>
                 <View style={{ flex: 1, marginStart: 8 }}>
-                  <Text style={styles.fieldLabel}>à¦¦à§ˆà¦¨à¦¿à¦• à¦«à¦¿ (à§³)</Text>
+                  <Text style={styles.fieldLabel}>দৈনিক ফি (৳)</Text>
                   <TextInput
                     style={styles.inputField}
-                    placeholder="à¦¯à§‡à¦®à¦¨: 1800"
+                    placeholder="যেমন: 1800"
                     placeholderTextColor="#94A3B8"
                     keyboardType="numeric"
                     value={applyDailyRate}
@@ -2459,31 +2459,31 @@ export default function TourGuidesScreen() {
               </View>
 
               <Text style={styles.fieldLabel}>
-                à¦­à¦¾à¦·à¦¾à¦° à¦¦à¦–à¦² (à¦¯à§‡à¦®à¦¨: Bengali, English, Chinese, Arabic, French)
+                ভাষার দখল (যেমন: Bengali, English, Chinese, Arabic, French)
               </Text>
               <TextInput
                 style={styles.inputField}
-                placeholder="à¦¯à§‡à¦¸à¦¬ à¦­à¦¾à¦·à¦¾ à¦ªà¦°à§à¦¯à¦Ÿà¦•à¦¦à§‡à¦° à¦¸à¦¾à¦¥à§‡ à¦¬à¦²à¦¤à§‡ à¦ªà¦¾à¦°à§‡à¦¨"
+                placeholder="যেসব ভাষা পর্যটকদের সাথে বলতে পারেন"
                 placeholderTextColor="#94A3B8"
                 value={applyLanguages}
                 onChangeText={setApplyLanguages}
               />
 
               <Text style={styles.fieldLabel}>
-                à¦¸à§à¦ªà§‡à¦¶à¦¾à¦²à¦¾à¦‡à¦œà§‡à¦¶à¦¨ (Historical, Wildlife, Culinary, Photography)
+                স্পেশালাইজেশন (Historical, Wildlife, Culinary, Photography)
               </Text>
               <TextInput
                 style={styles.inputField}
-                placeholder="à¦•à¦®à¦¾ à¦¦à¦¿à§Ÿà§‡ à¦²à¦¿à¦–à§à¦¨"
+                placeholder="কমা দিয়ে লিখুন"
                 placeholderTextColor="#94A3B8"
                 value={applySpecialty}
                 onChangeText={setApplySpecialty}
               />
 
-              <Text style={styles.fieldLabel}>à¦†à¦ªà¦¨à¦¾à¦° à¦…à¦­à¦¿à¦œà§à¦žà¦¤à¦¾ à¦“ à¦ªà¦°à¦¿à¦šà¦¿à¦¤à¦¿ *</Text>
+              <Text style={styles.fieldLabel}>আপনার অভিজ্ঞতা ও পরিচিতি *</Text>
               <TextInput
                 style={[styles.inputField, { height: 80, textAlignVertical: "top" }]}
-                placeholder="à¦ªà¦°à§à¦¯à¦Ÿà¦•à¦¦à§‡à¦° à¦•à§‡à¦¨ à¦†à¦ªà¦¨à¦¾à¦° à¦—à¦¾à¦‡à¦¡à§‡à¦¨à§à¦¸ à¦¬à§‡à¦›à§‡ à¦¨à§‡à¦“à¦¯à¦¼à¦¾ à¦‰à¦šà¦¿à¦¤ à¦²à¦¿à¦–à§à¦¨..."
+                placeholder="পর্যটকদের কেন আপনার গাইডেন্স বেছে নেওয়া উচিত লিখুন..."
                 placeholderTextColor="#94A3B8"
                 multiline
                 value={applyBio}
@@ -2504,7 +2504,7 @@ export default function TourGuidesScreen() {
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
                     <Text style={styles.checkoutBtnText}>
-                      à¦†à¦¬à§‡à¦¦à¦¨ à¦œà¦®à¦¾ à¦¦à¦¿à¦¨ (Instant Approval)
+                      আবেদন জমা দিন (Instant Approval)
                     </Text>
                   )}
                 </LinearGradient>

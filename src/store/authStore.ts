@@ -65,32 +65,21 @@ function resolveRolePermissions(user: User | null, profile: UserProfile | null):
     };
   }
 
+  // Zero-Trust Security: Only server-minted app_metadata is trusted for privileged roles.
+  // user_metadata and profile fields are user-mutable and strictly forbidden from conferring admin/staff privileges.
   const appRole = (user.app_metadata?.role as string) || "";
-  const metaRole = (user.user_metadata?.role as string) || "";
-  const profileRole = profile?.role || "";
 
   const isAdmin =
     appRole === "admin" ||
-    appRole === "super_admin" ||
-    metaRole === "admin" ||
-    profileRole === "admin" ||
-    user.user_metadata?.is_admin === true;
+    appRole === "super_admin";
 
   const isAgency =
     appRole === "agency" ||
-    appRole === "business" ||
-    metaRole === "agency" ||
-    profileRole === "agency" ||
-    profileRole === "business" ||
-    user.user_metadata?.is_agency === true;
+    appRole === "business";
 
   const isHotelStaff =
     appRole === "hotel_staff" ||
-    appRole === "partner" ||
-    metaRole === "hotel_staff" ||
-    profileRole === "hotel_staff" ||
-    profileRole === "partner" ||
-    user.user_metadata?.is_hotel_staff === true;
+    appRole === "partner";
 
   return {
     is_admin: isAdmin,

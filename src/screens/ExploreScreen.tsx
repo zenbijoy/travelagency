@@ -26,6 +26,7 @@ import { screens, type UIScreen } from "../data/screens";
 import * as Haptics from "expo-haptics";
 import { useDebounce } from "../hooks/useDebounce";
 import { useTheme } from "../context/ThemeContext";
+import { formatSourcePrice } from "../utils/currency";
 import { FONTS } from "../theme/typography";
 import { ListSkeleton, CardSkeleton, ErrorStateCard, EmptyStateView, OpenStreetMap, MapMarkerItem } from "../components/common";
 import { WeatherWidget } from "../components/weather/WeatherWidget";
@@ -89,7 +90,7 @@ export function ExploreScreen({ screen }: { screen?: UIScreen } = {}) {
           activities: Array.isArray(d.recommended_activities) ? d.recommended_activities : (Array.isArray(d.included_services) ? d.included_services : ["Sightseeing", "Walking Tour", "Photography"]),
           safetyScore: d.safety_rating ? Math.round(Number(d.safety_rating) * 20) : (d.rating ? Math.round(Number(d.rating) * 20) : 92),
           bestSeason: d.best_travel_months || "Nov - Mar",
-          avgBudget: d.average_daily_budget ? `$${d.average_daily_budget}` : "$120",
+          avgBudget: formatSourcePrice(d.average_daily_budget || 120, d.currency || "USD"),
         }));
         setDestinations(mapped);
       } else {
