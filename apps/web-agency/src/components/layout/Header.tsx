@@ -17,29 +17,15 @@ import { Badge } from '../ui/Badge';
 export const Header: React.FC = () => {
   const {
     currentTenant,
-    tenants,
-    switchTenant,
     activeRole,
-    switchRole,
     currentUser,
   } = useAgency();
 
-  const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
-  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-
-  const tenantRef = useRef<HTMLDivElement>(null);
-  const roleRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (tenantRef.current && !tenantRef.current.contains(e.target as Node)) {
-        setTenantDropdownOpen(false);
-      }
-      if (roleRef.current && !roleRef.current.contains(e.target as Node)) {
-        setRoleDropdownOpen(false);
-      }
       if (userRef.current && !userRef.current.contains(e.target as Node)) {
         setUserDropdownOpen(false);
       }

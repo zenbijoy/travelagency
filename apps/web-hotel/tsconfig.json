@@ -17,7 +17,15 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@shopnojatra/design-tokens": ["../../packages/design-tokens/src/index.ts"],
+      "@shopnojatra/design-tokens/*": ["../../packages/design-tokens/src/*"],
+      "@shopnojatra/api-client": ["../../packages/api-client/src/index.ts"],
+      "@shopnojatra/api-client/*": ["../../packages/api-client/src/*"],
+      "@shopnojatra/validation": ["../../packages/validation/src/index.ts"],
+      "@shopnojatra/validation/*": ["../../packages/validation/src/*"],
+      "@shopnojatra/shared": ["../../packages/shared/src/index.ts"],
+      "@shopnojatra/shared/*": ["../../packages/shared/src/*"]
     }
   },
   "include": ["src"]

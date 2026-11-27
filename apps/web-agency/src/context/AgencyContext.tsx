@@ -44,6 +44,18 @@ export const AgencyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [activeRole, setActiveRole] = useState<AgencyRole>('AGENCY_OWNER');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
+  const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    setToasts((prev) => [...prev, { ...toast, id }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4500);
+  }, []);
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   const currentTenant = useMemo(() => {
     return DEMO_TENANTS.find((t) => t.id === currentTenantId) || DEMO_TENANTS[0];
   }, [currentTenantId]);
@@ -84,18 +96,6 @@ export const AgencyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       avatarUrl:
         'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     };
-  }, []);
-
-  const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    setToasts((prev) => [...prev, { ...toast, id }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4500);
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const value = useMemo(

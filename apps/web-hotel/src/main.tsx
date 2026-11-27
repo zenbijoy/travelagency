@@ -9,6 +9,8 @@ import {
 } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HotelPMSApp } from './App';
+import { HotelAuthProvider, useHotelAuth } from './context/HotelAuthContext';
+import { HotelLoginView } from './components/auth/HotelLoginView';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -20,12 +22,24 @@ const queryClient = new QueryClient({
   },
 });
 
+function RootComponent() {
+  const { isAuthenticated } = useHotelAuth();
+
+  if (!isAuthenticated) {
+    return <HotelLoginView />;
+  }
+
+  return <Outlet />;
+}
+
 // Root Route
 const rootRoute = createRootRoute({
   component: () => (
-    <QueryClientProvider client={queryClient}>
-      <Outlet />
-    </QueryClientProvider>
+    <HotelAuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <RootComponent />
+      </QueryClientProvider>
+    </HotelAuthProvider>
   ),
 });
 

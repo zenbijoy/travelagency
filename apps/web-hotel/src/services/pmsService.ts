@@ -11,6 +11,20 @@ import {
   RoomHousekeepingStatus,
   MaintenanceCondition
 } from '../types/pms';
+import { ShopnoJatraClient } from '@shopnojatra/api-client';
+
+const API_BASE_URL =
+  (typeof process !== 'undefined' && process.env?.VITE_API_URL) ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ||
+  'http://localhost:8000';
+
+export const hotelApiClient = new ShopnoJatraClient({
+  baseUrl: API_BASE_URL,
+  getToken: () => {
+    if (typeof localStorage === 'undefined') return null;
+    return localStorage.getItem('shopnojatra_access_token') || localStorage.getItem('sj_hotel_token');
+  },
+});
 import { 
   INITIAL_ROOMS, 
   INITIAL_RESERVATIONS, 
@@ -438,6 +452,40 @@ class HotelPMSService {
 
   getRevenueAnalytics(): RevenueAnalyticsData {
     return { ...this.revenueAnalytics };
+  }
+
+  // ==========================================
+  // REALTIME BACKEND PMS INTEGRATIONS
+  // ==========================================
+
+  async fetchLiveRoomMatrix(hotelId: string) {
+    try {
+      const res = await hotelApiClient.hotelPms.getMatrix(hotelId);
+      return res.data;
+    } catch (err) {
+      console.warn('Realtime hotel room matrix unavailable, using local inventory:', err);
+      return null;
+    }
+  }
+
+  async fetchLiveHousekeeping(hotelId: string) {
+    try {
+      const res = await hotelApiClient.hotelPms.getHousekeeping(hotelId);
+      return res.data;
+    } catch (err) {
+      console.warn('Realtime housekeeping API unavailable, using local tasks:', err);
+      return null;
+    }
+  }
+
+  async fetchLiveAnalytics(hotelId: string) {
+    try {
+      const res = await hotelApiClient.hotelPms.getAnalytics(hotelId);
+      return res.data;
+    } catch (err) {
+      console.warn('Realtime PMS yield analytics unavailable, using local telemetry:', err);
+      return null;
+    }
   }
 }
 

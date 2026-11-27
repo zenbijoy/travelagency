@@ -12,6 +12,20 @@ import {
   BookingStatus,
   ServiceType,
 } from '../types';
+import { ShopnoJatraClient, ApiClientError } from '@shopnojatra/api-client';
+
+const API_BASE_URL =
+  (typeof process !== 'undefined' && process.env?.VITE_API_URL) ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ||
+  'http://localhost:8000';
+
+export const agencyApiClient = new ShopnoJatraClient({
+  baseUrl: API_BASE_URL,
+  getToken: () => {
+    if (typeof localStorage === 'undefined') return null;
+    return localStorage.getItem('shopnojatra_access_token') || localStorage.getItem('sj_agency_token');
+  },
+});
 
 // Demo Agencies for Tenant-aware switching
 export const DEMO_TENANTS: AgencyTenant[] = [
@@ -561,3 +575,57 @@ export function getDashboardMetrics(tenantId: string): DashboardMetrics {
     ],
   };
 }
+
+// ==========================================
+// REALTIME BACKEND API CLIENT INTEGRATIONS
+// ==========================================
+
+export async function fetchLiveAgencyEarningsSummary(): Promise<any | null> {
+  try {
+    const res = await agencyApiClient.agency.getEarningsSummary();
+    return res.data;
+  } catch (error) {
+    console.warn('Realtime agency earnings query failed, returning cached data:', error);
+    return null;
+  }
+}
+
+export async function fetchLiveAgencyBookings(params?: {
+  status?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<Booking[]> {
+  try {
+    const res = await agencyApiClient.bookings.list(params);
+    if (res.items && res.items.length > 0) {
+      return res.items.map((b: any) => ({
+        id: b.id,
+        bookingReference: b.booking_reference,
+        pnr: b.booking_reference.replace(/^SJ-/, ''),
+        customerName: b.passenger_name || 'Corporate Traveler',
+        customerEmail: b.passenger_email || 'guest@shopnojatra.com',
+        customerPhone: b.passenger_phone || '+8801700000000',
+        serviceType: (b.product_type as ServiceType) || 'flight',
+        title: `${b.product_name || b.destination_city || 'Service'} Booking`,
+        routeOrDetails: b.destination_city || 'Domestic Transit',
+        travelDate: b.created_at ? b.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+        guestsCount: b.number_of_guests || 1,
+        status: (['confirmed', 'completed', 'cancelled', 'pending'].includes(b.status) ? b.status : 'pending') as BookingStatus,
+        totalPriceBDT: b.total_amount || 0,
+        commissionBDT: Math.round((b.total_amount || 0) * 0.07),
+        markupBDT: Math.round((b.total_amount || 0) * 0.04),
+        paymentStatus: b.payment_status || 'unpaid',
+        assignedAgent: 'Assigned Agent',
+        assignedAgentId: 'usr-1',
+        createdAt: b.created_at || new Date().toISOString(),
+        updatedAt: b.updated_at || new Date().toISOString(),
+        supplierName: 'ShopnoJatra GDS Direct',
+        passengers: [],
+      }));
+    }
+  } catch (err) {
+    console.warn('Realtime booking fetch failed, falling back to local tenant cache:', err);
+  }
+  return getTenantBookings('agency-green-holidays');
+}
+

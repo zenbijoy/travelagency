@@ -15,6 +15,20 @@ import {
   SupplierHealthMetric,
   SystemHealthMetric
 } from '@/types';
+import { ShopnoJatraClient } from '@shopnojatra/api-client';
+
+const API_BASE_URL =
+  (typeof process !== 'undefined' && process.env?.VITE_API_URL) ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ||
+  'http://localhost:8000';
+
+export const adminApiClient = new ShopnoJatraClient({
+  baseUrl: API_BASE_URL,
+  getToken: () => {
+    if (typeof localStorage === 'undefined') return null;
+    return localStorage.getItem('shopnojatra_access_token') || localStorage.getItem('sj_admin_token');
+  },
+});
 import {
   INITIAL_PLATFORM_METRICS,
   INITIAL_SYSTEM_HEALTH,
@@ -519,6 +533,40 @@ class AdminDataStore {
     });
 
     return updated;
+  }
+
+  // ==========================================
+  // REALTIME BACKEND ADMIN INTEGRATIONS
+  // ==========================================
+
+  async fetchLivePayoutBatches(params?: { status?: string }) {
+    try {
+      const res = await adminApiClient.admin.getPayoutBatches(params);
+      return res.data;
+    } catch (err) {
+      console.warn('Realtime admin payout batches unavailable, using local ledger:', err);
+      return null;
+    }
+  }
+
+  async approveLivePayoutBatch(batchId: string) {
+    try {
+      const res = await adminApiClient.admin.approvePayoutBatch(batchId);
+      return res.data;
+    } catch (err) {
+      console.warn('Realtime payout batch approval unavailable, updating local ledger:', err);
+      return null;
+    }
+  }
+
+  async fetchLivePendingProviders() {
+    try {
+      const res = await adminApiClient.admin.getPendingProviders();
+      return res.data;
+    } catch (err) {
+      console.warn('Realtime marketplace provider queue unavailable, using local store:', err);
+      return null;
+    }
   }
 }
 

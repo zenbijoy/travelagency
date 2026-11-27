@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@shopnojatra/api-client': path.resolve(__dirname, '../../packages/api-client/src'),
     },
   },
   server: {
