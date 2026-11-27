@@ -12,7 +12,7 @@ export default defineConfig({
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: {
-    command: "pnpm dev -- -p 3100",
+    command: "corepack pnpm exec next dev -p 3100",
     url: "http://127.0.0.1:3100",
     reuseExistingServer: true,
     timeout: 120_000,

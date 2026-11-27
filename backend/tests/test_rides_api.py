@@ -244,6 +244,11 @@ async def test_ride_request_radar_claim_and_cancel(client: AsyncClient, setup_ri
         headers=rider_headers,
     )
     assert res_mismatched_mode.status_code == 400
+    res_wrong_mode_radar = await client.get(
+        "/api/v1/rides/dispatch/radar?vehicle_mode=sedan",
+        headers=rider_headers,
+    )
+    assert res_wrong_mode_radar.status_code == 400
 
     req_payload = {
         "vehicle_mode": "bike",

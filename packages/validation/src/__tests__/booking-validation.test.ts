@@ -127,7 +127,7 @@ describe('Booking & Flight Validation Schemas', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors.some((e) => e.path.includes('return_date'))).toBe(true);
+        expect(result.error.issues.some((e) => e.path.includes('return_date'))).toBe(true);
       }
     });
 

@@ -475,16 +475,18 @@ async def test_fulfillment_delivery_escrow_release_and_verified_review(client: A
     assert dropoff_otp is not None
 
     # 3. Rider claims job, verifies pickup OTP, and verifies dropoff OTP
-    await client.post(
+    res_claim = await client.post(
         "/api/v1/rides/dispatch/claim",
         json={"target_type": "delivery", "target_id": job_id},
         headers=rider_headers,
     )
-    await client.post(
+    assert res_claim.status_code == 200, res_claim.text
+    res_p = await client.post(
         f"/api/v1/rides/deliveries/{job_id}/verify-pickup",
         json={"otp": pickup_otp},
         headers=rider_headers,
     )
+    assert res_p.status_code == 200, res_p.text
     res_dlv = await client.post(
         f"/api/v1/rides/deliveries/{job_id}/verify-dropoff",
         json={"otp": dropoff_otp, "pod_photo_url": "https://cdn.shopnojatra.com/pod.jpg", "pod_recipient_name": "Sumaiya Akter"},

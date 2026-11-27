@@ -27,7 +27,7 @@ describe('Hotel & Room Inventory Validation Schemas', () => {
       });
       expect(invalid.success).toBe(false);
       if (!invalid.success) {
-        expect(invalid.error.errors.some((e) => e.path.includes('check_out'))).toBe(true);
+        expect(invalid.error.issues.some((e) => e.path.includes('check_out'))).toBe(true);
       }
     });
 

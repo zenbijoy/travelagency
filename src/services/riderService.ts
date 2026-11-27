@@ -57,6 +57,11 @@ const STORAGE_KEYS = {
   DELIVERY_CACHE: "@sj_rider_deliveries_v1",
 } as const;
 
+const IS_PRODUCTION =
+  !process.env.JEST_WORKER_ID &&
+  process.env.NODE_ENV !== "test" &&
+  (process.env.EXPO_PUBLIC_APP_ENV === "production" || process.env.NODE_ENV === "production");
+
 const SPATIAL_ENGINE_URL =
   process.env.EXPO_PUBLIC_SPATIAL_ENGINE_URL || "https://spatial.shopnojatra.com";
 const SPATIAL_ENGINE_KEY =
@@ -480,6 +485,17 @@ class RiderService {
   // ==========================================================================
 
   async fetchOpenRideRequests(vehicleMode?: VehicleMode): Promise<RideRequest[]> {
+    if (IS_PRODUCTION) {
+      const result = await apiRequest<{ ride_requests?: RideRequest[] }>("/rides/dispatch/radar", {
+        params: vehicleMode ? { vehicle_mode: vehicleMode } : undefined,
+        retries: 1,
+      });
+      if (!Array.isArray(result?.ride_requests)) {
+        throw new Error("Ride dispatch response did not include a ride request list");
+      }
+      return result.ride_requests;
+    }
+
     try {
       let query = supabase
         .from("ride_requests")
@@ -494,7 +510,7 @@ class RiderService {
       }
 
       const { data, error } = await query;
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         return data as RideRequest[];
       }
     } catch {
@@ -502,12 +518,12 @@ class RiderService {
     }
 
     try {
-      const apiData = await apiRequest<{ items?: RideRequest[] }>("/rides/dispatch/open", {
+      const apiData = await apiRequest<{ ride_requests?: RideRequest[] }>("/rides/dispatch/radar", {
         params: vehicleMode ? { vehicle_mode: vehicleMode } : undefined,
         retries: 0,
         timeoutMs: 3000,
       });
-      if (apiData?.items && apiData.items.length > 0) return apiData.items;
+      if (Array.isArray(apiData?.ride_requests)) return apiData.ride_requests;
     } catch {
       // fallback to live radar queue seeded from Dhaka/BD demand corridors
     }
@@ -596,7 +612,7 @@ class RiderService {
         .order("created_at", { ascending: false })
         .limit(30);
 
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const list = data as DeliveryJob[];
         await writeLocalJson(STORAGE_KEYS.DELIVERY_CACHE, list);
         return list;
@@ -607,6 +623,7 @@ class RiderService {
 
     const cached = await readLocalJson<DeliveryJob[]>(STORAGE_KEYS.DELIVERY_CACHE, []);
     if (cached.length > 0) return cached;
+    if (IS_PRODUCTION) return [];
 
     const now = new Date().toISOString();
     const seededJobs: DeliveryJob[] = [
@@ -719,6 +736,18 @@ class RiderService {
     request: RideRequest,
     riderProfile: RiderProfile
   ): Promise<RideTrip> {
+    if (IS_PRODUCTION) {
+      const result = await apiRequest<{ trip?: RideTrip }>("/rides/dispatch/claim", {
+        method: "POST",
+        body: JSON.stringify({ target_type: "ride", target_id: request.id }),
+        retries: 0,
+      });
+      if (!result?.trip?.id) {
+        throw new Error("Ride dispatch claim response did not include the assigned trip");
+      }
+      return { ...result.trip, request };
+    }
+
     try {
       const { data: rpcRes, error } = await supabase.rpc("claim_ride_or_delivery", {
         p_target_type: "ride",
@@ -796,6 +825,18 @@ class RiderService {
     job: DeliveryJob,
     riderProfile: RiderProfile
   ): Promise<DeliveryJob> {
+    if (IS_PRODUCTION) {
+      const result = await apiRequest<{ delivery_job?: DeliveryJob }>("/rides/dispatch/claim", {
+        method: "POST",
+        body: JSON.stringify({ target_type: "delivery", target_id: job.id }),
+        retries: 0,
+      });
+      if (!result?.delivery_job?.id) {
+        throw new Error("Delivery dispatch claim response did not include the assigned job");
+      }
+      return result.delivery_job;
+    }
+
     try {
       const { data: rpcRes, error } = await supabase.rpc("claim_ride_or_delivery", {
         p_target_type: "delivery",
@@ -846,6 +887,23 @@ class RiderService {
     expectedHint?: string
   ): Promise<{ verified: boolean; status: string; message: string }> {
     const parsed = verifyOtpSchema.parse({ trip_id: tripId, otp, job_type: jobType });
+
+    if (IS_PRODUCTION) {
+      const endpoint =
+        jobType === "ride_start"
+          ? `/rides/trips/${parsed.trip_id}/verify-otp`
+          : `/rides/deliveries/${parsed.trip_id}/${jobType === "delivery_pickup" ? "verify-pickup" : "verify-dropoff"}`;
+      const result = await apiRequest<{ status?: string }>(endpoint, {
+        method: "POST",
+        body: JSON.stringify({ otp: parsed.otp }),
+        retries: 0,
+      });
+      return {
+        verified: true,
+        status: result.status || (jobType === "ride_start" ? "in_progress" : jobType === "delivery_pickup" ? "picked_up" : "delivered"),
+        message: "OTP verified by the dispatch service.",
+      };
+    }
 
     try {
       const { data, error } = await supabase.rpc("verify_trip_otp", {
@@ -915,6 +973,23 @@ class RiderService {
       photo_uri: pod.photoUri,
       photo_captured_at: pod.photoCapturedAt,
     });
+
+    if (IS_PRODUCTION) {
+      const updatedJob = await apiRequest<DeliveryJob>(`/rides/deliveries/${job.id}/verify-dropoff`, {
+        method: "POST",
+        body: JSON.stringify({
+          otp: validated.delivery_otp,
+          pod_recipient_name: validated.recipient_name,
+          pod_signature_hash: validated.signature_hash,
+          pod_photo_url: validated.photo_uri ?? null,
+        }),
+        retries: 0,
+      });
+      await this.persistDeliveryUpdate(updatedJob);
+      const ledger = await this.fetchEarningsLedger(job.rider_id || "");
+      const ledgerEntry = ledger.find((entry) => entry.delivery_job_id === job.id);
+      return { verified: true, updatedJob, ...(ledgerEntry ? { ledgerEntry } : {}) };
+    }
 
     const otpResult = await this.verifyTripOtp(
       job.id,
@@ -987,6 +1062,20 @@ class RiderService {
     actualDurationMin?: number,
     tipPaisa: number = 0
   ): Promise<{ trip: RideTrip; ledgerEntries: RiderLedgerEntry[] }> {
+    if (IS_PRODUCTION) {
+      const settledTrip = await apiRequest<RideTrip>(`/rides/trips/${trip.id}/complete`, {
+        method: "POST",
+        body: JSON.stringify({
+          actual_distance_km: actualDistanceKm ?? trip.actual_distance_km,
+          actual_duration_min: actualDurationMin ?? trip.actual_duration_min,
+          tip_paisa: tipPaisa,
+        }),
+        retries: 0,
+      });
+      const ledgerEntries = await this.fetchEarningsLedger(trip.rider_id);
+      return { trip: { ...settledTrip, request: trip.request }, ledgerEntries };
+    }
+
     try {
       const { data, error } = await supabase.rpc("finalize_ride_settlement", {
         p_trip_id: trip.id,
@@ -1294,6 +1383,17 @@ class RiderService {
   // ==========================================================================
 
   async fetchEarningsLedger(riderId: string): Promise<RiderLedgerEntry[]> {
+    if (IS_PRODUCTION) {
+      try {
+        const rows = await apiRequest<RiderLedgerEntry[]>("/rides/riders/earnings/ledger", { retries: 1 });
+        if (!Array.isArray(rows)) throw new Error("Earnings response was not a list");
+        await writeLocalJson(STORAGE_KEYS.LEDGER, rows);
+        return rows;
+      } catch {
+        return readLocalJson<RiderLedgerEntry[]>(STORAGE_KEYS.LEDGER, []);
+      }
+    }
+
     try {
       const { data, error } = await supabase
         .from("rider_earnings_ledger")
@@ -1381,6 +1481,17 @@ class RiderService {
   }
 
   async fetchPayoutHistory(riderId: string): Promise<RiderPayout[]> {
+    if (IS_PRODUCTION) {
+      try {
+        const rows = await apiRequest<RiderPayout[]>("/rides/riders/payouts", { retries: 1 });
+        if (!Array.isArray(rows)) throw new Error("Payout response was not a list");
+        await writeLocalJson(STORAGE_KEYS.PAYOUTS, rows);
+        return rows;
+      } catch {
+        return readLocalJson<RiderPayout[]>(STORAGE_KEYS.PAYOUTS, []);
+      }
+    }
+
     try {
       const { data, error } = await supabase
         .from("rider_payouts")
@@ -1414,6 +1525,22 @@ class RiderService {
     const payoutRef = genRef("SJ-PAY");
     const masked = maskAccountNumber(validated.channel, validated.account_number);
     const feePaisa = validated.channel === "bank_transfer" ? 1000 : 0;
+
+    if (IS_PRODUCTION) {
+      const saved = await apiRequest<RiderPayout>("/rides/riders/payouts", {
+        method: "POST",
+        body: JSON.stringify({
+          amount_paisa: validated.amount_paisa,
+          channel: validated.channel,
+          account_number_masked: masked,
+          idempotency_key: `payout:${riderId}:${Date.now()}`,
+        }),
+        retries: 0,
+      });
+      const existing = await readLocalJson<RiderPayout[]>(STORAGE_KEYS.PAYOUTS, []);
+      await writeLocalJson(STORAGE_KEYS.PAYOUTS, [saved, ...existing]);
+      return saved;
+    }
 
     const newPayout: RiderPayout = {
       id: genUuidLike(),

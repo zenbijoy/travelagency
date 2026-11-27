@@ -265,7 +265,7 @@ export default function CustomerProfileScreen({ navigation, route }: any) {
                 </View>
                 <View style={styles.bookingAmountStatus}>
                   <Text style={styles.bookingAmount}>
-                    ${booking.amount.toLocaleString()}
+                    ৳ {booking.amount.toLocaleString("en-IN")}
                   </Text>
                   <Text
                     style={[

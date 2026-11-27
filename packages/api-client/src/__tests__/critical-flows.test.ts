@@ -1,6 +1,19 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ShopnoJatraClient, ApiClientError } from '../client';
 
+function createMockResponse(body: unknown, status = 200, statusText = 'OK') {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText,
+    headers: new Headers({
+      'content-type': 'application/json',
+    }),
+    json: async () => body,
+    text: async () => (typeof body === 'string' ? body : JSON.stringify(body)),
+  };
+}
+
 describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
   describe('Flow 1: Authentication & RBAC Flow', () => {
     it('injects Bearer token into Authorization header when getToken is provided', async () => {
@@ -8,15 +21,10 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
 
       const mockFetch = vi.fn().mockImplementation(async (url: string, init: RequestInit) => {
         capturedHeaders = init.headers as Record<string, string>;
-        return {
-          ok: true,
-          status: 200,
-          statusText: 'OK',
-          json: async () => ({
-            success: true,
-            data: { user_id: 'usr-123', email: 'agent@agency.com', role: 'agency_agent' },
-          }),
-        };
+        return createMockResponse({
+          success: true,
+          data: { id: 'usr-123', email: 'agent@agency.com', role: 'agency_agent' },
+        });
       });
 
       const client = new ShopnoJatraClient({
@@ -25,7 +33,7 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
         fetch: mockFetch,
       });
 
-      const result = await client.auth.getMe();
+      const result = await client.auth.me();
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(capturedHeaders['Authorization']).toBe('Bearer mock-jwt-bearer-token-xyz');
@@ -34,12 +42,7 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
 
     it('throws structured ApiClientError on 401 Unauthorized', async () => {
       const mockFetch = vi.fn().mockImplementation(async () => {
-        return {
-          ok: false,
-          status: 401,
-          statusText: 'Unauthorized',
-          json: async () => ({ detail: 'JWT expired or token invalid' }),
-        };
+        return createMockResponse({ detail: 'JWT expired or token invalid' }, 401, 'Unauthorized');
       });
 
       const client = new ShopnoJatraClient({
@@ -48,21 +51,15 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
         fetch: mockFetch,
       });
 
-      await expect(client.auth.getMe()).rejects.toThrow(ApiClientError);
+      await expect(client.auth.me()).rejects.toThrow(ApiClientError);
     });
 
     it('calls checkEmail endpoint cleanly', async () => {
       const mockFetch = vi.fn().mockImplementation(async (url: string, init: RequestInit) => {
-        const body = JSON.parse(init.body as string);
-        return {
-          ok: true,
-          status: 200,
-          statusText: 'OK',
-          json: async () => ({
-            success: true,
-            data: { exists: false, role: null },
-          }),
-        };
+        return createMockResponse({
+          success: true,
+          data: { exists: false, role: null },
+        });
       });
 
       const client = new ShopnoJatraClient({ fetch: mockFetch });
@@ -77,25 +74,20 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
 
       const mockFetch = vi.fn().mockImplementation(async (url: string) => {
         capturedUrl = url;
-        return {
-          ok: true,
-          status: 200,
-          statusText: 'OK',
-          json: async () => ({
-            items: [
-              {
-                id: 'fl-1',
-                airline_name: 'Biman Bangladesh Airlines',
-                flight_number: 'BG-433',
-                price_bdt: 4200,
-              },
-            ],
-            total: 1,
-            page: 1,
-            page_size: 20,
-            has_next: false,
-          }),
-        };
+        return createMockResponse({
+          items: [
+            {
+              id: 'fl-1',
+              airline_name: 'Biman Bangladesh Airlines',
+              flight_number: 'BG-433',
+              price_bdt: 4200,
+            },
+          ],
+          total: 1,
+          page: 1,
+          page_size: 20,
+          has_next: false,
+        });
       });
 
       const client = new ShopnoJatraClient({ fetch: mockFetch });
@@ -118,17 +110,19 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
 
       const mockFetch = vi.fn().mockImplementation(async (url: string, init: RequestInit) => {
         capturedHeaders = init.headers as Record<string, string>;
-        return {
-          ok: true,
-          status: 201,
-          statusText: 'Created',
-          json: async () => ({
-            id: 'bk-new-123',
-            reference_code: 'SJ-2026-9988',
-            status: 'PENDING_PAYMENT',
-            total_amount_bdt: 8400,
-          }),
-        };
+        return createMockResponse(
+          {
+            success: true,
+            data: {
+              id: 'bk-new-123',
+              reference_code: 'SJ-2026-9988',
+              status: 'PENDING_PAYMENT',
+              total_amount_bdt: 8400,
+            },
+          },
+          201,
+          'Created'
+        );
       });
 
       const client = new ShopnoJatraClient({
@@ -136,30 +130,28 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
         fetch: mockFetch,
       });
 
-      const booking = await client.bookings.create(
-        {
-          product_type: 'flight',
-          destination_city: 'Coxs Bazar',
-          origin_city: 'Dhaka',
-          number_of_guests: 2,
-          items: [
-            {
-              product_type: 'flight',
-              product_id: 'fl-1',
-              product_name: 'BG-433 DAC-CXB',
-              quantity: 2,
-              unit_price: 4200,
-              item_metadata: {},
-            },
-          ],
-          passengers: [],
-        },
-        'idem-booking-header-val-445'
-      );
+      const resp = await client.bookings.create({
+        product_type: 'flight',
+        destination_city: 'Coxs Bazar',
+        origin_city: 'Dhaka',
+        number_of_guests: 2,
+        items: [
+          {
+            product_type: 'flight',
+            product_id: 'fl-1',
+            product_name: 'BG-433 DAC-CXB',
+            quantity: 2,
+            unit_price: 4200,
+            item_metadata: {},
+          },
+        ],
+        passengers: [],
+        idempotency_key: 'idem-booking-header-val-445',
+      });
 
-      expect(capturedHeaders['Idempotency-Key']).toBe('idem-booking-header-val-445');
-      expect(booking.status).toBe('PENDING_PAYMENT');
-      expect(booking.reference_code).toBe('SJ-2026-9988');
+      expect(capturedHeaders['X-Idempotency-Key']).toBe('idem-booking-header-val-445');
+      expect(resp.data.status).toBe('PENDING_PAYMENT');
+      expect(resp.data.reference_code).toBe('SJ-2026-9988');
     });
   });
 
@@ -167,22 +159,18 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
     it('fetches room inventory matrix and updates room status', async () => {
       const mockFetch = vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
         if (init?.method === 'PATCH') {
-          return {
-            ok: true,
-            status: 200,
-            statusText: 'OK',
-            json: async () => ({
+          return createMockResponse({
+            success: true,
+            data: {
               id: 'room-301',
               room_number: '301',
               status: 'CLEANING',
-            }),
-          };
+            },
+          });
         }
-        return {
-          ok: true,
-          status: 200,
-          statusText: 'OK',
-          json: async () => ({
+        return createMockResponse({
+          success: true,
+          data: {
             hotel_id: 'hotel-royal-tulip',
             floors: [
               {
@@ -194,8 +182,8 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
               },
             ],
             occupancy_rate: 50.0,
-          }),
-        };
+          },
+        });
       });
 
       const client = new ShopnoJatraClient({
@@ -204,15 +192,15 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
       });
 
       // 1. Matrix fetch
-      const matrix = await client.hotelPms.getRoomMatrix('hotel-royal-tulip');
-      expect(matrix.occupancy_rate).toBe(50.0);
-      expect(matrix.floors[0].rooms).toHaveLength(2);
+      const matrixResp = await client.hotelPms.getMatrix('hotel-royal-tulip');
+      expect(matrixResp.data.occupancy_rate).toBe(50.0);
+      expect(matrixResp.data.floors[0].rooms).toHaveLength(2);
 
       // 2. Room unit status transition (AVAILABLE -> CLEANING)
-      const updated = await client.hotelPms.updateRoomUnit('room-301', {
+      const updated = await client.hotelPms.updateUnit('room-301', {
         status: 'CLEANING',
       });
-      expect(updated.status).toBe('CLEANING');
+      expect(updated.data.status).toBe('CLEANING');
     });
   });
 
@@ -223,22 +211,18 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
       const mockFetch = vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
         if (url.includes('/approve') && init?.method === 'POST') {
           approvalCalledWith = JSON.parse(init.body as string);
-          return {
-            ok: true,
-            status: 200,
-            statusText: 'OK',
-            json: async () => ({
+          return createMockResponse({
+            success: true,
+            data: {
               id: 'kyc-sub-001',
               agency_id: 'agency-horizon-001',
               status: 'APPROVED',
-            }),
-          };
+            },
+          });
         }
-        return {
-          ok: true,
-          status: 200,
-          statusText: 'OK',
-          json: async () => [
+        return createMockResponse({
+          success: true,
+          data: [
             {
               submission_id: 'kyc-sub-001',
               agency_id: 'agency-horizon-001',
@@ -248,7 +232,7 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
               status: 'PENDING',
             },
           ],
-        };
+        });
       });
 
       const client = new ShopnoJatraClient({
@@ -256,14 +240,14 @@ describe('ShopnoJatra API Client - Critical Flow Integration Tests', () => {
         fetch: mockFetch,
       });
 
-      const queue = await client.admin.getKycQueue();
-      expect(queue).toHaveLength(1);
-      expect(queue[0].agency_name).toBe('Horizon Travel Group');
+      const queueResp = await client.admin.kyc.getQueue();
+      expect(queueResp.data).toHaveLength(1);
+      expect(queueResp.data[0].agency_name).toBe('Horizon Travel Group');
 
-      const approved = await client.admin.approveKyc('kyc-sub-001', {
+      const approved = await client.admin.kyc.approve('kyc-sub-001', {
         admin_notes: 'Verified against DNCC trade registry. Compliant.',
       });
-      expect(approved.status).toBe('APPROVED');
+      expect(approved.data.status).toBe('APPROVED');
       expect(approvalCalledWith).toEqual({
         admin_notes: 'Verified against DNCC trade registry. Compliant.',
       });

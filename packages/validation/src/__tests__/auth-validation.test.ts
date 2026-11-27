@@ -79,7 +79,7 @@ describe('Auth Validation Schemas', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors.some((e) => e.message.includes('uppercase'))).toBe(true);
+        expect(result.error.issues.some((e) => e.message.includes('uppercase'))).toBe(true);
       }
     });
 
@@ -93,7 +93,7 @@ describe('Auth Validation Schemas', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors.some((e) => e.message.includes('do not match'))).toBe(true);
+        expect(result.error.issues.some((e) => e.message.includes('do not match'))).toBe(true);
       }
     });
   });

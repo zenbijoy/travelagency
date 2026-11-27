@@ -82,7 +82,7 @@ async def test_atomic_booking_creation_and_state_transition(
     resp = await client.post(
         "/api/v1/bookings",
         json=booking_payload,
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", "X-Tenant-Id": str(tenant.id)},
     )
     assert resp.status_code == 201, resp.text
     booking_data = resp.json()["data"]
@@ -196,11 +196,19 @@ async def test_flight_seat_double_booking_prevention(
     }
 
     # First traveler books seat 1A
-    resp1 = await client.post("/api/v1/bookings", json=payload, headers={"Authorization": f"Bearer {token1}"})
+    resp1 = await client.post(
+        "/api/v1/bookings",
+        json=payload,
+        headers={"Authorization": f"Bearer {token1}", "X-Tenant-Id": str(tenant.id)},
+    )
     assert resp1.status_code == 201
 
     # Second traveler attempts to book the same seat 1A -> Conflict
-    resp2 = await client.post("/api/v1/bookings", json=payload, headers={"Authorization": f"Bearer {token2}"})
+    resp2 = await client.post(
+        "/api/v1/bookings",
+        json=payload,
+        headers={"Authorization": f"Bearer {token2}", "X-Tenant-Id": str(tenant.id)},
+    )
     assert resp2.status_code == 409
     assert resp2.json()["code"] == "CONFLICT"
 

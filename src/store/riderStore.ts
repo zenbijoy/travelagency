@@ -31,6 +31,11 @@ import {
 import { riderService } from "../services/riderService";
 import { cachedStateStorage } from "./storage";
 
+const IS_PRODUCTION =
+  !process.env.JEST_WORKER_ID &&
+  process.env.NODE_ENV !== "test" &&
+  (process.env.EXPO_PUBLIC_APP_ENV === "production" || process.env.NODE_ENV === "production");
+
 export interface RiderStoreState {
   // Rider Partner State
   profile: RiderProfile | null;
@@ -208,7 +213,9 @@ export const useRiderStore = create<RiderStoreState>()(
           const [vehicles, rideReqs, delJobs, ledger, payouts, hotspots, packs] =
             await Promise.all([
               riderService.listVehicles(profile.id),
-              riderService.fetchOpenRideRequests(profile.active_vehicle_mode),
+              IS_PRODUCTION && profile.duty_status !== "online"
+                ? Promise.resolve([])
+                : riderService.fetchOpenRideRequests(profile.active_vehicle_mode),
               riderService.fetchDeliveryJobs(profile.id),
               riderService.fetchEarningsLedger(profile.id),
               riderService.fetchPayoutHistory(profile.id),
@@ -277,7 +284,7 @@ export const useRiderStore = create<RiderStoreState>()(
           });
           set({ profile: updated, activeVehicleMode: updated.active_vehicle_mode });
         }
-        await get().refreshDispatchRadar();
+        if (get().dutyStatus === "online") await get().refreshDispatchRadar();
       },
 
       setDailyGoalPaisa: async (goalPaisa) => {

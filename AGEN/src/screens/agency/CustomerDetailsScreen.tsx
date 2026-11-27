@@ -1,19 +1,29 @@
-import React, { useState } from "react";
+/**
+ * Customer Details Screen — real data via agencyCustomersService, light system.
+ * No fabricated profile or booking history.
+ */
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { COLORS, TYPOGRAPHY } from "../../App";
-import { Card, Button, Badge, ListItem, StatCard } from "../ui/UIComponents";
-import { agencyCustomersService } from "../../services/agencyService";
+
+import { agencyCustomersService, type AgencyBooking } from "../../services/agencyService";
 import { useAuth } from "../../hooks/useAuth";
+import {
+  Icon,
+  Card,
+  Badge,
+  StateView,
+  Skeleton,
+  KpiCard,
+} from "../../components/ui/DashboardUI";
+import { palette, spacing, typography } from "../../theme/tokens";
+import type { Tone } from "../../theme/tokens";
 
 type CustomersStackParamList = {
   CustomersList: undefined;
@@ -27,436 +37,283 @@ interface CustomerDetail {
   name: string;
   email: string;
   phone: string;
-  location: string;
-  profileImage?: string;
   vip: boolean;
   bookingsCount: number;
   totalSpent: number;
   joinDate: string;
   lastBooking: string;
-  status: "active" | "inactive" | "suspended";
+  bookings: AgencyBooking[];
 }
 
-interface BookingHistory {
-  id: string;
-  tourName: string;
-  date: string;
-  amount: number;
-  status: string;
-}
+const formatBDT = (value: number): string =>
+  `৳ ${Math.round(value || 0).toLocaleString("en-IN")}`;
+
+const statusTone = (status: string): Tone => {
+  switch (status.toLowerCase()) {
+    case "confirmed":
+      return "success";
+    case "completed":
+      return "cyan";
+    case "pending":
+      return "warning";
+    case "cancelled":
+      return "danger";
+    default:
+      return "neutral";
+  }
+};
 
 export default function CustomerDetailsScreen({ route, navigation }: Props) {
   const { user } = useAuth();
   const { customerId } = route.params;
-  const [loading, setLoading] = useState(false);
-  const [customer, setCustomer] = useState<CustomerDetail>({
-    id: customerId,
-    name: "Sarah Johnson",
-    email: "sarah.johnson@example.com",
-    phone: "+1 (555) 987-6543",
-    location: "New York, USA",
-    vip: true,
-    bookingsCount: 8,
-    totalSpent: 15800,
-    joinDate: "2023-06-15",
-    lastBooking: "2024-05-20",
-    status: "active",
-  });
+  const agencyId = user?.agency?.id || "";
 
-  const [bookingHistory] = useState<BookingHistory[]>([
-    {
-      id: "BK001",
-      tourName: "Bali Beach Paradise",
-      date: "2024-05-20",
-      amount: 2400,
-      status: "completed",
-    },
-    {
-      id: "BK002",
-      tourName: "Swiss Alps Adventure",
-      date: "2024-04-10",
-      amount: 3200,
-      status: "completed",
-    },
-    {
-      id: "BK003",
-      tourName: "Paris City Tour",
-      date: "2024-03-05",
-      amount: 1800,
-      status: "completed",
-    },
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [customer, setCustomer] = useState<CustomerDetail | null>(null);
 
-  React.useEffect(() => {
-    loadCustomerDetails();
-  }, [customerId]);
-
-  const loadCustomerDetails = async () => {
-    if (!user?.agency?.id) return;
+  const loadCustomerDetails = useCallback(async () => {
+    if (!agencyId) {
+      setError("No agency is linked to this account.");
+      setLoading(false);
+      return;
+    }
     setLoading(true);
+    setError(null);
     try {
-      // In production, fetch from Supabase
-      // const details = await agencyCustomersService.getCustomerDetails(customerId);
-      // setCustomer(details);
-    } catch (error) {
-      console.error("Error loading customer:", error);
+      const data: any = await agencyCustomersService.getCustomerDetail(agencyId, customerId);
+      if (!data) {
+        setError("Customer not found.");
+        setCustomer(null);
+        return;
+      }
+      const bookings: AgencyBooking[] = Array.isArray(data.bookings) ? data.bookings : [];
+      const totalSpent = Number(data.totalSpent) || 0;
+      const name =
+        [data.first_name, data.last_name].filter(Boolean).join(" ").trim() ||
+        data.name ||
+        data.email ||
+        `Customer ${String(customerId).slice(0, 6)}`;
+      setCustomer({
+        id: customerId,
+        name,
+        email: data.email || "",
+        phone: data.phone || "",
+        vip: totalSpent >= 10000 || bookings.length >= 5,
+        bookingsCount: bookings.length,
+        totalSpent,
+        joinDate: data.created_at || "",
+        lastBooking: bookings[0]?.created_at || "",
+        bookings,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load customer.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [agencyId, customerId]);
 
-  const handleStatusChange = async (newStatus: CustomerDetail["status"]) => {
-    setCustomer({ ...customer, status: newStatus });
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
-  }
+  useEffect(() => {
+    loadCustomerDetails();
+  }, [loadCustomerDetails]);
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.secondary]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Ionicons name="chevron-back" size={24} color={COLORS.text} />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
+          <Icon name="chevron-left" size={24} color={palette.text} />
         </TouchableOpacity>
-        <View style={styles.headerContent}>
+        <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Customer Details</Text>
-          <Text style={styles.headerSubtitle}>Profile & Booking History</Text>
+          <Text style={styles.headerSubtitle}>Profile & booking history</Text>
         </View>
-        <View style={{ width: 24 }} />
-      </LinearGradient>
+      </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Profile Card */}
-        <Card style={styles.profileCard}>
-          <View style={styles.profileHeader}>
-            <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>
-                {customer.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </Text>
-            </View>
-            <View style={styles.profileInfo}>
-              <View style={styles.nameRow}>
-                <Text style={styles.customerName}>{customer.name}</Text>
-                {customer.vip && (
-                  <Badge label="VIP" status="success" size="small" />
-                )}
+      {loading ? (
+        <View style={styles.body}>
+          <Skeleton style={{ height: 96, marginBottom: spacing.md }} />
+          <Skeleton style={{ height: 110, marginBottom: spacing.md }} />
+          <Skeleton style={{ height: 160 }} />
+        </View>
+      ) : error || !customer ? (
+        <StateView
+          variant="error"
+          title="Couldn't load customer"
+          message={error ?? "Customer not found."}
+          actionLabel="Retry"
+          onActionPress={loadCustomerDetails}
+        />
+      ) : (
+        <ScrollView
+          style={styles.body}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Profile */}
+          <Card style={{ marginBottom: spacing.md }}>
+            <View style={styles.profileHeader}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>
+                  {customer.name.charAt(0).toUpperCase()}
+                </Text>
               </View>
-              <Text style={styles.statusText}>{customer.status}</Text>
+              <View style={{ flex: 1 }}>
+                <View style={styles.nameRow}>
+                  <Text style={styles.customerName}>{customer.name}</Text>
+                  {customer.vip ? <Badge label="VIP" tone="warning" /> : null}
+                </View>
+                <Text style={styles.statusText}>Traveler profile</Text>
+              </View>
             </View>
-          </View>
-        </Card>
+          </Card>
 
-        {/* Metrics Cards */}
-        <View style={styles.metricsContainer}>
-          <StatCard
-            label="Total Bookings"
-            value={customer.bookingsCount.toString()}
-            icon="calendar"
-            color={COLORS.primary}
-          />
-          <StatCard
-            label="Total Spent"
-            value={`$${customer.totalSpent}`}
-            icon="currency-usd"
-            color={COLORS.secondary}
-          />
-        </View>
-
-        {/* Contact Information */}
-        <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Contact Information</Text>
-          <ListItem
-            title="Email"
-            subtitle={customer.email}
-            icon="mail"
-            rightIcon={false}
-          />
-          <View style={styles.divider} />
-          <ListItem
-            title="Phone"
-            subtitle={customer.phone}
-            icon="call"
-            rightIcon={false}
-          />
-          <View style={styles.divider} />
-          <ListItem
-            title="Location"
-            subtitle={customer.location}
-            icon="map-marker"
-            rightIcon={false}
-          />
-        </Card>
-
-        {/* Account Information */}
-        <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Account Information</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Member Since</Text>
-            <Text style={styles.infoValue}>
-              {new Date(customer.joinDate).toLocaleDateString()}
-            </Text>
+          {/* Metrics */}
+          <View style={styles.metricsRow}>
+            <KpiCard
+              label="Total Bookings"
+              value={String(customer.bookingsCount)}
+              icon="briefcase"
+              tone="primary"
+            />
+            <KpiCard
+              label="Total Spent"
+              value={formatBDT(customer.totalSpent)}
+              icon="dollar-sign"
+              tone="success"
+            />
           </View>
-          <View style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Last Booking</Text>
-            <Text style={styles.infoValue}>
-              {new Date(customer.lastBooking).toLocaleDateString()}
-            </Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Status</Text>
-            <Badge label={customer.status} status={customer.status as any} />
-          </View>
-        </Card>
 
-        {/* Booking History */}
-        <Card style={styles.card}>
-          <View style={styles.historyHeader}>
+          {/* Contact */}
+          <Card style={{ marginBottom: spacing.md }}>
+            <Text style={styles.cardTitle}>Contact Information</Text>
+            <DetailRow icon="mail" label="Email" value={customer.email || "—"} />
+            <Divider />
+            <DetailRow icon="phone" label="Phone" value={customer.phone || "—"} />
+          </Card>
+
+          {/* Account */}
+          <Card style={{ marginBottom: spacing.md }}>
+            <Text style={styles.cardTitle}>Account Information</Text>
+            <DetailRow
+              icon="calendar"
+              label="Member Since"
+              value={customer.joinDate ? new Date(customer.joinDate).toLocaleDateString() : "—"}
+            />
+            <Divider />
+            <DetailRow
+              icon="clock"
+              label="Last Booking"
+              value={customer.lastBooking ? new Date(customer.lastBooking).toLocaleDateString() : "—"}
+            />
+          </Card>
+
+          {/* Booking history */}
+          <Card style={{ marginBottom: spacing.md }}>
             <Text style={styles.cardTitle}>Booking History</Text>
-            <TouchableOpacity>
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
-          </View>
-
-          {bookingHistory.map((booking, index) => (
-            <View key={booking.id}>
-              {index > 0 && <View style={styles.divider} />}
-              <TouchableOpacity
-                style={styles.bookingItem}
-                onPress={() => {
-                  // Navigate to booking details
-                  navigation.goBack();
-                }}
-              >
-                <View style={styles.bookingInfo}>
-                  <Text style={styles.bookingTitle}>{booking.tourName}</Text>
-                  <Text style={styles.bookingDate}>
-                    {new Date(booking.date).toLocaleDateString()}
-                  </Text>
-                </View>
-                <View style={styles.bookingAmount}>
-                  <Text style={styles.amount}>${booking.amount}</Text>
-                  <Badge
-                    label={booking.status}
-                    status={booking.status as any}
-                    size="small"
-                  />
-                </View>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </Card>
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <Button
-            title="Send Message"
-            variant="primary"
-            onPress={() => {}}
-            icon="send"
-          />
-          <Button
-            title="Create Booking"
-            variant="secondary"
-            onPress={() => {}}
-            icon="plus"
-          />
-        </View>
-
-        {/* Status Management */}
-        <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Account Status</Text>
-          <View style={styles.statusButtons}>
-            {(["active", "inactive", "suspended"] as const).map((status) => (
-              <Button
-                key={status}
-                title={status.charAt(0).toUpperCase() + status.slice(1)}
-                variant={customer.status === status ? "primary" : "outline"}
-                size="small"
-                onPress={() => handleStatusChange(status)}
+            {customer.bookings.length === 0 ? (
+              <StateView
+                variant="empty"
+                title="No bookings"
+                message="This customer has no bookings yet."
+                icon="briefcase"
               />
-            ))}
-          </View>
-        </Card>
+            ) : (
+              customer.bookings.map((b, index) => (
+                <View key={b.id}>
+                  {index > 0 ? <Divider /> : null}
+                  <View style={styles.bookingItem}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.bookingTitle}>
+                        {b.product_type || "Service"} • {b.destination_city || "—"}
+                      </Text>
+                      <Text style={styles.bookingDate}>
+                        {b.start_date ? new Date(b.start_date).toLocaleDateString() : "Date pending"}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: "flex-end", gap: 4 }}>
+                      <Text style={styles.amount}>{formatBDT(Number(b.final_price || 0))}</Text>
+                      <Badge label={b.status.toUpperCase()} tone={statusTone(b.status)} />
+                    </View>
+                  </View>
+                </View>
+              ))
+            )}
+          </Card>
 
-        <View style={{ height: 32 }} />
-      </ScrollView>
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      )}
     </View>
   );
 }
 
+const DetailRow: React.FC<{
+  icon: React.ComponentProps<typeof Icon>["name"];
+  label: string;
+  value: string;
+}> = ({ icon, label, value }) => (
+  <View style={styles.infoRow}>
+    <View style={styles.infoLabelRow}>
+      <Icon name={icon} size={16} color={palette.textMuted} />
+      <Text style={styles.infoLabel}>{label}</Text>
+    </View>
+    <Text style={styles.infoValue} numberOfLines={1}>
+      {value}
+    </Text>
+  </View>
+);
+
+const Divider: React.FC = () => <View style={styles.divider} />;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
+  container: { flex: 1, backgroundColor: palette.background },
   header: {
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: palette.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.border,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
+  headerTitle: { ...typography.h3, color: palette.text },
+  headerSubtitle: { ...typography.caption, color: palette.textMuted, marginTop: 2 },
+  body: { flex: 1 },
+  scrollContent: { padding: spacing.lg },
+  profileHeader: { flexDirection: "row", alignItems: "center", gap: spacing.md },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: palette.primarySoft,
+    alignItems: "center",
     justifyContent: "center",
-    alignItems: "center",
   },
-  headerContent: {
-    flex: 1,
-    marginHorizontal: 12,
-  },
-  headerTitle: {
-    fontSize: TYPOGRAPHY.h2.fontSize,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-  headerSubtitle: {
-    fontSize: TYPOGRAPHY.caption.fontSize,
-    color: "rgba(255,255,255,0.8)",
-    marginTop: 4,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  profileCard: {
-    marginBottom: 16,
-  },
-  profileHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  avatarContainer: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: COLORS.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginEnd: 16,
-  },
-  avatarText: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  customerName: {
-    fontSize: TYPOGRAPHY.h3.fontSize,
-    fontWeight: "700",
-    color: COLORS.text,
-    marginEnd: 8,
-  },
-  statusText: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    color: COLORS.textSecondary,
-  },
-  metricsContainer: {
-    gap: 12,
-    marginBottom: 16,
-  },
-  card: {
-    marginBottom: 16,
-  },
-  cardTitle: {
-    fontSize: TYPOGRAPHY.h3.fontSize,
-    fontWeight: "700",
-    color: COLORS.text,
-    marginBottom: 12,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: 12,
-  },
+  avatarText: { ...typography.h2, color: palette.primary, fontWeight: "800" },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  customerName: { ...typography.h3, color: palette.text, flexShrink: 1 },
+  statusText: { ...typography.body, color: palette.textMuted, marginTop: 2 },
+  metricsRow: { flexDirection: "row", gap: spacing.md, marginBottom: spacing.md },
+  cardTitle: { ...typography.h3, color: palette.text, marginBottom: spacing.md },
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: spacing.xs,
   },
-  infoLabel: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    color: COLORS.textSecondary,
-  },
-  infoValue: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  historyHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  viewAllText: {
-    fontSize: TYPOGRAPHY.caption.fontSize,
-    color: COLORS.primary,
-    fontWeight: "600",
-  },
+  infoLabelRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, flex: 1 },
+  infoLabel: { ...typography.body, color: palette.textSecondary },
+  infoValue: { ...typography.body, color: palette.text, fontWeight: "600", maxWidth: "55%", textAlign: "right" },
+  divider: { height: 1, backgroundColor: palette.border, marginVertical: spacing.sm },
   bookingItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
   },
-  bookingInfo: {
-    flex: 1,
-  },
-  bookingTitle: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  bookingDate: {
-    fontSize: TYPOGRAPHY.caption.fontSize,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  bookingAmount: {
-    alignItems: "flex-end",
-  },
-  amount: {
-    fontSize: TYPOGRAPHY.body.fontSize,
-    fontWeight: "700",
-    color: COLORS.secondary,
-  },
-  actionButtons: {
-    gap: 12,
-    marginBottom: 16,
-  },
-  statusButtons: {
-    flexDirection: "row",
-    gap: 8,
-  },
+  bookingTitle: { ...typography.body, color: palette.text, fontWeight: "600" },
+  bookingDate: { ...typography.caption, color: palette.textMuted, marginTop: 2 },
+  amount: { ...typography.body, color: palette.success, fontWeight: "700" },
 });
