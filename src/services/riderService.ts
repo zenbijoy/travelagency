@@ -510,7 +510,7 @@ class RiderService {
       }
 
       const { data, error } = await query;
-      if (!error && Array.isArray(data)) {
+      if (!error && Array.isArray(data) && data.length > 0) {
         return data as RideRequest[];
       }
     } catch {
@@ -612,7 +612,7 @@ class RiderService {
         .order("created_at", { ascending: false })
         .limit(30);
 
-      if (!error && Array.isArray(data)) {
+      if (!error && Array.isArray(data) && data.length > 0) {
         const list = data as DeliveryJob[];
         await writeLocalJson(STORAGE_KEYS.DELIVERY_CACHE, list);
         return list;

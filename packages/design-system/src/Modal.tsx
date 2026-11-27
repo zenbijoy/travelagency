@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { cn } from './utils';
 
 export interface ModalProps {
@@ -6,6 +6,7 @@ export interface ModalProps {
   onClose: () => void;
   title?: string;
   description?: string;
+  labelledBy?: string;
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   closeOnEsc?: boolean;
@@ -25,11 +26,15 @@ export function Modal({
   onClose,
   title,
   description,
+  labelledBy,
   children,
   size = 'md',
   closeOnEsc = true,
   closeOnBackdrop = true,
 }: ModalProps) {
+  const generatedTitleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!isOpen || !closeOnEsc) return;
 
@@ -43,6 +48,19 @@ export function Modal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, closeOnEsc, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const dialog = dialogRef.current;
+    const firstFocusable = dialog?.querySelector<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    (firstFocusable ?? dialog)?.focus();
+
+    return () => previouslyFocused?.focus();
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -50,9 +68,13 @@ export function Modal({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
+      aria-labelledby={labelledBy ?? (title ? generatedTitleId : undefined)}
+      aria-describedby={description ? `${generatedTitleId}-description` : undefined}
       onClick={closeOnBackdrop ? onClose : undefined}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className={cn(
           'relative w-full rounded-2xl bg-white shadow-2xl transition-all duration-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800',
           sizeClasses[size]
@@ -63,12 +85,12 @@ export function Modal({
           <div className="flex items-start justify-between border-b border-slate-100 p-5 dark:border-slate-800">
             <div>
               {title && (
-                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                <h2 id={labelledBy ?? generatedTitleId} className="text-base font-semibold text-slate-900 dark:text-slate-100">
                   {title}
                 </h2>
               )}
               {description && (
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                <p id={`${generatedTitleId}-description`} className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                   {description}
                 </p>
               )}

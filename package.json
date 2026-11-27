@@ -128,7 +128,9 @@
       "<rootDir>/AGEN/",
       "<rootDir>/hotel/",
       "<rootDir>/.kilo/",
-      "<rootDir>/spatial-engine/"
+      "<rootDir>/spatial-engine/",
+      "<rootDir>/apps/",
+      "<rootDir>/packages/"
     ],
     "modulePathIgnorePatterns": [
       "<rootDir>/.kilo/"

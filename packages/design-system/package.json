@@ -8,7 +8,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@shopnojatra/design-tokens": "workspace:*"
+    "@shopnojatra/design-tokens": "workspace:*",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

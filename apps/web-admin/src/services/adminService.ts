@@ -43,18 +43,6 @@ import {
   INITIAL_SUPPLIER_METRICS
 } from './mockData';
 
-// Simulated cryptographic SHA-256 tamper hash generator for audit logs
-function generateTamperHash(data: string): string {
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    const char = data.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  const hex = Math.abs(hash).toString(16).padStart(8, '0');
-  return `sha256_${hex}_${Date.now().toString(16)}`;
-}
-
 class AdminDataStore {
   private metrics = { ...INITIAL_PLATFORM_METRICS };
   private systemHealth = [...INITIAL_SYSTEM_HEALTH];
@@ -68,14 +56,12 @@ class AdminDataStore {
   private auditLogs = [...INITIAL_AUDIT_LOGS];
   private suppliers = [...INITIAL_SUPPLIER_METRICS];
 
-  private logAudit(entry: Omit<AuditLogEntry, 'id' | 'timestamp' | 'tamperHash'>): AuditLogEntry {
+  private logAudit(entry: Omit<AuditLogEntry, 'id' | 'timestamp'>): AuditLogEntry {
     const timestamp = new Date().toISOString();
-    const digestContent = `${entry.actorId}|${entry.action}|${entry.module}|${entry.entityId}|${timestamp}|${JSON.stringify(entry.details)}`;
     const newLog: AuditLogEntry = {
       ...entry,
       id: `aud-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      timestamp,
-      tamperHash: generateTamperHash(digestContent)
+      timestamp
     };
     this.auditLogs.unshift(newLog);
     return newLog;
@@ -489,7 +475,7 @@ class AdminDataStore {
         l.actorName.toLowerCase().includes(search.toLowerCase()) ||
         l.action.toLowerCase().includes(search.toLowerCase()) ||
         l.entityId.toLowerCase().includes(search.toLowerCase()) ||
-        l.tamperHash.toLowerCase().includes(search.toLowerCase());
+        l.entityId.toLowerCase().includes(search.toLowerCase());
       return matchModule && matchSearch;
     });
   }

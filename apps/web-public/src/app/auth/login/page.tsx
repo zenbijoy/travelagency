@@ -22,9 +22,12 @@ export default function LoginPage() {
         await supabase.auth.signInWithPassword({ email, password });
       if (authError) throw authError;
       const requestedPath = searchParams.get("next");
+      const redirectUrl = requestedPath
+        ? new URL(requestedPath, window.location.origin)
+        : null;
       const safePath =
-        requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
-          ? requestedPath
+        redirectUrl?.origin === window.location.origin
+          ? `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`
           : "/account/bookings";
       router.replace(safePath);
     } catch (authError) {

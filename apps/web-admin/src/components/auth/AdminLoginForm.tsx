@@ -124,7 +124,6 @@ export const AdminLoginForm: React.FC = () => {
         </form>
 
         <p className="text-[11px] text-slate-500 text-center mt-6">
-          Access attempts are cryptographically audited with SHA-256 tamper logs.
         </p>
       </div>
     </div>

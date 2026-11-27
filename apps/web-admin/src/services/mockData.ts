@@ -732,7 +732,6 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     },
     ipAddress: '103.145.118.24 (Dhaka GP Fiber)',
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131.0.0.0',
-    tamperHash: '8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4',
     timestamp: '2026-11-26T14:30:00Z'
   },
   {
@@ -751,7 +750,6 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     },
     ipAddress: '103.145.118.25 (Dhaka GP Fiber)',
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Edge/131.0.0.0',
-    tamperHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
     timestamp: '2026-11-26T23:59:00Z'
   },
   {
@@ -769,7 +767,6 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     },
     ipAddress: '103.205.180.12 (Amber IT)',
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    tamperHash: 'd4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35',
     timestamp: '2026-11-27T10:00:00Z'
   },
   {
@@ -787,7 +784,6 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     },
     ipAddress: '103.145.118.24 (Dhaka GP Fiber)',
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131.0.0.0',
-    tamperHash: '4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce',
     timestamp: '2026-11-15T09:00:00Z'
   },
   {
@@ -806,7 +802,6 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     },
     ipAddress: '103.145.118.25 (Dhaka GP Fiber)',
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Edge/131.0.0.0',
-    tamperHash: 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e',
     timestamp: '2026-11-27T12:05:00Z'
   }
 ];

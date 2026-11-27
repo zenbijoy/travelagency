@@ -192,7 +192,6 @@ export interface AuditLogEntry {
   details: Record<string, any>;
   ipAddress: string;
   userAgent: string;
-  tamperHash: string; // SHA-256 integrity digest
   timestamp: string;
 }
 

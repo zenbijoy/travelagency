@@ -76,6 +76,24 @@ export const colors = {
     infoLight: '#dbeafe',
   },
 
+  semantic: {
+    success: '#047857',
+    successForeground: '#ffffff',
+    successBackground: '#d1fae5',
+    warning: '#92400e',
+    warningForeground: '#ffffff',
+    warningBackground: '#fef3c7',
+    danger: '#b91c1c',
+    dangerForeground: '#ffffff',
+    dangerBackground: '#fee2e2',
+    info: '#1d4ed8',
+    infoForeground: '#ffffff',
+    infoBackground: '#dbeafe',
+    neutral: '#475569',
+    neutralForeground: '#ffffff',
+    neutralBackground: '#f1f5f9',
+  },
+
   // Theme palettes for CSS variables
   themes: {
     light: {

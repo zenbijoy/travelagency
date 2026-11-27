@@ -125,16 +125,6 @@ export const AuditLogTable: React.FC = () => {
         )
       },
       {
-        accessorKey: 'tamperHash',
-        header: 'Integrity Digest',
-        cell: ({ row }) => (
-          <div className="flex items-center gap-1 text-[11px] font-mono text-slate-400">
-            <Fingerprint className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="truncate max-w-[130px]">{row.original.tamperHash}</span>
-          </div>
-        )
-      },
-      {
         id: 'actions',
         header: 'Details',
         cell: ({ row }) => (
@@ -171,9 +161,9 @@ export const AuditLogTable: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-            <ScrollText className="w-5 h-5 text-emerald-400" /> Tamper-Evident Regulatory Audit Logs
+            <ScrollText className="w-5 h-5 text-emerald-400" /> Audit Logs
           </h3>
-          <p className="text-xs text-slate-400">Platform-wide immutable event trail cryptographically hashed for ISO/PCI-DSS regulatory compliance</p>
+          <p className="text-xs text-slate-400">Server-managed audit records are not connected to this portal.</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -182,7 +172,7 @@ export const AuditLogTable: React.FC = () => {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search actor, action, hash..."
+              placeholder="Search actor, action, entity..."
               className="pl-9 text-xs"
             />
           </form>
@@ -312,7 +302,7 @@ export const AuditLogTable: React.FC = () => {
                 <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
                   <Terminal className="w-4 h-4 text-emerald-400" /> Action Payload JSON:
                 </span>
-                <Badge variant="emerald" size="sm">Immutable Record</Badge>
+                <Badge variant="emerald" size="sm">Local preview</Badge>
               </div>
               <pre className="p-3 bg-navy-950 border border-navy-800 rounded-lg text-xs font-mono text-emerald-300 overflow-x-auto max-h-56">
                 {JSON.stringify(selectedLog.details, null, 2)}
@@ -320,8 +310,8 @@ export const AuditLogTable: React.FC = () => {
             </div>
 
             <div className="p-3 rounded-lg bg-navy-950 border border-navy-800 space-y-1">
-              <span className="text-[11px] font-semibold text-slate-400">Cryptographic Integrity Hash:</span>
-              <p className="text-xs font-mono text-emerald-400 break-all select-all">{selectedLog.tamperHash}</p>
+              <span className="text-[11px] font-semibold text-slate-400">Integrity status:</span>
+              <p className="text-xs font-mono text-emerald-400 break-all select-all">Not available</p>
             </div>
 
             <div className="flex justify-end pt-2 border-t border-navy-800">
